@@ -1392,8 +1392,9 @@ function renderTabbar(section){
       {ico:'🗓️', lbl:'Calendario', on:sv==='scal', fn:()=>showSportView('scal')}
     ];
   } // week y mente: sin tabbar (se oculta por CSS / tabs vacíos)
-  if(!tabs.length){ tb.style.display = 'none'; tb.innerHTML = ''; return; }
+  if(!tabs.length){ tb.style.display = 'none'; tb.innerHTML = ''; document.body.classList.add('no-tabbar'); return; }
   tb.style.display = '';
+  document.body.classList.remove('no-tabbar');
   tb.innerHTML = tabs.map((t,i)=>`<button class="tb ${t.on?'on':''}" data-i="${i}" role="tab" aria-selected="${!!t.on}">
       ${t.badge ? `<span class="tb-badge">${t.badge}</span>` : ''}
       <span class="tb-ico">${t.ico}</span><span class="tb-l">${t.lbl}</span>
