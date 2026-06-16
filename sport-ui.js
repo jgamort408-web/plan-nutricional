@@ -97,16 +97,41 @@ let _spExMuscle = 'all';
 let _spExDisc   = 'all';
 let _spFavOnly  = false;
 let _spExSearch = '';
+// Estado del bottom-sheet de filtros de deporte (móvil)
+let _spSheetOpen = false, _spSheetScroll = 0;
+function spActiveCount(){
+  return (_spExFilter!=='all'?1:0) + (_spExMuscle!=='all'?1:0) + (_spExDisc!=='all'?1:0) + (_spFavOnly?1:0);
+}
+function spResultCount(){
+  const q = _norm(_spExSearch).trim();
+  return Object.keys(EXERCISES).filter(id=>{
+    const ex = EXERCISES[id];
+    if(_spExFilter!=='all' && ex.type!==_spExFilter) return false;
+    if(_spExMuscle!=='all' && !(ex.muscles||[]).includes(_spExMuscle)) return false;
+    if(_spExDisc!=='all' && exDisc(ex)!==_spExDisc) return false;
+    if(_spFavOnly && !isFav(id)) return false;
+    if(q && !_norm(ex.name).includes(q)) return false;
+    return true;
+  }).length;
+}
+function setSpSheet(open){
+  _spSheetOpen = open;
+  const sheet = document.getElementById('spFSheet');
+  const back  = document.getElementById('spFBack');
+  if(sheet) sheet.classList.toggle('open', open);
+  if(back)  back.classList.toggle('open', open);
+  document.body.classList.toggle('sheet-lock', open);
+  if(open){ const b = document.querySelector('#spFSheet .fsheet-body'); if(b) b.scrollTop = _spSheetScroll; }
+}
 function renderExercises(){
   const types = ['all', ...Object.keys(EX_TYPES)];
-  const searchRow = `<div class="fpill-row"><input class="sp-search" id="spExSearch" type="search" placeholder="🔎 Buscar ejercicio por nombre…" value="${spEsc(_spExSearch)}"></div>`;
-  const typeRow = `<div class="fpill-row">${types.map(t=>{
+  const typeRow = `<div class="frow-grp"><span class="frow-lbl">Tipo</span>${types.map(t=>{
     const lbl = t==='all' ? 'Todos' : EX_TYPES[t].lbl;
     const ico = t==='all' ? '◇' : EX_TYPES[t].ico;
     return `<button class="fpill ${_spExFilter===t?'on':''}" data-spf="${t}"><span class="fico">${ico}</span>${lbl}</button>`;
   }).join('')}</div>`;
-  const discRow = `<div class="fpill-row sp-disc-row">
-    <span class="sp-disc-lbl">Deporte</span>
+  const discRow = `<div class="frow-grp sp-disc-row">
+    <span class="frow-lbl">Deporte</span>
     <select class="fsel sp-disc-sel" id="spExDiscSel">
       <option value="all">🏅 Todos los deportes</option>
       ${Object.entries(EX_SPORTS).map(([k,v])=>`<option value="${k}" ${_spExDisc===k?'selected':''}>${v.ico} ${v.lbl}</option>`).join('')}
@@ -114,18 +139,43 @@ function renderExercises(){
     <button class="fpill fav ${_spFavOnly?'on':''}" data-favtog>${_spFavOnly?'★':'☆'} Favoritos</button>
   </div>`;
   const muscles = ['all', ...Object.keys(EX_MUSCLES)];
-  const muscRow = `<div class="fpill-row">
-    ${muscles.map(m=>{
+  const muscRow = `<div class="frow-grp"><span class="frow-lbl">Músculo</span>${muscles.map(m=>{
       const lbl = m==='all' ? 'Todo el cuerpo' : EX_MUSCLES[m].lbl;
       return `<button class="fpill ${_spExMuscle===m?'on':''}" data-spm="${m}">${lbl}</button>`;
     }).join('')}</div>`;
+  const nActive = spActiveCount();
   const cont = document.getElementById('spExFilters');
-  cont.innerHTML = searchRow + typeRow + discRow + muscRow;
+  cont.innerHTML = `
+    <div class="fbar-quick">
+      <input class="sp-search" id="spExSearch" type="search" placeholder="🔎 Buscar ejercicio por nombre…" value="${spEsc(_spExSearch)}">
+      <button class="fbtn-open ${nActive?'has-active':''}" id="spFOpen" type="button" aria-label="Filtros">
+        <span class="ffunnel">⚙</span> Filtros<span class="fbadge">${nActive}</span>
+      </button>
+    </div>
+    <div class="filter-sheet" id="spFSheet">
+      <div class="fsheet-hd"><strong>Filtros</strong><button class="fsheet-x" id="spFClose" type="button" aria-label="Cerrar">✕</button></div>
+      <div class="fsheet-body">${typeRow}${discRow}${muscRow}</div>
+      <div class="fsheet-foot">
+        <button class="fsheet-clear" id="spFClear" type="button">Limpiar</button>
+        <button class="fsheet-apply" id="spFApply" type="button">Ver ${spResultCount()} resultados</button>
+      </div>
+    </div>
+    <div class="filter-backdrop" id="spFBack"></div>`;
+
   cont.querySelectorAll('[data-spf]').forEach(b=> b.addEventListener('click', ()=>{ _spExFilter=b.dataset.spf; renderExercises(); }));
   cont.querySelectorAll('[data-spm]').forEach(b=> b.addEventListener('click', ()=>{ _spExMuscle=b.dataset.spm; renderExercises(); }));
   const ds = document.getElementById('spExDiscSel'); if(ds) ds.addEventListener('change', ()=>{ _spExDisc=ds.value; renderExercises(); });
   const ft = cont.querySelector('[data-favtog]'); if(ft) ft.addEventListener('click', ()=>{ _spFavOnly=!_spFavOnly; renderExercises(); });
   const se = document.getElementById('spExSearch'); if(se) se.addEventListener('input', ()=>{ _spExSearch=se.value; renderExGrid(); });   // solo rejilla → no pierde foco
+
+  // Bottom-sheet (móvil)
+  const ob = document.getElementById('spFOpen'); if(ob) ob.addEventListener('click', ()=> setSpSheet(true));
+  const cb = document.getElementById('spFClose'); if(cb) cb.addEventListener('click', ()=> setSpSheet(false));
+  const bk = document.getElementById('spFBack'); if(bk) bk.addEventListener('click', ()=> setSpSheet(false));
+  const ap = document.getElementById('spFApply'); if(ap) ap.addEventListener('click', ()=> setSpSheet(false));
+  const cl = document.getElementById('spFClear'); if(cl) cl.addEventListener('click', ()=>{ _spExFilter='all'; _spExMuscle='all'; _spExDisc='all'; _spFavOnly=false; renderExercises(); });
+  const sb = document.querySelector('#spFSheet .fsheet-body'); if(sb) sb.addEventListener('scroll', ()=>{ _spSheetScroll = sb.scrollTop; });
+  if(_spSheetOpen) setSpSheet(true);
 
   renderExGrid();
 }

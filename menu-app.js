@@ -356,10 +356,22 @@ function getId(d){
 }
 
 /* ── RENDER: FILTER ROW ───────────────────────────────── */
+// Estado del bottom-sheet de filtros (móvil): se conserva entre re-renders.
+let _nutSheetOpen = false, _nutSheetScroll = 0;
+function nutResultCount(){
+  return Object.keys(DISHES).filter(id=> DISHES[id] && !DISHES[id].libre && !DISHES[id].loose && passesFilter(id)).length;
+}
+function setNutSheet(open){
+  _nutSheetOpen = open;
+  const sheet = document.getElementById('nutFSheet');
+  const back  = document.getElementById('nutFBack');
+  if(sheet) sheet.classList.toggle('open', open);
+  if(back)  back.classList.toggle('open', open);
+  document.body.classList.toggle('sheet-lock', open);
+  if(open){ const b = document.querySelector('#nutFSheet .fsheet-body'); if(b) b.scrollTop = _nutSheetScroll; }
+}
 function renderFilters(){
   const el = document.getElementById('frow');
-  // Agrupa filtros: dieta · alimento
-  const groupOf = (k)=> FILTERS.find(f=>f.key===k)?.group || 'all';
   const dietFilters = FILTERS.filter(f=> f.group==='all' || f.group==='diet');
   const foodFilters = FILTERS.filter(f=> f.group==='food');
 
@@ -369,31 +381,53 @@ function renderFilters(){
       <span class="fico">${f.ico}</span>${f.label}
     </button>`;
 
+  const nActive = (S.filters||[]).length;
   el.innerHTML = `
-    <div class="frow-grp" data-grp="search">
+    <div class="fbar-quick">
       <input class="dish-search" id="dishSearch" type="search" placeholder="🔎 Buscar receta por nombre…" value="${(S.search||'').replace(/"/g,'&quot;')}">
+      <button class="fbtn-open ${nActive?'has-active':''}" id="nutFOpen" type="button" aria-label="Filtros">
+        <span class="ffunnel">⚙</span> Filtros<span class="fbadge">${nActive}</span>
+      </button>
     </div>
-    <div class="frow-grp" data-grp="diet">
-      <span class="frow-lbl">Dieta</span>
-      <button class="fpill fav-pill ${isOn('favs')?'on':''}" data-f="favs"><span class="fico">${isOn('favs')?'★':'☆'}</span>Favoritos</button>
-      ${dietFilters.map(pillHtml).join('')}
+    <div class="filter-sheet" id="nutFSheet">
+      <div class="fsheet-hd"><strong>Filtros</strong><button class="fsheet-x" id="nutFClose" type="button" aria-label="Cerrar">✕</button></div>
+      <div class="fsheet-body">
+        <div class="frow-grp" data-grp="diet">
+          <span class="frow-lbl">Dieta</span>
+          <button class="fpill fav-pill ${isOn('favs')?'on':''}" data-f="favs"><span class="fico">${isOn('favs')?'★':'☆'}</span>Favoritos</button>
+          ${dietFilters.map(pillHtml).join('')}
+        </div>
+        <div class="frow-grp" data-grp="food">
+          <span class="frow-lbl">Tipo de alimento</span>
+          ${foodFilters.map(pillHtml).join('')}
+        </div>
+        <div class="frow-grp frow-sort" data-grp="sort">
+          <span class="frow-lbl">Ordenar</span>
+          ${SORT_OPTS.map(o=>`
+            <button class="fpill sort-pill ${S.sort.key===o.key?'on':''}" data-sort="${o.key}">
+              <span class="fico">${o.ico}</span>${o.lbl}${o.key!=='def'&&S.sort.key===o.key?`<span class="sort-dir">${S.sort.dir==='asc'?'↑':'↓'}</span>`:''}
+            </button>`).join('')}
+        </div>
+        <div class="frow-grp frow-vm" data-grp="vm">
+          <span class="frow-lbl">Vista</span>
+          ${[['detail','▤','Detalle'],['big','▦','Iconos'],['small','▪','Compacto']].map(([k,ic,lb])=>`
+            <button class="fpill vm-pill ${S.viewMode===k?'on':''}" data-vm="${k}" title="${lb}"><span class="fico">${ic}</span>${lb}</button>`).join('')}
+        </div>
+      </div>
+      <div class="fsheet-foot">
+        <button class="fsheet-clear" id="nutFClear" type="button">Limpiar</button>
+        <button class="fsheet-apply" id="nutFApply" type="button">Ver ${nutResultCount()} resultados</button>
+      </div>
     </div>
-    <div class="frow-grp" data-grp="food">
-      <span class="frow-lbl">Tipo de alimento</span>
-      ${foodFilters.map(pillHtml).join('')}
-    </div>
-    <div class="frow-grp frow-sort" data-grp="sort">
-      <span class="frow-lbl">Ordenar</span>
-      ${SORT_OPTS.map(o=>`
-        <button class="fpill sort-pill ${S.sort.key===o.key?'on':''}" data-sort="${o.key}">
-          <span class="fico">${o.ico}</span>${o.lbl}${o.key!=='def'&&S.sort.key===o.key?`<span class="sort-dir">${S.sort.dir==='asc'?'↑':'↓'}</span>`:''}
-        </button>`).join('')}
-    </div>
-    <div class="frow-grp frow-vm" data-grp="vm">
-      <span class="frow-lbl">Vista</span>
-      ${[['detail','▤','Detalle'],['big','▦','Iconos'],['small','▪','Compacto']].map(([k,ic,lb])=>`
-        <button class="fpill vm-pill ${S.viewMode===k?'on':''}" data-vm="${k}" title="${lb}"><span class="fico">${ic}</span>${lb}</button>`).join('')}
-    </div>`;
+    <div class="filter-backdrop" id="nutFBack"></div>`;
+
+  // Apertura/cierre del bottom-sheet (móvil)
+  const ob = document.getElementById('nutFOpen'); if(ob) ob.addEventListener('click', ()=> setNutSheet(true));
+  const cb = document.getElementById('nutFClose'); if(cb) cb.addEventListener('click', ()=> setNutSheet(false));
+  const bk = document.getElementById('nutFBack'); if(bk) bk.addEventListener('click', ()=> setNutSheet(false));
+  const ap = document.getElementById('nutFApply'); if(ap) ap.addEventListener('click', ()=> setNutSheet(false));
+  const cl = document.getElementById('nutFClear'); if(cl) cl.addEventListener('click', ()=>{ S.filters = []; renderAll(); });
+  const sb = document.querySelector('#nutFSheet .fsheet-body'); if(sb) sb.addEventListener('scroll', ()=>{ _nutSheetScroll = sb.scrollTop; });
 
   const dishSearch = document.getElementById('dishSearch');
   // Búsqueda con debounce: re-renderiza la rejilla tras una breve pausa,
@@ -439,6 +473,9 @@ function renderFilters(){
       renderAll();
     });
   });
+
+  // Restaura el bottom-sheet abierto tras cualquier re-render (móvil)
+  if(_nutSheetOpen) setNutSheet(true);
 }
 
 /* ── RENDER: DISH CARD ────────────────────────────────── */

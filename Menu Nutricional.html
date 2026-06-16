@@ -195,6 +195,15 @@ button{font-family:inherit}
 .sort-pill.on{background:var(--terra);border-color:var(--terra);color:#fff}
 .sort-pill .sort-dir{margin-left:4px;font-weight:700}
 
+/* ── Filtros tipo Idealista: quickbar + bottom-sheet (escritorio = igual) ── */
+.fbar-quick{display:flex;gap:8px;align-items:center;width:100%}
+.fbar-quick .dish-search,.fbar-quick .sp-search{flex:1;max-width:440px}
+.fbtn-open{display:none}                 /* en escritorio: oculto */
+.filter-sheet{display:contents}          /* en escritorio: los grupos fluyen como antes */
+.fsheet-body{display:flex;flex-direction:column;gap:7px;width:100%}  /* grupos apilados, ancho completo */
+.fsheet-hd,.fsheet-foot{display:none}    /* solo visibles en el sheet móvil */
+.filter-backdrop{display:none}
+
 /* ════════════════════════════════════════════════════════
    MAIN
 ═════════════════════════════════════════════════════════ */
@@ -1552,6 +1561,33 @@ body.sec-sport #helpBtn,body.sec-mente #helpBtn{margin-left:auto}
 .sp-search,.dish-search{width:100%;max-width:440px;padding:9px 14px;border-radius:22px;border:1.5px solid rgba(44,31,14,.15);background:var(--white);font-family:'Lora',serif;font-size:.92rem;color:var(--warm)}
 .sp-search:focus,.dish-search:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(200,116,46,.12)}
 .frow-grp[data-grp="search"]{width:100%}
+
+/* ── Bottom-sheet de filtros (móvil ≤760px) ── */
+@media(max-width:760px){
+  body.sheet-lock{overflow:hidden}
+  .fbtn-open{display:inline-flex;align-items:center;gap:6px;flex-shrink:0;border:1.5px solid rgba(44,31,14,.15);background:var(--white);color:var(--warm);font-family:'DM Mono',monospace;font-size:.68rem;text-transform:uppercase;letter-spacing:.04em;font-weight:600;padding:9px 13px;border-radius:22px;cursor:pointer;white-space:nowrap}
+  .fbtn-open .ffunnel{font-size:.9rem}
+  .fbtn-open.has-active{border-color:var(--olive);color:var(--olive)}
+  .fbadge{display:none;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:var(--olive);color:#fff;font-size:.6rem;align-items:center;justify-content:center;line-height:1;font-weight:700}
+  .fbtn-open.has-active .fbadge{display:inline-flex}
+
+  .filter-backdrop{display:block;position:fixed;inset:0;background:rgba(20,12,4,.42);z-index:300;opacity:0;pointer-events:none;transition:opacity .25s}
+  .filter-backdrop.open{opacity:1;pointer-events:auto}
+
+  .filter-sheet{display:flex;flex-direction:column;position:fixed;left:0;right:0;bottom:0;z-index:310;background:var(--cream);border-radius:18px 18px 0 0;box-shadow:0 -10px 40px rgba(0,0,0,.3);max-height:86vh;transform:translateY(102%);transition:transform .28s cubic-bezier(.4,0,.2,1)}
+  .filter-sheet.open{transform:translateY(0)}
+  .fsheet-hd{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 10px;flex-shrink:0}
+  .fsheet-hd strong{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700}
+  .fsheet-x{border:none;background:rgba(44,31,14,.07);width:32px;height:32px;border-radius:50%;font-size:1rem;cursor:pointer;color:var(--warm);flex-shrink:0}
+  .fsheet-body{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:4px 18px 14px;display:flex;flex-direction:column;gap:18px}
+  .fsheet-body .frow-grp{flex-wrap:wrap;overflow:visible;gap:8px;padding-bottom:0}
+  .fsheet-body .frow-lbl{width:100%;padding:0 0 1px}
+  .fsheet-body .frow-sort{border-top:none;padding-top:0;margin-top:0}
+  .fsheet-body .fpill{font-size:.72rem;padding:9px 14px}
+  .fsheet-foot{display:flex;gap:10px;padding:12px 18px calc(14px + env(safe-area-inset-bottom,0px));border-top:1px solid rgba(44,31,14,.1);background:var(--cream);flex-shrink:0}
+  .fsheet-clear{flex-shrink:0;border:1.5px solid rgba(44,31,14,.18);background:transparent;color:var(--warm);font-family:'DM Mono',monospace;font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;font-weight:600;padding:12px 18px;border-radius:24px;cursor:pointer}
+  .fsheet-apply{flex:1;border:none;background:var(--olive);color:#fff;font-family:'DM Mono',monospace;font-size:.74rem;text-transform:uppercase;letter-spacing:.05em;font-weight:700;padding:12px;border-radius:24px;cursor:pointer}
+}
 /* copia de datos */
 .data-stat{font-family:'DM Mono',monospace;font-size:.8rem;color:var(--warm);background:var(--cream);border-radius:var(--r-sm);padding:10px 13px;margin-bottom:12px}
 .data-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
