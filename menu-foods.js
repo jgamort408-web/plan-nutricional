@@ -510,3 +510,128 @@ window.scaleByFactor = scaleByFactor;
 window.dishScaled = dishScaled;
 window.recomputeDish = recomputeDish;
 window.recomputeAllComp = recomputeAllComp;
+
+/* ══════════════════════════════════════════════════════════
+   PÁGINA "MEDIDAS DE ALIMENTOS" (referencia + buscador + PDF)
+   Para no tener que pesar/medir todo: equivalencias aproximadas.
+══════════════════════════════════════════════════════════ */
+const MEASURE_REFS = [
+  ['🥄 Cucharada sopera',  '≈ 15 ml · aceite 14 g · azúcar 12 g · harina 9 g · miel 20 g'],
+  ['🥄 Cucharadita (café)', '≈ 5 ml · sal 5 g · azúcar 4 g · aceite 4,5 g · levadura 3 g'],
+  ['🥛 Vaso de agua',       '≈ 200 ml (vaso de agua) · 100 ml el vaso pequeño'],
+  ['☕ Taza',               '≈ 240 ml · taza de café con leche ≈ 200 ml'],
+  ['🤏 Puñado',             '≈ 25-30 g (frutos secos) · 20 g de hojas verdes'],
+  ['✊ Puño cerrado',       '≈ 1 ración de hidratos cocidos (arroz/pasta) ≈ 150 g'],
+  ['🖐️ Palma de la mano',  '≈ 1 ración de proteína (carne/pescado) ≈ 100-120 g'],
+  ['👍 Pulgar',             '≈ 1 ración de grasa (aceite/mantequilla) ≈ 10-15 g'],
+  ['🧀 Loncha de queso',    '≈ 20 g · 🥓 loncha de jamón ≈ 15 g'],
+  ['🍞 Rebanada de pan molde','≈ 25-30 g · pan de barra (rodaja) ≈ 30 g'],
+  ['🥚 Huevo',              'pequeño ≈ 45 g · mediano (M) ≈ 55 g · grande (L) ≈ 65 g'],
+  ['🍫 Onza de chocolate',  '≈ 5-7 g']
+];
+function _fmNorm(s){ return (s||'').toString().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,''); }
+function injectMeasuresCSS(){
+  if(document.getElementById('fmCss')) return;
+  const st=document.createElement('style'); st.id='fmCss';
+  st.textContent=`
+  .fm-back{position:fixed;inset:0;background:rgba(20,12,4,.55);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);z-index:340;display:flex;align-items:center;justify-content:center;padding:18px;opacity:0;transition:opacity .2s}
+  .fm-back.show{opacity:1}
+  .fm-page{background:var(--cream,#f6edd8);width:min(680px,96vw);max-height:90vh;display:flex;flex-direction:column;border-radius:16px;box-shadow:0 24px 64px rgba(0,0,0,.4);overflow:hidden;transform:translateY(10px) scale(.99);transition:transform .2s}
+  .fm-back.show .fm-page{transform:none}
+  .fm-hd{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:15px 18px 9px;flex-shrink:0}
+  .fm-hd h3{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--warm,#3a2c1a);margin:0}
+  .fm-hd-actions{display:flex;gap:8px;flex-shrink:0}
+  .fm-print{border:1.5px solid rgba(44,31,14,.18);background:var(--white,#fff);color:var(--warm,#3a2c1a);font-family:'DM Mono',monospace;font-size:.66rem;text-transform:uppercase;letter-spacing:.04em;font-weight:600;padding:8px 13px;border-radius:20px;cursor:pointer}
+  .fm-print:hover{border-color:var(--terra,#b5603a);color:var(--terra,#b5603a)}
+  .fm-x{border:none;background:rgba(44,31,14,.07);width:30px;height:30px;border-radius:50%;font-size:.95rem;cursor:pointer;color:var(--warm,#3a2c1a);flex-shrink:0}
+  .fm-intro{padding:0 18px 8px;font-family:'Lora',serif;font-size:.86rem;color:var(--ink-50,#6b5d49)}
+  .fm-search{margin:0 18px 10px;padding:9px 14px;border-radius:22px;border:1.5px solid rgba(44,31,14,.15);background:var(--white,#fff);font-family:'Lora',serif;font-size:.92rem;color:var(--warm,#3a2c1a)}
+  .fm-search:focus{outline:none;border-color:var(--gold,#c8742e);box-shadow:0 0 0 3px rgba(200,116,46,.12)}
+  .fm-scroll{overflow-y:auto;padding:2px 18px 18px;-webkit-overflow-scrolling:touch}
+  .fm-refs{display:grid;grid-template-columns:1fr;gap:6px;background:var(--white,#fff);border-radius:12px;padding:12px 14px;margin-bottom:16px;border:1px solid rgba(44,31,14,.07)}
+  .fm-ref{display:flex;gap:10px;font-size:.84rem;line-height:1.4}
+  .fm-ref b{flex:0 0 auto;min-width:158px;color:var(--warm,#3a2c1a);font-family:'Lora',serif;font-weight:600}
+  .fm-ref span{color:var(--ink-50,#6b5d49);font-family:'DM Mono',monospace;font-size:.72rem;align-self:center}
+  .fm-sec{margin-bottom:14px}
+  .fm-sec-h{font-family:'DM Mono',monospace;font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--terra,#b5603a);font-weight:700;margin:0 0 7px;padding-bottom:5px;border-bottom:1px solid rgba(44,31,14,.1)}
+  .fm-items{display:grid;grid-template-columns:1fr 1fr;gap:5px 16px}
+  .fm-item{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:4px 0;border-bottom:1px dotted rgba(44,31,14,.1)}
+  .fm-n{font-family:'Lora',serif;font-size:.88rem;color:var(--warm,#3a2c1a);min-width:0}
+  .fm-m{font-family:'DM Mono',monospace;font-size:.72rem;color:var(--ink-50,#6b5d49);text-align:right;white-space:nowrap;flex-shrink:0}
+  .fm-m b{color:var(--olive,#5a6b2c)} .fm-m small{display:block;font-size:.6rem;color:var(--ink-30,#9b8d76)}
+  .fm-empty{font-family:'DM Mono',monospace;font-size:.78rem;color:var(--ink-30,#9b8d76);padding:14px 0;text-align:center}
+  @media(max-width:560px){ .fm-items{grid-template-columns:1fr} .fm-ref b{min-width:118px} }
+  @media print{
+    body>*:not(.fm-back){display:none!important}
+    .fm-back{position:static!important;background:none!important;padding:0!important;display:block!important;backdrop-filter:none!important}
+    .fm-page{box-shadow:none!important;max-height:none!important;width:100%!important;border-radius:0!important}
+    .fm-no-print{display:none!important}
+    .fm-scroll{overflow:visible!important}
+    .fm-items{break-inside:avoid}
+  }`;
+  document.head.appendChild(st);
+}
+function openFoodMeasures(){
+  injectMeasuresCSS();
+  const esc = window.escHtml || (s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])));
+  const F = window.FOODS || FOODS, SEC = window.FOOD_SECTIONS || FOOD_SECTIONS;
+  const withUnit = Object.keys(F).filter(id=> F[id] && F[id].unit && F[id].unit.g);
+  const bySec = {};
+  withUnit.forEach(id=>{ const s = SEC[F[id].sec] ? F[id].sec : 'desp'; (bySec[s]=bySec[s]||[]).push(id); });
+  const secOrder = Object.keys(SEC).sort((a,b)=>(SEC[a].order||9)-(SEC[b].order||9));
+  const listHtml = secOrder.filter(s=>bySec[s]).map(s=>{
+    const items = bySec[s].sort((a,b)=> F[a].name.localeCompare(F[b].name, 'es'));
+    return `<div class="fm-sec" data-sec="${s}">
+      <h4 class="fm-sec-h">${SEC[s].ico||''} ${esc(SEC[s].lbl||s)}</h4>
+      <div class="fm-items">${items.map(id=>{
+        const f=F[id], u=f.unit, kc=Math.round((f.kcal||0)*u.g/100);
+        return `<div class="fm-item" data-name="${esc(_fmNorm(f.name))}">
+          <span class="fm-n">${esc(f.name)}</span>
+          <span class="fm-m">1 ${esc(u.lbl)} ≈ <b>${u.g} g</b><small>${kc} kcal</small></span>
+        </div>`;
+      }).join('')}</div>
+    </div>`;
+  }).join('');
+  const refsHtml = MEASURE_REFS.map(([k,v])=>`<div class="fm-ref"><b>${esc(k)}</b><span>${esc(v)}</span></div>`).join('');
+  const back=document.createElement('div'); back.className='fm-back';
+  back.innerHTML=`<div class="fm-page" role="dialog" aria-modal="true" aria-label="Medidas de alimentos">
+    <div class="fm-hd fm-no-print">
+      <h3>📏 Medidas de alimentos</h3>
+      <div class="fm-hd-actions">
+        <button class="fm-print" data-print>🖨️ PDF</button>
+        <button class="fm-x" data-x aria-label="Cerrar">✕</button>
+      </div>
+    </div>
+    <div class="fm-intro">Equivalencias aproximadas para no tener que pesar a diario. Usa el buscador o imprime esta página como PDF.</div>
+    <input class="fm-search fm-no-print" type="search" placeholder="🔎 Buscar alimento…" aria-label="Buscar alimento">
+    <div class="fm-scroll">
+      <div class="fm-refs">${refsHtml}</div>
+      ${listHtml || '<div class="fm-empty">No hay medidas registradas.</div>'}
+      <div class="fm-empty fm-noresult" style="display:none">Sin alimentos que coincidan con la búsqueda.</div>
+    </div>
+  </div>`;
+  document.body.appendChild(back);
+  requestAnimationFrame(()=> back.classList.add('show'));
+
+  const search = back.querySelector('.fm-search');
+  search.addEventListener('input', ()=>{
+    const q = _fmNorm(search.value.trim());
+    let any = false;
+    back.querySelectorAll('.fm-item').forEach(it=>{
+      const ok = !q || it.dataset.name.includes(q);
+      it.style.display = ok ? '' : 'none'; if(ok) any = true;
+    });
+    back.querySelectorAll('.fm-sec').forEach(sec=>{
+      const vis = [...sec.querySelectorAll('.fm-item')].some(it=> it.style.display !== 'none');
+      sec.style.display = vis ? '' : 'none';
+    });
+    const refsBox = back.querySelector('.fm-refs'); if(refsBox) refsBox.style.display = q ? 'none' : '';
+    const nr = back.querySelector('.fm-noresult'); if(nr) nr.style.display = (q && !any) ? '' : 'none';
+  });
+  const pr = back.querySelector('[data-print]'); if(pr) pr.addEventListener('click', ()=> window.print());
+  function close(){ back.classList.remove('show'); setTimeout(()=> back.remove(), 200); document.removeEventListener('keydown', onKey, true); }
+  function onKey(e){ if(e.key==='Escape') close(); }
+  back.addEventListener('click', e=>{ if(e.target.closest('[data-x]') || e.target===back) close(); });
+  document.addEventListener('keydown', onKey, true);
+}
+window.openFoodMeasures = openFoodMeasures;

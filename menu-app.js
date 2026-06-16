@@ -1423,6 +1423,8 @@ function wireSecMenu(){
   btn.addEventListener('click', e=>{ e.stopPropagation(); menu.hidden ? open() : close(); });
   menu.querySelectorAll('.sec-mi').forEach(m=> m.addEventListener('click', ()=>{
     close();
+    if(m.dataset.page === 'measures'){ if(typeof window.openFoodMeasures === 'function') window.openFoodMeasures(); return; }
+    if(m.dataset.page === 'info'){ if(typeof window.pnInfoLegal === 'function') window.pnInfoLegal(); return; }
     if(typeof window.setSection === 'function') window.setSection(m.dataset.sec);
     else { const sb = document.querySelector('.sec-btn[data-sec="'+m.dataset.sec+'"]'); if(sb) sb.click(); }
   }));
