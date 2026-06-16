@@ -833,16 +833,16 @@ function scoreCandidate(dishId, ctx){
     const expectedPct = SLOT_CUM_PCT[ctx.slot];
     let macroPenalty = 0;
     let counts = 0;
-    ['A','B'].forEach((p, i)=>{
+    PEOPLE.forEach((p, i)=>{
       const tgt = TARGETS[p];
       if(!tgt || !tgt.kcal) return;
       counts++;
-      const cur = ctx.dayTotals[ctx.day][p];
+      const cur = (ctx.dayTotals[ctx.day] && ctx.dayTotals[ctx.day][p]) || {k:0,p:0,f:0,c:0};
       // valores tras añadir este candidato
-      const k = cur.k + d.kcal[i];
-      const pp = cur.p + d.mac.p[i];
-      const ff = cur.f + d.mac.f[i];
-      const cc = cur.c + d.mac.c[i];
+      const k  = cur.k + (+d.kcal[i]||0);
+      const pp = cur.p + (+(d.mac.p[i])||0);
+      const ff = cur.f + (+(d.mac.f[i])||0);
+      const cc = cur.c + (+(d.mac.c[i])||0);
       // Objetivos esperados acumulados tras esta franja
       const tK = expectedPct * tgt.kcal;
       const tP = expectedPct * (tgt.p || 0);
@@ -919,11 +919,8 @@ function autofillCalendar(opts){
   opts = opts || {};
   const respectExisting = opts.respectExisting !== false; // por defecto sí
 
-  // Combina restricciones de A y B (la receta debe pasar las DOS)
-  const restrictions = [...new Set([
-    ...(TARGETS.A.restr || []),
-    ...(TARGETS.B.restr || [])
-  ])];
+  // Combina restricciones de TODAS las personas (la receta debe pasarlas todas)
+  const restrictions = [...new Set(PEOPLE.flatMap(id => (TARGETS[id]||{}).restr || []))];
 
   const ctx = {
     usedCount: {},     // {dishId: count}
@@ -935,8 +932,9 @@ function autofillCalendar(opts){
     favBoost:  opts.favorites ? 4000 : 0,
     dayTotals: {}      // {day: {A:{k,p,f,c}, B:{k,p,f,c}}}
   };
-  // Init per-day totals (vacíos o con lo que ya hay)
-  WEEK_DAYS.forEach(d=>{ ctx.dayTotals[d.k] = {A:{k:0,p:0,f:0,c:0}, B:{k:0,p:0,f:0,c:0}}; });
+  // Init per-day totals (una entrada por persona activa)
+  const blankTotals = ()=>{ const o={}; PEOPLE.forEach(id=>{ o[id]={k:0,p:0,f:0,c:0}; }); return o; };
+  WEEK_DAYS.forEach(d=>{ ctx.dayTotals[d.k] = blankTotals(); });
 
   // Comprueba si quedará alguna categoría sin candidatos
   const blocked = [];
@@ -961,10 +959,7 @@ function autofillCalendar(opts){
             (DISHES[id]?.food||[]).forEach(f=>{ ctx.gotCom[f] = (ctx.gotCom[f]||0) + 1; });
           }
           const d = DISHES[id];
-          if(d && ctx.dayTotals[day]){
-            ctx.dayTotals[day].A.k += d.kcal[0]; ctx.dayTotals[day].A.p += d.mac.p[0]; ctx.dayTotals[day].A.f += d.mac.f[0]; ctx.dayTotals[day].A.c += d.mac.c[0];
-            ctx.dayTotals[day].B.k += d.kcal[1]; ctx.dayTotals[day].B.p += d.mac.p[1]; ctx.dayTotals[day].B.f += d.mac.f[1]; ctx.dayTotals[day].B.c += d.mac.c[1];
-          }
+          if(d && ctx.dayTotals[day]) addToTotals(ctx.dayTotals[day], d);
         });
       });
     });
@@ -972,15 +967,19 @@ function autofillCalendar(opts){
     CalState.data = emptyCal();
   }
 
+  // Suma los macros de un plato a los totales por persona (clave = id de PEOPLE)
+  function addToTotals(totals, d){
+    PEOPLE.forEach((id, i)=>{
+      const t = totals[id]; if(!t || !d.kcal) return;
+      t.k += (+d.kcal[i]||0); t.p += (+(d.mac.p[i])||0); t.f += (+(d.mac.f[i])||0); t.c += (+(d.mac.c[i])||0);
+    });
+  }
   // Helper para registrar el pick y actualizar dayTotals
   const registerPick = (day, slot, id)=>{
     ctx.usedCount[id] = (ctx.usedCount[id]||0) + 1;
     ctx.lastBySlot[slot] = id;
     const d = DISHES[id];
-    if(d && ctx.dayTotals[day]){
-      ctx.dayTotals[day].A.k += d.kcal[0]; ctx.dayTotals[day].A.p += d.mac.p[0]; ctx.dayTotals[day].A.f += d.mac.f[0]; ctx.dayTotals[day].A.c += d.mac.c[0];
-      ctx.dayTotals[day].B.k += d.kcal[1]; ctx.dayTotals[day].B.p += d.mac.p[1]; ctx.dayTotals[day].B.f += d.mac.f[1]; ctx.dayTotals[day].B.c += d.mac.c[1];
-    }
+    if(d && ctx.dayTotals[day]) addToTotals(ctx.dayTotals[day], d);
   };
 
   // Orden de relleno: COMIDAS primero (más restrictivo por plantilla),
@@ -1038,7 +1037,7 @@ function showAutofillReport(){
   const all = weeklyCounts('all');
   const lines = [];
   const get = (src, k) => src[k] || 0;
-  const restr = [...new Set([...(TARGETS.A.restr||[]), ...(TARGETS.B.restr||[])])];
+  const restr = [...new Set(PEOPLE.flatMap(id => (TARGETS[id]||{}).restr || []))];
   if(restr.length){
     const labels = restr.map(k=> RESTRICTIONS_MAP[k]?.lbl || k).join(', ');
     lines.push(`🚫 Restricciones aplicadas: ${labels}`);
@@ -1076,21 +1075,26 @@ function toastAutofill(msg){
   t.addEventListener('click', ()=> t.classList.remove('show'), {once:true});
 }
 
+function safeAutofill(opts){
+  try{ autofillCalendar(opts); }
+  catch(e){ console.error('autofill', e); if(typeof pnAlert==='function') pnAlert('No se pudo autocompletar.\n'+(e&&e.message||e)); }
+}
+
 async function autofillFromMenu(){
   if(!await pnConfirm('¿Autocompletar?\nSe rellenarán SÓLO las franjas vacías, respetando lo que ya hay. Usa "Vaciar" antes si quieres empezar desde cero.', {okText:'Autocompletar'})) return;
-  autofillCalendar({respectExisting:true});
+  safeAutofill({respectExisting:true});
 }
 
 async function autofillFromScratch(){
   if(!await pnConfirm('¿Generar un menú nuevo desde cero?\nSe borrará todo lo actual.', {danger:true, okText:'Generar nuevo'})) return;
-  autofillCalendar({respectExisting:false});
+  safeAutofill({respectExisting:false});
 }
 
 async function autofillFromFavorites(){
   const favs = getDishFavs();
   if(!favs.length){ pnAlert('Aún no tienes recetas favoritas.\nMarca algunas con la ★ en el catálogo y vuelve a intentarlo.'); return; }
   if(!await pnConfirm(`¿Generar un menú con tus ${favs.length} recetas favoritas?\nSe prioriza lo que te gusta y se completa con otras sólo si falta variedad. Se borrará el menú actual.`, {danger:true, okText:'Generar'})) return;
-  autofillCalendar({respectExisting:false, favorites:true});
+  safeAutofill({respectExisting:false, favorites:true});
 }
 
 /* ── BIND ──────────────────────────────────────────── */
