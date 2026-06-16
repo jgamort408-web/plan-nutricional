@@ -1428,6 +1428,8 @@ function wireSecMenu(){
     close();
     if(m.dataset.page === 'measures'){ if(typeof window.openFoodMeasures === 'function') window.openFoodMeasures(); return; }
     if(m.dataset.page === 'info'){ if(typeof window.pnInfoLegal === 'function') window.pnInfoLegal(); return; }
+    if(m.dataset.page === 'save'){ if(window.PNSession && window.PNSession.manualSave) window.PNSession.manualSave(); return; }
+    if(m.dataset.page === 'settings'){ if(typeof openSettings === 'function') openSettings(); return; }
     if(typeof window.setSection === 'function') window.setSection(m.dataset.sec);
     else { const sb = document.querySelector('.sec-btn[data-sec="'+m.dataset.sec+'"]'); if(sb) sb.click(); }
   }));
@@ -1435,7 +1437,8 @@ function wireSecMenu(){
 }
 wireSecMenu();
 
-document.getElementById('settingsBtn').addEventListener('click', ()=> openSettings());
+// Ajustes y Guardar viven ahora en el menú ☰ (ver wireSecMenu); el botón del header se quitó.
+const _sbtn = document.getElementById('settingsBtn'); if(_sbtn) _sbtn.addEventListener('click', ()=> openSettings());
 
 document.getElementById('mClose').addEventListener('click', closeModal);
 document.getElementById('modalBg').addEventListener('click', e=>{
