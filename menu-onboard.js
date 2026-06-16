@@ -88,7 +88,7 @@
   let step = 0;             // 0=intro, 1..N=personas, N+1=resumen
   let backEl = null;
 
-  function defaultPerson(i){ return { name:'', kg:'', cm:'', act:'mod', goal:'man' }; }
+  function defaultPerson(i){ return { name:'', sex:'M', age:'', kg:'', cm:'', act:'mod', goal:'man' }; }
   function ensurePeople(){
     while(people.length < N) people.push(defaultPerson(people.length));
     people.length = N;
@@ -100,7 +100,7 @@
 
   function calc(p){
     if(typeof calcFromInputs!=='function') return null;
-    return calcFromInputs(p.kg, p.cm, p.act, p.goal);
+    return calcFromInputs(p.kg, p.cm, p.act, p.goal, p.sex, p.age);
   }
 
   function render(){
@@ -130,11 +130,20 @@
           <label>Nombre</label>
           <input type="text" data-f="name" value="${esc(p.name)}" placeholder="Ej.: ${esc(['Juan','Ana','Leo','Sara','Max','Eva'][i]||'Persona')}" maxlength="24">
         </div>
+        <div class="ob-field">
+          <label>Sexo</label>
+          <div class="ob-chips">
+            <button class="ob-chip ${p.sex==='M'?'on':''}" data-sex="M">♂ Hombre</button>
+            <button class="ob-chip ${p.sex==='F'?'on':''}" data-sex="F">♀ Mujer</button>
+          </div>
+        </div>
         <div class="ob-2col">
           <div class="ob-field"><label>Peso (kg)</label>
             <input type="number" data-f="kg" value="${esc(p.kg)}" inputmode="decimal" min="20" max="300" placeholder="70"></div>
           <div class="ob-field"><label>Altura (cm)</label>
             <input type="number" data-f="cm" value="${esc(p.cm)}" inputmode="numeric" min="120" max="230" placeholder="170"></div>
+          <div class="ob-field"><label>Edad</label>
+            <input type="number" data-f="age" value="${esc(p.age)}" inputmode="numeric" min="12" max="100" placeholder="30"></div>
         </div>
         <div class="ob-field">
           <label>Nivel de actividad</label>
@@ -200,7 +209,8 @@
       const nb = root.querySelector('[data-nav="next"]');
       if(nb) nb.disabled = !(people[i].kg && people[i].cm);
     });
-    // chips actividad/objetivo
+    // chips sexo/actividad/objetivo
+    root.querySelectorAll('[data-sex]').forEach(b=> b.onclick=()=>{ const i=step-1; people[i].sex=b.dataset.sex; render(); });
     root.querySelectorAll('[data-act]').forEach(b=> b.onclick=()=>{ const i=step-1; people[i].act=b.dataset.act; render(); });
     root.querySelectorAll('[data-goal]').forEach(b=> b.onclick=()=>{ const i=step-1; people[i].goal=b.dataset.goal; render(); });
     // navegación
@@ -242,7 +252,7 @@
         name, sym: (typeof PERSON_SYMS!=='undefined' ? PERSON_SYMS[i] : '🧑') || '🧑',
         restr: (TARGETS[id]&&TARGETS[id].restr)||[], modifier: i===0 ? null : undefined
       });
-      calcInputs[id] = { kg:+p.kg||null, cm:+p.cm||null, act:p.act, goal:p.goal, sex:'M', age:null };
+      calcInputs[id] = { kg:+p.kg||null, cm:+p.cm||null, act:p.act, goal:p.goal, sex:p.sex||'M', age:+p.age||null };
     });
     PEOPLE = ids;  // reasigna la lista global (binding léxico compartido entre scripts)
     // valida persona activa
@@ -263,7 +273,7 @@
       people = PEOPLE.map((id,i)=>{
         const ci = (typeof getCalcInputs==='function' ? getCalcInputs()[id] : {}) || {};
         const t = TARGETS[id]||{};
-        return { name:(t.name||'').replace(/kg$/,''), kg:ci.kg||'', cm:ci.cm||'', act:ci.act||'mod', goal:ci.goal||'man' };
+        return { name:(t.name||'').replace(/kg$/,''), sex:ci.sex||'M', age:ci.age||'', kg:ci.kg||'', cm:ci.cm||'', act:ci.act||'mod', goal:ci.goal||'man' };
       });
     } else { people = []; ensurePeople(); }
     step = 0;

@@ -561,14 +561,38 @@ function wirePersonasForm(){
   });
 }
 
-/* Cálculo PURO (sin DOM) a partir de los datos de una persona.
-   Reutilizable por el formulario de Ajustes y por el onboarding.
-   kg, cm, actK (clave de ACTIVITY_LEVELS), goalK (clave de GOALS). */
-function calcFromInputs(kg, cm, actK, goalK){
+/* Peso ideal según la teoría: 22 × altura². Sirve para el peso corregido. */
+function pesoIdeal(cm){ const m=(+cm||0)/100; return m ? 22*m*m : 0; }
+
+/* ¿Conviene usar peso corregido? Según la teoría: sobrepeso/obesidad.
+   Criterio por IMC (umbral por sexo, más laxo en hombres por más masa magra). */
+function usaPesoCorregido(kg, cm, sex){
+  if(!kg || !cm) return false;
+  const m=cm/100, imc = kg/(m*m);
+  return imc > (sex === 'F' ? 26 : 27);
+}
+
+/* Peso de cálculo teniendo en cuenta el sexo (teoría: %graso/IMC por sexo). */
+function pesoCalculoSex(kg, cm, sex){
+  if(!kg) return 0; if(!cm) return kg;
+  if(!usaPesoCorregido(kg, cm, sex)) return kg;
+  const ideal = pesoIdeal(cm);
+  return ideal + 0.25 * (kg - ideal);                // peso corregido (teoría)
+}
+
+/* Cálculo PURO (sin DOM), FIEL A LA TEORÍA "kcal" de la carpeta:
+     1) Peso de cálculo (real, o corregido si hay sobrepeso — umbral por sexo).
+     2) GMB = peso de cálculo × 22.
+     3) GET = GMB × factor de actividad.
+     4) Objetivo = GET × multiplicador del objetivo.
+     5) Macros (método B): proteína y grasa por g/kg; grasa ≥20% kcal; carbos el resto.
+   El sexo afina el peso corregido; la edad se guarda como dato (la fórmula
+   peso×22 de la teoría no la usa). */
+function calcFromInputs(kg, cm, actK, goalK, sex, age){
   kg = +kg || 0; cm = +cm || 0;
-  if(!kg) return null;
-  const gmb = calcGMB(kg, cm);                       // peso de cálculo × 22
-  const pc  = pesoCalculo(kg, cm);                   // peso de cálculo (real o corregido)
+  if(!kg || !cm) return null;                        // peso y altura imprescindibles
+  const pc  = pesoCalculoSex(kg, cm, sex);           // peso de cálculo (real o corregido)
+  const gmb = Math.round(pc * 22);                   // GMB = peso de cálculo × 22 (teoría)
   const actFactor = ACTIVITY_LEVELS.find(a=>a.k===actK)?.f || 1.6;
   const goalDef = GOALS.find(g=>g.k===goalK) || GOALS.find(g=>g.k==='man');
 
@@ -577,12 +601,12 @@ function calcFromInputs(kg, cm, actK, goalK){
 
   const proteinG = Math.round(pc * goalDef.pPerKg);
   let   fatG     = Math.round(pc * goalDef.fPerKg);
-  const minFatG  = Math.round((goal * 0.20) / 9);
+  const minFatG  = Math.round((goal * 0.20) / 9);    // grasa nunca < 20% kcal
   if(fatG < minFatG) fatG = minFatG;
-  const carbG = Math.max(0, Math.round((goal - proteinG*4 - fatG*9) / 4));
+  const carbG = Math.max(0, Math.round((goal - proteinG*4 - fatG*9) / 4)); // carbos = resto
 
   return {bmr:gmb, tdee, goal, macros:{p:proteinG, f:fatG, c:carbG},
-          pesoCalc:Math.round(pc), corrected: cm ? (kg/((cm/100)**2) > IMC_CORRECT) : false};
+          pesoCalc:Math.round(pc), corrected: usaPesoCorregido(kg, cm, sex)};
 }
 
 function computeCalc(k){
@@ -591,10 +615,12 @@ function computeCalc(k){
   // La fórmula peso×22 no necesita sexo ni edad (se conservan solo como dato).
   const kg  = +card.querySelector('[name=kg]')?.value  || 0;
   const cm  = +card.querySelector('[name=cm]')?.value  || 0;
-  if(!kg || !cm) return null;   // peso y altura bastan (altura = ajuste por sobrepeso)
+  if(!kg || !cm) return null;   // peso y altura imprescindibles
   const actK = card.querySelector(`[name="act-${k}"]:checked`)?.value || 'mod';
   const goalK = card.querySelector(`[name="goal-${k}"]:checked`)?.value || 'man';
-  return calcFromInputs(kg, cm, actK, goalK);
+  const sex = card.querySelector('.cseg.on')?.dataset.sex || 'M';
+  const age = +card.querySelector('[name=age]')?.value || null;
+  return calcFromInputs(kg, cm, actK, goalK, sex, age);
 }
 window.calcFromInputs = calcFromInputs;
 window.ACTIVITY_LEVELS = ACTIVITY_LEVELS;
