@@ -403,12 +403,15 @@ function bindCalCells(){
 /* ══════════════════════════════════════════════════════════
    PICKER · ahora soporta añadir/quitar varias recetas
 ══════════════════════════════════════════════════════════ */
-let _picker = {day:null, slot:null, search:''};
+let _picker = {day:null, slot:null, search:'', fav:false, mode:'recetas', foodPick:null};
 
 function openPicker(day, slot){
   _picker.day = day;
   _picker.slot = slot;
   _picker.search = '';
+  _picker.fav = false;
+  _picker.mode = 'recetas';
+  _picker.foodPick = null;
   renderPicker();
   document.getElementById('pickerBg').classList.add('show');
   document.body.classList.add('no-scroll');
@@ -427,8 +430,10 @@ function renderPicker(){
   const dayMeta = WEEK_DAYS.find(d => d.k === day);
   const current = CalState.data[day][slot] || [];
 
+  const favOn = !!_picker.fav;
   const dishIds = Object.keys(DISHES)
     .filter(id => DISHES[id].cat === slot && !DISHES[id].loose)
+    .filter(id => !favOn || (typeof isDishFav === 'function' && isDishFav(id)))
     .filter(id => {
       if(!_picker.search) return true;
       const q = _picker.search.toLowerCase();
@@ -447,6 +452,47 @@ function renderPicker(){
     totK += px(d.kcal); totP += px(d.mac.p); totF += px(d.mac.f); totC += px(d.mac.c);
   });
   const personaLbl = S.p==='AB' ? 'Todas' : (((TARGETS[S.p]||{}).name||'').trim() || ('Persona '+((typeof PEOPLE!=='undefined'?PEOPLE.indexOf(S.p):0)+1)));
+
+  // Controles: favoritos + recetas/alimentos
+  const controlsHtml = `
+    <div class="picker-ctrls">
+      <div class="pk-seg">
+        <button class="pk-seg-b ${_picker.mode==='recetas'?'on':''}" data-mode="recetas">🍽️ Recetas</button>
+        <button class="pk-seg-b ${_picker.mode==='alimentos'?'on':''}" data-mode="alimentos">🍎 Alimentos</button>
+      </div>
+      ${_picker.mode==='recetas' ? `<button class="pk-fav ${favOn?'on':''}" data-favtog>${favOn?'★':'☆'} Favoritos</button>` : ''}
+    </div>`;
+
+  // Lista de alimentos sueltos (modo alimentos)
+  const FOODS_ = window.FOODS || (typeof FOODS!=='undefined'?FOODS:{});
+  const norm = s => (s||'').toString().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+  let foodListHtml = '';
+  if(_picker.mode === 'alimentos'){
+    const q = norm(_picker.search);
+    const fids = Object.keys(FOODS_)
+      .filter(id => !FOODS_[id].loose)
+      .filter(id => !q || norm(FOODS_[id].name).includes(q))
+      .sort((a,b)=> FOODS_[a].name.localeCompare(FOODS_[b].name,'es'))
+      .slice(0, 200);
+    foodListHtml = fids.length ? fids.map(id=>{
+      const f = FOODS_[id];
+      const hasUnit = !!(f.unit && f.unit.g);
+      const open = _picker.foodPick === id;
+      const sec = (typeof FOOD_SECTIONS!=='undefined' && FOOD_SECTIONS[f.sec]) ? FOOD_SECTIONS[f.sec].ico : '🍎';
+      return `<div class="pk-food ${open?'open':''}" data-food="${id}">
+        <div class="pk-food-row">
+          <span class="pi-ico">${sec}</span>
+          <span class="pk-food-n">${escAttr(f.name)}</span>
+          <span class="pk-food-k">${f.kcal||0} kcal/100g</span>
+        </div>
+        ${open ? `<div class="pk-food-add">
+          <input class="pk-qty" type="number" min="0" step="any" value="${hasUnit?1:100}" inputmode="decimal">
+          <select class="pk-unit">${hasUnit?`<option value="u">${escAttr(f.unit.lbl||'ud')}</option>`:''}<option value="g">gramos</option></select>
+          <button class="pk-add-b" data-add="${id}">Añadir</button>
+        </div>` : ''}
+      </div>`;
+    }).join('') : `<div class="picker-empty">Sin alimentos para “${escAttr(_picker.search)}”</div>`;
+  }
 
   const body = document.getElementById('pickerBodyOuter');
   body.innerHTML = `
@@ -476,11 +522,12 @@ function renderPicker(){
         ` : `<div class="picker-cur-empty">Franja vacía — elige una o varias recetas</div>`}
       </div>
 
+      ${controlsHtml}
       <div class="picker-search">
-        <input id="pickerSearch" type="text" placeholder="Buscar receta o tipo (legumbre, pescado azul…)" value="${escAttr(_picker.search)}">
+        <input id="pickerSearch" type="text" placeholder="${_picker.mode==='alimentos'?'Buscar alimento (manzana, yogur, arroz…)':'Buscar receta o tipo (legumbre, pescado azul…)'}" value="${escAttr(_picker.search)}">
       </div>
       <div class="picker-list">
-        ${dishIds.length ? dishIds.map(id=>{
+        ${_picker.mode==='alimentos' ? foodListHtml : (dishIds.length ? dishIds.map(id=>{
           const d = DISHES[id];
           const added = current.includes(id);
           const viols = dishViolations(id, 'AB');
@@ -500,7 +547,7 @@ function renderPicker(){
               </div>
               <div class="pi-foods">${foodChipsHtml(d, {compact:true})}</div>
             </div>`;
-        }).join('') : `<div class="picker-empty">Sin recetas para “${escAttr(_picker.search)}”</div>`}
+        }).join('') : `<div class="picker-empty">Sin recetas para “${escAttr(_picker.search)}”</div>`)}
       </div>
     </div>
     <div class="form-actions">
@@ -553,6 +600,52 @@ function renderPicker(){
   if(nw) nw.addEventListener('click', ()=>{
     closePicker();
     openRecipeForm(_picker.slot);
+  });
+
+  // Segmento Recetas/Alimentos
+  body.querySelectorAll('[data-mode]').forEach(b=>{
+    b.addEventListener('click', ()=>{ _picker.mode = b.dataset.mode; _picker.foodPick = null; renderPicker(); });
+  });
+  // Toggle Favoritos (modo recetas)
+  const favT = body.querySelector('[data-favtog]');
+  if(favT) favT.addEventListener('click', ()=>{ _picker.fav = !_picker.fav; renderPicker(); });
+  // Expandir/contraer un alimento para indicar cantidad
+  body.querySelectorAll('.pk-food-row').forEach(row=>{
+    row.addEventListener('click', ()=>{
+      const id = row.parentElement.dataset.food;
+      _picker.foodPick = (_picker.foodPick === id) ? null : id;
+      const sc = body.scrollTop; renderPicker(); body.scrollTop = sc;
+    });
+  });
+  // Añadir alimento suelto a la franja
+  body.querySelectorAll('[data-add]').forEach(btn=>{
+    btn.addEventListener('click', e=>{
+      e.stopPropagation();
+      const id = btn.dataset.add;
+      const food = FOODS_[id]; if(!food) return;
+      const wrap = btn.closest('.pk-food');
+      const q = +wrap.querySelector('.pk-qty').value || 0;
+      const unit = wrap.querySelector('.pk-unit').value;
+      if(q <= 0){ wrap.querySelector('.pk-qty').focus(); return; }
+      const it = {f:id, fx:true}; if(unit === 'u') it.u = q; else it.g = q;
+      const qLbl = unit === 'u' ? `${q} ${(food.unit&&food.unit.lbl)||'ud'}` : `${q} g`;
+      const newId = (typeof nextUserId === 'function') ? nextUserId() : ('U' + Date.now());
+      DISHES[newId] = {
+        cat: _picker.slot, loose:true,
+        short: food.name.slice(0,24), nom: `${food.name} · ${qLbl}`,
+        icon: ((typeof FOOD_SECTIONS!=='undefined' && FOOD_SECTIONS[food.sec]) || {}).ico || '🍎',
+        t:'—', eq:'—', tags:[], tipo:null, diet:[], desc:'Alimento suelto.', nota:'—',
+        comp:[it], food:[]
+      };
+      if(typeof recomputeDish === 'function') recomputeDish(DISHES[newId]);
+      if(typeof persistCustom === 'function') persistCustom();
+      CalState.data[_picker.day][_picker.slot].push(newId);
+      CalState.modified = true;
+      persistCal();
+      _picker.foodPick = null;
+      renderPicker();
+      renderCalendar();
+    });
   });
 }
 
