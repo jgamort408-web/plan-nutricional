@@ -140,7 +140,7 @@ const initialState = hydrate();
 const S = {
   // persona activa válida: una de PEOPLE o 'AB' (todas); si no, la primera
   p: (initialState.persona === 'AB' || PEOPLE.includes(initialState.persona)) ? initialState.persona : PEOPLE[0],
-  filter: 'todos',
+  filters: [],            // multi-selección: ['favs','sg','f:leg', …]; vacío = todos
   search: '',
   cart: initialState.cart.filter(id => DISHES[id]),  // drop stale ids
   activeCat: 'des',
@@ -276,17 +276,26 @@ function phSvg(cat){
 }
 
 /* ── HELPERS ──────────────────────────────────────────── */
+// ¿hay algún filtro activo? (búsqueda no cuenta; solo las píldoras)
+function anyFilter(){ return (S.filters||[]).length > 0; }
+
 function passesFilter(id){
   const d = DISHES[id];
   if(!d) return false;
   if(!dishMatchesSearch(id)) return false;
-  if(S.filter === 'todos') return true;
-  if(S.filter === 'favs') return isDishFav(id);
-  if(S.filter.startsWith('f:')){
-    const fk = S.filter.slice(2);
-    return (d.food||[]).includes(fk);
+  const fs = S.filters || [];
+  if(!fs.length) return true;
+  // Favoritos: obligatorio si está seleccionado
+  if(fs.includes('favs') && !isDishFav(id)) return false;
+  // Dieta (sg/sl/vt/vg): AND — debe cumplir TODAS las seleccionadas
+  for(const k of fs){
+    if(k==='favs' || k.startsWith('f:')) continue;
+    if(!(d.diet||[]).includes(k)) return false;
   }
-  return (d.diet||[]).includes(S.filter);
+  // Tipo de alimento (f:xx): OR — basta con contener UNA de las seleccionadas
+  const foods = fs.filter(k=> k.startsWith('f:')).map(k=> k.slice(2));
+  if(foods.length && !foods.some(fk=> (d.food||[]).includes(fk))) return false;
+  return true;
 }
 
 function tagHtml(d){
@@ -354,8 +363,9 @@ function renderFilters(){
   const dietFilters = FILTERS.filter(f=> f.group==='all' || f.group==='diet');
   const foodFilters = FILTERS.filter(f=> f.group==='food');
 
+  const isOn = (k)=> k==='todos' ? !anyFilter() : (S.filters||[]).includes(k);
   const pillHtml = (f)=>`
-    <button class="fpill ${f.cls||''} ${S.filter===f.key?'on':''}" data-f="${f.key}">
+    <button class="fpill ${f.cls||''} ${isOn(f.key)?'on':''}" data-f="${f.key}">
       <span class="fico">${f.ico}</span>${f.label}
     </button>`;
 
@@ -365,7 +375,7 @@ function renderFilters(){
     </div>
     <div class="frow-grp" data-grp="diet">
       <span class="frow-lbl">Dieta</span>
-      <button class="fpill fav-pill ${S.filter==='favs'?'on':''}" data-f="favs"><span class="fico">${S.filter==='favs'?'★':'☆'}</span>Favoritos</button>
+      <button class="fpill fav-pill ${isOn('favs')?'on':''}" data-f="favs"><span class="fico">${isOn('favs')?'★':'☆'}</span>Favoritos</button>
       ${dietFilters.map(pillHtml).join('')}
     </div>
     <div class="frow-grp" data-grp="food">
@@ -393,10 +403,15 @@ function renderFilters(){
     clearTimeout(window.__searchDeb);
     window.__searchDeb = setTimeout(()=>{ renderMain(); renderCatNav(); }, 120);   // solo grid+nav → no pierde foco
   });
-  el.querySelectorAll('.fpill:not(.sort-pill)').forEach(b=>{
+  el.querySelectorAll('.fpill:not(.sort-pill):not(.vm-pill)').forEach(b=>{
     b.addEventListener('click', ()=>{
-      // Toggle: si pulsas el activo, vuelve a "todos"
-      S.filter = (S.filter === b.dataset.f) ? 'todos' : b.dataset.f;
+      const k = b.dataset.f;
+      if(k === 'todos'){ S.filters = []; }            // limpia todos
+      else {
+        const i = S.filters.indexOf(k);
+        if(i >= 0) S.filters.splice(i, 1);            // toggle off
+        else S.filters.push(k);                       // toggle on (multi)
+      }
       renderAll();
     });
   });
@@ -459,15 +474,57 @@ function dishCard(id){
 }
 
 /* ── RENDER: MAIN ─────────────────────────────────────── */
+const RENDER_BATCH = 24;          // recetas que se pintan por lote (render progresivo)
+let _moreState = {};              // cat → ids aún por pintar
+let _moreObserver = null;         // observa los botones "mostrar más"
+
+// Engancha clicks (abrir ficha + favorito) en un conjunto de nodos .dish.
+function wireDishNodes(nodes){
+  nodes.forEach(a=>{
+    if(!a.classList || !a.classList.contains('dish')) return;
+    if(a.classList.contains('add-card')){
+      a.addEventListener('click', ()=> openRecipeForm(a.dataset.cat));
+      return;
+    }
+    a.addEventListener('click', ()=> openModal(a.dataset.id));
+    const fav = a.querySelector('.dish-fav');
+    if(fav) fav.addEventListener('click', e=>{ e.stopPropagation(); toggleDishFav(fav.dataset.fav); renderMain(); renderCatNav(); });
+  });
+}
+
+// Pinta el siguiente lote de una categoría e inserta antes de la add-card.
+function loadMoreCat(cat){
+  const rest = _moreState[cat];
+  if(!rest || !rest.length) return;
+  const sec = document.getElementById('cat-'+cat);
+  if(!sec) return;
+  const grid = sec.querySelector('.grid');
+  const addc = grid.querySelector('.add-card');
+  const batch = rest.splice(0, RENDER_BATCH);
+  const frag = document.createElement('div');
+  frag.innerHTML = batch.map(dishCard).join('');
+  const nodes = [...frag.children];
+  nodes.forEach(n=> addc ? grid.insertBefore(n, addc) : grid.appendChild(n));
+  wireDishNodes(nodes);
+  const btn = sec.querySelector('.grid-more');
+  if(!rest.length){ if(btn){ if(_moreObserver) _moreObserver.unobserve(btn); btn.remove(); } delete _moreState[cat]; }
+  else if(btn){ btn.textContent = `Mostrar ${rest.length} receta${rest.length>1?'s':''} más`; }
+}
+
 function renderMain(){
   const el = document.getElementById('main');
   el.dataset.vm = S.viewMode || 'detail';            // modo de vista (detail|big|small)
+  _moreState = {};
+  if(_moreObserver) _moreObserver.disconnect();
   const sections = CATEGORIES.map(c=>{
     let ids = Object.keys(DISHES).filter(id=>DISHES[id].cat===c.key && !DISHES[id].libre && !DISHES[id].loose && passesFilter(id));
-    if(!ids.length && S.filter!=='todos') return '';
+    if(!ids.length && anyFilter()) return '';
     ids = sortIds(ids);
     const sortNote = S.sort.key!=='def' ? ` · ${(SORT_OPTS.find(o=>o.key===S.sort.key)||{}).lbl} ${S.sort.dir==='asc'?'↑':'↓'}` : '';
     const isCol = (S.collapsed||[]).includes(c.key);
+    const shown = ids.slice(0, RENDER_BATCH);
+    const rest  = ids.slice(RENDER_BATCH);
+    if(rest.length) _moreState[c.key] = rest;
     return `
       <section class="cat-section ${isCol?'collapsed':''}" id="cat-${c.key}">
         <header class="cat-hd" data-col="${c.key}" role="button" tabindex="0" aria-expanded="${!isCol}">
@@ -477,9 +534,10 @@ function renderMain(){
           <span class="cline"></span>
         </header>
         <div class="grid">
-          ${ids.map(dishCard).join('')}
-          ${S.filter==='todos' ? addCard(c.key) : ''}
+          ${shown.map(dishCard).join('')}
+          ${!anyFilter() ? addCard(c.key) : ''}
         </div>
+        ${rest.length ? `<button class="grid-more" data-more="${c.key}">Mostrar ${rest.length} receta${rest.length>1?'s':''} más</button>` : ''}
       </section>`;
   }).join('');
 
@@ -504,15 +562,19 @@ function renderMain(){
     h.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); toggle(); } });
   });
 
-  el.querySelectorAll('.dish:not(.add-card)').forEach(a=>{
-    a.addEventListener('click', ()=> openModal(a.dataset.id));
-  });
-  el.querySelectorAll('.dish-fav').forEach(b=>{
-    b.addEventListener('click', e=>{ e.stopPropagation(); toggleDishFav(b.dataset.fav); renderMain(); renderCatNav(); });
-  });
-  el.querySelectorAll('.add-card').forEach(a=>{
-    a.addEventListener('click', ()=> openRecipeForm(a.dataset.cat));
-  });
+  wireDishNodes([...el.querySelectorAll('.dish')]);
+
+  // Render progresivo: botón "mostrar más" + auto-carga al acercarse por scroll
+  const moreBtns = el.querySelectorAll('.grid-more');
+  if(moreBtns.length){
+    moreBtns.forEach(b=> b.addEventListener('click', ()=> loadMoreCat(b.dataset.more)));
+    if('IntersectionObserver' in window){
+      _moreObserver = new IntersectionObserver((entries)=>{
+        entries.forEach(en=>{ if(en.isIntersecting) loadMoreCat(en.target.dataset.more); });
+      }, {rootMargin:'300px'});
+      moreBtns.forEach(b=> _moreObserver.observe(b));
+    }
+  }
 }
 
 function addCard(cat){

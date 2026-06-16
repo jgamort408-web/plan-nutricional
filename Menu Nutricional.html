@@ -219,6 +219,11 @@ button{font-family:inherit}
 .cat-hd[data-col]{cursor:pointer;user-select:none}
 .cat-hd[data-col]:hover h2{color:var(--terra)}
 
+/* ── Render progresivo: botón "mostrar más" (E2) ── */
+.grid-more{display:block;width:100%;margin:16px auto 0;max-width:340px;border:1.5px solid rgba(44,31,14,.14);background:var(--white);color:var(--warm);font-family:'DM Mono',monospace;font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;font-weight:500;padding:11px 18px;border-radius:30px;cursor:pointer;transition:.18s}
+.grid-more:hover{border-color:var(--terra);color:var(--terra);background:rgba(213,137,106,.05)}
+.cat-section.collapsed .grid-more{display:none}
+
 /* ── Vistas: detalle (def) / iconos grandes / compacto (E1) ── */
 main[data-vm="big"] .grid{grid-template-columns:repeat(2,1fr);gap:14px}
 @media(min-width:640px){main[data-vm="big"] .grid{grid-template-columns:repeat(3,1fr)}}
