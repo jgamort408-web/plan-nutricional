@@ -44,6 +44,12 @@ body.sec-sport{--accent:var(--sport);--accent-l:var(--sport-l)}
 body.sec-week{--accent:var(--gold);--accent-l:var(--gold-l)}
 body.sec-mente,body.mente-mode{--accent:var(--mente);--accent-l:var(--mente-l)}
 *{box-sizing:border-box;margin:0;padding:0}
+/* Barras de scroll con el acento de la sección activa (estilo común) */
+*{scrollbar-width:thin;scrollbar-color:var(--accent,#B5603A) transparent}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--accent,#B5603A);border-radius:20px;border:2px solid var(--cream,#F6EDD8);background-clip:padding-box}
+::-webkit-scrollbar-thumb:hover{background:var(--accent-l,#D4896A);background-clip:padding-box}
 html{scroll-behavior:smooth;scroll-padding-top:165px}
 body{background:var(--cream);color:var(--warm);font-family:'Lora',Georgia,serif;min-height:100vh;padding-bottom:140px;-webkit-tap-highlight-color:transparent}
 button{font-family:inherit}
@@ -1258,6 +1264,9 @@ button{font-family:inherit}
 .site-foot .sf-sep{color:var(--ink-30)}
 .site-foot .sf-credit{color:var(--ink-50)}
 .site-foot .sf-credit strong{color:var(--warm-2);font-weight:500;letter-spacing:.04em}
+.site-foot .sf-links{margin-top:10px}
+.site-foot .sf-linkbtn{background:transparent;border:1px solid rgba(44,31,14,.18);color:var(--ink-50);font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.06em;text-transform:uppercase;padding:7px 14px;border-radius:30px;cursor:pointer;transition:.15s}
+.site-foot .sf-linkbtn:hover{border-color:var(--accent,var(--terra));color:var(--accent,var(--terra))}
 .site-foot .sf-link{color:var(--terra);text-decoration:none;border-bottom:1px solid rgba(181,96,58,.4);transition:.15s}
 .site-foot .sf-link:hover{color:var(--terra-d);border-bottom-color:var(--terra-d)}
 .site-foot .sf-lic{margin-top:9px;font-size:.55rem;letter-spacing:.06em;color:var(--ink-50);line-height:1.8}
@@ -1756,7 +1765,7 @@ img,svg,canvas{max-width:100%}
         <button class="cal-btn ghost" id="calClear">🧹 Vaciar</button>
         <button class="cal-btn" id="calExportPdf" title="Exportar como PDF">📄 PDF</button>
         <button class="cal-btn" id="calShopList" title="Lista de la compra de la semana">🛒 Lista compra</button>
-        <button class="cal-btn" id="calExportJson" title="Exportar menú como JSON">↧ JSON</button>
+        <button class="cal-btn" id="calExportJson" title="Exportar menú como JSON" style="display:none" hidden>↧ JSON</button>
         <button class="cal-btn primary" id="calSave">💾 Guardar menú</button>
       </div>
     </div>
@@ -1775,7 +1784,7 @@ img,svg,canvas{max-width:100%}
       <span class="cline"></span>
       <button class="cal-btn ghost" id="importMenuBtn">↥ Importar menú JSON</button>
       <button class="cal-btn ghost" id="importJsonBtn">↥ Importar recetas JSON</button>
-      <button class="cal-btn ghost" id="exportJsonBtn">↧ Exportar recetas</button>
+      <button class="cal-btn ghost" id="exportJsonBtn" style="display:none" hidden>↧ Exportar recetas</button>
     </div>
     <div id="savedGrid" class="saved-grid"></div>
   </div>
@@ -1970,6 +1979,9 @@ img,svg,canvas{max-width:100%}
     <span class="sf-lic-d">Se permite usar, copiar y modificar esta aplicación
     <strong>citando al autor</strong> y <strong>sin fines comerciales</strong>.
     Obra derivada bajo la misma licencia.</span>
+  </div>
+  <div class="sf-row sf-links">
+    <button class="sf-linkbtn" id="infoLegalBtn">ℹ️ Información y aviso legal</button>
   </div>
 </footer>
 <script>try{document.getElementById('sfYear').textContent=new Date().getFullYear();}catch(e){}</script>

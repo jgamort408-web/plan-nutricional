@@ -394,11 +394,108 @@
   window.pnTutorialSeen = tutorialSeen;
   window.pnCurrentSection = currentSection;
 
+  /* ══════════════════════════════════════════════════════════
+     INFORMACIÓN Y AVISO LEGAL
+  ══════════════════════════════════════════════════════════ */
+  const INFO_CSS = `
+  .pn-info-back{position:fixed;inset:0;z-index:4400;display:flex;align-items:center;
+    justify-content:center;padding:20px;background:rgba(34,22,8,.5);
+    backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);opacity:0;transition:opacity .2s}
+  .pn-info-back.show{opacity:1}
+  .pn-info{background:var(--white,#FFFDF7);width:100%;max-width:560px;border-radius:20px;overflow:hidden;
+    box-shadow:0 28px 80px rgba(34,22,8,.45);display:flex;flex-direction:column;max-height:90vh;
+    transform:translateY(12px) scale(.98);transition:transform .22s cubic-bezier(.2,.9,.3,1)}
+  .pn-info-back.show .pn-info{transform:none}
+  .pn-info-hd{background:var(--accent,#B5603A);color:#fff;padding:18px 22px;display:flex;
+    align-items:center;justify-content:space-between;gap:12px}
+  .pn-info-hd h3{font-family:'Playfair Display',serif;font-weight:700;font-size:1.25rem;margin:0}
+  .pn-info-x{border:none;background:rgba(255,255,255,.18);color:#fff;width:32px;height:32px;border-radius:50%;
+    cursor:pointer;font-size:.95rem;flex-shrink:0;transition:.15s}
+  .pn-info-x:hover{background:rgba(255,255,255,.32)}
+  .pn-info-body{padding:20px 22px 8px;overflow-y:auto;font-family:'Lora',Georgia,serif;
+    font-size:.95rem;line-height:1.62;color:var(--ink-70,rgba(44,31,14,.82))}
+  .pn-info-body h4{font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--warm,#2C1F0E);
+    margin:16px 0 6px;font-weight:700}
+  .pn-info-body p{margin:0 0 10px}
+  .pn-info-body ul{margin:0 0 12px;padding-left:20px}
+  .pn-info-body li{margin-bottom:5px}
+  .pn-info-body strong{color:var(--warm-2,#3D2C1A)}
+  .pn-info-foot{padding:14px 22px 20px}
+  .pn-info-foot button{width:100%;border:none;border-radius:12px;background:var(--accent,#B5603A);color:#fff;
+    font-family:'DM Mono',monospace;font-size:.74rem;letter-spacing:.05em;text-transform:uppercase;
+    font-weight:600;padding:13px;cursor:pointer;transition:.15s}
+  .pn-info-foot button:hover{filter:brightness(1.08)}
+  @media(max-width:560px){ .pn-info{max-width:none} }
+  `;
+  const INFO_HTML = `
+    <p><strong>Plan Nutricional</strong> es una herramienta personal de organización
+    creada por <strong>Juan María Gámez Ortiz</strong>. Su objetivo es ayudarte a
+    orientarte de forma coherente y razonada con tu alimentación, tu entrenamiento y
+    tu bienestar.</p>
+
+    <h4>No es una aplicación de uso exclusivo ni profesional</h4>
+    <p>Esta app <strong>no sustituye</strong> el consejo de un médico, dietista-nutricionista,
+    entrenador ni psicólogo. Es una guía orientativa: úsala con criterio y nunca al pie
+    de la letra.</p>
+
+    <h4>La información puede contener errores</h4>
+    <ul>
+      <li>Los valores nutricionales, cálculos de calorías y macros son <strong>estimaciones</strong>
+      y pueden no ser exactos.</li>
+      <li>Parte del contenido (recetas, textos, sugerencias) puede estar
+      <strong>generado por inteligencia artificial</strong> o aportado por
+      <strong>otros usuarios</strong>, por lo que puede contener imprecisiones.</li>
+      <li>Mantén siempre el <strong>espíritu crítico</strong>: contrasta, ajusta a tu caso
+      y consulta a un profesional ante cualquier duda de salud.</li>
+    </ul>
+
+    <h4>Descargo de responsabilidad</h4>
+    <p>El uso de esta aplicación y de la información que contiene es
+    <strong>responsabilidad exclusiva del usuario</strong>. El autor no se hace
+    responsable de decisiones, daños o perjuicios derivados de su uso. Si tienes una
+    condición médica, alergias, intolerancias o sigues un tratamiento, consulta con un
+    profesional antes de aplicar cualquier cambio.</p>
+
+    <h4>Tus datos</h4>
+    <p>Todos tus datos se guardan <strong>localmente en tu dispositivo</strong>. La app no
+    los envía a ningún servidor.</p>
+
+    <p style="font-size:.82rem;color:var(--ink-50,rgba(44,31,14,.5));margin-top:14px">
+    © <span class="pn-info-year">2026</span> Juan María Gámez Ortiz · Licencia CC BY-NC 4.0 ·
+    Desarrollado con la ayuda de Claude.</p>
+  `;
+  function injectInfoCSS(){
+    if(document.getElementById('pn-info-css')) return;
+    const s=document.createElement('style'); s.id='pn-info-css'; s.textContent=INFO_CSS;
+    (document.head||document.documentElement).appendChild(s);
+  }
+  function pnInfoLegal(){
+    injectInfoCSS();
+    const back=document.createElement('div'); back.className='pn-info-back';
+    back.innerHTML=`<div class="pn-info" role="dialog" aria-modal="true">
+      <div class="pn-info-hd"><h3>ℹ️ Información y aviso legal</h3>
+        <button class="pn-info-x" data-x aria-label="Cerrar">✕</button></div>
+      <div class="pn-info-body">${INFO_HTML}</div>
+      <div class="pn-info-foot"><button data-x>Entendido</button></div>
+    </div>`;
+    document.body.appendChild(back);
+    const yr=back.querySelector('.pn-info-year'); if(yr) yr.textContent=new Date().getFullYear();
+    requestAnimationFrame(()=> back.classList.add('show'));
+    function close(){ back.classList.remove('show'); setTimeout(()=>back.remove(),200);
+      document.removeEventListener('keydown',onKey,true); }
+    function onKey(e){ if(e.key==='Escape') close(); }
+    back.addEventListener('click', e=>{ if(e.target.closest('[data-x]')||e.target===back) close(); });
+    document.addEventListener('keydown', onKey, true);
+  }
+  window.pnInfoLegal = pnInfoLegal;
+
   /* Botón ❔ del header → tutorial de la sección activa.
      Además, la PRIMERA vez que se entra a una sección, se abre solo. */
   document.addEventListener('DOMContentLoaded', ()=>{
     const help = document.getElementById('helpBtn');
     if(help) help.addEventListener('click', ()=> pnTutorial(currentSection()));
+    const info = document.getElementById('infoLegalBtn');
+    if(info) info.addEventListener('click', pnInfoLegal);
     // Onboarding: tutorial de Nutrición la primera vez (suave, una sola vez)
     if(!tutorialSeen('nutri')){
       setTimeout(()=>{ if(currentSection()==='nutri') pnTutorial('nutri'); }, 900);
