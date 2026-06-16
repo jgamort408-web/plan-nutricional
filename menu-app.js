@@ -1155,6 +1155,10 @@ function renderAll(){
   // refresh other views if active
   if(S.view === 'cal' && typeof renderCalendar === 'function') renderCalendar();
   if(S.view === 'saved' && typeof renderSaved === 'function') renderSaved();
+  // actualiza la pestaña "Mi día" (badge del carrito) si estamos en Nutrición
+  if(typeof renderTabbar === 'function' && !document.body.classList.contains('sec-sport')
+     && !document.body.classList.contains('sec-mente') && !document.body.classList.contains('mente-mode')
+     && !document.body.classList.contains('sec-week')) renderTabbar('nutri');
 }
 
 /* ── VIEW SWITCHING ───────────────────────────────────── */
@@ -1177,6 +1181,7 @@ function switchView(v){
   }
   if(v==='cal' && typeof renderCalendar === 'function') renderCalendar();
   if(v==='saved' && typeof renderSaved === 'function') renderSaved();
+  if(typeof renderTabbar === 'function') renderTabbar('nutri');
 }
 document.querySelectorAll('.vtab').forEach(b=>{
   if(b.id === 'vtabCreate') return;
@@ -1184,6 +1189,49 @@ document.querySelectorAll('.vtab').forEach(b=>{
 });
 const vtabCreate = document.getElementById('vtabCreate');
 if(vtabCreate) vtabCreate.addEventListener('click', ()=> openRecipeForm('des'));
+
+/* ── TABBAR INFERIOR ──────────────────────────────────────
+   Subvistas de la sección activa en una barra inferior (móvil y
+   escritorio). Delega en las funciones de navegación existentes. */
+function renderTabbar(section){
+  const tb = document.getElementById('appTabbar');
+  if(!tb) return;
+  const b = document.body;
+  section = section || (b.classList.contains('sec-sport') ? 'sport'
+            : b.classList.contains('sec-week') ? 'week'
+            : (b.classList.contains('sec-mente') || b.classList.contains('mente-mode')) ? 'mente'
+            : 'nutri');
+  let tabs = [];
+  if(section === 'nutri'){
+    const n = (typeof S !== 'undefined' && S.cart) ? S.cart.length : 0;
+    const cv = (typeof S !== 'undefined') ? S.view : 'cat';
+    tabs = [
+      {ico:'📖', lbl:'Catálogo',   on:cv==='cat',   fn:()=>switchView('cat')},
+      {ico:'📅', lbl:'Calendario', on:cv==='cal',   fn:()=>switchView('cal')},
+      {ico:'💾', lbl:'Guardados',  on:cv==='saved', fn:()=>switchView('saved')},
+      {ico:'✚', lbl:'Crear',      fn:()=>openRecipeForm('des')},
+      {ico:'🛒', lbl:'Mi día',     badge:n||null, fn:()=>openDrawer()}
+    ];
+  } else if(section === 'sport'){
+    const sv = (typeof sportView !== 'undefined') ? sportView : 'ex';
+    tabs = [
+      {ico:'💪', lbl:'Ejercicios', on:sv==='ex',   fn:()=>showSportView('ex')},
+      {ico:'📋', lbl:'Sesiones',   on:sv==='sess', fn:()=>showSportView('sess')},
+      {ico:'🗓️', lbl:'Calendario', on:sv==='scal', fn:()=>showSportView('scal')}
+    ];
+  } // week y mente: sin tabbar (se oculta por CSS / tabs vacíos)
+  if(!tabs.length){ tb.style.display = 'none'; tb.innerHTML = ''; return; }
+  tb.style.display = '';
+  tb.innerHTML = tabs.map((t,i)=>`<button class="tb ${t.on?'on':''}" data-i="${i}" role="tab" aria-selected="${!!t.on}">
+      ${t.badge ? `<span class="tb-badge">${t.badge}</span>` : ''}
+      <span class="tb-ico">${t.ico}</span><span class="tb-l">${t.lbl}</span>
+    </button>`).join('');
+  tb.querySelectorAll('.tb').forEach((btn,i)=> btn.addEventListener('click', ()=>{
+    try{ tabs[i].fn(); }catch(e){}
+    renderTabbar(section);
+  }));
+}
+window.renderTabbar = renderTabbar;
 
 /* ── INIT ────────────────────────────────────────────── */
 renderPersonToggle();   // construye el selector de personas (dinámico)

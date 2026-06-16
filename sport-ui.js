@@ -47,6 +47,7 @@ function setSection(sec){
     document.querySelectorAll('.sportview').forEach(el=> el.classList.add('hidden'));
     const cf=document.getElementById('cartFab'); if(cf) cf.style.display='none';
     const cb=document.getElementById('cartBar'); if(cb) cb.classList.remove('show');
+    if(typeof renderTabbar === 'function') renderTabbar('mente');   // oculta la tabbar (Mente usa la suya)
     lsSet('sport:section', sec);
     return;
   }
@@ -59,6 +60,7 @@ function setSection(sec){
     document.getElementById('cartBar').classList.remove('show');
     if(wk) wk.classList.remove('hidden');
     if(typeof renderWeek === 'function') renderWeek();
+    if(typeof renderTabbar === 'function') renderTabbar('week');   // Semana: sin subvistas
   } else if(sportMode){
     if(wk) wk.classList.add('hidden');
     ['view-cat','view-cal','view-saved'].forEach(id=> document.getElementById(id).classList.add('hidden'));
@@ -83,6 +85,7 @@ function showSportView(v){
   if(v === 'ex')   renderExercises();
   if(v === 'sess') renderSessions();
   if(v === 'scal' && typeof renderSportCalendar === 'function') renderSportCalendar();
+  if(typeof renderTabbar === 'function') renderTabbar('sport');
 }
 
 /* refresca la vista de deporte activa */

@@ -959,12 +959,15 @@ button{font-family:inherit}
 
   /* HEADER */
   .hdr{box-shadow:0 4px 18px rgba(0,0,0,.28)}
-  .hdr-top{padding:9px 14px 8px;gap:10px;flex-wrap:wrap}
-  .logo{font-size:.98rem;line-height:1.1;order:1}
+  /* Fila 1: logo + iconos (siempre juntos, sin saltos). Fila 2: selector
+     de persona a lo ancho. Determinista, sin botones que bailan. */
+  .hdr-top{padding:9px 14px 8px;gap:8px;flex-wrap:wrap;align-items:center}
+  .logo{font-size:.98rem;line-height:1.1;order:1;flex:1 1 auto;min-width:0}
   .logo small{font-size:.5rem;letter-spacing:.08em;margin-top:0}
-  .ptoggle{margin-left:auto;order:2;padding:2px;gap:1px}
-  .pbtn{padding:6px 10px;font-size:.66rem;letter-spacing:0}
-  .icon-btn{order:3;width:32px;height:32px;font-size:.95rem}
+  .icon-btn{order:2;width:34px;height:34px;font-size:.98rem;flex-shrink:0;margin-left:0}
+  #ptoggle{order:5;flex:1 0 100%;max-width:100%;margin:7px 0 0;padding:3px;gap:2px;justify-content:center}
+  body.sec-sport #helpBtn,body.sec-mente #helpBtn{margin-left:0}
+  .pbtn{padding:7px 12px;font-size:.68rem;letter-spacing:0;flex:1;text-align:center}
 
   /* SECTION SWITCH (4 secciones: scroll horizontal si no caben) */
   .sec-switch{padding:8px 12px 0;overflow-x:auto;scrollbar-width:none;flex-wrap:nowrap}
@@ -1401,6 +1404,31 @@ body.mente-mode #cartFab,body.mente-mode #cartBar{display:none!important}
 .sec-btn[data-sec="mente"].on{background:var(--mente);border-color:var(--mente);color:#fff}
 /* Franja de acento bajo el header: equilibra y refuerza la sección activa */
 .hdr{border-bottom:3px solid var(--accent);transition:border-color .25s}
+
+/* ── TABBAR INFERIOR · subvistas de la sección (móvil y escritorio) ── */
+.app-tabbar{position:fixed;left:0;right:0;bottom:0;z-index:170;display:flex;justify-content:center;
+  gap:2px;background:var(--white);border-top:1px solid rgba(44,31,14,.1);
+  box-shadow:0 -6px 24px rgba(44,31,14,.1);
+  padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));max-width:100%}
+.app-tabbar .tb{flex:1;max-width:130px;border:none;background:transparent;cursor:pointer;display:flex;
+  flex-direction:column;align-items:center;gap:3px;padding:7px 4px 5px;border-radius:13px;
+  color:var(--ink-50);font-family:'DM Mono',monospace;font-size:.56rem;letter-spacing:.02em;
+  text-transform:uppercase;font-weight:600;transition:.15s;position:relative;min-height:48px}
+.app-tabbar .tb .tb-ico{font-size:1.3rem;line-height:1;transition:transform .15s}
+.app-tabbar .tb.on{color:var(--accent);background:color-mix(in srgb,var(--accent) 9%,transparent)}
+.app-tabbar .tb.on .tb-ico{transform:translateY(-1px) scale(1.06)}
+.app-tabbar .tb:hover{color:var(--accent)}
+.app-tabbar .tb .tb-badge{position:absolute;top:3px;left:calc(50% + 5px);background:var(--accent);color:#fff;
+  min-width:17px;height:17px;border-radius:10px;font-size:.58rem;display:flex;align-items:center;
+  justify-content:center;padding:0 4px;border:1.5px solid var(--white)}
+/* Mente usa su propia tabbar interna; Semana no tiene subvistas */
+body.sec-mente .app-tabbar,body.mente-mode .app-tabbar{display:none!important}
+/* Subvistas ahora viven en la tabbar inferior: se ocultan del header */
+#nutriVtabs,#sportVtabs{display:none!important}
+/* El FAB y la barra del carrito se sustituyen por la pestaña "Mi día" */
+#cartFab,#cartBar{display:none!important}
+/* Hueco inferior para que el contenido no quede tapado por la tabbar */
+body{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
 /* El selector de persona solo tiene sentido en Nutrición/Semana */
 body.sec-sport #ptoggle,body.sec-mente #ptoggle{display:none}
 body.sec-sport #helpBtn,body.sec-mente #helpBtn{margin-left:auto}
@@ -1963,6 +1991,9 @@ img,svg,canvas{max-width:100%}
 <script src="sport-anim.js"></script>
 <script src="menu-unified.js"></script>
 <script src="menu-session.js"></script>
+
+<!-- TABBAR INFERIOR · subvistas de la sección activa (móvil y escritorio) -->
+<nav id="appTabbar" class="app-tabbar" role="tablist" aria-label="Vistas de la sección"></nav>
 
 <footer class="site-foot">
   <div class="sf-row">
