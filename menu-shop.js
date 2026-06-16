@@ -5,13 +5,25 @@
    depende de FOODS, FOOD_SECTIONS, dishScaled, fmtNum, roundGrams,
    DISHES, WEEK_DAYS, TARGETS, CalState
 ══════════════════════════════════════════════════════════ */
-let _shopScope = 'AB';          // 'A' | 'B' | 'AB'
+let _shopScope = 'AB';          // id de persona (PEOPLE) | 'AB' (todas)
 let _shopChecked = {};          // {foodId: true}
 
+// Personas actuales (generalizado desde el viejo A/B)
+function shopPeople(){ return (typeof PEOPLE !== 'undefined' && PEOPLE.length) ? PEOPLE : ['A','B']; }
+function shopName(pid){
+  if(typeof personaLabel === 'function') return personaLabel(pid);
+  return ((TARGETS[pid]||{}).name || '').trim() || pid;
+}
+function shopToken(pid){
+  if(typeof personaToken === 'function'){ const t = personaToken(pid); return t.txt; }
+  return pid;
+}
+
 function buildShoppingData(calData){
-  const acc = {};               // id → {gA,gB,cs,unit}
+  const acc = {};               // id → {g:{pid:grams}, cs, unit}
   const legacy = [];            // recetas sin composición
   let dishes = 0;
+  const ppl = shopPeople();
   WEEK_DAYS.forEach(d=>{
     const day = calData[d.k]; if(!day) return;
     ['des','com','mer','cen'].forEach(slot=>{
@@ -19,13 +31,13 @@ function buildShoppingData(calData){
         const dish = DISHES[id]; if(!dish) return;
         dishes++;
         if(!dish.comp || !dish.comp.length){ if(!legacy.includes(dish.nom)) legacy.push(dish.nom); return; }
-        const A = dishScaled(dish,'A'), B = dishScaled(dish,'B');
+        const scaled = {};
+        ppl.forEach(pid=>{ scaled[pid] = dishScaled(dish, pid); });
         dish.comp.forEach((it,i)=>{
           const f = FOODS[it.f]; if(!f) return;
-          const a = acc[it.f] = acc[it.f] || {gA:0, gB:0, cs:false, unit:false};
+          const a = acc[it.f] = acc[it.f] || {g:{}, cs:false, unit:false};
           if(it.cs){ a.cs = true; return; }
-          a.gA += A.rows[i].grams;
-          a.gB += B.rows[i].grams;
+          ppl.forEach(pid=>{ a.g[pid] = (a.g[pid]||0) + (scaled[pid] ? scaled[pid].rows[i].grams : 0); });
           if(it.u != null && f.unit) a.unit = true;
         });
       });
@@ -49,9 +61,8 @@ function fmtShopQty(f, grams, useUnit){
 }
 
 function shopGrams(a){
-  if(_shopScope === 'A') return a.gA;
-  if(_shopScope === 'B') return a.gB;
-  return a.gA + a.gB;
+  if(_shopScope === 'AB') return shopPeople().reduce((s,pid)=> s + (a.g[pid]||0), 0);
+  return a.g[_shopScope] || 0;
 }
 
 function openShopList(){
@@ -70,9 +81,9 @@ function renderShopList(){
   const body = document.getElementById('shopBody');
   const ids = Object.keys(acc);
 
-  const scopeLbl = _shopScope==='A' ? `♂ ${TARGETS.A.name||'A'}`
-                 : _shopScope==='B' ? `♀ ${TARGETS.B.name||'B'}`
-                 : '♂+♀ Pareja (total)';
+  const ppl = shopPeople();
+  if(_shopScope !== 'AB' && !ppl.includes(_shopScope)) _shopScope = 'AB';
+  const scopeLbl = _shopScope==='AB' ? 'Todas (total)' : shopName(_shopScope);
 
   // agrupa por sección
   const bySec = {};
@@ -95,8 +106,8 @@ function renderShopList(){
           qHtml = `<span class="sr-q shop-cond">al gusto</span>`;
         } else {
           const main = fmtShopQty(f, grams, a.unit);
-          const ab = _shopScope==='AB'
-            ? `<span class="sr-ab">A ${fmtShopQty(f,a.gA,a.unit)||'—'} · B ${fmtShopQty(f,a.gB,a.unit)||'—'}</span>`
+          const ab = (_shopScope==='AB' && ppl.length>1)
+            ? `<span class="sr-ab">${ppl.map(pid=> `${esc(shopToken(pid))} ${fmtShopQty(f,a.g[pid]||0,a.unit)||'—'}`).join(' · ')}</span>`
             : '';
           qHtml = `<span class="sr-q">${main}${ab}</span>`;
         }
@@ -122,9 +133,8 @@ function renderShopList(){
       <span class="form-sub">${CalState.name||'Semana actual'} · ${dishes} recetas · ${scopeLbl}</span>
     </div>
     <div class="shop-scope">
-      <button class="ss-btn ${_shopScope==='A'?'on':''}" data-scope="A">♂ Solo A</button>
-      <button class="ss-btn ${_shopScope==='B'?'on':''}" data-scope="B">♀ Solo B</button>
-      <button class="ss-btn ${_shopScope==='AB'?'on':''}" data-scope="AB">♂+♀ Pareja</button>
+      ${ppl.map(pid=>`<button class="ss-btn ${_shopScope===pid?'on':''}" data-scope="${pid}">${esc(shopName(pid))}</button>`).join('')}
+      ${ppl.length>1 ? `<button class="ss-btn ${_shopScope==='AB'?'on':''}" data-scope="AB">👥 Todas</button>` : ''}
     </div>
     <div class="shop-body">
       ${ids.length ? sectionsHtml + legacyHtml : `<div class="shop-empty">El calendario está vacío. Planifica comidas en la pestaña Calendario para generar la lista.</div>`}
@@ -150,7 +160,7 @@ function renderShopList(){
 }
 
 function shopAsText(acc, legacy){
-  const scopeLbl = _shopScope==='A' ? 'Persona A' : _shopScope==='B' ? 'Persona B' : 'Pareja (A+B)';
+  const scopeLbl = _shopScope==='AB' ? 'Todas (total)' : shopName(_shopScope);
   const lines = [`LISTA DE LA COMPRA · ${CalState.name||'Semana'} · ${scopeLbl}`, ''];
   const bySec = {};
   Object.keys(acc).forEach(id=>{ const s=FOODS[id].sec||'desp'; (bySec[s]=bySec[s]||[]).push(id); });

@@ -4,7 +4,7 @@
      · online  → siempre lo más reciente (no rompe el desarrollo)
      · offline → responde desde caché
 ══════════════════════════════════════════════════════════ */
-const CACHE = 'plan-nutri-v24';
+const CACHE = 'plan-nutri-v25';
 const SHELL = [
   'Menu%20Nutricional.html',
   'menu-ui.js',
