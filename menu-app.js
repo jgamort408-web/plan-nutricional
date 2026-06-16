@@ -426,6 +426,8 @@ function renderFilters(){
   // Portal: saca el sheet+backdrop del #frow (sticky, z-index bajo) al <body>,
   // si no, las estrellas de favoritos de las tarjetas (z-index 3) lo atraviesan.
   ['nutFSheet','nutFBack'].forEach(id=>{ const n=document.getElementById(id); if(n) document.body.appendChild(n); });
+  // OJO: tras portalizar, las píldoras viven en el sheet (ya en <body>), no en #frow.
+  const sheetEl = document.getElementById('nutFSheet') || el;
 
   // Apertura/cierre del bottom-sheet (móvil)
   const ob = document.getElementById('nutFOpen'); if(ob) ob.addEventListener('click', ()=> setNutSheet(true));
@@ -443,7 +445,7 @@ function renderFilters(){
     clearTimeout(window.__searchDeb);
     window.__searchDeb = setTimeout(()=>{ renderMain(); renderCatNav(); }, 120);   // solo grid+nav → no pierde foco
   });
-  el.querySelectorAll('.fpill:not(.sort-pill):not(.vm-pill)').forEach(b=>{
+  sheetEl.querySelectorAll('.fpill:not(.sort-pill):not(.vm-pill)').forEach(b=>{
     b.addEventListener('click', ()=>{
       const k = b.dataset.f;
       if(k === 'todos'){ S.filters = []; }            // limpia todos
@@ -455,16 +457,16 @@ function renderFilters(){
       renderAll();
     });
   });
-  el.querySelectorAll('.vm-pill').forEach(b=>{
+  sheetEl.querySelectorAll('.vm-pill').forEach(b=>{
     b.addEventListener('click', ()=>{
       S.viewMode = b.dataset.vm;
       persistViewMode();
-      el.querySelectorAll('.vm-pill').forEach(x=> x.classList.toggle('on', x===b));
+      sheetEl.querySelectorAll('.vm-pill').forEach(x=> x.classList.toggle('on', x===b));
       const main = document.getElementById('main'); if(main) main.dataset.vm = S.viewMode;
       renderMain();
     });
   });
-  el.querySelectorAll('.sort-pill').forEach(b=>{
+  sheetEl.querySelectorAll('.sort-pill').forEach(b=>{
     b.addEventListener('click', ()=>{
       const k = b.dataset.sort;
       if(k === 'def'){ S.sort = {key:'def', dir:'desc'}; }

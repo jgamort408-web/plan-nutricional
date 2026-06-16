@@ -84,6 +84,11 @@ nav button.active{color:var(--green-d)}
 nav button.active .ic{transform:scale(1.15)}
 .view{display:none;animation:fade .3s}
 .view.on{display:block}
+.pd-foot{margin:30px auto 4px;padding:16px 18px 4px;max-width:560px;text-align:center;border-top:1px solid var(--line);color:var(--muted);font-size:11px;line-height:1.65;display:flex;flex-direction:column;gap:2px;align-items:center}
+.pd-foot .pdf-logo{font-weight:700;color:var(--ink);font-size:13px}
+.pd-foot strong{color:var(--green-d)}
+.pd-foot a{color:var(--green-d);text-decoration:none;border-bottom:1px solid rgba(15,118,110,.3)}
+.pd-foot a:hover{color:var(--ink)}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
 /* Mood faces */
@@ -592,6 +597,12 @@ html.embedded #tutorial{display:none!important}
     <button class="btn red sm" id="resetBtn" style="width:100%">🗑️ Borrar todos los datos</button>
   </div>
 </section>
+
+<footer class="pd-foot">
+  <span class="pdf-logo">Plan Nutricional</span>
+  <span>Creado por <strong>Juan María Gámez Ortiz</strong></span>
+  <span>Desarrollado con la ayuda de <a href="https://claude.ai" target="_blank" rel="noopener noreferrer">Claude</a></span>
+</footer>
 
 </div>
 

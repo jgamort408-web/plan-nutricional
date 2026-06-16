@@ -628,10 +628,65 @@ function openFoodMeasures(){
     const refsBox = back.querySelector('.fm-refs'); if(refsBox) refsBox.style.display = q ? 'none' : '';
     const nr = back.querySelector('.fm-noresult'); if(nr) nr.style.display = (q && !any) ? '' : 'none';
   });
-  const pr = back.querySelector('[data-print]'); if(pr) pr.addEventListener('click', ()=> window.print());
+  const pr = back.querySelector('[data-print]'); if(pr) pr.addEventListener('click', ()=> printFoodMeasures());
   function close(){ back.classList.remove('show'); setTimeout(()=> back.remove(), 200); document.removeEventListener('keydown', onKey, true); }
   function onKey(e){ if(e.key==='Escape') close(); }
   back.addEventListener('click', e=>{ if(e.target.closest('[data-x]') || e.target===back) close(); });
   document.addEventListener('keydown', onKey, true);
+}
+
+/* PDF de medidas con el mismo método de la app: HTML aislado en un iframe + print */
+function buildMeasuresPrintHtml(){
+  const esc = window.escHtml || (s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])));
+  const F = window.FOODS || FOODS, SEC = window.FOOD_SECTIONS || FOOD_SECTIONS;
+  const withUnit = Object.keys(F).filter(id=> F[id] && F[id].unit && F[id].unit.g);
+  const bySec = {};
+  withUnit.forEach(id=>{ const s = SEC[F[id].sec] ? F[id].sec : 'desp'; (bySec[s]=bySec[s]||[]).push(id); });
+  const secOrder = Object.keys(SEC).sort((a,b)=>(SEC[a].order||9)-(SEC[b].order||9));
+  const refsRows = MEASURE_REFS.map(([k,v])=>`<tr><td class="k">${esc(k)}</td><td>${esc(v)}</td></tr>`).join('');
+  const secHtml = secOrder.filter(s=>bySec[s]).map(s=>{
+    const items = bySec[s].sort((a,b)=> F[a].name.localeCompare(F[b].name,'es'));
+    return `<h2>${SEC[s].ico||''} ${esc(SEC[s].lbl||s)}</h2>
+      <table class="foods"><tbody>${items.map(id=>{
+        const f=F[id], u=f.unit, kc=Math.round((f.kcal||0)*u.g/100);
+        return `<tr><td class="n">${esc(f.name)}</td><td class="m">1 ${esc(u.lbl)} ≈ <b>${u.g} g</b></td><td class="kc">${kc} kcal</td></tr>`;
+      }).join('')}</tbody></table>`;
+  }).join('');
+  return `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Medidas de alimentos</title>
+  <style>
+    *{box-sizing:border-box} body{font-family:Georgia,'Times New Roman',serif;color:#2c1f0e;margin:26px 30px;font-size:12px}
+    h1{font-size:22px;margin:0 0 2px} .intro{color:#6b5d49;font-size:12px;margin:0 0 16px}
+    h2{font-size:13px;margin:18px 0 6px;padding-bottom:4px;border-bottom:1.5px solid #b5603a;color:#b5603a;page-break-after:avoid}
+    table{width:100%;border-collapse:collapse;margin-bottom:8px}
+    table.refs td{padding:4px 6px;border-bottom:1px solid #eee;vertical-align:top}
+    table.refs td.k{font-weight:bold;width:200px}
+    table.foods{column-count:2;column-gap:26px;display:block}
+    table.foods tbody{display:block} table.foods tr{display:flex;justify-content:space-between;gap:8px;padding:3px 0;border-bottom:1px dotted #ddd;break-inside:avoid}
+    table.foods td.n{flex:1} table.foods td.m{white-space:nowrap;color:#444} table.foods td.m b{color:#5a6b2c} table.foods td.kc{white-space:nowrap;color:#999;width:60px;text-align:right}
+    footer{margin-top:22px;padding-top:10px;border-top:1px solid #ddd;color:#999;font-size:10px;text-align:center}
+    @page{margin:14mm}
+  </style></head><body>
+    <h1>📏 Medidas de alimentos</h1>
+    <p class="intro">Equivalencias aproximadas para no tener que pesar a diario.</p>
+    <h2>Referencias generales</h2>
+    <table class="refs"><tbody>${refsRows}</tbody></table>
+    ${secHtml}
+    <footer>Plan Nutricional · Generado el ${new Date().toLocaleDateString('es')}</footer>
+  </body></html>`;
+}
+function printFoodMeasures(){
+  const html = buildMeasuresPrintHtml();
+  const iframe = document.createElement('iframe');
+  iframe.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0';
+  document.body.appendChild(iframe);
+  const doc = iframe.contentDocument || iframe.contentWindow.document;
+  doc.open(); doc.write(html); doc.close();
+  iframe.contentWindow.onload = ()=>{
+    setTimeout(()=>{
+      try{ iframe.contentWindow.focus(); iframe.contentWindow.print(); }
+      catch(e){ alert('No se ha podido abrir el diálogo de impresión: '+e.message); }
+      setTimeout(()=> iframe.remove(), 1000);
+    }, 200);
+  };
 }
 window.openFoodMeasures = openFoodMeasures;
