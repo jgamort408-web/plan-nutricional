@@ -255,6 +255,33 @@ const FOODS_EXTRA = {
 
 const FOODS = Object.assign({}, FOODS_BASE, FOODS_EXTRA);
 
+/* ── MEDIDAS CASERAS aproximadas ────────────────────────────
+   Para no tener que pesar a diario: cantidades típicas por pieza/medida.
+   Se aplican a los alimentos que aún no tengan "unit" propia. */
+const HOUSEHOLD_UNITS = {
+  // Frutas (pieza comestible aprox.)
+  manzana:{lbl:'pieza mediana',g:180}, pera:{lbl:'pieza mediana',g:170},
+  platano:{lbl:'unidad',g:120}, banana:{lbl:'unidad',g:120}, platano_macho:{lbl:'unidad',g:150},
+  naranja:{lbl:'pieza mediana',g:180}, mandarina:{lbl:'unidad',g:70}, clementina:{lbl:'unidad',g:70},
+  kiwi:{lbl:'unidad',g:75}, melocoton:{lbl:'unidad',g:150}, nectarina:{lbl:'unidad',g:140},
+  ciruela:{lbl:'unidad',g:60}, albaricoque:{lbl:'unidad',g:40}, higo:{lbl:'unidad',g:50},
+  mango:{lbl:'unidad',g:200}, aguacate:{lbl:'media unidad',g:100}, granada:{lbl:'unidad',g:200},
+  limon:{lbl:'unidad',g:60}, lima:{lbl:'unidad',g:45}, caqui:{lbl:'unidad',g:170},
+  fresa:{lbl:'unidad',g:15}, datil:{lbl:'unidad',g:8},
+  // Verduras/hortalizas de pieza
+  tomate:{lbl:'pieza mediana',g:120}, tomate_pera:{lbl:'unidad',g:90},
+  zanahoria:{lbl:'unidad',g:80}, cebolla:{lbl:'pieza mediana',g:110}, cebolla_morada:{lbl:'pieza mediana',g:110},
+  pimiento_rojo:{lbl:'unidad',g:150}, pimiento_verde:{lbl:'unidad',g:130},
+  calabacin:{lbl:'pieza mediana',g:200}, berenjena:{lbl:'unidad',g:250}, pepino:{lbl:'unidad',g:200},
+  puerro:{lbl:'unidad',g:90}, alcachofa:{lbl:'unidad',g:120}, champinones:{lbl:'unidad',g:20},
+  ajo:{lbl:'diente',g:5}, patata:{lbl:'pieza mediana',g:150},
+  // Lácteos / huevos
+  huevo:{lbl:'unidad (M)',g:55}, yogur_natural:{lbl:'unidad',g:125}, yogur_griego:{lbl:'unidad',g:125},
+  // Otros
+  pan_integral:{lbl:'rebanada',g:40}
+};
+Object.entries(HOUSEHOLD_UNITS).forEach(([id, u])=>{ if(FOODS[id] && !FOODS[id].unit) FOODS[id].unit = u; });
+
 /* Alimentos propios del usuario (localStorage) */
 const LS_FOODS = 'mnut:foods:v1';
 (function loadUserFoods(){
@@ -401,6 +428,14 @@ function fmtQty(it, grams){
     s = `${fmtNum(u)} ${lbl}`;
   } else {
     s = `${roundGrams(grams)} g`;
+    // Medida casera aproximada (para no pesar): "180 g · ≈1 pieza mediana"
+    if(f && f.unit && f.unit.g){
+      const u = roundUnits(grams / f.unit.g);
+      if(u >= 0.5 && u <= 6){
+        const lbl = f.unit.lbl + (Math.abs(u) === 1 ? '' : 's');
+        s += ` · ≈${fmtNum(u)} ${lbl}`;
+      }
+    }
   }
   return s + (it.note ? ' · ' + it.note : '');
 }

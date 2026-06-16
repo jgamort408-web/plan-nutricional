@@ -421,9 +421,9 @@ function dishCard(id){
       ${isUser?`<span class="user-badge">Tuya</span>`:''}
       ${inCart?`<span class="added-mark" title="Añadido">✓</span>`:''}
       ${viols.length?`<span class="dish-viol" title="Rompe: ${viols.map(v=>RESTRICTIONS_MAP[v]?.lbl||v).join(', ')}">⚠ ${viols.map(v=>RESTRICTIONS_MAP[v]?.ico).join('')}</span>`:''}
-      <div class="dish-img">
-        ${phSvg(d.cat)}
-        <span class="dish-emoji">${d.icon}</span>
+      <div class="dish-img${d.img?' has-photo':''}">
+        ${d.img ? `<img class="dish-photo" src="${escHtml(d.img)}" alt="" loading="lazy">` : phSvg(d.cat)}
+        ${d.img ? '' : `<span class="dish-emoji">${d.icon}</span>`}
         <span class="ph-lbl">${d.cat==='cen'?'cena · noche':d.cat==='des'?'desayuno':d.cat==='mer'?'merienda':'plato principal'}</span>
       </div>
       <div class="dish-body">
@@ -968,10 +968,10 @@ function openModal(id){
   const body = document.getElementById('modalBody');
 
   body.innerHTML = `
-    <div class="m-img">
-      ${phSvg(d.cat)}
-      <span class="m-emoji">${d.icon}</span>
-      <span class="ph-lbl">marcador · foto del plato</span>
+    <div class="m-img${d.img?' has-photo':''}">
+      ${d.img ? `<img class="m-photo" src="${escHtml(d.img)}" alt="">` : phSvg(d.cat)}
+      ${d.img ? '' : `<span class="m-emoji">${d.icon}</span>`}
+      ${d.img ? '' : `<span class="ph-lbl">marcador · foto del plato</span>`}
     </div>
     <div class="m-body">
       <h2 class="m-title">${escHtml(d.nom)}</h2>
@@ -1016,7 +1016,10 @@ function openModal(id){
       </table>
 
       <div class="m-section-hd">Preparación</div>
-      <div class="pnote">📋 ${d.nota}</div>
+      ${(()=>{ const steps=(d.nota||'').split('\n').map(s=>s.trim()).filter(Boolean);
+        return steps.length>1
+          ? `<ol class="m-steps">${steps.map(s=>`<li>${escHtml(s)}</li>`).join('')}</ol>`
+          : `<div class="pnote">📋 ${escHtml(d.nota||'—')}</div>`; })()}
 
       <div class="m-cta">
         <button id="ctaFav" class="m-fav-btn ${isDishFav(id)?'on':''}" data-id="${id}">

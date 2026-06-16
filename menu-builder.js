@@ -30,7 +30,9 @@ function wireEmojiPicker(form){
   const close = ()=> pop.classList.remove('show');
   btn.addEventListener('click', e=>{ e.stopPropagation(); pop.classList.toggle('show'); });
   pop.querySelectorAll('.emoji-opt').forEach(o=> o.addEventListener('click', ()=>{
-    hidden.value = o.dataset.e; cur.textContent = o.dataset.e;
+    hidden.value = o.dataset.e;
+    const curNow = form.querySelector('#emojiCur');     // puede no existir si hay foto
+    if(curNow) curNow.textContent = o.dataset.e;
     pop.querySelectorAll('.emoji-opt').forEach(x=> x.classList.toggle('on', x===o));
     close();
   }));
@@ -66,6 +68,66 @@ function compRowHtml(it){
   </div>`;
 }
 
+/* Fila de un paso de preparación (bloques añadibles) */
+function stepRowHtml(text){
+  return `<div class="step-row">
+    <span class="step-n"></span>
+    <textarea class="ftxt step-txt" rows="2" placeholder="Describe este paso…">${esc(text||'')}</textarea>
+    <button type="button" class="step-rm" title="Quitar paso" aria-label="Quitar paso">✕</button>
+  </div>`;
+}
+
+/* Conecta los botones de quitar paso (idempotente) */
+function wireSteps(form){
+  form.querySelectorAll('#stepsList .step-rm').forEach(b=>{
+    if(b.dataset.wired) return; b.dataset.wired='1';
+    b.addEventListener('click', ()=>{
+      const list = document.getElementById('stepsList');
+      if(list.querySelectorAll('.step-row').length <= 1){ b.closest('.step-row').querySelector('.step-txt').value=''; return; }
+      b.closest('.step-row').remove();
+    });
+  });
+}
+
+/* Subida de imagen propia: la comprime a un dataURL pequeño y la guarda */
+function wireRecipeImage(form){
+  const btn = document.getElementById('iiUploadBtn');
+  const file = document.getElementById('iiFile');
+  const clr = document.getElementById('iiClearBtn');
+  const hidden = form.querySelector('[name=img]');
+  const prev = document.getElementById('iiPreview');
+  if(!btn || !file) return;
+  btn.addEventListener('click', ()=> file.click());
+  file.addEventListener('change', ()=>{
+    const f = file.files && file.files[0]; if(!f) return;
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      const img = new Image();
+      img.onload = ()=>{
+        // redimensiona a máx 640px y exporta JPEG (~0.8) para no llenar el almacenamiento
+        const max = 640; let {width:w, height:h} = img;
+        if(w > h && w > max){ h = Math.round(h*max/w); w = max; }
+        else if(h >= w && h > max){ w = Math.round(w*max/h); h = max; }
+        const cv = document.createElement('canvas'); cv.width=w; cv.height=h;
+        cv.getContext('2d').drawImage(img, 0, 0, w, h);
+        const dataUrl = cv.toDataURL('image/jpeg', 0.8);
+        hidden.value = dataUrl;
+        if(prev){ prev.classList.add('has-img'); prev.innerHTML=`<img src="${dataUrl}" alt="">`; }
+        if(clr) clr.style.display = '';
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(f);
+    file.value='';
+  });
+  if(clr) clr.addEventListener('click', ()=>{
+    hidden.value='';
+    const icon = (form.querySelector('[name=icon]')||{}).value || '🍴';
+    if(prev){ prev.classList.remove('has-img'); prev.innerHTML=`<span id="emojiCur">${esc(icon)}</span>`; }
+    clr.style.display='none';
+  });
+}
+
 // Códigos de dieta para el generador de prompt (coinciden con normalizeBuilderRecipe)
 const AI_DIETS = [
   {k:'sg', lbl:'Sin gluten'},   {k:'sl', lbl:'Sin lactosa'},
@@ -73,6 +135,21 @@ const AI_DIETS = [
   {k:'ps', lbl:'Pescetariano'}, {k:'cn', lbl:'Con carne'},
   {k:'lg', lbl:'Con legumbre'}
 ];
+
+// Opciones predefinidas (evitan diferencias de nomenclatura entre recetas)
+const TIME_OPTS  = ['≤ 10 min','10-20 min','20-30 min','30-45 min','45-60 min','> 60 min'];
+const EQUIP_OPTS = [
+  {k:'Sartén',ico:'🍳'},{k:'Olla/Cazo',ico:'🥘'},{k:'Horno',ico:'🔥'},
+  {k:'Microondas',ico:'📡'},{k:'Batidora',ico:'🌀'},{k:'Air fryer',ico:'💨'},
+  {k:'Plancha',ico:'🔲'},{k:'Cuchillo/Bol',ico:'🔪'},{k:'Sin cocción',ico:'🥗'}
+];
+// separa el string de equipamiento guardado en piezas (admite · , / )
+function splitEquip(s){ return (s||'').split(/[·,\/]+/).map(x=>x.trim()).filter(Boolean); }
+// separa la preparación en pasos (por líneas o por números "1." "2.")
+function splitSteps(s){
+  if(!s || s==='—') return [];
+  return s.split(/\n+|(?:^|\s)\d+[\.\)]\s+/).map(x=>x.trim()).filter(Boolean);
+}
 
 function openRecipeForm(catKey, editId){
   const editing = !!editId;
@@ -94,6 +171,7 @@ function openRecipeForm(catKey, editId){
     </div>
     <div class="form-body" id="recipeForm">
       <div id="builderVisual">
+        ${editing?'':`<button type="button" class="loose-link" id="looseFromBuilder">🍎 ¿Solo un alimento suelto (fruta, yogur…) con su cantidad? Añádelo aquí →</button>`}
         ${legacyNoComp?`<div class="comp-hint" style="color:var(--rose)">Esta receta es antigua y no tiene desglose por alimentos. Añádelos abajo para recalcular sus macros automáticamente.</div>`:''}
         <div class="frow-2">
           <div class="fgrp">
@@ -103,11 +181,20 @@ function openRecipeForm(catKey, editId){
             </select>
           </div>
           <div class="fgrp">
-            <label class="flbl">Icono representativo</label>
-            <div class="emoji-field">
-              <button type="button" class="emoji-btn" id="emojiBtn" aria-label="Elegir emoji"><span id="emojiCur">${esc(d.icon||'🍴')}</span> <span class="emoji-caret">▾</span></button>
-              <input type="hidden" name="icon" value="${esc(d.icon||'🍴')}">
-              <div class="emoji-pop" id="emojiPop"></div>
+            <label class="flbl">Imagen o icono</label>
+            <div class="img-icon-field">
+              <div class="ii-preview ${d.img?'has-img':''}" id="iiPreview">${d.img?`<img src="${esc(d.img)}" alt="">`:`<span id="emojiCur">${esc(d.icon||'🍴')}</span>`}</div>
+              <div class="ii-actions">
+                <div class="emoji-field">
+                  <button type="button" class="emoji-btn" id="emojiBtn" aria-label="Elegir emoji">😀 Icono <span class="emoji-caret">▾</span></button>
+                  <input type="hidden" name="icon" value="${esc(d.icon||'🍴')}">
+                  <div class="emoji-pop" id="emojiPop"></div>
+                </div>
+                <button type="button" class="ii-upload-btn" id="iiUploadBtn">🖼 Subir foto</button>
+                <button type="button" class="ii-clear-btn" id="iiClearBtn" style="${d.img?'':'display:none'}">Quitar foto</button>
+                <input type="file" id="iiFile" accept="image/*" hidden>
+                <input type="hidden" name="img" value="${esc(d.img||'')}">
+              </div>
             </div>
           </div>
         </div>
@@ -124,15 +211,18 @@ function openRecipeForm(catKey, editId){
           <label class="flbl">Descripción</label>
           <textarea class="ftxt" name="desc" placeholder="Una o dos frases sobre el plato">${esc(d.desc)}</textarea>
         </div>
-        <div class="frow-2">
-          <div class="fgrp">
-            <label class="flbl">Tiempo</label>
-            <input class="finp mono" name="t" placeholder="ej. 20 min" value="${esc(d.t)}">
+        <div class="fgrp">
+          <label class="flbl">Tiempo de preparación</label>
+          <select class="fsel" name="t">
+            ${TIME_OPTS.map(o=>`<option value="${o}" ${o===(d.t||'')?'selected':''}>${o}</option>`).join('')}
+          </select>
+        </div>
+        <div class="fgrp">
+          <label class="flbl">Equipamiento <span class="flbl-ex">marca lo que necesites</span></label>
+          <div class="fchips" id="equipChips">
+            ${EQUIP_OPTS.map(o=>`<button type="button" class="fchip ${splitEquip(d.eq).includes(o.k)?'on':''}" data-eq="${esc(o.k)}">${o.ico} ${o.k}</button>`).join('')}
           </div>
-          <div class="fgrp">
-            <label class="flbl">Equipamiento</label>
-            <input class="finp mono" name="eq" placeholder="ej. Horno · Sartén" value="${esc(d.eq)}">
-          </div>
+          <input type="hidden" name="eq" value="${esc(d.eq||'')}">
         </div>
         <div class="fgrp">
           <label class="flbl">Etiquetas dietéticas</label>
@@ -163,8 +253,11 @@ function openRecipeForm(catKey, editId){
         </div>
 
         <div class="fgrp" style="margin-top:14px">
-          <label class="flbl">Preparación</label>
-          <textarea class="ftxt" name="nota" placeholder="Pasos breves de cocinado">${esc(d.nota)}</textarea>
+          <label class="flbl">Preparación · pasos</label>
+          <div class="steps-list" id="stepsList">
+            ${(splitSteps(d.nota).length?splitSteps(d.nota):['']).map(stepRowHtml).join('')}
+          </div>
+          <button type="button" class="ing-add-btn" id="addStepBtn">＋ Añadir paso</button>
         </div>
       </div>
 
@@ -272,7 +365,29 @@ function wireRecipeForm(editId){
   form.querySelectorAll('#tipoChips .fchip').forEach(b=> b.addEventListener('click', ()=>{
     form.querySelectorAll('#tipoChips .fchip').forEach(x=> x.classList.toggle('on', x===b));
   }));
+  // equipamiento (multi-chips)
+  form.querySelectorAll('#equipChips .fchip').forEach(b=> b.addEventListener('click', ()=> b.classList.toggle('on')));
   form.querySelector('[name=cat]').addEventListener('change', live);
+
+  // pasos de preparación (bloques añadibles)
+  wireSteps(form);
+  const addStepBtn = document.getElementById('addStepBtn');
+  if(addStepBtn) addStepBtn.addEventListener('click', ()=>{
+    const list = document.getElementById('stepsList');
+    list.insertAdjacentHTML('beforeend', stepRowHtml(''));
+    wireSteps(form);
+    const last = list.lastElementChild.querySelector('.step-txt'); if(last) last.focus();
+  });
+
+  // imagen propia (sube foto, la comprime y la guarda como dataURL)
+  wireRecipeImage(form);
+
+  // acceso directo a "alimento suelto"
+  const looseBtn = document.getElementById('looseFromBuilder');
+  if(looseBtn) looseBtn.addEventListener('click', ()=>{
+    if(typeof closeForm==='function') closeForm();
+    if(typeof openLooseFoodForm==='function') openLooseFoodForm();
+  });
 
   // comp rows
   form.querySelectorAll('.comp-row').forEach(row=> wireCompRow(row, live));
@@ -574,12 +689,17 @@ function saveRecipeForm(form, editId){
   const diet = [...form.querySelectorAll('#dietChips .fchip.on')].map(b=>b.dataset.k);
   const tipoBtn = form.querySelector('#tipoChips .fchip.on');
   const tipo = (tipoBtn && tipoBtn.dataset.k) ? tipoBtn.dataset.k : null;
+  // equipamiento desde los chips marcados
+  const eq = [...form.querySelectorAll('#equipChips .fchip.on')].map(b=>b.dataset.eq).join(' · ') || '—';
+  // preparación: pasos no vacíos unidos por salto de línea
+  const nota = [...form.querySelectorAll('.step-txt')].map(t=>(t.value||'').trim()).filter(Boolean).join('\n') || '—';
+  const img = get('img') || null;
 
   const data = {
     cat: get('cat'), short: get('short') || nom.slice(0,28), nom,
-    icon: get('icon') || '🍴', t: get('t') || '—', eq: get('eq') || '—',
+    icon: get('icon') || '🍴', img, t: get('t') || '—', eq,
     tags: [], tipo, diet, desc: get('desc'),
-    comp, nota: get('nota') || '—', food: []
+    comp, nota, food: []
   };
   recomputeDish(data);              // calcula kcal/mac/ing/food desde comp
   const id = editId || nextUserId();
@@ -595,7 +715,19 @@ function fillFormFromData(form, data){
   const set = (n,v)=>{ const el=form.querySelector(`[name="${n}"]`); if(el) el.value = v||''; };
   set('cat', data.cat); set('icon', data.icon); set('nom', data.nom);
   set('short', data.short); set('desc', data.desc); set('t', data.t);
-  set('eq', data.eq); set('nota', data.nota);
+  set('eq', data.eq);
+  // imagen
+  set('img', data.img||'');
+  const prev = form.querySelector('#iiPreview');
+  if(prev){ if(data.img){ prev.classList.add('has-img'); prev.innerHTML=`<img src="${esc(data.img)}" alt="">`; }
+    else { prev.classList.remove('has-img'); prev.innerHTML=`<span id="emojiCur">${esc(data.icon||'🍴')}</span>`; } }
+  const clr = form.querySelector('#iiClearBtn'); if(clr) clr.style.display = data.img ? '' : 'none';
+  // equipamiento (chips)
+  const eqset = splitEquip(data.eq);
+  form.querySelectorAll('#equipChips .fchip').forEach(b=> b.classList.toggle('on', eqset.includes(b.dataset.eq)));
+  // preparación (pasos)
+  const sList = form.querySelector('#stepsList');
+  if(sList){ const steps = splitSteps(data.nota); sList.innerHTML = (steps.length?steps:['']).map(stepRowHtml).join(''); wireSteps(form); }
   form.querySelectorAll('#dietChips .fchip').forEach(b=> b.classList.toggle('on', (data.diet||[]).includes(b.dataset.k)));
   form.querySelectorAll('#tipoChips .fchip').forEach(b=> b.classList.toggle('on', (data.tipo||'')===b.dataset.k));
   const list = document.getElementById('compList');
