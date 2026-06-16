@@ -70,6 +70,7 @@ function setSection(sec){
   } else {
     if(wk) wk.classList.add('hidden');
     document.querySelectorAll('.sportview').forEach(el=> el.classList.add('hidden'));
+    document.body.classList.remove('spv-ex','spv-sess','spv-scal');   // fuera de Deporte: sin vista de deporte
     switchView(S.view);
   }
   lsSet('sport:section', sec);
@@ -82,6 +83,8 @@ function showSportView(v){
   document.querySelectorAll('#sportVtabs .svtab').forEach(b=> b.classList.toggle('on', b.dataset.sview === v));
   document.querySelectorAll('.sportview').forEach(el=> el.classList.add('hidden'));
   document.getElementById('sportview-' + v).classList.remove('hidden');
+  document.body.classList.remove('spv-ex','spv-sess','spv-scal');
+  document.body.classList.add('spv-' + v);
   if(v === 'ex')   renderExercises();
   if(v === 'sess') renderSessions();
   if(v === 'scal' && typeof renderSportCalendar === 'function') renderSportCalendar();
@@ -756,8 +759,11 @@ function normalizeSession(r){
 (function bindSport(){
   document.querySelectorAll('.sec-btn').forEach(b=> b.addEventListener('click', ()=> setSection(b.dataset.sec)));
   document.querySelectorAll('#sportVtabs .svtab').forEach(b=> b.addEventListener('click', ()=> showSportView(b.dataset.sview)));
-  const map = [['spExNew',()=>openExerciseEditor()],['spExImport',()=>openSportImport('ex')],['spSessNew',()=>openSessionEditor()],['spSessGen',()=>openSessionGenerator()],['spSessImport',()=>openSportImport('sess')]];
-  map.forEach(([id,fn])=>{ const el=document.getElementById(id); if(el) el.addEventListener('click', fn); });
+  // Botones de contexto del header (Deporte): ✚ nuevo (ejercicio o sesión según vista) · 🎲 generar
+  const hAdd = document.getElementById('hdrSportAdd');
+  if(hAdd) hAdd.addEventListener('click', ()=>{ if(sportView==='sess') openSessionEditor(); else openExerciseEditor(); });
+  const hGen = document.getElementById('hdrSportGen');
+  if(hGen) hGen.addEventListener('click', ()=> openSessionGenerator());
   // restaura sección guardada (tras cargar el resto de scripts de deporte)
   const _sec0 = lsGet('sport:section','nutri');
   if(_sec0==='sport' || _sec0==='week' || _sec0==='mente') setTimeout(()=> setSection(_sec0), 0);

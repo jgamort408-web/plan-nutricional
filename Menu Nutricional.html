@@ -73,6 +73,11 @@ button{font-family:inherit}
 
 .icon-btn{flex-shrink:0;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.08);border:none;color:rgba(255,255,255,.65);font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.18s}
 .icon-btn:hover{background:rgba(255,255,255,.18);color:#fff;transform:rotate(60deg)}
+/* Botones de contexto del header (Deporte): ✚ nuevo · 🎲 generar */
+.hdr-ctx{display:none}
+.hdr-ctx:hover{transform:scale(1.08)}
+body.sec-sport.spv-ex .hdr-add,body.sec-sport.spv-sess .hdr-add{display:flex}
+body.sec-sport.spv-sess .hdr-gen{display:flex}
 
 /* Menú ☰ de secciones (sustituye a la barra de secciones para ahorrar espacio) */
 .sec-switch{display:none!important}
@@ -1585,6 +1590,8 @@ body.sec-mente .app-tabbar,body.mente-mode .app-tabbar{display:none!important}
 #cartFab,#cartBar{display:none!important}
 /* Hueco inferior para que el contenido no quede tapado por la tabbar */
 body{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+/* Sin tabbar (Semana/Mente): sin hueco fantasma abajo */
+body.no-tabbar{padding-bottom:0}
 /* El selector de persona solo tiene sentido en Nutrición/Semana */
 body.sec-sport #ptoggle,body.sec-mente #ptoggle{display:none}
 body.sec-sport #helpBtn,body.sec-mente #helpBtn{margin-left:auto}
@@ -1924,6 +1931,8 @@ img,svg,canvas{max-width:100%}
     <div class="ptoggle" id="ptoggle" aria-label="Persona activa">
       <button class="pbtn on" data-p="A">Persona 1</button>
     </div>
+    <button class="icon-btn hdr-ctx hdr-gen" id="hdrSportGen" title="Generar sesión a medida" aria-label="Generar sesión">🎲</button>
+    <button class="icon-btn hdr-ctx hdr-add" id="hdrSportAdd" title="Añadir" aria-label="Añadir">✚</button>
     <button class="icon-btn" id="helpBtn" title="Tutorial de esta sección" aria-label="Tutorial">❔</button>
     <button class="icon-btn" id="saveNowBtn" title="Guardar avance" aria-label="Guardar avance">💾</button>
     <button class="icon-btn" id="settingsBtn" title="Ajustes y recetas" aria-label="Ajustes">⚙</button>
@@ -1995,13 +2004,6 @@ img,svg,canvas{max-width:100%}
 <!-- SPORT VIEWS -->
 <div id="sportview-ex" class="sportview hidden">
   <div class="sp-wrap">
-    <div class="sp-toolbar">
-      <div class="sp-title">Ejercicios<small>Bloques básicos · músculos y gasto</small></div>
-      <div class="sp-tools">
-        <button class="cal-btn" id="spExNew">✚ Nuevo ejercicio</button>
-        <button class="cal-btn ghost" id="spExImport">↥ Importar JSON</button>
-      </div>
-    </div>
     <div class="sp-filters" id="spExFilters"></div>
     <main class="sp-grid" id="spExGrid"></main>
   </div>
@@ -2009,14 +2011,6 @@ img,svg,canvas{max-width:100%}
 
 <div id="sportview-sess" class="sportview hidden">
   <div class="sp-wrap">
-    <div class="sp-toolbar">
-      <div class="sp-title">Sesiones<small>Entrenos = ejercicios combinados</small></div>
-      <div class="sp-tools">
-        <button class="cal-btn" id="spSessGen" title="Generar una sesión a medida por criterios">🎲 Generar sesión</button>
-        <button class="cal-btn" id="spSessNew">✚ Nueva sesión</button>
-        <button class="cal-btn ghost" id="spSessImport">↥ Importar JSON</button>
-      </div>
-    </div>
     <div class="sp-filters" id="spSessFilters"></div>
     <main class="sp-grid" id="spSessGrid"></main>
   </div>

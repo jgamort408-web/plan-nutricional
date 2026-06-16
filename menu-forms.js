@@ -96,6 +96,13 @@ function renderDataManager(){
     <p style="font-size:.74rem;color:var(--ink-30);margin-top:14px;line-height:1.5">
       Al importar se <strong>sustituyen</strong> los datos actuales por los de la copia. La app se recargará.
     </p>
+    <div class="snap-sec">
+      <h3 class="snap-h">📥 Importar por lote (JSON) <small>añade o actualiza ejercicios y sesiones sin borrar lo demás</small></h3>
+      <div class="data-actions">
+        <button class="btn-sec" id="impSportEx">🏋️ Importar ejercicios</button>
+        <button class="btn-sec" id="impSportSess">📋 Importar sesiones</button>
+      </div>
+    </div>
     ${renderSnapshotsBlock()}`;
 }
 
@@ -147,6 +154,12 @@ function wireDataManager(){
     };
     reader.readAsText(file);
   });
+
+  // Importar ejercicios / sesiones por lote (centralizado aquí)
+  const impEx = document.getElementById('impSportEx');
+  if(impEx) impEx.addEventListener('click', ()=>{ if(typeof openSportImport==='function') openSportImport('ex'); });
+  const impSess = document.getElementById('impSportSess');
+  if(impSess) impSess.addEventListener('click', ()=>{ if(typeof openSportImport==='function') openSportImport('sess'); });
 
   // Autoguardado: guardar ahora + restaurar copias
   const saveNowBtn = document.getElementById('snapSaveNow');
