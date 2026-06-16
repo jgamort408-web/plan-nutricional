@@ -626,6 +626,21 @@ button{font-family:inherit}
 .ai-prompt-box{margin-bottom:14px;padding:12px;border:1.5px solid var(--gold-l);border-radius:var(--r-sm);background:linear-gradient(180deg,rgba(200,147,40,.07),rgba(200,147,40,.02))}
 #aiPromptToggle.on{filter:brightness(.95)}
 .ai-help{font-size:.78rem;color:var(--ink-50);line-height:1.55;font-family:'Lora',serif;margin-bottom:12px}
+/* Pasos guiados + subir archivo + avanzado (pestaña IA de Nueva Receta) */
+.ai-steps{margin:0 0 14px;padding:12px 14px 12px 30px;background:var(--cream);border-radius:var(--r-sm);
+  font-family:'Lora',serif;font-size:.86rem;line-height:1.5;color:var(--warm)}
+.ai-steps li{margin-bottom:6px}.ai-steps li:last-child{margin-bottom:0}
+.ai-steps li::marker{color:var(--accent,var(--terra));font-weight:700}
+.ai-upload{margin-top:14px;padding:14px 12px;border:1.5px dashed var(--accent,var(--terra));border-radius:var(--r-sm);
+  background:color-mix(in srgb,var(--accent,#B5603A) 5%,transparent);text-align:center}
+.ai-advanced{margin-top:14px;border:1px solid rgba(44,31,14,.12);border-radius:var(--r-sm);overflow:hidden}
+.ai-advanced>summary{cursor:pointer;padding:11px 14px;font-family:'DM Mono',monospace;font-size:.66rem;
+  letter-spacing:.05em;text-transform:uppercase;color:var(--ink-50);background:var(--cream);user-select:none}
+.ai-advanced>summary:hover{color:var(--accent,var(--terra))}
+.ai-advanced[open]>summary{border-bottom:1px solid rgba(44,31,14,.1)}
+.ai-advanced .json-help,.ai-advanced .json-area,.ai-advanced #builderJsonLoad{margin-left:12px;margin-right:12px;width:auto}
+.ai-advanced .json-help{margin-top:12px}
+.ai-advanced .json-area{display:block;margin-top:10px}
 .ai-ing-field{position:relative}
 .ai-ing-field .food-ac{position:absolute;left:0;right:0;top:calc(100% + 2px);z-index:30}
 .ai-ing-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}

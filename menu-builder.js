@@ -89,8 +89,8 @@ function openRecipeForm(catKey, editId){
       <span class="form-sub">${editing?`ID ${editId}`:'Composición de alimentos · se guarda en este navegador'}</span>
     </div>
     <div class="builder-tabs">
-      <button type="button" class="btab on" data-btab="visual">Visual</button>
-      <button type="button" class="btab" data-btab="json">JSON</button>
+      <button type="button" class="btab on" data-btab="visual">✍️ Manual</button>
+      <button type="button" class="btab" data-btab="json">✨ Con IA</button>
     </div>
     <div class="form-body" id="recipeForm">
       <div id="builderVisual">
@@ -169,10 +169,15 @@ function openRecipeForm(catKey, editId){
       </div>
 
       <div id="builderJsonPane" style="display:none">
+        <ol class="ai-steps">
+          <li><strong>Rellena</strong> lo que quieras abajo y pulsa <strong>Copiar prompt</strong>.</li>
+          <li><strong>Pégalo</strong> en una IA (ChatGPT, Claude o Gemini).</li>
+          <li>La IA te dará un <strong>archivo .json</strong>: descárgalo y <strong>súbelo aquí</strong> con el botón “Subir archivo”.</li>
+        </ol>
         <div class="ai-prompt-box">
-          <button type="button" class="btn-prim" id="aiPromptToggle" style="width:100%">✨ Generar prompt para crear la receta con una IA</button>
+          <button type="button" class="btn-prim" id="aiPromptToggle" style="width:100%">✨ Preparar el prompt para la IA</button>
           <div id="aiPromptPanel" style="display:none;margin-top:10px">
-            <p class="ai-help">Rellena lo que quieras (todo es opcional) y pulsa <strong>Copiar prompt</strong>. Pégalo en ChatGPT, Claude o Gemini; cuando te devuelva el JSON, pégalo en el recuadro de abajo ↓ y pulsa “Cargar”.</p>
+            <p class="ai-help">Todo es opcional. Pulsa <strong>Copiar prompt</strong>, pégalo en tu IA y sube el archivo que te devuelva. (Si lo prefieres, también puedes pegar el texto en “Opciones avanzadas”.)</p>
             <div class="fgrp">
               <label class="flbl">Idea / nombre de la receta</label>
               <input class="finp" id="aiIdea" placeholder="Ej. Bowl de salmón y quinoa (o déjalo en blanco)">
@@ -209,9 +214,18 @@ function openRecipeForm(catKey, editId){
             <div id="aiPromptMsg" class="data-msg"></div>
           </div>
         </div>
-        <div class="json-help">
-          Pega aquí el JSON que te dé la IA y pulsa “Cargar”. Acepta el formato combinado <code>{"foods":{…}, "recipes":[…]}</code> (crea los alimentos nuevos y añade las recetas) o una sola receta suelta como este ejemplo:
-          <pre style="font-family:'DM Mono',monospace;font-size:.68rem;white-space:pre-wrap;margin-top:6px;line-height:1.45">{
+        <div class="ai-upload">
+          <label class="flbl" style="text-align:center;display:block">2 · Sube el archivo que te dio la IA</label>
+          <input type="file" id="builderJsonFile" accept="application/json,.json" hidden>
+          <button type="button" class="btn-prim" id="builderJsonFileBtn" style="width:100%">📁 Subir archivo .json</button>
+          <div id="builderJsonStatus" style="margin-top:8px"></div>
+        </div>
+
+        <details class="ai-advanced">
+          <summary>⚙️ Opciones avanzadas · pegar el JSON a mano</summary>
+          <div class="json-help">
+            Pega el JSON que te dé la IA y pulsa “Cargar”. Acepta el formato combinado <code>{"foods":{…}, "recipes":[…]}</code> o una sola receta suelta como este ejemplo:
+            <pre style="font-family:'DM Mono',monospace;font-size:.68rem;white-space:pre-wrap;margin-top:6px;line-height:1.45">{
   "cat":"com", "nom":"Pollo con arroz", "icon":"🍗",
   "diet":["sg"], "tipo":"completa",
   "comp":[
@@ -223,11 +237,10 @@ function openRecipeForm(catKey, editId){
   ],
   "nota":"Pollo a la plancha; arroz hervido."
 }</pre>
-          IDs de alimento válidos: ${Object.keys(FOODS).slice(0,16).map(id=>`<code>${id}</code>`).join(' ')}… (ver pestaña Alimentos en Ajustes)
-        </div>
-        <textarea class="json-area" id="builderJson" spellcheck="false" placeholder="Pega aquí el JSON de la receta"></textarea>
-        <div id="builderJsonStatus"></div>
-        <button type="button" class="btn-sec" id="builderJsonLoad" style="width:100%;margin-top:8px">↧ Cargar en el formulario visual</button>
+          </div>
+          <textarea class="json-area" id="builderJson" spellcheck="false" placeholder="Pega aquí el JSON de la receta"></textarea>
+          <button type="button" class="btn-sec" id="builderJsonLoad" style="width:100%;margin-top:8px">↧ Cargar JSON pegado</button>
+        </details>
       </div>
     </div>
     <div class="form-actions">
@@ -270,14 +283,10 @@ function wireRecipeForm(editId){
     live();
   });
 
-  // JSON pane
-  document.getElementById('builderJsonLoad').addEventListener('click', ()=>{
+  // ── Importación de JSON (compartida por "subir archivo" y "pegar") ──
+  function builderImportParsed(raw){
     const st = document.getElementById('builderJsonStatus');
     st.className = 'json-status';
-    let raw;
-    try{ raw = JSON.parse(document.getElementById('builderJson').value); }
-    catch(e){ st.className='json-status err'; st.textContent='JSON inválido: '+e.message; return; }
-
     const hasFoods   = raw && raw.foods && typeof raw.foods==='object' && !Array.isArray(raw.foods);
     const hasRecipes = raw && Array.isArray(raw.recipes);
 
@@ -317,7 +326,40 @@ function wireRecipeForm(editId){
     if(r.error){ st.className='json-status err'; st.textContent='✘ '+r.error; return; }
     fillFormFromData(form, r.data);
     form.parentNode.querySelector('.btab[data-btab="visual"]').click();
+  }
+
+  // Pegar JSON (avanzado)
+  const jsonLoadBtn = document.getElementById('builderJsonLoad');
+  if(jsonLoadBtn) jsonLoadBtn.addEventListener('click', ()=>{
+    const st = document.getElementById('builderJsonStatus');
+    st.className = 'json-status';
+    let raw;
+    try{ raw = JSON.parse(document.getElementById('builderJson').value); }
+    catch(e){ st.className='json-status err'; st.textContent='JSON inválido: '+e.message; return; }
+    builderImportParsed(raw);
   });
+
+  // Subir archivo .json (flujo principal de la IA)
+  const fileBtn = document.getElementById('builderJsonFileBtn');
+  const fileInp = document.getElementById('builderJsonFile');
+  if(fileBtn && fileInp){
+    fileBtn.addEventListener('click', ()=> fileInp.click());
+    fileInp.addEventListener('change', ()=>{
+      const st = document.getElementById('builderJsonStatus');
+      const file = fileInp.files && fileInp.files[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = ()=>{
+        let raw;
+        try{ raw = JSON.parse(reader.result); }
+        catch(e){ st.className='json-status err'; st.textContent='✘ El archivo no es un JSON válido: '+e.message; fileInp.value=''; return; }
+        builderImportParsed(raw);
+        fileInp.value='';
+      };
+      reader.onerror = ()=>{ st.className='json-status err'; st.textContent='✘ No se pudo leer el archivo.'; };
+      reader.readAsText(file);
+    });
+  }
 
   // ── Generador de prompt para IA ──
   const aiToggle = document.getElementById('aiPromptToggle');
@@ -378,7 +420,7 @@ function wireRecipeForm(editId){
   if(aiCopy) aiCopy.addEventListener('click', ()=>{
     const prompt = buildRecipePrompt();
     const msg = document.getElementById('aiPromptMsg');
-    const ok = ()=>{ if(msg){ msg.className='data-msg ok'; msg.textContent='✓ Prompt copiado. Pégalo en tu IA; cuando te dé el JSON, pégalo abajo y pulsa “Cargar”.'; } };
+    const ok = ()=>{ if(msg){ msg.className='data-msg ok'; msg.textContent='✓ Prompt copiado. Pégalo en tu IA; cuando te dé el archivo .json, súbelo con el botón “Subir archivo”.'; } };
     const manual = ()=>{ const ta=document.getElementById('builderJson'); if(ta){ ta.value=prompt; ta.focus(); ta.select(); } if(msg){ msg.className='data-msg'; msg.textContent='El prompt está ahora en el recuadro de abajo: selecciónalo y cópialo (Ctrl/Cmd+C).'; } };
     if(navigator.clipboard && navigator.clipboard.writeText){
       navigator.clipboard.writeText(prompt).then(ok).catch(manual);
@@ -828,7 +870,7 @@ function buildRecipePrompt(){
 `ALIMENTOS DISPONIBLES (ids ya existentes; úsalos en "comp[].f" cuando encajen; formato "id — nombre"):`,
 catalog,
 ``,
-`Recuerda: devuelve únicamente el objeto JSON con "foods" y "recipes", sin explicaciones.`
+`ENTREGA (MUY IMPORTANTE): genera el objeto JSON anterior y entrégamelo como un ARCHIVO DESCARGABLE llamado "receta.json" (un archivo de texto con extensión .json y solo el JSON dentro). Si no puedes adjuntar archivos, muéstrame el JSON en un bloque de código para copiarlo. No añadas explicaciones fuera del archivo/bloque.`
 ];
   return lines.join('\n');
 }
