@@ -71,12 +71,12 @@ function recomputeAB(){
   PEOPLE.forEach((id, i)=>{
     const t = TARGETS[id]; if(!t) return;
     if(!t.sym) t.sym = PERSON_SYMS[i] || '🧑';
-    t.lbl = `${t.sym} ${t.name || id} · ${t.kcal} kcal/día`;
+    t.lbl = `${(t.name||'').trim() || ('Persona '+(i+1))} · ${t.kcal} kcal/día`;
   });
   const sum = PEOPLE.reduce((a,id)=>{ const t=TARGETS[id]||{}; a.kcal+=t.kcal||0; a.p+=t.p||0; a.f+=t.f||0; a.c+=t.c||0; return a; }, {kcal:0,p:0,f:0,c:0});
   if(!TARGETS.AB) TARGETS.AB = {restr:[]};
   TARGETS.AB.kcal=sum.kcal; TARGETS.AB.p=sum.p; TARGETS.AB.f=sum.f; TARGETS.AB.c=sum.c;
-  TARGETS.AB.lbl = `${PEOPLE.map(id=>(TARGETS[id]||{}).sym||'').join('+')} Total · ${sum.kcal} kcal/día`;
+  TARGETS.AB.lbl = `Todas · ${sum.kcal} kcal/día`;
 }
 
 /* Hydrate state from localStorage */
@@ -793,7 +793,7 @@ function renderDrawer(){
     return `
       <div class="dt-card ${st.cls} ${S.p===pp.key?'active':''}">
         <div class="dt-card-hd">
-          <span class="dt-who">${pp.sym} ${escHtml(pp.T.name || pp.key)}</span>
+          <span class="dt-who">${escHtml((pp.T.name||'').trim() || ('Persona '+(PEOPLE.indexOf(pp.key)+1)))}</span>
           <span class="dt-kcal"><b>${pp.tot.k}</b><small>/${pp.T.kcal}</small><i class="dt-pct">${kPct}%${st.ico?' '+st.ico:''}</i></span>
         </div>
         <div class="dt-macros">
@@ -988,7 +988,7 @@ function openModal(id){
 
       <p style="font-size:.95rem;line-height:1.55;color:rgba(44,31,14,.78);margin-bottom:6px">${d.desc}</p>
 
-      <div class="m-section-hd">Macros · ${S.p==='AB' ? 'Todas · ración combinada' : ((TARGETS[S.p]||{}).sym||'')+' '+escHtml((TARGETS[S.p]||{}).name||S.p)}</div>
+      <div class="m-section-hd">Macros · ${S.p==='AB' ? 'Todas · ración combinada' : escHtml(((TARGETS[S.p]||{}).name||'').trim()||('Persona '+(PEOPLE.indexOf(S.p)+1)))}</div>
       <div class="m-kcal-row">
         <div class="m-k-cell"><div class="m-k-v">${px(d.kcal)}</div><div class="m-k-l">kcal</div></div>
         <div class="m-k-cell"><div class="m-k-v">${px(d.mac.p)}g</div><div class="m-k-l">proteína</div></div>
@@ -1001,7 +1001,7 @@ function openModal(id){
         <thead>
           <tr>
             <th>Ingrediente</th>
-            ${PEOPLE.map(id=>`<th class="qty">${(TARGETS[id]||{}).sym||''} ${escHtml((TARGETS[id]||{}).name||id)}</th>`).join('')}
+            ${PEOPLE.map((id,i)=>`<th class="qty">${escHtml(((TARGETS[id]||{}).name||'').trim()||('Persona '+(i+1)))}</th>`).join('')}
             ${PEOPLE.length>1?`<th class="qty ab">Todas</th>`:''}
           </tr>
         </thead>
@@ -1102,12 +1102,14 @@ function renderPersonToggle(){
   const tog = document.querySelector('.ptoggle');
   if(!tog) return;
   if(!PEOPLE.includes(S.p) && S.p !== 'AB') S.p = PEOPLE[0];
+  // Representación por NOMBRE (no por sexo/peso)
   const btns = PEOPLE.map(id=>{
     const t = TARGETS[id] || {};
-    return `<button class="pbtn ${S.p===id?'on':''}" data-p="${id}">${t.sym||'🧑'} ${escHtml(t.name||id)}</button>`;
+    const nm = (t.name||'').trim() || ('Persona '+(PEOPLE.indexOf(id)+1));
+    return `<button class="pbtn ${S.p===id?'on':''}" data-p="${id}">${escHtml(nm)}</button>`;
   });
   if(PEOPLE.length > 1){
-    btns.push(`<button class="pbtn ${S.p==='AB'?'on':''}" data-p="AB">${PEOPLE.map(id=>(TARGETS[id]||{}).sym||'').join('+')} Todas</button>`);
+    btns.push(`<button class="pbtn ${S.p==='AB'?'on':''}" data-p="AB">👥 Todas</button>`);
   }
   tog.innerHTML = btns.join('');
   tog.querySelectorAll('.pbtn').forEach(b=> b.addEventListener('click', ()=> setPersona(b.dataset.p)));

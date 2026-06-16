@@ -245,9 +245,9 @@ const FILTERS = [
 ];
 
 const TARGETS = {
-  A:  {kcal:2100, p:200, f:85,  c:134, name:'135kg', sym:'♂', lbl:'♂ 135kg · 2100 kcal/día', restr:[]},
-  B:  {kcal:1350, p:120, f:50,  c:105, name:'95kg',  sym:'♀', lbl:'♀ 95kg · 1350 kcal/día',  restr:[]},
-  AB: {kcal:3450, p:320, f:135, c:239, lbl:'♂+♀ Total pareja · 3450 kcal/día',     restr:[]}
+  A:  {kcal:2100, p:200, f:85,  c:134, name:'Persona 1', sym:'🧑', lbl:'Persona 1 · 2100 kcal/día', restr:[]},
+  B:  {kcal:1350, p:120, f:50,  c:105, name:'Persona 2', sym:'🧑', lbl:'Persona 2 · 1350 kcal/día', restr:[]},
+  AB: {kcal:3450, p:320, f:135, c:239, lbl:'Todas · 3450 kcal/día',     restr:[]}
 };
 
 /* ── PERSONAS (flexible) ───────────────────────────────────

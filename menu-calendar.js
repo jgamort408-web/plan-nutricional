@@ -339,7 +339,7 @@ function renderCellDetail(id){
   const mp = S.p==='AB' ? `${d.mac.p[0]}·${d.mac.p[1]}` : px(d.mac.p);
   const mf = S.p==='AB' ? `${d.mac.f[0]}·${d.mac.f[1]}` : px(d.mac.f);
   const mc = S.p==='AB' ? `${d.mac.c[0]}·${d.mac.c[1]}` : px(d.mac.c);
-  const persLbl = S.p==='A'?'♂A':S.p==='B'?'♀B':'A·B';
+  const persLbl = S.p==='AB' ? 'Todas' : escAttr(((TARGETS[S.p]||{}).name||'').trim() || ('P'+((typeof PEOPLE!=='undefined'?PEOPLE.indexOf(S.p):0)+1)));
   const ingHtml = (d.ing && d.ing.length)
     ? d.ing.map(r=>{
         const q = S.p==='A' ? r.A : S.p==='B' ? r.B : `${r.A} / ${r.B}`;
@@ -446,7 +446,7 @@ function renderPicker(){
     const d = DISHES[id]; if(!d) return;
     totK += px(d.kcal); totP += px(d.mac.p); totF += px(d.mac.f); totC += px(d.mac.c);
   });
-  const personaLbl = S.p==='A'?'♂ A':S.p==='B'?'♀ B':'A+B';
+  const personaLbl = S.p==='AB' ? 'Todas' : (((TARGETS[S.p]||{}).name||'').trim() || ('Persona '+((typeof PEOPLE!=='undefined'?PEOPLE.indexOf(S.p):0)+1)));
 
   const body = document.getElementById('pickerBodyOuter');
   body.innerHTML = `

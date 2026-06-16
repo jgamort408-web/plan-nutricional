@@ -328,6 +328,7 @@ function renderPersonasForm(){
     <p style="font-size:.86rem;color:var(--ink-50);margin-bottom:14px;line-height:1.55">
       Ajusta los objetivos de cada persona. Puedes <strong>añadir o quitar personas</strong> (mínimo 1). La ración de cada una = ración <strong>base</strong> (la de menor kcal) × su <strong>modificador</strong>. El modo <strong style="color:var(--warm)">Todas</strong> es la suma.
     </p>
+    <button type="button" class="btn-sec" id="reOnboard" style="width:100%;margin-bottom:12px">🧮 Asistente de cálculo (peso, altura, objetivo…)</button>
     ${PEOPLE.map((id,i)=> personRow(id, (TARGETS[id]||{}).sym || PERSON_SYMS[i] || '🧑', i)).join('')}
     <button type="button" class="btn-sec" id="addPerson" style="width:100%;margin-bottom:10px">➕ Añadir persona</button>
     <div style="font-family:'DM Mono',monospace;font-size:.62rem;color:var(--ink-50);text-transform:uppercase;letter-spacing:.08em;text-align:center;padding:6px">
@@ -403,6 +404,10 @@ function wirePersonasForm(){
   formBody().querySelectorAll('.finp').forEach(i=> i.addEventListener('input', refreshPreview));
 
   // Añadir persona
+  const reOb = document.getElementById('reOnboard');
+  if(reOb) reOb.addEventListener('click', ()=>{
+    if(window.pnOnboarding){ if(typeof closeForm==='function') closeForm(); window.pnOnboarding.open(true); }
+  });
   const addBtn = document.getElementById('addPerson');
   if(addBtn) addBtn.addEventListener('click', ()=>{
     // guarda lo editado actualmente, luego añade una persona nueva y re-renderiza
@@ -556,6 +561,30 @@ function wirePersonasForm(){
   });
 }
 
+/* Cálculo PURO (sin DOM) a partir de los datos de una persona.
+   Reutilizable por el formulario de Ajustes y por el onboarding.
+   kg, cm, actK (clave de ACTIVITY_LEVELS), goalK (clave de GOALS). */
+function calcFromInputs(kg, cm, actK, goalK){
+  kg = +kg || 0; cm = +cm || 0;
+  if(!kg) return null;
+  const gmb = calcGMB(kg, cm);                       // peso de cálculo × 22
+  const pc  = pesoCalculo(kg, cm);                   // peso de cálculo (real o corregido)
+  const actFactor = ACTIVITY_LEVELS.find(a=>a.k===actK)?.f || 1.6;
+  const goalDef = GOALS.find(g=>g.k===goalK) || GOALS.find(g=>g.k==='man');
+
+  const tdee = Math.round(gmb * actFactor);          // GET = GMB × FA
+  const goal = Math.max(1000, Math.round((tdee * goalDef.m) / 25) * 25); // ajuste por objetivo
+
+  const proteinG = Math.round(pc * goalDef.pPerKg);
+  let   fatG     = Math.round(pc * goalDef.fPerKg);
+  const minFatG  = Math.round((goal * 0.20) / 9);
+  if(fatG < minFatG) fatG = minFatG;
+  const carbG = Math.max(0, Math.round((goal - proteinG*4 - fatG*9) / 4));
+
+  return {bmr:gmb, tdee, goal, macros:{p:proteinG, f:fatG, c:carbG},
+          pesoCalc:Math.round(pc), corrected: cm ? (kg/((cm/100)**2) > IMC_CORRECT) : false};
+}
+
 function computeCalc(k){
   const card = document.querySelector(`.fcard[data-pkey="${k}"]`);
   if(!card) return null;
@@ -563,29 +592,13 @@ function computeCalc(k){
   const kg  = +card.querySelector('[name=kg]')?.value  || 0;
   const cm  = +card.querySelector('[name=cm]')?.value  || 0;
   if(!kg || !cm) return null;   // peso y altura bastan (altura = ajuste por sobrepeso)
-
-  const gmb = calcGMB(kg, cm);                       // peso de cálculo × 22
-  const pc  = pesoCalculo(kg, cm);                   // peso de cálculo (real o corregido)
   const actK = card.querySelector(`[name="act-${k}"]:checked`)?.value || 'mod';
   const goalK = card.querySelector(`[name="goal-${k}"]:checked`)?.value || 'man';
-  const actFactor = ACTIVITY_LEVELS.find(a=>a.k===actK)?.f || 1.6;
-  const goalDef = GOALS.find(g=>g.k===goalK) || GOALS.find(g=>g.k==='man');
-
-  const tdee = Math.round(gmb * actFactor);          // GET = GMB × FA
-  const goal = Math.max(1000, Math.round((tdee * goalDef.m) / 25) * 25); // ajuste por objetivo
-
-  // Macros (método B): proteína y grasa por g/kg de peso de cálculo,
-  // grasa nunca por debajo del 20% de las kcal, carbohidratos = el resto.
-  const proteinG = Math.round(pc * goalDef.pPerKg);
-  let   fatG     = Math.round(pc * goalDef.fPerKg);
-  const minFatG  = Math.round((goal * 0.20) / 9);
-  if(fatG < minFatG) fatG = minFatG;
-  const proteinKcal = proteinG * 4;
-  const fatKcal     = fatG * 9;
-  const carbG = Math.max(0, Math.round((goal - proteinKcal - fatKcal) / 4));
-
-  return {bmr:gmb, tdee, goal, macros:{p:proteinG, f:fatG, c:carbG}, pesoCalc:Math.round(pc), corrected: cm ? (kg/((cm/100)**2) > IMC_CORRECT) : false};
+  return calcFromInputs(kg, cm, actK, goalK);
 }
+window.calcFromInputs = calcFromInputs;
+window.ACTIVITY_LEVELS = ACTIVITY_LEVELS;
+window.GOALS = GOALS;
 
 function recalcPanel(k){
   const card = document.querySelector(`.fcard[data-pkey="${k}"]`);

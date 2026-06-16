@@ -499,8 +499,10 @@
     if(help) help.addEventListener('click', ()=> pnTutorial(currentSection()));
     const info = document.getElementById('infoLegalBtn');
     if(info) info.addEventListener('click', pnInfoLegal);
-    // Onboarding: tutorial de Nutrición la primera vez (suave, una sola vez)
-    if(!tutorialSeen('nutri')){
+    // Tutorial de Nutrición la primera vez — pero NO si aún está el onboarding
+    // pendiente (primero el asistente, luego el tour; lo lanza el propio onboarding al acabar).
+    const obDone = !window.pnOnboarding || window.pnOnboarding.seen();
+    if(obDone && !tutorialSeen('nutri')){
       setTimeout(()=>{ if(currentSection()==='nutri') pnTutorial('nutri'); }, 900);
     }
   });

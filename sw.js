@@ -4,12 +4,12 @@
      · online  → siempre lo más reciente (no rompe el desarrollo)
      · offline → responde desde caché
 ══════════════════════════════════════════════════════════ */
-const CACHE = 'plan-nutri-v8';
+const CACHE = 'plan-nutri-v9';
 const SHELL = [
   'Menu%20Nutricional.html',
   'menu-ui.js',
   'menu-data.js','menu-foods.js','menu-comp.js','menu-recipes2.js','menu-app.js',
-  'menu-forms.js','menu-builder.js','menu-calendar.js','menu-saved.js','menu-shop.js','menu-unified.js','menu-session.js',
+  'menu-forms.js','menu-onboard.js','menu-builder.js','menu-calendar.js','menu-saved.js','menu-shop.js','menu-unified.js','menu-session.js',
   'sport-catalog.js','sport-data.js','sport-engine.js','sport-ui.js','sport-calendar.js','sport-anim.js',
   'psicodiet.html',
   'manifest.webmanifest','favicon.svg','icon-192.png','icon-512.png','icon-180.png'
