@@ -1248,17 +1248,26 @@ function personaLabel(id){
   const t = TARGETS[id] || {};
   return (t.name||'').trim() || ('Persona '+(PEOPLE.indexOf(id)+1));
 }
-// Token mínimo para el avatar: icono si no hay nombre; inicial (o dos letras si
-// coincide con la de otra persona) si lo hay; 👥 para "Todas".
+// Token mínimo para el avatar: icono si no hay nombre; el prefijo más corto
+// (hasta 3 letras) que NO comparta ninguna otra persona; si ni con 3 letras se
+// distingue, inicial + número de orden; 👥 para "Todas".
 function personaToken(id){
   if(id==='AB') return {txt:'👥', emoji:true};
   const t = TARGETS[id] || {};
   const name = (t.name||'').trim();
   if(!name) return {txt: t.sym || '🧑', emoji:true};
-  const first = name[0].toUpperCase();
-  const clash = PEOPLE.some(o=> o!==id && (((TARGETS[o]||{}).name||'').trim()[0]||'').toUpperCase() === first);
-  const txt = clash ? (name[0].toUpperCase() + (name[1]||'').toLowerCase()) : first;
-  return {txt, emoji:false};
+  const U = s => (s||'').toUpperCase();
+  const un = U(name);
+  const others = PEOPLE.filter(o=> o!==id).map(o=> U(((TARGETS[o]||{}).name||'').trim())).filter(Boolean);
+  const cap = Math.min(3, name.length);
+  for(let len=1; len<=cap; len++){
+    const pre = un.slice(0, len);
+    if(!others.some(o=> o.slice(0, len) === pre)){
+      return {txt: name[0].toUpperCase() + name.slice(1, len).toLowerCase(), emoji:false};
+    }
+  }
+  // No distinguible en 3 letras → inicial + número de orden (garantiza diferencia)
+  return {txt: name[0].toUpperCase() + (PEOPLE.indexOf(id) + 1), emoji:false};
 }
 function renderPersonToggle(){
   const tog = document.querySelector('.ptoggle');
@@ -1266,8 +1275,9 @@ function renderPersonToggle(){
   if(!PEOPLE.includes(S.p) && S.p !== 'AB') S.p = PEOPLE[0];
   const seq = personaSeq();
   const tk = personaToken(S.p), full = personaLabel(S.p);
+  const longCls = (!tk.emoji && tk.txt.length >= 3) ? 'is-long' : '';
   // Avatar redondo: muestra la persona activa; al pulsar, cicla a la siguiente.
-  tog.innerHTML = `<button class="pbtn pcycle on ${tk.emoji?'is-emoji':''}" id="personaCycle" title="${escHtml(full)} · pulsa para cambiar de persona" aria-label="Persona activa: ${escHtml(full)}. Pulsa para cambiar">${escHtml(tk.txt)}</button>`;
+  tog.innerHTML = `<button class="pbtn pcycle on ${tk.emoji?'is-emoji':''} ${longCls}" id="personaCycle" title="${escHtml(full)} · pulsa para cambiar de persona" aria-label="Persona activa: ${escHtml(full)}. Pulsa para cambiar">${escHtml(tk.txt)}</button>`;
   const btn = document.getElementById('personaCycle');
   if(btn && seq.length>1) btn.addEventListener('click', ()=>{
     const i = seq.indexOf(S.p);
