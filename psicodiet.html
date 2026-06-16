@@ -320,8 +320,20 @@ textarea:focus,input:focus{outline:none;border-color:var(--green)}
 .color-pick .c{width:30px;height:30px;border-radius:50%;border:2px solid transparent;cursor:pointer}
 .color-pick .c.sel{border-color:var(--ink);transform:scale(1.12)}
 </style>
+<style>
+/* Cuando "Mente" va embebida dentro de Plan Nutricional: se oculta su
+   cabecera propia (ya hay un header general arriba) y su tutorial interno
+   (se usa el tutorial general de la app). La tabbar inferior se mantiene. */
+html.embedded header{display:none!important}
+html.embedded body{padding-top:8px}
+html.embedded #tutorial{display:none!important}
+</style>
 </head>
 <body>
+<script>
+  // Detecta si está incrustada en un iframe (dentro de la app principal)
+  if (window.self !== window.top) document.documentElement.classList.add('embedded');
+</script>
 <header>
   <p class="hi" id="greeting">Hola</p>
   <h1>🌿 Mente en Forma</h1>
@@ -1237,7 +1249,12 @@ $("#tutNext")&&($("#tutNext").onclick=()=>{
   if(tutStep<TUTORIAL.length-1){tutStep++;renderTutStep();}else endTutorial();
 });
 $("#tutSkip")&&($("#tutSkip").onclick=endTutorial);
-$("#replayTutBtn")&&($("#replayTutBtn").onclick=startTutorial);
+$("#replayTutBtn")&&($("#replayTutBtn").onclick=()=>{
+  // Embebida: usa el tutorial general de la app (uno solo). Si no, el propio.
+  if(document.documentElement.classList.contains('embedded') && window.parent && window.parent.pnTutorial){
+    window.parent.pnTutorial('mente');
+  } else { startTutorial(); }
+});
 window.addEventListener("resize",()=>{if($("#tutorial").classList.contains("on")){const s=TUTORIAL[tutStep];positionSpot(s.center?null:s.nav);}});
 
 /* ========== Extras UX: saludo, banner, recordatorios ========== */
@@ -1303,7 +1320,8 @@ function wireReminders(){
   if(!state.days||typeof state.days!=="object")state.days={};
   if(!("mantraId"in state))state.mantraId=null;
   renderToday();renderMantraSetup();wireReminders();
-  if(!state.onboarded)setTimeout(startTutorial,400);
+  // Embebida: el tutorial lo gestiona la app principal (uno solo, general)
+  if(!state.onboarded && !document.documentElement.classList.contains('embedded'))setTimeout(startTutorial,400);
 })();
 </script>
 </body>

@@ -307,9 +307,12 @@
       {ico:'🍽️', t:'Detalle por día', x:'Toca cualquier comida para ver su ficha completa con ingredientes y macros, igual que en el calendario de Nutrición.'}
     ]},
     mente: { sec:'Mente', steps:[
-      {ico:'🧠', t:'Mente en Forma', x:'Esta sección cuida tu bienestar psicológico: registro de estado de ánimo, hábitos y ejercicios de mente. Funciona dentro de la misma app.'},
-      {ico:'😊', t:'Registra cómo estás', x:'Anota tu ánimo y tus hábitos del día. Con el tiempo verás tu evolución y patrones útiles.'},
-      {ico:'🔒', t:'Privado y local', x:'Tus datos de Mente se guardan en tu propio dispositivo, separados del resto. Nada sale de aquí.'}
+      {ico:'🧠', t:'Mente en Forma', x:'Esta sección cuida tu bienestar mientras haces la dieta: estado de ánimo, hábitos y herramientas psicológicas. Funciona dentro de la misma app, con su barra de pestañas abajo.'},
+      {ico:'🏠', t:'Hoy', x:'Cada día marcas cómo te sientes con una carita y registras tus hábitos. Un anillo te muestra tu progreso del día, sin presión. También puedes grabar un mensaje de ánimo y escucharlo cuando lo necesites.'},
+      {ico:'📖', t:'Diario', x:'Graba notas de voz, haz fotos de seguimiento y escribe cómo va tu día. Todo queda guardado en tu dispositivo.'},
+      {ico:'📊', t:'Tendencia', x:'Revisa tu evolución con calma: gráficos, calendario de días pasados y mensajes amables sobre cómo te sientes.'},
+      {ico:'💚', t:'Apoyo', x:'Tu caja de herramientas: respiración guiada 4-7-8, técnicas para la ansiedad sin recurrir a la comida y recursos para los días flojos.'},
+      {ico:'🔒', t:'Privado y local', x:'Todos tus datos de Mente se guardan solo en tu dispositivo. Nada sale de aquí.'}
     ]}
   };
 
