@@ -505,14 +505,20 @@ function recomputeBuilderLive(form){
     <div class="cl-cell"><div class="cl-v">${Math.round(base.c)}</div><div class="cl-l">carb</div></div>`;
 
   if(comp.length){
-    const A = scaleComp(comp, TARGETS.A.kcal*MEAL_PCT[cat]);
-    const B = scaleComp(comp, TARGETS.B.kcal*MEAL_PCT[cat]);
     const catLbl = (CATEGORIES.find(c=>c.key===cat)||{}).label || '';
-    document.getElementById('clAb').innerHTML = `
-      <div class="cl-ab-i"><strong>♂ A</strong> · ${catLbl}: ${Math.round(A.tot.k)} kcal · ${Math.round(A.tot.p)}P ${Math.round(A.tot.f)}G ${Math.round(A.tot.c)}C</div>
-      <div class="cl-ab-i b"><strong>♀ B</strong> · ${catLbl}: ${Math.round(B.tot.k)} kcal · ${Math.round(B.tot.p)}P ${Math.round(B.tot.f)}G ${Math.round(B.tot.c)}C</div>`;
+    // Modelo "1 ración estándar": el bloque base ya muestra 1 ración (×1);
+    // aquí cada persona = 1 ración × su modificador (fijos no escalan).
+    const list = (typeof PEOPLE !== 'undefined' ? PEOPLE : ['A','B']);
+    document.getElementById('clAb').innerHTML = list.map((id,i)=>{
+      const mod = (typeof personModifier==='function') ? personModifier(id) : 1;
+      const s = scaleByFactor(comp, mod);
+      const T = (typeof TARGETS!=='undefined' && TARGETS[id]) ? TARGETS[id] : {};
+      const sym = T.sym || (id==='A'?'♂':id==='B'?'♀':'🧑');
+      const name = T.name || id;
+      return `<div class="cl-ab-i${i%2?' b':''}"><strong>${sym} ${name}</strong> ·${mod!==1?` ×${mod} ·`:''} ${catLbl}: ${Math.round(s.tot.k)} kcal · ${Math.round(s.tot.p)}P ${Math.round(s.tot.f)}G ${Math.round(s.tot.c)}C</div>`;
+    }).join('');
   } else {
-    document.getElementById('clAb').innerHTML = `<div class="cl-ab-i">Añade alimentos para ver el cálculo de A y B</div>`;
+    document.getElementById('clAb').innerHTML = `<div class="cl-ab-i">Añade alimentos para ver el cálculo por persona</div>`;
   }
 }
 

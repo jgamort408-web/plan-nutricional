@@ -343,10 +343,33 @@ function mealTargetKcal(personaKey, cat){
   return baseK * mod * (MEAL_PCT[cat] || 0.25);
 }
 
-/* Composición escalada para una persona ('A'|'B') en su franja */
+/* Escala una composición por un FACTOR directo (no por objetivo de kcal).
+   Los ingredientes fijos (verduras, aliños, fx/cs) no se tocan; los
+   escalables se multiplican por el factor. Con factor=1 se obtiene la
+   receta TAL CUAL está escrita = 1 ración estándar. */
+function scaleByFactor(comp, factor){
+  const f = (isFinite(factor) && factor > 0) ? factor : 1;
+  const rows = [];
+  const tot = {k:0, p:0, f:0, c:0};
+  comp.forEach(it=>{
+    const baseG = itemGrams(it);
+    const g = it.cs ? 0 : (itemScalable(it) ? baseG * f : baseG);
+    const m = gramMacros(it.f, g);
+    tot.k += m.k; tot.p += m.p; tot.f += m.f; tot.c += m.c;
+    rows.push({it, grams: g, units: (it.u != null && foodOf(it) && foodOf(it).unit) ? g / foodOf(it).unit.g : null});
+  });
+  return {rows, tot, factor:f};
+}
+
+/* Composición escalada para una persona en su franja.
+   MODELO "1 ración estándar": cada receta se escribe para UNA ración
+   (la persona base, ×1). Cada persona escala su parte por su modificador
+   (≈ ratio de kcal respecto a la base, editable). Así la ficha de la
+   receta y el menú son coherentes: lo escrito es 1 ración real. */
 function dishScaled(d, personaKey){
   if(!d || !d.comp) return null;
-  return scaleComp(d.comp, mealTargetKcal(personaKey, d.cat));
+  const mod = (typeof personModifier === 'function') ? personModifier(personaKey) : 1;
+  return scaleByFactor(d.comp, mod);
 }
 
 /* ── Formato de cantidades ──────────────────────────────── */
@@ -448,6 +471,7 @@ window.FOODS = FOODS;
 window.FOOD_SECTIONS = FOOD_SECTIONS;
 window.MEAL_PCT = MEAL_PCT;
 window.scaleComp = scaleComp;
+window.scaleByFactor = scaleByFactor;
 window.dishScaled = dishScaled;
 window.recomputeDish = recomputeDish;
 window.recomputeAllComp = recomputeAllComp;
