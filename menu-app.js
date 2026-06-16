@@ -1241,29 +1241,32 @@ function closeDrawer(){
   document.body.classList.remove('no-scroll');
 }
 
-/* ── PERSONA TOGGLE (dinámico desde PEOPLE) ───────────── */
+/* ── PERSONA: botón único que cicla entre persona(s) ──── */
+function personaSeq(){ const s=[...PEOPLE]; if(PEOPLE.length>1) s.push('AB'); return s; }
+function personaLabel(id){
+  if(id==='AB') return '👥 Todas';
+  const t = TARGETS[id] || {};
+  return (t.name||'').trim() || ('Persona '+(PEOPLE.indexOf(id)+1));
+}
 function renderPersonToggle(){
   const tog = document.querySelector('.ptoggle');
   if(!tog) return;
   if(!PEOPLE.includes(S.p) && S.p !== 'AB') S.p = PEOPLE[0];
-  // Representación por NOMBRE (no por sexo/peso)
-  const btns = PEOPLE.map(id=>{
-    const t = TARGETS[id] || {};
-    const nm = (t.name||'').trim() || ('Persona '+(PEOPLE.indexOf(id)+1));
-    return `<button class="pbtn ${S.p===id?'on':''}" data-p="${id}">${escHtml(nm)}</button>`;
+  const seq = personaSeq();
+  // Un solo botón que muestra la persona activa; al pulsar, cicla a la siguiente.
+  tog.innerHTML = `<button class="pbtn pcycle on" id="personaCycle" title="Cambiar persona" aria-label="Persona activa: ${escHtml(personaLabel(S.p))}. Pulsa para cambiar">
+      <span class="pcyc-ico">👤</span><span class="pcyc-lbl">${escHtml(personaLabel(S.p))}</span>${seq.length>1?'<span class="pcyc-sw">⇄</span>':''}
+    </button>`;
+  const btn = document.getElementById('personaCycle');
+  if(btn && seq.length>1) btn.addEventListener('click', ()=>{
+    const i = seq.indexOf(S.p);
+    setPersona(seq[(i+1) % seq.length]);
   });
-  if(PEOPLE.length > 1){
-    btns.push(`<button class="pbtn ${S.p==='AB'?'on':''}" data-p="AB">👥 Todas</button>`);
-  }
-  tog.innerHTML = btns.join('');
-  tog.querySelectorAll('.pbtn').forEach(b=> b.addEventListener('click', ()=> setPersona(b.dataset.p)));
 }
 function setPersona(p){
   S.p = p;
   persistPersona();
-  document.querySelectorAll('.pbtn').forEach(b=>{
-    b.classList.toggle('on', b.dataset.p === p);
-  });
+  renderPersonToggle();   // refresca la etiqueta del botón cíclico
   renderAll();
   if(typeof renderSportActive === 'function') renderSportActive();
   if(document.body.classList.contains('week-mode') && typeof renderWeek === 'function') renderWeek();
@@ -1381,6 +1384,30 @@ window.renderTabbar = renderTabbar;
 
 /* ── INIT ────────────────────────────────────────────── */
 renderPersonToggle();   // construye el selector de personas (dinámico)
+
+/* Menú ☰ de secciones (Nutrición/Deporte/Semana/Mente) */
+function wireSecMenu(){
+  const btn = document.getElementById('secMenuBtn');
+  const menu = document.getElementById('secMenu');
+  if(!btn || !menu) return;
+  const close = ()=>{ menu.hidden = true; btn.setAttribute('aria-expanded','false'); };
+  const open = ()=>{
+    const b = document.body;
+    const cur = b.classList.contains('sec-sport') ? 'sport'
+              : b.classList.contains('sec-week')  ? 'week'
+              : (b.classList.contains('sec-mente') || b.classList.contains('mente-mode')) ? 'mente' : 'nutri';
+    menu.querySelectorAll('.sec-mi').forEach(m=> m.classList.toggle('on', m.dataset.sec === cur));
+    menu.hidden = false; btn.setAttribute('aria-expanded','true');
+  };
+  btn.addEventListener('click', e=>{ e.stopPropagation(); menu.hidden ? open() : close(); });
+  menu.querySelectorAll('.sec-mi').forEach(m=> m.addEventListener('click', ()=>{
+    close();
+    if(typeof window.setSection === 'function') window.setSection(m.dataset.sec);
+    else { const sb = document.querySelector('.sec-btn[data-sec="'+m.dataset.sec+'"]'); if(sb) sb.click(); }
+  }));
+  document.addEventListener('click', e=>{ if(!menu.hidden && !menu.contains(e.target) && e.target !== btn) close(); });
+}
+wireSecMenu();
 
 document.getElementById('settingsBtn').addEventListener('click', ()=> openSettings());
 

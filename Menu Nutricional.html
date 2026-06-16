@@ -74,6 +74,23 @@ button{font-family:inherit}
 .icon-btn{flex-shrink:0;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.08);border:none;color:rgba(255,255,255,.65);font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.18s}
 .icon-btn:hover{background:rgba(255,255,255,.18);color:#fff;transform:rotate(60deg)}
 
+/* Menú ☰ de secciones (sustituye a la barra de secciones para ahorrar espacio) */
+.sec-switch{display:none!important}
+.sec-menu-wrap{position:relative;flex-shrink:0;order:0}
+.sec-menu-btn{font-size:1.2rem}
+.sec-menu-btn:hover{transform:none}
+.sec-menu{position:absolute;top:calc(100% + 7px);left:0;background:var(--cream);border-radius:13px;box-shadow:0 14px 38px rgba(0,0,0,.34);padding:6px;display:flex;flex-direction:column;gap:2px;z-index:260;min-width:194px;border:1px solid rgba(44,31,14,.08)}
+.sec-menu[hidden]{display:none}
+.sec-mi{display:flex;align-items:center;gap:9px;border:none;background:transparent;color:var(--warm);font-family:'Lora',serif;font-size:.96rem;font-weight:500;text-align:left;padding:10px 13px;border-radius:9px;cursor:pointer;transition:.14s;white-space:nowrap}
+.sec-mi:hover{background:rgba(44,31,14,.06)}
+.sec-mi.on{background:color-mix(in srgb,var(--accent) 15%,transparent);color:var(--accent);font-weight:600}
+/* Botón único que cicla entre persona(s) */
+.ptoggle{margin-left:auto;display:flex;align-items:center;background:none;padding:0;border-radius:0;overflow:visible;max-width:none}
+.pcycle{flex:0 0 auto;display:inline-flex;align-items:center;gap:7px;border:none;background:var(--gold);color:var(--warm);font-family:'DM Mono',monospace;font-size:.7rem;font-weight:600;padding:8px 14px;border-radius:22px;cursor:pointer;letter-spacing:.02em;white-space:nowrap;transition:.18s}
+.pcycle:hover{filter:brightness(1.06)}
+.pcycle .pcyc-ico{font-size:.92rem;line-height:1}
+.pcycle .pcyc-sw{opacity:.65;font-size:.82rem;margin-left:1px}
+
 /* "+ Nueva receta" card */
 .dish.add-card{background:transparent;border:2px dashed rgba(44,31,14,.22);box-shadow:none;display:flex;align-items:center;justify-content:center;min-height:240px;padding:24px;text-align:center;cursor:pointer}
 .dish.add-card:hover{border-color:var(--terra);background:rgba(213,137,106,.06);box-shadow:none;transform:translateY(-2px)}
@@ -1049,7 +1066,7 @@ main[data-vm="small"] .dish.add-card{min-height:62px;flex-direction:row}
   .logo{font-size:.95rem;line-height:1.05;order:1;flex:1 1 auto;min-width:0}
   .logo small{display:none}
   .icon-btn{order:2;width:32px;height:32px;font-size:.94rem;flex-shrink:0;margin-left:0}
-  #ptoggle{order:5;flex:1 0 100%;max-width:100%;margin:5px 0 0;padding:2px;gap:2px;justify-content:center}
+  #ptoggle{order:4;flex:0 0 auto;margin:0;padding:0;gap:2px}
   body.sec-sport #helpBtn,body.sec-mente #helpBtn{margin-left:0}
   .pbtn{padding:7px 12px;font-size:.68rem;letter-spacing:0;flex:1;text-align:center}
 
@@ -1872,11 +1889,18 @@ img,svg,canvas{max-width:100%}
 <!-- HEADER -->
 <header class="hdr">
   <div class="hdr-top">
+    <div class="sec-menu-wrap">
+      <button class="icon-btn sec-menu-btn" id="secMenuBtn" aria-label="Secciones" aria-haspopup="true" aria-expanded="false">☰</button>
+      <div class="sec-menu" id="secMenu" role="menu" hidden>
+        <button class="sec-mi" data-sec="nutri" role="menuitem">🥗 Nutrición</button>
+        <button class="sec-mi" data-sec="sport" role="menuitem">🏋️ Deporte</button>
+        <button class="sec-mi" data-sec="week" role="menuitem">📆 Semana</button>
+        <button class="sec-mi" data-sec="mente" role="menuitem">🧠 Mente</button>
+      </div>
+    </div>
     <div class="logo">Plan <em>Nutricional</em><small id="logoSub">Menú semanal</small></div>
-    <div class="ptoggle" id="ptoggle" role="tablist" aria-label="Selección de persona">
-      <button class="pbtn on" data-p="A">♂ A</button>
-      <button class="pbtn" data-p="B">♀ B</button>
-      <button class="pbtn" data-p="AB">♂+♀ A+B</button>
+    <div class="ptoggle" id="ptoggle" aria-label="Persona activa">
+      <button class="pbtn on" data-p="A">Persona 1</button>
     </div>
     <button class="icon-btn" id="helpBtn" title="Tutorial de esta sección" aria-label="Tutorial">❔</button>
     <button class="icon-btn" id="saveNowBtn" title="Guardar avance" aria-label="Guardar avance">💾</button>
