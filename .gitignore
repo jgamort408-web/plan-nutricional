@@ -20,3 +20,6 @@ Menu Nutricional · standalone-src.html
 # Sistema
 Thumbs.db
 .DS_Store
+
+# Claude Code local
+.claude/

@@ -1,8 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(ls -la *.md *.json)",
-      "Bash(wc -l deep-research-report.md ejerciciosnuevos.json sesionesnuevas.json)"
-    ]
-  }
-}
