@@ -86,10 +86,9 @@ button{font-family:inherit}
 .sec-mi.on{background:color-mix(in srgb,var(--accent) 15%,transparent);color:var(--accent);font-weight:600}
 /* Botón único que cicla entre persona(s) */
 .ptoggle{margin-left:auto;display:flex;align-items:center;background:none;padding:0;border-radius:0;overflow:visible;max-width:none}
-.pcycle{flex:0 0 auto;display:inline-flex;align-items:center;gap:7px;border:none;background:var(--gold);color:var(--warm);font-family:'DM Mono',monospace;font-size:.7rem;font-weight:600;padding:8px 14px;border-radius:22px;cursor:pointer;letter-spacing:.02em;white-space:nowrap;transition:.18s}
-.pcycle:hover{filter:brightness(1.06)}
-.pcycle .pcyc-ico{font-size:.92rem;line-height:1}
-.pcycle .pcyc-sw{opacity:.65;font-size:.82rem;margin-left:1px}
+.ptoggle .pcycle{flex:0 0 auto;width:36px;height:36px;padding:0;display:inline-flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,.25);background:var(--gold);color:var(--warm);font-family:'DM Mono',monospace;font-size:.82rem;font-weight:700;border-radius:50%;cursor:pointer;letter-spacing:0;line-height:1;transition:.18s}
+.ptoggle .pcycle.is-emoji{font-size:1.05rem}
+.ptoggle .pcycle:hover{filter:brightness(1.06);transform:scale(1.05)}
 
 /* "+ Nueva receta" card */
 .dish.add-card{background:transparent;border:2px dashed rgba(44,31,14,.22);box-shadow:none;display:flex;align-items:center;justify-content:center;min-height:240px;padding:24px;text-align:center;cursor:pointer}

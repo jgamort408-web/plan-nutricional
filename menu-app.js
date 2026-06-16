@@ -1241,22 +1241,33 @@ function closeDrawer(){
   document.body.classList.remove('no-scroll');
 }
 
-/* ── PERSONA: botón único que cicla entre persona(s) ──── */
+/* ── PERSONA: avatar único que cicla entre persona(s) ─── */
 function personaSeq(){ const s=[...PEOPLE]; if(PEOPLE.length>1) s.push('AB'); return s; }
 function personaLabel(id){
   if(id==='AB') return '👥 Todas';
   const t = TARGETS[id] || {};
   return (t.name||'').trim() || ('Persona '+(PEOPLE.indexOf(id)+1));
 }
+// Token mínimo para el avatar: icono si no hay nombre; inicial (o dos letras si
+// coincide con la de otra persona) si lo hay; 👥 para "Todas".
+function personaToken(id){
+  if(id==='AB') return {txt:'👥', emoji:true};
+  const t = TARGETS[id] || {};
+  const name = (t.name||'').trim();
+  if(!name) return {txt: t.sym || '🧑', emoji:true};
+  const first = name[0].toUpperCase();
+  const clash = PEOPLE.some(o=> o!==id && (((TARGETS[o]||{}).name||'').trim()[0]||'').toUpperCase() === first);
+  const txt = clash ? (name[0].toUpperCase() + (name[1]||'').toLowerCase()) : first;
+  return {txt, emoji:false};
+}
 function renderPersonToggle(){
   const tog = document.querySelector('.ptoggle');
   if(!tog) return;
   if(!PEOPLE.includes(S.p) && S.p !== 'AB') S.p = PEOPLE[0];
   const seq = personaSeq();
-  // Un solo botón que muestra la persona activa; al pulsar, cicla a la siguiente.
-  tog.innerHTML = `<button class="pbtn pcycle on" id="personaCycle" title="Cambiar persona" aria-label="Persona activa: ${escHtml(personaLabel(S.p))}. Pulsa para cambiar">
-      <span class="pcyc-ico">👤</span><span class="pcyc-lbl">${escHtml(personaLabel(S.p))}</span>${seq.length>1?'<span class="pcyc-sw">⇄</span>':''}
-    </button>`;
+  const tk = personaToken(S.p), full = personaLabel(S.p);
+  // Avatar redondo: muestra la persona activa; al pulsar, cicla a la siguiente.
+  tog.innerHTML = `<button class="pbtn pcycle on ${tk.emoji?'is-emoji':''}" id="personaCycle" title="${escHtml(full)} · pulsa para cambiar de persona" aria-label="Persona activa: ${escHtml(full)}. Pulsa para cambiar">${escHtml(tk.txt)}</button>`;
   const btn = document.getElementById('personaCycle');
   if(btn && seq.length>1) btn.addEventListener('click', ()=>{
     const i = seq.indexOf(S.p);
