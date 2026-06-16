@@ -145,8 +145,12 @@ const S = {
   cart: initialState.cart.filter(id => DISHES[id]),  // drop stale ids
   activeCat: 'des',
   view: lsGet(LS.VIEW, 'cat'),
-  sort: lsGet('mnut:sort:v1', {key:'def', dir:'desc'})
+  sort: lsGet('mnut:sort:v1', {key:'def', dir:'desc'}),
+  viewMode: lsGet('mnut:viewmode:v1', 'detail'),       // detail | big | small
+  collapsed: lsGet('mnut:collapsed:v1', [])            // categorías plegadas (claves)
 };
+function persistViewMode(){ lsSet('mnut:viewmode:v1', S.viewMode); }
+function persistCollapsed(){ lsSet('mnut:collapsed:v1', S.collapsed); }
 function dishMatchesSearch(id){
   const q = (S.search||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();
   if(!q) return true;
@@ -374,6 +378,11 @@ function renderFilters(){
         <button class="fpill sort-pill ${S.sort.key===o.key?'on':''}" data-sort="${o.key}">
           <span class="fico">${o.ico}</span>${o.lbl}${o.key!=='def'&&S.sort.key===o.key?`<span class="sort-dir">${S.sort.dir==='asc'?'↑':'↓'}</span>`:''}
         </button>`).join('')}
+    </div>
+    <div class="frow-grp frow-vm" data-grp="vm">
+      <span class="frow-lbl">Vista</span>
+      ${[['detail','▤','Detalle'],['big','▦','Iconos'],['small','▪','Compacto']].map(([k,ic,lb])=>`
+        <button class="fpill vm-pill ${S.viewMode===k?'on':''}" data-vm="${k}" title="${lb}"><span class="fico">${ic}</span>${lb}</button>`).join('')}
     </div>`;
 
   const dishSearch = document.getElementById('dishSearch');
@@ -389,6 +398,15 @@ function renderFilters(){
       // Toggle: si pulsas el activo, vuelve a "todos"
       S.filter = (S.filter === b.dataset.f) ? 'todos' : b.dataset.f;
       renderAll();
+    });
+  });
+  el.querySelectorAll('.vm-pill').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      S.viewMode = b.dataset.vm;
+      persistViewMode();
+      el.querySelectorAll('.vm-pill').forEach(x=> x.classList.toggle('on', x===b));
+      const main = document.getElementById('main'); if(main) main.dataset.vm = S.viewMode;
+      renderMain();
     });
   });
   el.querySelectorAll('.sort-pill').forEach(b=>{
@@ -443,14 +461,17 @@ function dishCard(id){
 /* ── RENDER: MAIN ─────────────────────────────────────── */
 function renderMain(){
   const el = document.getElementById('main');
+  el.dataset.vm = S.viewMode || 'detail';            // modo de vista (detail|big|small)
   const sections = CATEGORIES.map(c=>{
     let ids = Object.keys(DISHES).filter(id=>DISHES[id].cat===c.key && !DISHES[id].libre && !DISHES[id].loose && passesFilter(id));
     if(!ids.length && S.filter!=='todos') return '';
     ids = sortIds(ids);
     const sortNote = S.sort.key!=='def' ? ` · ${(SORT_OPTS.find(o=>o.key===S.sort.key)||{}).lbl} ${S.sort.dir==='asc'?'↑':'↓'}` : '';
+    const isCol = (S.collapsed||[]).includes(c.key);
     return `
-      <section class="cat-section" id="cat-${c.key}">
-        <header class="cat-hd">
+      <section class="cat-section ${isCol?'collapsed':''}" id="cat-${c.key}">
+        <header class="cat-hd" data-col="${c.key}" role="button" tabindex="0" aria-expanded="${!isCol}">
+          <span class="cat-caret">▾</span>
           <h2>${c.label}</h2>
           <span class="cmeta">${c.icon} ${c.time} · ${ids.length} opciones${sortNote}</span>
           <span class="cline"></span>
@@ -467,6 +488,21 @@ function renderMain(){
       <strong>Sin resultados</strong>
       Prueba con otro filtro o desactiva los activos.
     </div>`;
+
+  // Plegar/desplegar comidas al pulsar la cabecera
+  el.querySelectorAll('.cat-hd[data-col]').forEach(h=>{
+    const toggle = ()=>{
+      const k = h.dataset.col;
+      const i = (S.collapsed||(S.collapsed=[])).indexOf(k);
+      if(i>=0) S.collapsed.splice(i,1); else S.collapsed.push(k);
+      persistCollapsed();
+      const sec = h.closest('.cat-section');
+      sec.classList.toggle('collapsed');
+      h.setAttribute('aria-expanded', !sec.classList.contains('collapsed'));
+    };
+    h.addEventListener('click', toggle);
+    h.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); toggle(); } });
+  });
 
   el.querySelectorAll('.dish:not(.add-card)').forEach(a=>{
     a.addEventListener('click', ()=> openModal(a.dataset.id));

@@ -212,6 +212,36 @@ button{font-family:inherit}
 @media(min-width:640px){.grid{grid-template-columns:repeat(2,1fr);gap:18px}}
 @media(min-width:1024px){.grid{grid-template-columns:repeat(3,1fr);gap:20px}}
 
+/* ── Plegar/desplegar comidas (E1) ── */
+.cat-caret{font-size:.78rem;color:var(--terra);transition:transform .2s ease;display:inline-block;flex-shrink:0;align-self:center}
+.cat-section.collapsed .cat-caret{transform:rotate(-90deg)}
+.cat-section.collapsed .grid{display:none}
+.cat-hd[data-col]{cursor:pointer;user-select:none}
+.cat-hd[data-col]:hover h2{color:var(--terra)}
+
+/* ── Vistas: detalle (def) / iconos grandes / compacto (E1) ── */
+main[data-vm="big"] .grid{grid-template-columns:repeat(2,1fr);gap:14px}
+@media(min-width:640px){main[data-vm="big"] .grid{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:1024px){main[data-vm="big"] .grid{grid-template-columns:repeat(4,1fr)}}
+main[data-vm="big"] .dish-tags,main[data-vm="big"] .dish-mac,main[data-vm="big"] .dish-foods{display:none}
+main[data-vm="big"] .dish-body{padding:10px 12px 12px;gap:6px}
+main[data-vm="big"] .dish-name{font-size:.95rem}
+main[data-vm="big"] .dish-emoji{font-size:2.4rem}
+main[data-vm="big"] .dish.add-card{min-height:150px}
+
+main[data-vm="small"] .grid{grid-template-columns:1fr;gap:9px}
+@media(min-width:768px){main[data-vm="small"] .grid{grid-template-columns:repeat(2,1fr)}}
+main[data-vm="small"] .dish{flex-direction:row;align-items:stretch}
+main[data-vm="small"] .dish-img{width:62px;flex-shrink:0;aspect-ratio:1}
+main[data-vm="small"] .dish-emoji{font-size:1.7rem}
+main[data-vm="small"] .dish-img .ph-lbl{display:none}
+main[data-vm="small"] .dish-body{padding:8px 12px;gap:6px;flex-direction:row;align-items:center;justify-content:space-between}
+main[data-vm="small"] .dish-tags,main[data-vm="small"] .dish-foods{display:none}
+main[data-vm="small"] .dish-name{font-size:.95rem;flex:1}
+main[data-vm="small"] .dish-bot{margin:0;padding:0;border:none;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0}
+main[data-vm="small"] .dish-mac{display:none}
+main[data-vm="small"] .dish.add-card{min-height:62px;flex-direction:row}
+
 /* ════════════════════════════════════════════════════════
    DISH CARD
 ═════════════════════════════════════════════════════════ */
