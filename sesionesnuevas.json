@@ -1,0 +1,194 @@
+{
+  "fullbody_principiante_a": {
+    "name": "Full-body principiante A",
+    "type": "fuerza",
+    "level": "Principiante",
+    "focus": "Base general: piernas, empuje, tracción y core",
+    "warmup": "5-8 min de movilidad general + sentadillas sin peso + activación de core.",
+    "notes": "Mantén 2-3 repeticiones en reserva. Prioriza técnica antes que carga.",
+    "items": [
+      { "e": "sentadilla_goblet", "sets": 3, "reps": 10, "rest": 75 },
+      { "e": "peso_muerto_rumano", "sets": 3, "reps": 8, "rest": 90 },
+      { "e": "flexiones", "sets": 3, "reps": 8, "rest": 60 },
+      { "e": "remo_mancuerna", "sets": 3, "reps": 10, "rest": 75 },
+      { "e": "plancha", "sets": 3, "dur": 35, "rest": 35 }
+    ]
+  },
+  "fullbody_principiante_b": {
+    "name": "Full-body principiante B",
+    "type": "fuerza",
+    "level": "Principiante",
+    "focus": "Unilateral, glúteo, espalda y estabilidad",
+    "warmup": "5 min de bici suave + movilidad de tobillo y cadera.",
+    "notes": "Usa cargas fáciles y aumenta repeticiones antes de aumentar peso.",
+    "items": [
+      { "e": "zancadas", "sets": 3, "reps": 8, "rest": 75 },
+      { "e": "hip_thrust", "sets": 3, "reps": 12, "rest": 75 },
+      { "e": "press_mancuernas", "sets": 3, "reps": 10, "rest": 75 },
+      { "e": "jalon_banda", "sets": 3, "reps": 15, "rest": 60 },
+      { "e": "dead_bug", "sets": 3, "reps": 10, "rest": 30 }
+    ]
+  },
+  "tren_inferior_fuerza": {
+    "name": "Tren inferior fuerza",
+    "type": "fuerza",
+    "level": "Intermedio",
+    "focus": "Sentadilla, bisagra, glúteo y core",
+    "warmup": "8-10 min: movilidad de tobillo, bisagras sin carga, sentadillas progresivas y activación de glúteo.",
+    "notes": "Descansa bien en los básicos. No sacrifiques profundidad ni espalda neutra por más carga.",
+    "items": [
+      { "e": "sentadilla_trasera", "sets": 5, "reps": 5, "rest": 180 },
+      { "e": "peso_muerto_rumano", "sets": 4, "reps": 8, "rest": 120 },
+      { "e": "bulgara", "sets": 3, "reps": 8, "rest": 90 },
+      { "e": "hip_thrust", "sets": 3, "reps": 10, "rest": 90 },
+      { "e": "pallof_press", "sets": 3, "reps": 12, "rest": 40 }
+    ]
+  },
+  "tren_superior_push": {
+    "name": "Tren superior empuje",
+    "type": "fuerza",
+    "level": "Intermedio",
+    "focus": "Pecho, hombro y tríceps",
+    "warmup": "5-8 min de movilidad torácica + activación escapular + series ligeras de press.",
+    "notes": "Combina empuje pesado con trabajo escapular para equilibrar el hombro.",
+    "items": [
+      { "e": "press_banca_barra", "sets": 5, "reps": 5, "rest": 150 },
+      { "e": "press_militar", "sets": 4, "reps": 8, "rest": 120 },
+      { "e": "press_mancuernas", "sets": 3, "reps": 10, "rest": 90 },
+      { "e": "fondos_triceps", "sets": 3, "reps": 10, "rest": 75 },
+      { "e": "reverse_fly", "sets": 3, "reps": 15, "rest": 45 }
+    ]
+  },
+  "tren_superior_pull": {
+    "name": "Tren superior tracción",
+    "type": "fuerza",
+    "level": "Intermedio",
+    "focus": "Espalda, bíceps, escápulas y agarre",
+    "warmup": "5 min de remo suave + movilidad torácica + activación escapular.",
+    "notes": "Evita tirar con cuello y hombros elevados. Busca control escapular.",
+    "items": [
+      { "e": "dominadas", "sets": 4, "reps": 6, "rest": 120 },
+      { "e": "remo_barra", "sets": 4, "reps": 8, "rest": 100 },
+      { "e": "remo_mancuerna", "sets": 3, "reps": 10, "rest": 75 },
+      { "e": "curl_biceps", "sets": 3, "reps": 12, "rest": 60 },
+      { "e": "farmer_carry", "sets": 4, "dur": 35, "rest": 60 }
+    ]
+  },
+  "posterior_gluteo_core": {
+    "name": "Cadena posterior, glúteo y core",
+    "type": "fuerza",
+    "level": "Intermedio",
+    "focus": "Peso muerto, glúteo, isquios y estabilidad lumbopélvica",
+    "warmup": "8 min de bisagras, movilidad de cadera y activación de glúteo.",
+    "notes": "Mantén la técnica limpia. En bisagras, corta la serie si la espalda pierde posición.",
+    "items": [
+      { "e": "peso_muerto_convencional", "sets": 4, "reps": 4, "rest": 180 },
+      { "e": "hip_thrust", "sets": 4, "reps": 10, "rest": 90 },
+      { "e": "step_up", "sets": 3, "reps": 10, "rest": 75 },
+      { "e": "gemelos_pie", "sets": 4, "reps": 15, "rest": 45 },
+      { "e": "bird_dog", "sets": 3, "reps": 10, "rest": 30 },
+      { "e": "plancha_lateral", "sets": 3, "dur": 30, "rest": 30 }
+    ]
+  },
+  "running_base_suave": {
+    "name": "Running base suave",
+    "type": "cardio",
+    "level": "Todos",
+    "focus": "Base aeróbica y recuperación activa",
+    "warmup": "5 min caminando rápido + movilidad de tobillo y cadera.",
+    "notes": "Debe sentirse fácil. Puedes hablar en frases completas.",
+    "items": [
+      { "e": "movilidad_tobillo", "sets": 2, "dur": 35, "rest": 10 },
+      { "e": "estiramiento_flexor_cadera", "sets": 2, "dur": 30, "rest": 10 },
+      { "e": "carrera_suave", "sets": 1, "dur": 2400, "rest": 0 },
+      { "e": "cat_cow", "sets": 2, "reps": 8, "rest": 15 }
+    ]
+  },
+  "running_series_400": {
+    "name": "Running series cortas",
+    "type": "hiit",
+    "level": "Intermedio",
+    "focus": "Velocidad aeróbica, técnica y tolerancia al ritmo",
+    "warmup": "10-15 min de trote suave + movilidad dinámica + 4 progresivos de 15 s.",
+    "notes": "No salgas demasiado rápido. Todas las repeticiones deben parecerse.",
+    "items": [
+      { "e": "movilidad_tobillo", "sets": 2, "dur": 35, "rest": 10 },
+      { "e": "rotacion_toracica", "sets": 2, "reps": 8, "rest": 10 },
+      { "e": "series_carrera", "sets": 8, "dur": 60, "rest": 90 },
+      { "e": "carrera_suave", "sets": 1, "dur": 600, "rest": 0 }
+    ]
+  },
+  "running_tempo": {
+    "name": "Running tempo / umbral",
+    "type": "cardio",
+    "level": "Intermedio",
+    "focus": "Umbral, resistencia sostenida y control de ritmo",
+    "warmup": "10 min de trote fácil + 3 progresivos suaves.",
+    "notes": "Es duro pero controlado. No debe convertirse en una carrera máxima.",
+    "items": [
+      { "e": "carrera_suave", "sets": 1, "dur": 600, "rest": 0 },
+      { "e": "tempo_carrera", "sets": 1, "dur": 1800, "rest": 0 },
+      { "e": "carrera_suave", "sets": 1, "dur": 600, "rest": 0 }
+    ]
+  },
+  "hiit_fullbody_20min": {
+    "name": "HIIT full-body 20 min",
+    "type": "hiit",
+    "level": "Intermedio",
+    "focus": "Acondicionamiento global, core y potencia",
+    "warmup": "5 min de jumping jacks suaves, movilidad y 2 rondas fáciles del circuito.",
+    "notes": "Mantén técnica. Si se degrada, baja ritmo o alarga descanso.",
+    "items": [
+      { "e": "jumping_jacks", "sets": 3, "dur": 40, "rest": 20 },
+      { "e": "kettlebell_swing", "sets": 5, "reps": 15, "rest": 45 },
+      { "e": "flexiones", "sets": 4, "reps": 10, "rest": 45 },
+      { "e": "mountain_climbers", "sets": 4, "dur": 30, "rest": 20 },
+      { "e": "burpees", "sets": 5, "dur": 25, "rest": 45 },
+      { "e": "plancha", "sets": 3, "dur": 40, "rest": 30 }
+    ]
+  },
+  "potencia_pierna": {
+    "name": "Potencia de pierna",
+    "type": "hiit",
+    "level": "Avanzado",
+    "focus": "Saltos, cuestas, glúteo y reactividad",
+    "warmup": "10 min de trote suave + movilidad de tobillo/cadera + 3 progresivos.",
+    "notes": "Calidad antes que fatiga. Descansa lo necesario para saltar y correr bien.",
+    "items": [
+      { "e": "movilidad_tobillo", "sets": 2, "dur": 40, "rest": 10 },
+      { "e": "box_jump", "sets": 5, "reps": 4, "rest": 90 },
+      { "e": "cuestas", "sets": 8, "dur": 20, "rest": 90 },
+      { "e": "sentadilla_frontal", "sets": 4, "reps": 5, "rest": 150 },
+      { "e": "plancha_lateral", "sets": 3, "dur": 30, "rest": 30 }
+    ]
+  },
+  "cardio_bici_remo": {
+    "name": "Cardio bici + remo",
+    "type": "cardio",
+    "level": "Todos",
+    "focus": "Cardio de bajo impacto y acondicionamiento",
+    "warmup": "5 min de bici suave + movilidad torácica.",
+    "notes": "Buena sesión para días sin impacto o como complemento de fuerza.",
+    "items": [
+      { "e": "bici_estatica", "sets": 1, "dur": 1800, "rest": 0 },
+      { "e": "remoergometro_intervalos", "sets": 5, "dur": 90, "rest": 90 },
+      { "e": "cat_cow", "sets": 2, "reps": 10, "rest": 15 },
+      { "e": "estiramiento_flexor_cadera", "sets": 2, "dur": 40, "rest": 15 }
+    ]
+  },
+  "movilidad_recuperacion": {
+    "name": "Movilidad y recuperación",
+    "type": "movilidad",
+    "level": "Todos",
+    "focus": "Tobillo, cadera, columna torácica y descarga general",
+    "warmup": "Respiración nasal suave durante 2 min.",
+    "notes": "No fuerces rangos dolorosos. Busca sensación de tensión suave y control.",
+    "items": [
+      { "e": "cat_cow", "sets": 2, "reps": 10, "rest": 15 },
+      { "e": "movilidad_tobillo", "sets": 3, "dur": 40, "rest": 15 },
+      { "e": "estiramiento_flexor_cadera", "sets": 3, "dur": 40, "rest": 15 },
+      { "e": "rotacion_toracica", "sets": 3, "reps": 8, "rest": 15 },
+      { "e": "dead_bug", "sets": 2, "reps": 8, "rest": 20 }
+    ]
+  }
+}

@@ -1,0 +1,678 @@
+/* ══════════════════════════════════════════════════════════
+   SPORT UI · conmutador de sección + catálogos + detalle + editor
+   depende de sport-data.js, sport-engine.js, openForm/closeForm,
+   switchView/S (menu-app.js)
+══════════════════════════════════════════════════════════ */
+function spEsc(s){ return (s||'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+/* Animación 3D EN STANDBY · pon true para reactivar el visor y la etiqueta ▶3D */
+const ANIM_ENABLED = false;
+
+/* ── Conmutador Nutrición / Deporte ──────────────────────── */
+let sportMode = false;
+let sportView = lsGet('sport:view', 'ex');
+const SPORT_VIEWS = ['ex','sess','scal'];
+
+function setSection(sec){
+  sportMode = (sec === 'sport');
+  const weekMode = (sec === 'week');
+  const menteMode = (sec === 'mente');
+  document.body.classList.toggle('sport-mode', sportMode);
+  document.body.classList.toggle('week-mode', weekMode);
+  document.body.classList.toggle('mente-mode', menteMode);
+  // Clase de sección para el color de acento (estilo común, acento por sección)
+  document.body.classList.remove('sec-nutri','sec-sport','sec-week','sec-mente');
+  document.body.classList.add('sec-' + sec);
+  // Subtítulo del logo según la sección (header más profesional/equilibrado)
+  const _sub = document.getElementById('logoSub');
+  if(_sub) _sub.textContent =
+    sec==='sport' ? 'Entrenamiento' :
+    sec==='week'  ? 'Planificación por fechas' :
+    sec==='mente' ? 'Bienestar mental' : 'Menú semanal';
+  document.querySelectorAll('.sec-btn').forEach(b=> b.classList.toggle('on', b.dataset.sec === sec));
+  document.getElementById('nutriVtabs').classList.toggle('hidden', sportMode || weekMode || menteMode);
+  document.getElementById('sportVtabs').classList.toggle('hidden', !sportMode);
+  document.getElementById('catnav').style.display = (sportMode || weekMode || menteMode || S.view !== 'cat') ? 'none' : '';
+
+  // Sección "Mente" (psicodiet incrustada) — se muestra/oculta el iframe
+  const mv = document.getElementById('view-mente');
+  if(mv) mv.classList.toggle('hidden', !menteMode);
+  if(menteMode){
+    const fr = document.getElementById('menteFrame');
+    if(fr && !fr.getAttribute('src')) fr.setAttribute('src', 'psicodiet.html');  // carga perezosa
+    const hdr = document.querySelector('.hdr');
+    if(hdr && mv) mv.style.top = hdr.offsetHeight + 'px';                          // panel bajo la cabecera
+    const wk2 = document.getElementById('view-week'); if(wk2) wk2.classList.add('hidden');
+    ['view-cat','view-cal','view-saved'].forEach(id=>{ const e=document.getElementById(id); if(e) e.classList.add('hidden'); });
+    document.querySelectorAll('.sportview').forEach(el=> el.classList.add('hidden'));
+    const cf=document.getElementById('cartFab'); if(cf) cf.style.display='none';
+    const cb=document.getElementById('cartBar'); if(cb) cb.classList.remove('show');
+    lsSet('sport:section', sec);
+    return;
+  }
+
+  const wk = document.getElementById('view-week');
+  if(weekMode){
+    ['view-cat','view-cal','view-saved'].forEach(id=> document.getElementById(id).classList.add('hidden'));
+    document.querySelectorAll('.sportview').forEach(el=> el.classList.add('hidden'));
+    document.getElementById('cartFab').style.display = 'none';
+    document.getElementById('cartBar').classList.remove('show');
+    if(wk) wk.classList.remove('hidden');
+    if(typeof renderWeek === 'function') renderWeek();
+  } else if(sportMode){
+    if(wk) wk.classList.add('hidden');
+    ['view-cat','view-cal','view-saved'].forEach(id=> document.getElementById(id).classList.add('hidden'));
+    document.getElementById('cartFab').style.display = 'none';
+    document.getElementById('cartBar').classList.remove('show');
+    showSportView(sportView);
+  } else {
+    if(wk) wk.classList.add('hidden');
+    document.querySelectorAll('.sportview').forEach(el=> el.classList.add('hidden'));
+    switchView(S.view);
+  }
+  lsSet('sport:section', sec);
+}
+
+function showSportView(v){
+  if(!SPORT_VIEWS.includes(v)) v = 'ex';
+  sportView = v;
+  lsSet('sport:view', v);
+  document.querySelectorAll('#sportVtabs .svtab').forEach(b=> b.classList.toggle('on', b.dataset.sview === v));
+  document.querySelectorAll('.sportview').forEach(el=> el.classList.add('hidden'));
+  document.getElementById('sportview-' + v).classList.remove('hidden');
+  if(v === 'ex')   renderExercises();
+  if(v === 'sess') renderSessions();
+  if(v === 'scal' && typeof renderSportCalendar === 'function') renderSportCalendar();
+}
+
+/* refresca la vista de deporte activa */
+function renderSportActive(){ if(sportMode) showSportView(sportView); }
+
+/* ── EJERCICIOS (catálogo) ───────────────────────────────── */
+let _spExFilter = 'all';
+let _spExMuscle = 'all';
+let _spExDisc   = 'all';
+let _spFavOnly  = false;
+let _spExSearch = '';
+function renderExercises(){
+  const types = ['all', ...Object.keys(EX_TYPES)];
+  const searchRow = `<div class="fpill-row"><input class="sp-search" id="spExSearch" type="search" placeholder="🔎 Buscar ejercicio por nombre…" value="${spEsc(_spExSearch)}"></div>`;
+  const typeRow = `<div class="fpill-row">${types.map(t=>{
+    const lbl = t==='all' ? 'Todos' : EX_TYPES[t].lbl;
+    const ico = t==='all' ? '◇' : EX_TYPES[t].ico;
+    return `<button class="fpill ${_spExFilter===t?'on':''}" data-spf="${t}"><span class="fico">${ico}</span>${lbl}</button>`;
+  }).join('')}</div>`;
+  const discRow = `<div class="fpill-row sp-disc-row">
+    <span class="sp-disc-lbl">Deporte</span>
+    <select class="fsel sp-disc-sel" id="spExDiscSel">
+      <option value="all">🏅 Todos los deportes</option>
+      ${Object.entries(EX_SPORTS).map(([k,v])=>`<option value="${k}" ${_spExDisc===k?'selected':''}>${v.ico} ${v.lbl}</option>`).join('')}
+    </select>
+    <button class="fpill fav ${_spFavOnly?'on':''}" data-favtog>${_spFavOnly?'★':'☆'} Favoritos</button>
+  </div>`;
+  const muscles = ['all', ...Object.keys(EX_MUSCLES)];
+  const muscRow = `<div class="fpill-row">
+    ${muscles.map(m=>{
+      const lbl = m==='all' ? 'Todo el cuerpo' : EX_MUSCLES[m].lbl;
+      return `<button class="fpill ${_spExMuscle===m?'on':''}" data-spm="${m}">${lbl}</button>`;
+    }).join('')}</div>`;
+  const cont = document.getElementById('spExFilters');
+  cont.innerHTML = searchRow + typeRow + discRow + muscRow;
+  cont.querySelectorAll('[data-spf]').forEach(b=> b.addEventListener('click', ()=>{ _spExFilter=b.dataset.spf; renderExercises(); }));
+  cont.querySelectorAll('[data-spm]').forEach(b=> b.addEventListener('click', ()=>{ _spExMuscle=b.dataset.spm; renderExercises(); }));
+  const ds = document.getElementById('spExDiscSel'); if(ds) ds.addEventListener('change', ()=>{ _spExDisc=ds.value; renderExercises(); });
+  const ft = cont.querySelector('[data-favtog]'); if(ft) ft.addEventListener('click', ()=>{ _spFavOnly=!_spFavOnly; renderExercises(); });
+  const se = document.getElementById('spExSearch'); if(se) se.addEventListener('input', ()=>{ _spExSearch=se.value; renderExGrid(); });   // solo rejilla → no pierde foco
+
+  renderExGrid();
+}
+function _norm(s){ return (s||'').toString().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,''); }
+function renderExGrid(){
+  const q = _norm(_spExSearch).trim();
+  const ids = Object.keys(EXERCISES).filter(id=>{
+    const ex = EXERCISES[id];
+    if(_spExFilter!=='all' && ex.type!==_spExFilter) return false;
+    if(_spExMuscle!=='all' && !(ex.muscles||[]).includes(_spExMuscle)) return false;
+    if(_spExDisc!=='all' && exDisc(ex)!==_spExDisc) return false;
+    if(_spFavOnly && !isFav(id)) return false;
+    if(q && !_norm(ex.name).includes(q)) return false;
+    return true;
+  });
+  const grid = document.getElementById('spExGrid');
+  grid.innerHTML = ids.length ? ids.map(exCardHtml).join('')
+    : `<div class="sp-empty">${q?`Sin ejercicios que coincidan con “${spEsc(_spExSearch)}”.`:(_spFavOnly?'No tienes ejercicios marcados como favoritos para este filtro.':'Sin ejercicios para este filtro.')}</div>`;
+  grid.querySelectorAll('.sp-card').forEach(c=> c.addEventListener('click', ()=> openExerciseDetail(c.dataset.id)));
+  grid.querySelectorAll('.sp-fav').forEach(b=> b.addEventListener('click', e=>{ e.stopPropagation(); toggleFav(b.dataset.fav); renderExGrid(); }));
+}
+function exCardHtml(id){
+  const ex = EXERCISES[id];
+  const t = EX_TYPES[ex.type] || {ico:'•',lbl:ex.type};
+  const isUser = !!ex.user;
+  const fav = isFav(id);
+  return `<article class="sp-card ex" data-id="${id}">
+    <button class="sp-fav ${fav?'on':''}" data-fav="${id}" aria-label="Favorito" title="Favorito">${fav?'★':'☆'}</button>
+    ${isUser?'<span class="sp-badge">Tuyo</span>':''}
+    <div class="sp-card-hd"><span class="sp-ico">${t.ico}</span><span class="sp-type">${t.lbl}</span><span class="sp-disc">${(EX_SPORTS[exDisc(ex)]||{}).ico||''}</span></div>
+    <div class="sp-card-n">${spEsc(ex.name)}</div>
+    <div class="msc-row">${muscleChips(ex.muscles,{dot:true})}</div>
+    <div class="sp-card-meta">
+      <span>${itemScheme({e:id})}</span>
+      <span>·</span>
+      <span>${ex.met} MET</span>
+      ${(ANIM_ENABLED && typeof hasAnimFor==='function'&&hasAnimFor(ex))?'<span>·</span><span class="anim-tag">▶ 3D</span>':''}
+      ${ex.pat&&EX_PATTERNS[ex.pat]?`<span>·</span><span>${EX_PATTERNS[ex.pat].lbl}</span>`:''}
+      ${ex.equip?`<span>·</span><span>${spEsc(ex.equip)}</span>`:''}
+    </div>
+  </article>`;
+}
+
+function openExerciseDetail(id){
+  const ex = EXERCISES[id]; if(!ex) return;
+  const t = EX_TYPES[ex.type] || {ico:'•',lbl:ex.type};
+  const kcalA = Math.round(itemKcal({e:id}, personWeight('A')));
+  const kcalB = Math.round(itemKcal({e:id}, personWeight('B')));
+  const pat = ex.pat && EX_PATTERNS[ex.pat] ? EX_PATTERNS[ex.pat] : null;
+  const hasAnim = ANIM_ENABLED && ((typeof hasAnimFor==='function') ? hasAnimFor(ex) : !!(ex.visual && typeof ANIM_TEMPLATES!=='undefined' && ANIM_TEMPLATES[ex.visual.template]));
+  const html = `
+    <div class="form-hd"><h2>${t.ico} ${spEsc(ex.name)}</h2><span class="form-sub">${t.lbl}${pat?' · '+pat.lbl:''} · ${spEsc(ex.equip||'—')}</span></div>
+    <div class="form-body">
+      ${hasAnim?`<div class="anim-wrap"><div class="anim-canvas" id="exAnimMount"><div class="anim-msg">Cargando 3D…</div></div><div class="anim-bar"><button class="anim-btn" id="exAnimToggle">⏸ Pausar</button><span class="anim-hint">🖱️ Arrastra para girar · maniquí 3D</span></div></div>`:''}
+      <div class="msc-row big">${muscleChips(sessionMuscles({items:[{e:id}]}),{dot:true})}</div>
+      <div class="sp-detail-grid">
+        <div class="sdg-cell"><b>${itemScheme({e:id})}</b><i>pauta</i></div>
+        <div class="sdg-cell"><b>${ex.met}</b><i>MET</i></div>
+        <div class="sdg-cell"><b>${fmtDur(itemTotalSec({e:id}))}</b><i>≈ duración</i></div>
+        <div class="sdg-cell"><b>${kcalA}·${kcalB}</b><i>kcal A·B</i></div>
+      </div>
+      ${ex.cues?`<div class="sp-cues"><span class="scl">Técnica</span>${spEsc(ex.cues)}</div>`:''}
+      <details class="sp-guide"><summary>Dosis orientativa por objetivo</summary>
+        <table class="og-tbl">${OBJECTIVE_GUIDE.map(o=>`<tr><th>${o.lbl}</th><td>${o.dose}</td></tr>`).join('')}</table>
+        <span class="og-src">Marco de prescripción · ACSM/NSCA (deep-research-report)</span>
+      </details>
+    </div>
+    <div class="form-actions">
+      ${ex.user?`<button class="btn-danger" id="exDel">🗑 Eliminar</button>`:''}
+      <button class="btn-sec" id="exFav">${isFav(id)?'★ Favorito':'☆ Favorito'}</button>
+      <button class="btn-sec" id="exEdit">✎ ${ex.user?'Editar':'Duplicar y editar'}</button>
+      <button class="btn-prim" id="exClose">Cerrar</button>
+    </div>`;
+  openForm(html);
+  if(hasAnim && typeof startExerciseAnim==='function'){
+    const mount = document.getElementById('exAnimMount');
+    startExerciseAnim(ex, mount);
+    const tg = document.getElementById('exAnimToggle');
+    if(tg) tg.addEventListener('click', ()=>{ if(mount._animApi){ const playing=mount._animApi.toggle(); tg.textContent = playing?'⏸ Pausar':'▶ Reproducir'; } });
+  }
+  document.getElementById('exClose').addEventListener('click', closeForm);
+  document.getElementById('exFav').addEventListener('click', ()=>{ const on=toggleFav(id); const b=document.getElementById('exFav'); b.textContent=on?'★ Favorito':'☆ Favorito'; b.classList.toggle('on-fav', on); });
+  document.getElementById('exEdit').addEventListener('click', ()=> openExerciseEditor(ex.user?id:null, ex.user?null:ex));
+  const del = document.getElementById('exDel');
+  if(del) del.addEventListener('click', async ()=>{
+    if(!await pnConfirm('¿Eliminar este ejercicio?', {danger:true, okText:'Eliminar'})) return;
+    const snap = JSON.parse(JSON.stringify(EXERCISES[id]));
+    delete EXERCISES[id]; persistExercises(); closeForm(); renderExercises();
+    if(typeof showUndo==='function') showUndo('Ejercicio eliminado', ()=>{ EXERCISES[id]=snap; persistExercises(); renderExercises(); });
+  });
+}
+
+/* ── Editor de ejercicio ─────────────────────────────────── */
+function openExerciseEditor(editId, prefill){
+  const ex = editId ? EXERCISES[editId] : (prefill ? Object.assign({}, prefill) : {name:'', type:'fuerza', muscles:[], met:5, equip:'', mode:'reps', sets:3, reps:10, dur:40, rest:60, cues:''});
+  const html = `
+    <div class="form-hd"><h2>${editId?'Editar ejercicio':'Nuevo ejercicio'}</h2><span class="form-sub">Bloque básico de entrenamiento</span></div>
+    <div class="form-body" id="exForm">
+      <div class="fgrp"><label class="flbl">Nombre</label><input class="finp" name="name" value="${spEsc(ex.name)}" placeholder="Ej. Sentadilla búlgara"></div>
+      <div class="frow-2">
+        <div class="fgrp"><label class="flbl">Tipo</label><select class="fsel" name="type">${Object.entries(EX_TYPES).map(([k,v])=>`<option value="${k}" ${ex.type===k?'selected':''}>${v.ico} ${v.lbl}</option>`).join('')}</select></div>
+        <div class="fgrp"><label class="flbl">MET (gasto)</label><input class="finp mono" type="number" step="0.1" min="1" name="met" value="${ex.met}"></div>
+      </div>
+      <div class="fgrp"><label class="flbl">Patrón de movimiento</label><select class="fsel" name="pat">${Object.entries(EX_PATTERNS).map(([k,v])=>`<option value="${k}" ${ex.pat===k?'selected':''}>${v.lbl}</option>`).join('')}</select></div>
+      <div class="fgrp"><label class="flbl">Músculos implicados</label><div class="fchips" id="exMuscles">${Object.entries(EX_MUSCLES).map(([k,v])=>`<button type="button" class="fchip ${ex.muscles.includes(k)?'on':''}" data-m="${k}">${v.lbl}</button>`).join('')}</div></div>
+      <div class="fgrp"><label class="flbl">Material</label><input class="finp" name="equip" value="${spEsc(ex.equip||'')}" placeholder="Ej. Mancuernas, banco"></div>
+      <div class="frow-2">
+        <div class="fgrp"><label class="flbl">Medición</label><select class="fsel" name="mode"><option value="reps" ${ex.mode==='reps'?'selected':''}>Repeticiones</option><option value="time" ${ex.mode==='time'?'selected':''}>Tiempo</option></select></div>
+        <div class="fgrp"><label class="flbl">Series</label><input class="finp mono" type="number" min="1" name="sets" value="${ex.sets||3}"></div>
+      </div>
+      <div class="frow-2">
+        <div class="fgrp"><label class="flbl">Reps (si aplica)</label><input class="finp mono" type="number" min="0" name="reps" value="${ex.reps||0}"></div>
+        <div class="fgrp"><label class="flbl">Duración s (si tiempo)</label><input class="finp mono" type="number" min="0" name="dur" value="${ex.dur||0}"></div>
+      </div>
+      <div class="fgrp"><label class="flbl">Descanso entre series (s)</label><input class="finp mono" type="number" min="0" name="rest" value="${ex.rest||60}"></div>
+      <div class="fgrp"><label class="flbl">Técnica / notas</label><textarea class="ftxt" name="cues" placeholder="Indicaciones de ejecución">${spEsc(ex.cues||'')}</textarea></div>
+    </div>
+    <div class="form-actions"><button class="btn-sec" id="exCancel">Cancelar</button><button class="btn-prim" id="exSave">${editId?'Guardar':'Crear ejercicio'}</button></div>`;
+  openForm(html);
+  const form = document.getElementById('exForm');
+  form.querySelectorAll('#exMuscles .fchip').forEach(b=> b.addEventListener('click', ()=> b.classList.toggle('on')));
+  document.getElementById('exCancel').addEventListener('click', closeForm);
+  document.getElementById('exSave').addEventListener('click', ()=>{
+    const v = n => (form.querySelector(`[name="${n}"]`).value||'').trim();
+    const num = n => +form.querySelector(`[name="${n}"]`).value || 0;
+    const name = v('name'); if(!name){ alert('Pon un nombre'); return; }
+    const muscles = [...form.querySelectorAll('#exMuscles .fchip.on')].map(b=>b.dataset.m);
+    const obj = {name, type:v('type')||'fuerza', pat:v('pat')||'accesorio', muscles, met:num('met')||5, equip:v('equip'), mode:v('mode')||'reps', sets:num('sets')||3, reps:num('reps'), dur:num('dur'), rest:num('rest'), cues:v('cues'), user:true};
+    const id = editId || nextSpId(name, EXERCISES);
+    EXERCISES[id] = obj; persistExercises();
+    closeForm(); renderExercises();
+  });
+}
+
+/* ── SESIONES (catálogo) ─────────────────────────────────── */
+let _spSessFilter = 'all';
+function renderSessions(){
+  const types = ['all', ...Object.keys(EX_TYPES)];
+  document.getElementById('spSessFilters').innerHTML = types.map(t=>{
+    const lbl = t==='all' ? 'Todas' : EX_TYPES[t].lbl;
+    const ico = t==='all' ? '◇' : EX_TYPES[t].ico;
+    return `<button class="fpill ${_spSessFilter===t?'on':''}" data-spf="${t}"><span class="fico">${ico}</span>${lbl}</button>`;
+  }).join('');
+  document.querySelectorAll('#spSessFilters .fpill').forEach(b=> b.addEventListener('click', ()=>{ _spSessFilter=b.dataset.spf; renderSessions(); }));
+
+  const ids = Object.keys(SESSIONS).filter(id=> _spSessFilter==='all' || SESSIONS[id].type===_spSessFilter);
+  const grid = document.getElementById('spSessGrid');
+  grid.innerHTML = ids.length ? ids.map(sessCardHtml).join('') : `<div class="sp-empty">Sin sesiones para este filtro.</div>`;
+  grid.querySelectorAll('.sp-card').forEach(c=> c.addEventListener('click', ()=> openSessionDetail(c.dataset.id)));
+}
+function sessTotalsLabel(sess){
+  const tA = sessionTotals(sess,'A'), tB = sessionTotals(sess,'B');
+  const kc = S.p==='A' ? tA.kcal : S.p==='B' ? tB.kcal : `${tA.kcal}·${tB.kcal}`;
+  return `${tA.min} min · ${kc} kcal`;
+}
+function sessCardHtml(id){
+  const s = SESSIONS[id];
+  const t = EX_TYPES[s.type] || {ico:'•',lbl:s.type};
+  return `<article class="sp-card sess" data-id="${id}">
+    ${s.user?'<span class="sp-badge">Tuya</span>':''}
+    <div class="sp-card-hd"><span class="sp-ico">${t.ico}</span><span class="sp-type">${t.lbl}${s.level?' · '+spEsc(s.level):''}</span></div>
+    <div class="sp-card-n">${spEsc(s.name)}</div>
+    ${s.focus?`<div class="sp-focus">${spEsc(s.focus)}</div>`:''}
+    <div class="msc-row">${muscleChips(sessionMuscles(s),{dot:true})}</div>
+    <div class="sp-card-bot"><span class="sp-exn">${(s.items||[]).length} ejercicios</span><span class="sp-tot">${sessTotalsLabel(s)}</span></div>
+  </article>`;
+}
+
+function openSessionDetail(id, ctx){
+  const s = SESSIONS[id]; if(!s) return;
+  const t = EX_TYPES[s.type] || {ico:'•',lbl:s.type};
+  const tA = sessionTotals(s,'A'), tB = sessionTotals(s,'B');
+  const rows = (s.items||[]).map(it=>{
+    const ex = EXERCISES[it.e]; if(!ex) return '';
+    return `<div class="sd-ex" data-exid="${it.e}" role="button" tabindex="0">
+      <div class="sd-ex-top"><span class="sd-ex-n">${spEsc(ex.name)} <span class="sd-ex-go">›</span></span><span class="sd-ex-sch">${itemScheme(it)}</span></div>
+      <div class="msc-row sm">${muscleChips(ex.muscles,{dot:true})}</div>
+      ${ex.cues?`<div class="sd-ex-cue">${spEsc(ex.cues)}</div>`:''}
+    </div>`;
+  }).join('');
+  const inCal = ctx && ctx.key != null;
+  const curWho = inCal && SportPlan.days[ctx.key] && SportPlan.days[ctx.key][ctx.idx] ? SportPlan.days[ctx.key][ctx.idx].who : null;
+  const html = `
+    <div class="form-hd"><h2>${t.ico} ${spEsc(s.name)}</h2><span class="form-sub">${t.lbl}${s.level?' · '+spEsc(s.level):''}${s.focus?' · '+spEsc(s.focus):''}</span></div>
+    <div class="form-body">
+      ${inCal?`<div class="sd-cal-bar"><span class="scl">Entrena este día</span>${whoSeg(curWho||'AB','data-detwho')}<button class="sd-cal-rm" id="sdRemoveDay">Quitar del día</button></div>`:''}
+      <div class="sp-detail-grid">
+        <div class="sdg-cell"><b>${tA.min}</b><i>min</i></div>
+        <div class="sdg-cell"><b>${(s.items||[]).length}</b><i>ejercicios</i></div>
+        <div class="sdg-cell"><b>${tA.kcal}</b><i>kcal ♂A</i></div>
+        <div class="sdg-cell"><b>${tB.kcal}</b><i>kcal ♀B</i></div>
+      </div>
+      <div class="msc-row big">${muscleChips(sessionMuscles(s),{dot:true})}</div>
+      ${s.warmup?`<div class="sp-cues"><span class="scl">Calentamiento</span>${spEsc(s.warmup)}</div>`:''}
+      <div class="sd-list">${rows}</div>
+      ${s.notes?`<div class="sp-cues"><span class="scl">Notas</span>${spEsc(s.notes)}</div>`:''}
+    </div>
+    <div class="form-actions">
+      ${s.user?`<button class="btn-danger" id="sessDel">🗑 Eliminar</button>`:''}
+      <button class="btn-sec" id="sessEdit">✎ ${s.user?'Editar':'Duplicar y editar'}</button>
+      <button class="btn-prim" id="sessClose">Cerrar</button>
+    </div>`;
+  openForm(html);
+  document.getElementById('sessClose').addEventListener('click', closeForm);
+  document.getElementById('sessEdit').addEventListener('click', ()=> openSessionEditor(s.user?id:null, s.user?null:s));
+  // abrir cada ejercicio
+  formBody().querySelectorAll('.sd-ex').forEach(r=>{
+    const open = ()=> openExerciseDetail(r.dataset.exid);
+    r.addEventListener('click', open);
+    r.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); open(); } });
+  });
+  // contexto de calendario: cambiar quién entrena / quitar del día
+  if(inCal){
+    formBody().querySelectorAll('[data-detwho] .who-b').forEach(b=> b.addEventListener('click', ()=>{
+      formBody().querySelectorAll('[data-detwho] .who-b').forEach(x=>x.classList.toggle('on', x===b));
+      if(SportPlan.days[ctx.key] && SportPlan.days[ctx.key][ctx.idx]){ SportPlan.days[ctx.key][ctx.idx].who=b.dataset.who; persistSportPlan(); if(typeof renderSportCalendar==='function') renderSportCalendar(); }
+    }));
+    const rm=document.getElementById('sdRemoveDay');
+    if(rm) rm.addEventListener('click', ()=>{
+      if(SportPlan.days[ctx.key]){ SportPlan.days[ctx.key].splice(ctx.idx,1); if(!SportPlan.days[ctx.key].length) delete SportPlan.days[ctx.key]; persistSportPlan(); }
+      closeForm(); if(typeof renderSportCalendar==='function') renderSportCalendar();
+    });
+  }
+  const del = document.getElementById('sessDel');
+  if(del) del.addEventListener('click', async ()=>{
+    if(!await pnConfirm('¿Eliminar esta sesión?', {danger:true, okText:'Eliminar'})) return;
+    const snap = JSON.parse(JSON.stringify(SESSIONS[id]));
+    const planSnap = (typeof SportPlan!=='undefined') ? JSON.parse(JSON.stringify(SportPlan.days||{})) : null;
+    delete SESSIONS[id]; persistSessions();
+    // limpia el plan (quita las entradas que usaban esta sesión)
+    if(typeof cleanSportPlan === 'function'){ cleanSportPlan(); persistSportPlan(); }
+    closeForm(); renderSessions();
+    if(typeof showUndo==='function') showUndo('Sesión eliminada', ()=>{
+      SESSIONS[id]=snap; persistSessions();
+      if(planSnap && typeof SportPlan!=='undefined'){ SportPlan.days=planSnap; if(typeof persistSportPlan==='function') persistSportPlan(); if(typeof renderSportCalendar==='function') renderSportCalendar(); }
+      renderSessions();
+    });
+  });
+}
+
+/* ── Editor de sesión ────────────────────────────────────── */
+function sessItemRowHtml(it){
+  it = it || {e:'', sets:3, reps:10, rest:60};
+  const opts = Object.keys(EXERCISES).map(eid=>`<option value="${eid}" ${it.e===eid?'selected':''}>${spEsc(EXERCISES[eid].name)}</option>`).join('');
+  return `<div class="sess-it">
+    <select class="fsel si-ex"><option value="">— ejercicio —</option>${opts}</select>
+    <input class="finp mono si-sets" type="number" min="1" placeholder="ser" value="${it.sets||''}">
+    <input class="finp mono si-rr" type="number" min="0" placeholder="rep/seg" value="${it.dur!=null?it.dur:(it.reps!=null?it.reps:'')}">
+    <input class="finp mono si-rest" type="number" min="0" placeholder="desc" value="${it.rest!=null?it.rest:''}">
+    <button type="button" class="si-rm" title="Quitar">✕</button>
+  </div>`;
+}
+function openSessionEditor(editId, prefill){
+  const s = editId ? SESSIONS[editId] : (prefill ? JSON.parse(JSON.stringify(prefill)) : {name:'', focus:'', type:'fuerza', level:'Intermedio', warmup:'', notes:'', items:[null,null,null]});
+  const items = (s.items&&s.items.length)?s.items:[null];
+  const html = `
+    <div class="form-hd"><h2>${editId?'Editar sesión':'Nueva sesión'}</h2><span class="form-sub">Combinación de ejercicios</span></div>
+    <div class="form-body" id="sessForm">
+      <div class="fgrp"><label class="flbl">Nombre</label><input class="finp" name="name" value="${spEsc(s.name)}" placeholder="Ej. Tren superior B"></div>
+      <div class="frow-2">
+        <div class="fgrp"><label class="flbl">Tipo</label><select class="fsel" name="type">${Object.entries(EX_TYPES).map(([k,v])=>`<option value="${k}" ${s.type===k?'selected':''}>${v.ico} ${v.lbl}</option>`).join('')}</select></div>
+        <div class="fgrp"><label class="flbl">Nivel</label><input class="finp" name="level" value="${spEsc(s.level||'')}" placeholder="Intermedio"></div>
+      </div>
+      <div class="fgrp"><label class="flbl">Enfoque</label><input class="finp" name="focus" value="${spEsc(s.focus||'')}" placeholder="Ej. Empuje y core"></div>
+      <div class="fgrp"><label class="flbl">Calentamiento</label><input class="finp" name="warmup" value="${spEsc(s.warmup||'')}" placeholder="5 min movilidad…"></div>
+      <div class="fgrp"><label class="flbl">Ejercicios · series · rep o seg · descanso(s)</label>
+        <div class="comp-hint">Para ejercicios por tiempo, el 2º campo son <strong>segundos</strong>; para fuerza, son <strong>repeticiones</strong>.</div>
+        <div id="sessItems">${items.map(sessItemRowHtml).join('')}</div>
+        <button type="button" class="ing-add-btn" id="sessAddItem">＋ Añadir ejercicio</button>
+      </div>
+      <div class="fgrp"><label class="flbl">Notas</label><textarea class="ftxt" name="notes">${spEsc(s.notes||'')}</textarea></div>
+      <div class="comp-live" id="sessLive"></div>
+    </div>
+    <div class="form-actions"><button class="btn-sec" id="sessCancel">Cancelar</button><button class="btn-prim" id="sessSave">${editId?'Guardar':'Crear sesión'}</button></div>`;
+  openForm(html);
+  const form = document.getElementById('sessForm');
+  const wireRow = row=>{
+    row.querySelectorAll('select,input').forEach(el=> el.addEventListener('input', sessLive));
+    row.querySelector('.si-rm').addEventListener('click', ()=>{ if(form.querySelectorAll('.sess-it').length>1){ row.remove(); sessLive(); } });
+  };
+  function readItems(){
+    const out=[];
+    form.querySelectorAll('.sess-it').forEach(row=>{
+      const e = row.querySelector('.si-ex').value; if(!e || !EXERCISES[e]) return;
+      const sets = +row.querySelector('.si-sets').value || EXERCISES[e].sets || 1;
+      const rr = row.querySelector('.si-rr').value;
+      const rest = row.querySelector('.si-rest').value;
+      const it = {e, sets};
+      if(EXERCISES[e].mode==='time'){ it.dur = rr!==''?+rr:EXERCISES[e].dur; }
+      else { it.reps = rr!==''?+rr:EXERCISES[e].reps; }
+      if(rest!=='') it.rest = +rest;
+      out.push(it);
+    });
+    return out;
+  }
+  function sessLive(){
+    const items = readItems();
+    const sess = {items, type:form.querySelector('[name=type]').value};
+    const tA = sessionTotals(sess,'A'), tB = sessionTotals(sess,'B');
+    document.getElementById('sessLive').innerHTML = `<div class="cl-hd">Cálculo automático</div>
+      <div class="cl-ab"><div class="cl-ab-i"><strong>${items.length}</strong> ejercicios · <strong>${tA.min}</strong> min</div>
+      <div class="cl-ab-i"><strong>♂A</strong> ${tA.kcal} kcal · <strong>♀B</strong> ${tB.kcal} kcal</div></div>
+      <div class="msc-row" style="margin-top:7px">${muscleChips(sessionMuscles(sess),{dot:true})}</div>`;
+  }
+  form.querySelectorAll('.sess-it').forEach(wireRow);
+  document.getElementById('sessAddItem').addEventListener('click', ()=>{ const c=document.getElementById('sessItems'); c.insertAdjacentHTML('beforeend', sessItemRowHtml(null)); wireRow(c.lastElementChild); sessLive(); });
+  document.getElementById('sessCancel').addEventListener('click', closeForm);
+  document.getElementById('sessSave').addEventListener('click', ()=>{
+    const v=n=>(form.querySelector(`[name="${n}"]`).value||'').trim();
+    const name=v('name'); if(!name){ alert('Pon un nombre'); return; }
+    const items=readItems(); if(!items.length){ alert('Añade al menos un ejercicio'); return; }
+    const obj={name, focus:v('focus'), type:v('type')||'fuerza', level:v('level'), warmup:v('warmup'), notes:v('notes'), items, user:true};
+    const id = editId || nextSpId(name, SESSIONS);
+    SESSIONS[id]=obj; persistSessions();
+    closeForm(); renderSessions();
+  });
+  sessLive();
+}
+
+/* ── Constructor aleatorio de sesiones por criterios ─────────
+   El usuario elige músculos/objetivo, duración e intensidad y se
+   genera una sesión coherente y secuenciada de forma profesional
+   (básicos compuestos primero, accesorios y core al final).
+══════════════════════════════════════════════════════════ */
+const SP_INTENSITY = {
+  suave: {lbl:'Suave',  dSet:-1, repF:1.20, restF:0.85, minRest:30, ex:'Más reps, descansos cortos · técnica y volumen'},
+  media: {lbl:'Media',  dSet:0,  repF:1.00, restF:1.00, minRest:40, ex:'Equilibrio carga-volumen · RPE 7-8'},
+  alta:  {lbl:'Alta',   dSet:1,  repF:0.70, restF:1.25, minRest:45, ex:'Menos reps, más series y descanso · fuerza'}
+};
+const SP_PAT_ORDER = {movilidad:0, sentadilla:1, bisagra:1, pliometria:1, empuje_h:2, empuje_v:2, traccion_h:2, traccion_v:2, unilateral:3, acarreo:3, ergometro:4, carrera:4, condicionamiento:4, accesorio:5, core:6};
+let _genCriteria = null;
+
+function genIntensityItem(id, intensity){
+  const ex = EXERCISES[id]; const r = SP_INTENSITY[intensity] || SP_INTENSITY.media;
+  const it = {e:id};
+  const sets = Math.max(2, (ex.sets||3) + r.dSet);
+  if(ex.mode==='time'){
+    it.sets = sets; it.dur = ex.dur||30; it.rest = Math.max(r.minRest, Math.round((ex.rest||30)*r.restF));
+  } else {
+    it.sets = sets; it.reps = Math.max(4, Math.round((ex.reps||10)*r.repF)); it.rest = Math.max(r.minRest, Math.round((ex.rest||60)*r.restF));
+  }
+  return it;
+}
+function buildSessionByCriteria(muscles, durMin, intensity, disc){
+  const want = (muscles||[]).slice();
+  if(!want.length) return null;
+  const targetSec = durMin*60;
+  let cands = Object.keys(EXERCISES).map(id=>{
+    const ex = EXERCISES[id];
+    if(disc && disc!=='all' && exDisc(ex)!==disc) return null;
+    const matched = (ex.muscles||[]).filter(m=>want.includes(m));
+    return matched.length ? {id, ex, score:matched.length, matched} : null;
+  }).filter(Boolean);
+  if(!cands.length) return null;
+  cands.sort(()=>Math.random()-0.5);                                  // variedad
+  cands.sort((a,b)=> b.score-a.score || (b.ex.muscles.length-a.ex.muscles.length));
+
+  const covered=new Set(), usedIds=new Set(), chosen=[];
+  // 1) cubrir cada músculo objetivo (compuestos primero)
+  for(const m of want){
+    if(covered.has(m)) continue;
+    const pick = cands.find(c=>!usedIds.has(c.id) && c.matched.includes(m));
+    if(pick){ chosen.push(pick); usedIds.add(pick.id); pick.matched.forEach(x=>covered.add(x)); }
+  }
+  const estSec = ()=> chosen.reduce((a,c)=> a+itemTotalSec(genIntensityItem(c.id,intensity)), 0);
+  // 2) rellenar hasta la duración objetivo
+  while(estSec() < targetSec*0.9 && chosen.length<9){
+    const pick = cands.find(c=>!usedIds.has(c.id));
+    if(!pick) break; chosen.push(pick); usedIds.add(pick.id);
+  }
+  // 3) recortar si se pasa mucho
+  while(estSec() > targetSec*1.15 && chosen.length>Math.max(1,want.length)) chosen.pop();
+  // secuenciación profesional
+  chosen.sort((a,b)=> (SP_PAT_ORDER[a.ex.pat]??5)-(SP_PAT_ORDER[b.ex.pat]??5));
+
+  const items = chosen.map(c=>genIntensityItem(c.id,intensity));
+  const typeCount={}; chosen.forEach(c=> typeCount[c.ex.type]=(typeCount[c.ex.type]||0)+1);
+  const type = Object.keys(typeCount).sort((a,b)=>typeCount[b]-typeCount[a])[0] || 'fuerza';
+  const lblMus = want.map(m=>(EX_MUSCLES[m]||{}).lbl||m);
+  const intLbl = (SP_INTENSITY[intensity]||SP_INTENSITY.media).lbl;
+  const discLbl = (disc && disc!=='all' && EX_SPORTS[disc]) ? EX_SPORTS[disc].lbl : '';
+  return {
+    name:`${discLbl?discLbl+' · ':''}${lblMus.slice(0,3).join(' · ')}`,
+    type, level:`Generada · ${intLbl.toLowerCase()}`,
+    focus:lblMus.join(', '),
+    disc: (disc && disc!=='all') ? disc : undefined,
+    warmup:'5–10 min de movilidad articular general y activación progresiva de los grupos a trabajar.',
+    notes:`Generada para ~${durMin} min · intensidad ${intLbl.toLowerCase()}.${discLbl?' Deporte: '+discLbl+'.':''} Ajusta cargas para terminar cada serie con 1–3 reps en reserva.`,
+    items, user:true, generated:true
+  };
+}
+
+function openSessionGenerator(){
+  const sel = (_genCriteria && _genCriteria.muscles) || ['hombro','gluteo','core'];
+  const dur = (_genCriteria && _genCriteria.dur) || 40;
+  const inten = (_genCriteria && _genCriteria.intensity) || 'media';
+  const disc = (_genCriteria && _genCriteria.disc) || 'gimnasio';
+  const html = `
+    <div class="form-hd"><h2>🎲 Generar sesión a medida</h2><span class="form-sub">Elige deporte, qué trabajar, cuánto tiempo y a qué intensidad</span></div>
+    <div class="form-body" id="genForm">
+      <div class="fgrp"><label class="flbl">Deporte / contexto</label>
+        <select class="fsel" id="genDisc">
+          <option value="all" ${disc==='all'?'selected':''}>🏅 Cualquiera</option>
+          ${Object.entries(EX_SPORTS).map(([k,v])=>`<option value="${k}" ${disc===k?'selected':''}>${v.ico} ${v.lbl}</option>`).join('')}
+        </select>
+      </div>
+      <div class="fgrp"><label class="flbl">Músculos / zonas a trabajar</label>
+        <div class="fchips" id="genMuscles">${Object.entries(EX_MUSCLES).map(([k,v])=>`<button type="button" class="fchip ${sel.includes(k)?'on':''}" data-m="${k}">${v.lbl}</button>`).join('')}</div>
+      </div>
+      <div class="frow-2">
+        <div class="fgrp"><label class="flbl">Duración objetivo (min)</label><input class="finp mono" type="number" id="genDur" min="10" max="120" step="5" value="${dur}"></div>
+        <div class="fgrp"><label class="flbl">Intensidad</label>
+          <div class="seg-row" id="genInten">${Object.entries(SP_INTENSITY).map(([k,v])=>`<button type="button" class="seg-b ${inten===k?'on':''}" data-int="${k}">${v.lbl}</button>`).join('')}</div>
+        </div>
+      </div>
+      <div class="cad-help" id="genIntHelp">${SP_INTENSITY[inten].ex}</div>
+      <div id="genPreview"></div>
+    </div>
+    <div class="form-actions"><button class="btn-sec" id="genCancel">Cancelar</button><button class="btn-prim" id="genRun">🎲 Generar</button></div>`;
+  openForm(html);
+  formBody().querySelectorAll('#genMuscles .fchip').forEach(b=> b.addEventListener('click', ()=> b.classList.toggle('on')));
+  formBody().querySelectorAll('#genInten .seg-b').forEach(b=> b.addEventListener('click', ()=>{
+    formBody().querySelectorAll('#genInten .seg-b').forEach(x=>x.classList.toggle('on', x===b));
+    document.getElementById('genIntHelp').textContent = SP_INTENSITY[b.dataset.int].ex;
+  }));
+  document.getElementById('genCancel').addEventListener('click', closeForm);
+  document.getElementById('genRun').addEventListener('click', ()=>{
+    const muscles = [...formBody().querySelectorAll('#genMuscles .fchip.on')].map(b=>b.dataset.m);
+    if(!muscles.length){ alert('Elige al menos un músculo o zona.'); return; }
+    const durMin = Math.min(120, Math.max(10, +document.getElementById('genDur').value||40));
+    const intensity = formBody().querySelector('#genInten .seg-b.on')?.dataset.int || 'media';
+    const disc = document.getElementById('genDisc').value || 'all';
+    _genCriteria = {muscles, dur:durMin, intensity, disc};
+    const sess = buildSessionByCriteria(muscles, durMin, intensity, disc);
+    if(!sess){ alert(`No hay ejercicios de "${disc==='all'?'cualquier deporte':(EX_SPORTS[disc]||{}).lbl}" para esos músculos. Prueba con otro deporte o más músculos.`); return; }
+    showGeneratedSession(sess);
+  });
+}
+
+function showGeneratedSession(sess){
+  const t = EX_TYPES[sess.type] || {ico:'•',lbl:sess.type};
+  const tA = sessionTotals(sess,'A'), tB = sessionTotals(sess,'B');
+  const rows = sess.items.map(it=>{
+    const ex = EXERCISES[it.e]; if(!ex) return '';
+    return `<div class="sd-ex"><div class="sd-ex-top"><span class="sd-ex-n">${spEsc(ex.name)}</span><span class="sd-ex-sch">${itemScheme(it)}</span></div>
+      <div class="msc-row sm">${muscleChips(ex.muscles,{dot:true})}</div>${ex.cues?`<div class="sd-ex-cue">${spEsc(ex.cues)}</div>`:''}</div>`;
+  }).join('');
+  const html = `
+    <div class="form-hd"><h2>${t.ico} ${spEsc(sess.name)}</h2><span class="form-sub">${t.lbl} · ${spEsc(sess.level)}</span></div>
+    <div class="form-body">
+      <div class="sp-detail-grid">
+        <div class="sdg-cell"><b>${tA.min}</b><i>min</i></div>
+        <div class="sdg-cell"><b>${sess.items.length}</b><i>ejercicios</i></div>
+        <div class="sdg-cell"><b>${tA.kcal}</b><i>kcal ♂A</i></div>
+        <div class="sdg-cell"><b>${tB.kcal}</b><i>kcal ♀B</i></div>
+      </div>
+      <div class="msc-row big">${muscleChips(sessionMuscles(sess),{dot:true})}</div>
+      <div class="sp-cues"><span class="scl">Calentamiento</span>${spEsc(sess.warmup)}</div>
+      <div class="sd-list">${rows}</div>
+      <div class="sp-cues"><span class="scl">Notas</span>${spEsc(sess.notes)}</div>
+    </div>
+    <div class="form-actions">
+      <button class="btn-sec" id="genBack">← Criterios</button>
+      <button class="btn-sec" id="genAgain">🎲 Otra variante</button>
+      <button class="btn-prim" id="genSave">💾 Guardar sesión</button>
+    </div>`;
+  openForm(html);
+  document.getElementById('genBack').addEventListener('click', openSessionGenerator);
+  document.getElementById('genAgain').addEventListener('click', ()=>{
+    const s2 = buildSessionByCriteria(_genCriteria.muscles, _genCriteria.dur, _genCriteria.intensity, _genCriteria.disc);
+    if(s2) showGeneratedSession(s2);
+  });
+  document.getElementById('genSave').addEventListener('click', ()=>{
+    const id = nextSpId(sess.name, SESSIONS);
+    SESSIONS[id] = sess; persistSessions();
+    closeForm(); renderSessions();
+  });
+}
+
+/* ── Import JSON (ejercicios o sesiones) ─────────────────── */
+function openSportImport(kind){
+  const isEx = kind==='ex';
+  const sample = isEx
+    ? `{\n  "sentadilla_frontal": {\n    "name":"Sentadilla frontal","type":"fuerza",\n    "muscles":["cuadriceps","core"],"met":6,\n    "equip":"Barra","mode":"reps","sets":4,"reps":8,"rest":120,\n    "cues":"Codos altos, tronco vertical."\n  }\n}`
+    : `{\n  "push_b": {\n    "name":"Empuje B","type":"fuerza","level":"Avanzado",\n    "focus":"Pecho y hombro","warmup":"5 min banda",\n    "items":[\n      {"e":"press_banca_barra","sets":5,"reps":5,"rest":150},\n      {"e":"press_militar","sets":4,"reps":8,"rest":90}\n    ],\n    "notes":"Progresa carga semanal."\n  }\n}`;
+  const html = `
+    <div class="form-hd"><h2>Importar ${isEx?'ejercicios':'sesiones'} (JSON)</h2><span class="form-sub">Añade o actualiza por lote</span></div>
+    <div class="form-body">
+      <div class="json-help">Acepta <code>array</code>, <code>{id: objeto}</code> o un solo objeto. ${isEx?'IDs de músculo válidos: '+Object.keys(EX_MUSCLES).slice(0,8).map(m=>`<code>${m}</code>`).join(' ')+'…':'Cada item usa <code>e</code> = id de ejercicio existente.'}<pre style="font-family:'DM Mono',monospace;font-size:.66rem;white-space:pre-wrap;margin-top:6px;line-height:1.45">${spEsc(sample)}</pre></div>
+      <textarea class="json-area" id="spImpArea" spellcheck="false" placeholder="Pega aquí el JSON"></textarea>
+      <div id="spImpStatus"></div>
+    </div>
+    <div class="form-actions"><button class="btn-sec" id="spImpCancel">Cancelar</button><button class="btn-prim" id="spImpLoad">Importar</button></div>`;
+  openForm(html);
+  document.getElementById('spImpCancel').addEventListener('click', closeForm);
+  document.getElementById('spImpLoad').addEventListener('click', ()=>{
+    const st = document.getElementById('spImpStatus'); st.className='json-status';
+    let raw; try{ raw = JSON.parse(document.getElementById('spImpArea').value); }
+    catch(e){ st.className='json-status err'; st.textContent='JSON inválido: '+e.message; return; }
+    const res = importSport(kind, raw);
+    if(res.error){ st.className='json-status err'; st.textContent='✘ '+res.error; return; }
+    st.className='json-status ok'; st.textContent=`✓ ${res.count} ${isEx?'ejercicio(s)':'sesión/es'} importada(s).`;
+    if(isEx){ persistExercises(); } else { persistSessions(); }
+    setTimeout(()=>{ closeForm(); isEx?renderExercises():renderSessions(); }, 700);
+  });
+}
+
+function importSport(kind, raw){
+  let entries = [];
+  if(Array.isArray(raw)) entries = raw.map(r=>[null, r]);
+  else if(raw && typeof raw==='object' && (raw.name)) entries = [[null, raw]];
+  else if(raw && typeof raw==='object') entries = Object.entries(raw);
+  else return {error:'formato no reconocido'};
+  let count=0;
+  for(const [id, r] of entries){
+    const norm = kind==='ex' ? normalizeExercise(r) : normalizeSession(r);
+    if(norm.error) return {error:`"${(r&&(r.name||id))||'?'}": ${norm.error}`};
+    const store = kind==='ex' ? EXERCISES : SESSIONS;
+    const useId = (id && !store[id]) ? id : nextSpId(norm.data.name, store);
+    store[useId] = norm.data; count++;
+  }
+  return {count};
+}
+function normalizeExercise(r){
+  if(!r||typeof r!=='object') return {error:'no es objeto'};
+  if(!r.name) return {error:'falta name'};
+  const muscles = Array.isArray(r.muscles)? r.muscles.filter(m=>EX_MUSCLES[m]) : [];
+  return {data:{name:''+r.name, type:EX_TYPES[r.type]?r.type:'fuerza', pat:EX_PATTERNS[r.pat]?r.pat:'accesorio', muscles, met:+r.met||5, equip:(''+(r.equip||'')), mode:r.mode==='time'?'time':'reps', sets:+r.sets||3, reps:+r.reps||0, dur:+r.dur||0, rest:+r.rest||60, cues:(''+(r.cues||'')), user:true}};
+}
+function normalizeSession(r){
+  if(!r||typeof r!=='object') return {error:'no es objeto'};
+  if(!r.name) return {error:'falta name'};
+  if(!Array.isArray(r.items)||!r.items.length) return {error:'falta items'};
+  const items=[]; const unknown=[];
+  r.items.forEach(it=>{ if(!it||!it.e) return; if(!EXERCISES[it.e]){ unknown.push(it.e); return; } const o={e:it.e, sets:+it.sets||EXERCISES[it.e].sets||1}; if(it.dur!=null) o.dur=+it.dur; if(it.reps!=null) o.reps=+it.reps; if(it.rest!=null) o.rest=+it.rest; items.push(o); });
+  if(!items.length) return {error: unknown.length?`ejercicios desconocidos: ${unknown.join(', ')}`:'items vacíos'};
+  return {data:{name:''+r.name, focus:(''+(r.focus||'')), type:EX_TYPES[r.type]?r.type:'fuerza', level:(''+(r.level||'')), warmup:(''+(r.warmup||'')), notes:(''+(r.notes||'')), items, user:true}};
+}
+
+/* ── BIND (una vez) ──────────────────────────────────────── */
+(function bindSport(){
+  document.querySelectorAll('.sec-btn').forEach(b=> b.addEventListener('click', ()=> setSection(b.dataset.sec)));
+  document.querySelectorAll('#sportVtabs .svtab').forEach(b=> b.addEventListener('click', ()=> showSportView(b.dataset.sview)));
+  const map = [['spExNew',()=>openExerciseEditor()],['spExImport',()=>openSportImport('ex')],['spSessNew',()=>openSessionEditor()],['spSessGen',()=>openSessionGenerator()],['spSessImport',()=>openSportImport('sess')]];
+  map.forEach(([id,fn])=>{ const el=document.getElementById(id); if(el) el.addEventListener('click', fn); });
+  // restaura sección guardada (tras cargar el resto de scripts de deporte)
+  const _sec0 = lsGet('sport:section','nutri');
+  if(_sec0==='sport' || _sec0==='week' || _sec0==='mente') setTimeout(()=> setSection(_sec0), 0);
+  else document.body.classList.add('sec-nutri');   // acento por defecto (Nutrición)
+})();
+
+window.setSection = setSection;
+window.renderSportActive = renderSportActive;

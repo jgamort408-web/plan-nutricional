@@ -1,0 +1,528 @@
+## 1. Idea principal: primero se calcula el gasto, después se ajusta al objetivo
+
+Para diseñar una dieta no se empieza por “comer 1.500 kcal” o “quitar hidratos”, sino por estimar **cuánta energía gasta esa persona**, decidir si necesita déficit, mantenimiento o superávit, y después repartir esas calorías entre **proteína, grasas e hidratos de carbono**.
+
+En la metodología del curso, la pérdida de grasa con salud no depende solo de las kcal: también importan la comida real, el entrenamiento, el descanso, el estrés, la adherencia y la salud mental. De hecho, el material remarca que el objetivo no es perder peso a cualquier precio, sino mejorar composición corporal: perder grasa preservando masa muscular. 
+
+---
+
+# 2. Componentes del gasto energético diario
+
+El gasto energético total de una persona se compone de varios bloques:
+
+### 2.1. Gasto metabólico basal o tasa metabólica basal
+
+Es la energía que el cuerpo necesita para mantener funciones vitales: respirar, mantener el latido cardíaco, actividad de órganos, producción hormonal, funcionamiento cerebral, temperatura corporal, etc.
+
+En el material se indica que el GMB/TMB suele representar aproximadamente el **60% del gasto energético total**, aunque varía según masa muscular, edad, sexo, entorno hormonal, composición corporal y otros factores. 
+
+### 2.2. Efecto térmico de los alimentos
+
+Es la energía que se gasta en digerir, absorber y metabolizar la comida. No suele ser el factor principal, pero existe. La proteína tiene un efecto térmico mayor que grasas e hidratos, por eso una dieta suficientemente proteica puede ayudar ligeramente al gasto y, sobre todo, a la saciedad.
+
+### 2.3. Ejercicio físico
+
+Es el gasto derivado del deporte: fuerza, cardio, clases dirigidas, correr, bicicleta, etc. Es modificable, pero muchas veces se sobreestima. Una persona puede entrenar 4 días por semana y seguir siendo bastante sedentaria si el resto del día apenas se mueve.
+
+### 2.4. NEAT o actividad no deportiva
+
+Es todo lo que se gasta fuera del entrenamiento: pasos, subir escaleras, caminar al trabajo, hacer la compra, tareas domésticas, moverse durante el trabajo, estar de pie, etc. El curso diferencia claramente el gasto del ejercicio y el gasto no asociado a deporte, y ambos forman parte de la actividad física total. 
+
+Este punto es clave: **el factor de actividad no debe elegirse solo por los días de gimnasio**, sino por el conjunto de la vida diaria.
+
+---
+
+# 3. Cálculo del gasto metabólico basal
+
+La fórmula sencilla que propone el material es:
+
+**GMB = peso corporal × 22**
+
+Ejemplo:
+
+**Persona de 70 kg**
+
+70 × 22 = **1.540 kcal/día**
+
+Ese sería su gasto basal aproximado.
+
+Esta fórmula es práctica porque no exige edad, sexo ni ecuaciones complejas. No es perfecta, pero sirve como punto de partida. El propio curso recalca que son estimaciones, no verdades absolutas, y que después hay que ajustar según evolución real. 
+
+---
+
+# 4. Cuándo usar peso real y cuándo usar peso corregido
+
+En personas con sobrepeso u obesidad, usar el peso real puede sobreestimar mucho las kcal. Por eso el curso propone usar **peso corregido** cuando hay sobrepeso u obesidad, especialmente si:
+
+* IMC > 25–26.
+* Porcentaje graso >25% en hombres.
+* Porcentaje graso >33% en mujeres.
+
+La fórmula es:
+
+**Peso ideal = 22 × altura²**
+
+**Peso corregido = peso ideal + 0,25 × (peso real − peso ideal)**
+
+Ejemplo:
+
+Persona de **100 kg** y **1,70 m**.
+
+Peso ideal:
+
+22 × 1,70² = 22 × 2,89 = **63,6 kg**
+
+Peso corregido:
+
+63,6 + 0,25 × (100 − 63,6)
+63,6 + 0,25 × 36,4
+63,6 + 9,1 = **72,7 kg**
+
+Para calcular el gasto, usaríamos aproximadamente **72,7 kg**, no 100 kg.
+
+GMB:
+
+72,7 × 22 = **1.599 kcal/día**
+
+Esto evita asignar una dieta demasiado alta en calorías a una persona con mucha masa grasa. 
+
+---
+
+# 5. Cálculo del gasto energético total: GET
+
+Una vez calculado el GMB, se multiplica por el **factor de actividad**.
+
+**GET = GMB × FA**
+
+El GET son las calorías aproximadas de mantenimiento: las kcal con las que, en teoría, la persona mantendría su peso.
+
+## Factores de actividad orientativos
+
+| Estilo de vida     |                                                         Pistas prácticas | Factor de actividad aproximado |
+| ------------------ | -----------------------------------------------------------------------: | -----------------------------: |
+| Sedentario         |            Trabajo sentado, poco movimiento, menos de 8.000–10.000 pasos |                        1,3–1,6 |
+| Ligeramente activo | Más movimiento diario, trabajos con desplazamientos, 10.000–15.000 pasos |                        1,5–1,8 |
+| Activo             |   Vida diaria demandante, bastante movimiento, alrededor de 20.000 pasos |                        1,5–2,0 |
+| Muy activo         |       Trabajo físico intenso, deporte largo/intenso, más de 20.000 pasos |                        1,9–2,2 |
+
+El curso propone que, si no se sabe qué factor elegir, se puede empezar por un **FA 1,5–1,7** y ajustar después según resultados. 
+
+Ejemplo:
+
+Persona de 70 kg.
+
+GMB = 70 × 22 = **1.540 kcal**
+
+Actividad ligera-media, FA 1,6.
+
+GET = 1.540 × 1,6 = **2.464 kcal/día**
+
+Sus kcal de mantenimiento estimadas serían unas **2.450 kcal/día**.
+
+---
+
+# 6. Ajuste de calorías según objetivo
+
+Una vez tienes el GET, decides el objetivo.
+
+## Objetivo 1: pérdida de grasa
+
+Para perder grasa hay que crear un déficit energético. El curso propone un déficit habitual del **20–25%**, evitando déficits muy agresivos porque perjudican la adherencia, aumentan el hambre, reducen energía y pueden favorecer pérdida de masa muscular. 
+
+Fórmulas:
+
+**Déficit del 20%: kcal objetivo = GET × 0,8**
+
+**Déficit del 25%: kcal objetivo = GET × 0,75**
+
+Ejemplo con GET de 2.464 kcal:
+
+Déficit 20%:
+
+2.464 × 0,8 = **1.971 kcal/día**
+
+Déficit 25%:
+
+2.464 × 0,75 = **1.848 kcal/día**
+
+En la mayoría de casos empezaría con el **20%**. Usaría el 25% solo si la persona parte de un porcentaje graso alto, tiene buena adherencia, no tiene hambre excesiva y mantiene buen rendimiento.
+
+## Objetivo 2: mantenimiento
+
+Se usan aproximadamente las kcal de mantenimiento:
+
+**kcal objetivo = GET**
+
+Ejemplo:
+
+GET 2.464 kcal → dieta de unas **2.450 kcal/día**.
+
+Esto sirve para mantener peso, consolidar hábitos, hacer una pausa tras déficit o estabilizar una nueva composición corporal.
+
+## Objetivo 3: recomposición corporal
+
+La recomposición busca perder grasa y ganar o mantener músculo. Suele funcionar mejor en principiantes, personas que vuelven a entrenar, personas con margen de mejora o con porcentaje graso medio/alto.
+
+Opciones prácticas:
+
+* Si hay grasa que perder: déficit suave, **5–15%**.
+* Si el peso ya es adecuado: mantenimiento.
+* Proteína alta.
+* Entrenamiento de fuerza progresivo.
+* Buen descanso.
+
+Ejemplo:
+
+GET 2.464 kcal.
+
+Déficit suave 10%:
+
+2.464 × 0,9 = **2.218 kcal/día**
+
+## Objetivo 4: ganancia muscular
+
+Aquí no interesa un gran superávit, porque aumentaría demasiado la grasa. Se suele usar un superávit pequeño:
+
+**kcal objetivo = GET × 1,05 a 1,10**
+
+Ejemplo:
+
+2.464 × 1,05 = **2.587 kcal/día**
+
+2.464 × 1,10 = **2.710 kcal/día**
+
+Para la mayoría, bastaría con **+150 a +300 kcal/día** sobre mantenimiento, ajustando según evolución.
+
+---
+
+# 7. Cómo calcular los macronutrientes
+
+Los macronutrientes aportan energía:
+
+* **Proteínas:** 4 kcal/g.
+* **Carbohidratos:** 4 kcal/g.
+* **Grasas:** 9 kcal/g.
+* **Fibra:** aproximadamente 2 kcal/g.
+* **Alcohol:** 7 kcal/g, aunque no es un nutriente. 
+
+La propuesta Realfooding del material usa como referencia una distribución sencilla y adherente:
+
+**30% proteína, 30% grasa, 40% carbohidratos**
+
+También se indica que, en pérdida de grasa, la proteína puede situarse en torno a **1,5–2,5 g/kg/día**, y que si hay sobrepeso u obesidad conviene calcularla con peso corregido. 
+
+---
+
+# 8. Método recomendado para calcular macros
+
+Hay dos formas válidas.
+
+## Método A: por porcentajes
+
+Ejemplo con dieta de **2.000 kcal** y reparto 30/30/40.
+
+### Proteína: 30%
+
+2.000 × 0,30 = 600 kcal de proteína
+600 ÷ 4 = **150 g de proteína**
+
+### Grasas: 30%
+
+2.000 × 0,30 = 600 kcal de grasa
+600 ÷ 9 = **67 g de grasa**
+
+### Carbohidratos: 40%
+
+2.000 × 0,40 = 800 kcal de hidratos
+800 ÷ 4 = **200 g de carbohidratos**
+
+Resultado:
+
+**2.000 kcal: 150 g proteína, 67 g grasa, 200 g hidratos**
+
+Este método es sencillo y encaja con la propuesta del curso.
+
+## Método B: por gramos/kg y después carbohidratos al resto
+
+Este método suele ser más preciso.
+
+Orden recomendado:
+
+1. Fijar proteína.
+2. Fijar grasas mínimas.
+3. Rellenar el resto con carbohidratos.
+
+Ejemplo:
+
+Persona de 70 kg, objetivo pérdida de grasa, 2.000 kcal.
+
+### Paso 1: proteína
+
+Usamos 2 g/kg.
+
+70 × 2 = **140 g proteína**
+
+140 × 4 = **560 kcal**
+
+### Paso 2: grasa
+
+Usamos 0,8–1 g/kg. Por ejemplo, 0,9 g/kg.
+
+70 × 0,9 = **63 g grasa**
+
+63 × 9 = **567 kcal**
+
+### Paso 3: carbohidratos
+
+Kcal restantes:
+
+2.000 − 560 − 567 = **873 kcal**
+
+Carbohidratos:
+
+873 ÷ 4 = **218 g hidratos**
+
+Resultado:
+
+**2.000 kcal: 140 g proteína, 63 g grasa, 218 g hidratos**
+
+Este método me gusta más porque asegura proteína y grasa suficientes, y después adapta los hidratos al nivel de actividad.
+
+---
+
+# 9. Recomendaciones de macros según objetivo
+
+## Pérdida de grasa
+
+Prioridades:
+
+1. Déficit calórico moderado.
+2. Proteína alta.
+3. Entrenamiento de fuerza.
+4. Grasas suficientes.
+5. Hidratos adaptados a actividad y adherencia.
+
+Macros orientativos:
+
+* **Proteína:** 1,8–2,5 g/kg.
+* **Grasas:** 0,7–1 g/kg o mínimo 20–25% de kcal.
+* **Carbohidratos:** el resto.
+
+El material recuerda que no conviene restringir demasiado las grasas, porque cumplen funciones importantes y no deberían bajar del 20% de las kcal o aproximadamente 1 g/kg como referencia práctica. 
+
+## Mantenimiento
+
+Prioridades:
+
+1. Mantener energía estable.
+2. Buena calidad alimentaria.
+3. Proteína suficiente.
+4. Flexibilidad.
+
+Macros orientativos:
+
+* **Proteína:** 1,4–2 g/kg.
+* **Grasas:** 0,8–1,2 g/kg.
+* **Carbohidratos:** el resto.
+
+## Recomposición corporal
+
+Prioridades:
+
+1. Fuerza progresiva.
+2. Proteína alta.
+3. Déficit leve o mantenimiento.
+4. Buen sueño.
+
+Macros orientativos:
+
+* **Proteína:** 1,8–2,4 g/kg.
+* **Grasas:** 0,8–1 g/kg.
+* **Carbohidratos:** el resto, idealmente más altos alrededor del entrenamiento.
+
+## Ganancia muscular
+
+Prioridades:
+
+1. Superávit pequeño.
+2. Entrenamiento de fuerza progresivo.
+3. Carbohidratos suficientes.
+4. No subir grasa demasiado rápido.
+
+Macros orientativos:
+
+* **Proteína:** 1,6–2,2 g/kg.
+* **Grasas:** 0,8–1,2 g/kg.
+* **Carbohidratos:** el resto.
+
+En ganancia muscular, los hidratos suelen subir porque ayudan al rendimiento, al volumen de entrenamiento y a la recuperación.
+
+---
+
+# 10. Cómo ajustar los hidratos según actividad física
+
+Los carbohidratos no son obligatoriamente “altos” o “bajos”; dependen del contexto.
+
+Una persona sedentaria puede funcionar bien con menos hidratos y más verduras, fruta, legumbres y grasas saludables. Una persona que entrena fuerza 4–5 días, corre, hace deporte intenso o tiene un trabajo físico probablemente necesitará más hidratos.
+
+El material recomienda priorizar carbohidratos complejos y comida real: patata, boniato, arroz, avena, legumbres, cereales integrales, frutas, verduras y tubérculos. También reconoce que en deportistas o tras entrenamientos intensos puede tener sentido usar opciones más simples en momentos concretos. 
+
+Una estrategia práctica:
+
+* Días de entrenamiento: más hidratos, especialmente pre/postentreno.
+* Días de descanso: algo menos de hidratos y algo más de grasas si ayuda a la adherencia.
+* Proteína: estable todos los días.
+
+---
+
+# 11. Ejemplo completo
+
+Persona:
+
+* Peso: 80 kg.
+* Altura: 1,75 m.
+* Actividad: ligera-media.
+* Entrena fuerza 3–4 días.
+* Objetivo: pérdida de grasa.
+
+### Paso 1: GMB
+
+80 × 22 = **1.760 kcal**
+
+### Paso 2: factor de actividad
+
+Elegimos FA 1,6.
+
+1.760 × 1,6 = **2.816 kcal**
+
+GET estimado: **2.816 kcal/día**
+
+### Paso 3: déficit
+
+Déficit 20%.
+
+2.816 × 0,8 = **2.253 kcal/día**
+
+### Paso 4: proteína
+
+2 g/kg.
+
+80 × 2 = **160 g proteína**
+
+160 × 4 = **640 kcal**
+
+### Paso 5: grasa
+
+0,9 g/kg.
+
+80 × 0,9 = **72 g grasa**
+
+72 × 9 = **648 kcal**
+
+### Paso 6: hidratos
+
+2.253 − 640 − 648 = **965 kcal restantes**
+
+965 ÷ 4 = **241 g hidratos**
+
+Resultado aproximado:
+
+**2.250 kcal/día**
+**160 g proteína**
+**72 g grasa**
+**240 g hidratos**
+
+---
+
+# 12. Cómo saber si el cálculo está bien
+
+Las fórmulas solo dan un punto de partida. Después hay que mirar la evolución real durante 2–4 semanas.
+
+## En pérdida de grasa
+
+Ritmos orientativos:
+
+* Persona con peso/grasa moderada: **0,5–1% del peso corporal por semana**.
+* Mujeres con sobrepeso u hombres grandes: **1–1,5% semanal**.
+* Hombres con obesidad o sobrepeso elevado: **1,5–2,5% semanal**, especialmente al inicio. 
+
+Ejemplo: persona de 80 kg.
+
+* 0,5% = 400 g/semana.
+* 1% = 800 g/semana.
+
+Si pierde 300–800 g/semana, probablemente va bien. Si no pierde nada durante varias semanas, habría que bajar kcal o aumentar actividad. Si pierde demasiado rápido, tiene hambre, duerme mal o baja mucho el rendimiento, habría que subir kcal o reducir déficit.
+
+## No usar solo la báscula
+
+El curso insiste en que el peso puede variar por agua, ciclo menstrual, digestión, hidratación, entrenamiento o descanso. También recuerda que perder peso no siempre significa perder grasa, y ganar peso no siempre es malo si hay ganancia muscular. 
+
+Mejor controlar:
+
+* Media semanal del peso.
+* Perímetros, especialmente cintura y cadera.
+* Fotos.
+* Rendimiento en fuerza.
+* Hambre y saciedad.
+* Energía diaria.
+* Sueño.
+* Adherencia.
+
+---
+
+# 13. Adherencia: el cálculo perfecto no sirve si no se puede seguir
+
+Una dieta puede estar matemáticamente bien calculada y fracasar si no encaja con la persona. El material del módulo 2 es muy claro: la adherencia es uno de los mejores predictores de éxito a largo plazo, y una estrategia debe estar bien calculada, pero también ser satisfactoria y fácil de mantener. 
+
+Por eso, al calcular kcal y macros hay que tener en cuenta:
+
+* Gustos.
+* Horarios.
+* Hambre.
+* Vida social.
+* Cocina realista.
+* Número de comidas preferido.
+* Presupuesto.
+* Trabajo.
+* Entrenamientos.
+* Descanso.
+* Nivel de estrés.
+
+No hay obligación de hacer 5 comidas. Si las calorías y macros están bien, hacer 3 o 5 comidas no cambia demasiado la pérdida de grasa; lo importante es que el patrón mejore la adherencia. El módulo 8 indica que la cantidad y calidad de lo que se come es más importante que cómo se distribuye durante el día, siempre que el horario sea ordenado y encaje con la persona. 
+
+---
+
+# 14. Resumen operativo
+
+La fórmula práctica sería:
+
+1. **Determinar peso de cálculo**
+   Peso real si no hay sobrepeso importante; peso corregido si hay sobrepeso/obesidad.
+
+2. **Calcular GMB**
+   Peso × 22.
+
+3. **Elegir factor de actividad**
+   Según pasos, trabajo, NEAT y entrenamiento.
+
+4. **Calcular GET**
+   GMB × FA.
+
+5. **Ajustar según objetivo**
+
+   * Pérdida grasa: GET × 0,75–0,9, habitualmente GET × 0,8.
+   * Mantenimiento: GET.
+   * Recomposición: GET o déficit leve.
+   * Ganancia muscular: GET × 1,05–1,10.
+
+6. **Calcular macros**
+
+   * Proteína: normalmente 1,6–2,5 g/kg según objetivo.
+   * Grasas: no bajar de 20% de kcal o aproximadamente 0,7–1 g/kg.
+   * Carbohidratos: el resto de calorías.
+
+7. **Transformar macros en comida real**
+   Proteína en cada comida, verduras y fruta a diario, legumbres, tubérculos, cereales integrales, aceite de oliva, frutos secos/semillas si procede, pescado, huevos, carnes magras o alternativas vegetales.
+
+8. **Revisar cada 2–4 semanas**
+   Ajustar según peso medio, medidas, rendimiento, hambre, sueño y adherencia.

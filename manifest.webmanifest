@@ -1,0 +1,16 @@
+{
+  "name": "Plan Nutricional",
+  "short_name": "Plan",
+  "description": "Planificación nutricional semanal: catálogo de recetas, calendario y menús guardados.",
+  "start_url": "Menu%20Nutricional.html",
+  "display": "standalone",
+  "background_color": "#F6EDD8",
+  "theme_color": "#2C1F0E",
+  "orientation": "portrait-primary",
+  "lang": "es",
+  "icons": [
+    { "src": "favicon.svg",  "sizes": "any",     "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png",     "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png",     "purpose": "any maskable" }
+  ]
+}

@@ -1,0 +1,22 @@
+# Build de escritorio (Electron/Tauri) — no va a la web
+desktop/
+anim_preview/
+node_modules/
+
+# Scripts y artefactos de desarrollo
+_pdf.py
+_render.mjs
+_strip.mjs
+
+# Documentos pesados / fuentes no necesarias en la web
+*.pdf
+deep-research-report.md
+
+# Variantes/duplicados de la app (la web usa index.html + Menu Nutricional.html)
+Plan Nutricional · offline.html
+Plan Nutricional · standalone.html
+Menu Nutricional · standalone-src.html
+
+# Sistema
+Thumbs.db
+.DS_Store
