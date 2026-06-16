@@ -312,14 +312,51 @@ function openExerciseEditor(editId, prefill){
 
 /* ── SESIONES (catálogo) ─────────────────────────────────── */
 let _spSessFilter = 'all';
+let _spSessSheetOpen = false, _spSessSheetScroll = 0;
+function spSessResultCount(){
+  return Object.keys(SESSIONS).filter(id=> _spSessFilter==='all' || SESSIONS[id].type===_spSessFilter).length;
+}
+function setSpSessSheet(open){
+  _spSessSheetOpen = open;
+  const sheet = document.getElementById('spSessSheet');
+  const back  = document.getElementById('spSessBack');
+  if(sheet) sheet.classList.toggle('open', open);
+  if(back)  back.classList.toggle('open', open);
+  document.body.classList.toggle('sheet-lock', open);
+  if(open){ const b = document.querySelector('#spSessSheet .fsheet-body'); if(b) b.scrollTop = _spSessSheetScroll; }
+}
 function renderSessions(){
   const types = ['all', ...Object.keys(EX_TYPES)];
-  document.getElementById('spSessFilters').innerHTML = types.map(t=>{
+  const typeRow = `<div class="frow-grp"><span class="frow-lbl">Tipo</span>${types.map(t=>{
     const lbl = t==='all' ? 'Todas' : EX_TYPES[t].lbl;
     const ico = t==='all' ? '◇' : EX_TYPES[t].ico;
     return `<button class="fpill ${_spSessFilter===t?'on':''}" data-spf="${t}"><span class="fico">${ico}</span>${lbl}</button>`;
-  }).join('');
-  document.querySelectorAll('#spSessFilters .fpill').forEach(b=> b.addEventListener('click', ()=>{ _spSessFilter=b.dataset.spf; renderSessions(); }));
+  }).join('')}</div>`;
+  const nActive = _spSessFilter!=='all' ? 1 : 0;
+  const cont = document.getElementById('spSessFilters');
+  cont.innerHTML = `
+    <div class="fbar-quick fbar-end">
+      <button class="fbtn-open ${nActive?'has-active':''}" id="spSessOpen" type="button" aria-label="Filtros">
+        <span class="ffunnel">⚙</span> Filtros<span class="fbadge">${nActive}</span>
+      </button>
+    </div>
+    <div class="filter-sheet" id="spSessSheet">
+      <div class="fsheet-hd"><strong>Filtros</strong><button class="fsheet-x" id="spSessClose" type="button" aria-label="Cerrar">✕</button></div>
+      <div class="fsheet-body">${typeRow}</div>
+      <div class="fsheet-foot">
+        <button class="fsheet-clear" id="spSessClear" type="button">Limpiar</button>
+        <button class="fsheet-apply" id="spSessApply" type="button">Ver ${spSessResultCount()} resultados</button>
+      </div>
+    </div>
+    <div class="filter-backdrop" id="spSessBack"></div>`;
+  cont.querySelectorAll('[data-spf]').forEach(b=> b.addEventListener('click', ()=>{ _spSessFilter=b.dataset.spf; renderSessions(); }));
+  const ob = document.getElementById('spSessOpen'); if(ob) ob.addEventListener('click', ()=> setSpSessSheet(true));
+  const cb = document.getElementById('spSessClose'); if(cb) cb.addEventListener('click', ()=> setSpSessSheet(false));
+  const bk = document.getElementById('spSessBack'); if(bk) bk.addEventListener('click', ()=> setSpSessSheet(false));
+  const ap = document.getElementById('spSessApply'); if(ap) ap.addEventListener('click', ()=> setSpSessSheet(false));
+  const cl = document.getElementById('spSessClear'); if(cl) cl.addEventListener('click', ()=>{ _spSessFilter='all'; renderSessions(); });
+  const sb = document.querySelector('#spSessSheet .fsheet-body'); if(sb) sb.addEventListener('scroll', ()=>{ _spSessSheetScroll = sb.scrollTop; });
+  if(_spSessSheetOpen) setSpSessSheet(true);
 
   const ids = Object.keys(SESSIONS).filter(id=> _spSessFilter==='all' || SESSIONS[id].type===_spSessFilter);
   const grid = document.getElementById('spSessGrid');

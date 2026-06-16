@@ -146,7 +146,7 @@ const S = {
   activeCat: 'des',
   view: lsGet(LS.VIEW, 'cat'),
   sort: lsGet('mnut:sort:v1', {key:'def', dir:'desc'}),
-  viewMode: lsGet('mnut:viewmode:v1', 'detail'),       // detail | big | small
+  viewMode: lsGet('mnut:viewmode:v1', 'small'),        // detail | big | small (compacta por defecto)
   collapsed: lsGet('mnut:collapsed:v1', [])            // categorías plegadas (claves)
 };
 function persistViewMode(){ lsSet('mnut:viewmode:v1', S.viewMode); }
@@ -372,6 +372,8 @@ function setNutSheet(open){
 }
 function renderFilters(){
   const el = document.getElementById('frow');
+  // Limpia restos del sheet portado al body en un render anterior (evita IDs duplicados)
+  ['nutFSheet','nutFBack'].forEach(id=>{ const o=document.getElementById(id); if(o && o.parentElement===document.body) o.remove(); });
   const dietFilters = FILTERS.filter(f=> f.group==='all' || f.group==='diet');
   const foodFilters = FILTERS.filter(f=> f.group==='food');
 
@@ -420,6 +422,10 @@ function renderFilters(){
       </div>
     </div>
     <div class="filter-backdrop" id="nutFBack"></div>`;
+
+  // Portal: saca el sheet+backdrop del #frow (sticky, z-index bajo) al <body>,
+  // si no, las estrellas de favoritos de las tarjetas (z-index 3) lo atraviesan.
+  ['nutFSheet','nutFBack'].forEach(id=>{ const n=document.getElementById(id); if(n) document.body.appendChild(n); });
 
   // Apertura/cierre del bottom-sheet (móvil)
   const ob = document.getElementById('nutFOpen'); if(ob) ob.addEventListener('click', ()=> setNutSheet(true));

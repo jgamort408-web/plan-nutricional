@@ -197,6 +197,7 @@ button{font-family:inherit}
 
 /* ── Filtros tipo Idealista: quickbar + panel (móvil: bottom-sheet · escritorio: modal) ── */
 .fbar-quick{display:flex;gap:8px;align-items:center;width:100%}
+.fbar-quick.fbar-end{justify-content:flex-end}
 .fbar-quick .dish-search,.fbar-quick .sp-search{flex:1;max-width:440px}
 .fbtn-open{display:inline-flex;align-items:center;gap:6px;flex-shrink:0;border:1.5px solid rgba(44,31,14,.15);background:var(--white);color:var(--warm);font-family:'DM Mono',monospace;font-size:.68rem;text-transform:uppercase;letter-spacing:.04em;font-weight:600;padding:9px 14px;border-radius:22px;cursor:pointer;white-space:nowrap;transition:.18s}
 .fbtn-open .ffunnel{font-size:.9rem}
@@ -206,14 +207,14 @@ button{font-family:inherit}
 .fbtn-open.has-active .fbadge{display:inline-flex}
 body.sheet-lock{overflow:hidden}
 
-.filter-backdrop{position:fixed;inset:0;background:rgba(20,12,4,.42);z-index:300;opacity:0;pointer-events:none;transition:opacity .25s}
+.filter-backdrop{position:fixed;inset:0;background:rgba(20,12,4,.6);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);z-index:300;opacity:0;pointer-events:none;transition:opacity .25s}
 .filter-backdrop.open{opacity:1;pointer-events:auto}
 
 .filter-sheet{display:flex;flex-direction:column;position:fixed;z-index:310;background:var(--cream);box-shadow:0 20px 60px rgba(0,0,0,.32)}
 .fsheet-hd{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 16px 7px;flex-shrink:0}
 .fsheet-hd strong{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700}
 .fsheet-x{border:none;background:rgba(44,31,14,.07);width:28px;height:28px;border-radius:50%;font-size:.9rem;cursor:pointer;color:var(--warm);flex-shrink:0;line-height:1}
-.fsheet-body{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:4px 16px 12px;display:flex;flex-direction:column;gap:16px}
+.fsheet-body{min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:4px 16px 12px;display:flex;flex-direction:column;gap:16px;max-height:calc(82vh - 120px)}
 .fsheet-body .frow-grp{flex-wrap:wrap;overflow:visible;gap:8px;padding-bottom:0}
 .fsheet-body .frow-lbl{width:100%;padding:0 0 1px}
 .fsheet-body .frow-sort{border-top:none;padding-top:0;margin-top:0}
@@ -1044,18 +1045,18 @@ main[data-vm="small"] .dish.add-card{min-height:62px;flex-direction:row}
   .hdr{box-shadow:0 4px 18px rgba(0,0,0,.28)}
   /* Fila 1: logo + iconos (siempre juntos, sin saltos). Fila 2: selector
      de persona a lo ancho. Determinista, sin botones que bailan. */
-  .hdr-top{padding:9px 14px 8px;gap:8px;flex-wrap:wrap;align-items:center}
-  .logo{font-size:.98rem;line-height:1.1;order:1;flex:1 1 auto;min-width:0}
-  .logo small{font-size:.5rem;letter-spacing:.08em;margin-top:0}
-  .icon-btn{order:2;width:34px;height:34px;font-size:.98rem;flex-shrink:0;margin-left:0}
-  #ptoggle{order:5;flex:1 0 100%;max-width:100%;margin:7px 0 0;padding:3px;gap:2px;justify-content:center}
+  .hdr-top{padding:7px 14px 4px;gap:8px;flex-wrap:wrap;align-items:center}
+  .logo{font-size:.95rem;line-height:1.05;order:1;flex:1 1 auto;min-width:0}
+  .logo small{display:none}
+  .icon-btn{order:2;width:32px;height:32px;font-size:.94rem;flex-shrink:0;margin-left:0}
+  #ptoggle{order:5;flex:1 0 100%;max-width:100%;margin:5px 0 0;padding:2px;gap:2px;justify-content:center}
   body.sec-sport #helpBtn,body.sec-mente #helpBtn{margin-left:0}
   .pbtn{padding:7px 12px;font-size:.68rem;letter-spacing:0;flex:1;text-align:center}
 
   /* SECTION SWITCH (4 secciones: scroll horizontal si no caben) */
-  .sec-switch{padding:8px 12px 0;overflow-x:auto;scrollbar-width:none;flex-wrap:nowrap}
+  .sec-switch{padding:4px 12px 0;overflow-x:auto;scrollbar-width:none;flex-wrap:nowrap}
   .sec-switch::-webkit-scrollbar{display:none}
-  .sec-btn{flex-shrink:0;padding:8px 13px;font-size:.64rem}
+  .sec-btn{flex-shrink:0;padding:6px 12px;font-size:.62rem}
 
   /* VIEW TABS */
   .vtabs{padding:0 8px;overflow-x:auto;scrollbar-width:none;flex-wrap:nowrap}
@@ -1064,8 +1065,8 @@ main[data-vm="small"] .dish.add-card{min-height:62px;flex-direction:row}
   .vtab .vti{font-size:.88rem}
 
   /* CATEGORY NAV */
-  .catnav{padding:2px 10px 8px;gap:2px}
-  .cbtn{padding:6px 11px 8px;font-size:.86rem}
+  .catnav{padding:2px 10px 6px;gap:2px}
+  .cbtn{padding:5px 11px 6px;font-size:.84rem}
   .cbtn .cnum{font-size:.58rem}
 
   /* FILTER ROW */
@@ -1590,6 +1591,7 @@ body.sec-sport #helpBtn,body.sec-mente #helpBtn{margin-left:auto}
 @media(max-width:760px){
   .filter-sheet{left:0;right:0;bottom:0;border-radius:18px 18px 0 0;box-shadow:0 -10px 40px rgba(0,0,0,.3);max-height:86vh;transform:translateY(102%);transition:transform .28s cubic-bezier(.4,0,.2,1)}
   .filter-sheet.open{transform:translateY(0)}
+  .fsheet-body{max-height:calc(86vh - 120px)}
   .fsheet-foot{padding-bottom:calc(14px + env(safe-area-inset-bottom,0px))}
 }
 /* copia de datos */
