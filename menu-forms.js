@@ -8,6 +8,9 @@
 const formBg    = () => document.getElementById('formBg');
 const formBody  = () => document.getElementById('formBody');
 
+/* Iconos elegibles para el avatar de persona (o "Aa" = inicial del nombre) */
+const PERSON_ICON_CHOICES = ['🧑','👩','👨','👧','👦','🧒','👵','👴','💪','🏃','🧘','🥗','⭐','🌟','🐱','🐶','🦊','🦁','🌶️','🍀'];
+
 function openForm(html){
   formBody().innerHTML = html;
   formBg().classList.add('show');
@@ -230,12 +233,19 @@ function renderPersonasForm(){
     return `
       <div class="fcard" data-pkey="${k}">
         <div class="fcard-hd">
-          <span>${sym} ${(t.name||('Persona '+(idx+1))).replace(/</g,'&lt;')} <small>${t.kcal} kcal/día</small></span>
+          <span>${t.icon||sym} ${(t.name||('Persona '+(idx+1))).replace(/</g,'&lt;')} <small>${t.kcal} kcal/día</small></span>
           ${PEOPLE.length>1 ? `<button type="button" class="person-rm" data-rm="${k}" title="Quitar persona">🗑</button>` : ''}
         </div>
         <div class="fgrp">
           <label class="flbl">Nombre / etiqueta</label>
           <input class="finp" name="name" value="${(t.name||'').replace(/"/g,'&quot;')}" placeholder="ej. ${idx===0?'135kg':'95kg'}">
+        </div>
+        <div class="fgrp">
+          <label class="flbl">Icono <span class="flbl-ex">— se muestra en el botón de persona; si eliges "Aa", se usa la inicial del nombre</span></label>
+          <div class="fchips icon-chips" data-icon-for="${k}">
+            <button type="button" class="fchip icon-chip ${!t.icon?'on':''}" data-icon="">Aa</button>
+            ${PERSON_ICON_CHOICES.map(ic=>`<button type="button" class="fchip icon-chip ${t.icon===ic?'on':''}" data-icon="${ic}">${ic}</button>`).join('')}
+          </div>
         </div>
         <div class="fgrp">
           <label class="flbl">Modificador de ración ${isBase?'<span class="flbl-ex">— ración BASE (la de menor kcal): ×1</span>':'<span class="flbl-ex">× sobre la ración base. Por defecto = ratio de kcal; edítalo si quieres</span>'}</label>
@@ -366,6 +376,8 @@ function savePeopleFromForm(opts){
     t.f    = +c.querySelector('[name=f]').value    || t.f;
     t.c    = +c.querySelector('[name=c]').value    || t.c;
     t.restr = [...c.querySelectorAll('.restr-chips .fchip.on')].map(b=>b.dataset.r);
+    const iconBtn = c.querySelector('.icon-chips .icon-chip.on');
+    t.icon = iconBtn ? (iconBtn.dataset.icon || '') : (t.icon||'');
   });
   // Modificadores (con las kcal ya actualizadas y la base recalculada)
   const baseId = basePersonId();
@@ -469,6 +481,14 @@ function wirePersonasForm(){
       const card = b.closest('.fcard');
       card.querySelectorAll('.cseg').forEach(x=> x.classList.toggle('on', x === b));
       recalcPanel(card.dataset.pkey);
+    });
+  });
+
+  // Selección de icono de persona (single-select por tarjeta)
+  formBody().querySelectorAll('.icon-chips .icon-chip').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const wrap = b.closest('.icon-chips');
+      wrap.querySelectorAll('.icon-chip').forEach(x=> x.classList.toggle('on', x === b));
     });
   });
 

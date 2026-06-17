@@ -100,6 +100,7 @@ let _spExMuscle = 'all';
 let _spExDisc   = 'all';
 let _spFavOnly  = false;
 let _spExSearch = '';
+let _spExView   = lsGet('sport:exview', 'compact');   // 'detail' | 'compact' (compacta por defecto)
 // Estado del bottom-sheet de filtros de deporte (móvil)
 let _spSheetOpen = false, _spSheetScroll = 0;
 function spActiveCount(){
@@ -146,6 +147,7 @@ function renderExercises(){
       const lbl = m==='all' ? 'Todo el cuerpo' : EX_MUSCLES[m].lbl;
       return `<button class="fpill ${_spExMuscle===m?'on':''}" data-spm="${m}">${lbl}</button>`;
     }).join('')}</div>`;
+  const viewRow = `<div class="frow-grp"><span class="frow-lbl">Vista</span>${[['detail','▤','Detalle'],['compact','▪','Compacto']].map(([k,ic,lb])=>`<button class="fpill spvm-pill ${_spExView===k?'on':''}" data-spvm="${k}"><span class="fico">${ic}</span>${lb}</button>`).join('')}</div>`;
   const nActive = spActiveCount();
   const cont = document.getElementById('spExFilters');
   cont.innerHTML = `
@@ -157,7 +159,7 @@ function renderExercises(){
     </div>
     <div class="filter-sheet" id="spFSheet">
       <div class="fsheet-hd"><strong>Filtros</strong><button class="fsheet-x" id="spFClose" type="button" aria-label="Cerrar">✕</button></div>
-      <div class="fsheet-body">${typeRow}${discRow}${muscRow}</div>
+      <div class="fsheet-body">${typeRow}${discRow}${muscRow}${viewRow}</div>
       <div class="fsheet-foot">
         <button class="fsheet-clear" id="spFClear" type="button">Limpiar</button>
         <button class="fsheet-apply" id="spFApply" type="button">Ver ${spResultCount()} resultados</button>
@@ -169,6 +171,7 @@ function renderExercises(){
   cont.querySelectorAll('[data-spm]').forEach(b=> b.addEventListener('click', ()=>{ _spExMuscle=b.dataset.spm; renderExercises(); }));
   const ds = document.getElementById('spExDiscSel'); if(ds) ds.addEventListener('change', ()=>{ _spExDisc=ds.value; renderExercises(); });
   const ft = cont.querySelector('[data-favtog]'); if(ft) ft.addEventListener('click', ()=>{ _spFavOnly=!_spFavOnly; renderExercises(); });
+  cont.querySelectorAll('[data-spvm]').forEach(b=> b.addEventListener('click', ()=>{ _spExView=b.dataset.spvm; lsSet('sport:exview',_spExView); renderExercises(); }));
   const se = document.getElementById('spExSearch'); if(se) se.addEventListener('input', ()=>{ _spExSearch=se.value; renderExGrid(); });   // solo rejilla → no pierde foco
 
   // Bottom-sheet (móvil)
@@ -195,6 +198,7 @@ function renderExGrid(){
     return true;
   });
   const grid = document.getElementById('spExGrid');
+  grid.dataset.spvm = _spExView;
   grid.innerHTML = ids.length ? ids.map(exCardHtml).join('')
     : `<div class="sp-empty">${q?`Sin ejercicios que coincidan con “${spEsc(_spExSearch)}”.`:(_spFavOnly?'No tienes ejercicios marcados como favoritos para este filtro.':'Sin ejercicios para este filtro.')}</div>`;
   grid.querySelectorAll('.sp-card').forEach(c=> c.addEventListener('click', ()=> openExerciseDetail(c.dataset.id)));
@@ -767,7 +771,7 @@ function normalizeSession(r){
   // restaura sección guardada (tras cargar el resto de scripts de deporte)
   const _sec0 = lsGet('sport:section','nutri');
   if(_sec0==='sport' || _sec0==='week' || _sec0==='mente') setTimeout(()=> setSection(_sec0), 0);
-  else document.body.classList.add('sec-nutri');   // acento por defecto (Nutrición)
+  else { document.body.classList.add('sec-nutri'); if(typeof renderTabbar==='function') renderTabbar('nutri'); }   // Nutrición: asegura la tabbar al cargar
 })();
 
 window.setSection = setSection;

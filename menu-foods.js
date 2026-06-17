@@ -690,3 +690,159 @@ function printFoodMeasures(){
   };
 }
 window.openFoodMeasures = openFoodMeasures;
+
+/* ══════════════════════════════════════════════════════════
+   PÁGINA "RECOMENDACIONES NUTRICIONALES Y CONSTRUCCIÓN DEL MENÚ"
+   Mismo formato que Medidas: overlay + buscador + PDF.
+══════════════════════════════════════════════════════════ */
+const RECO_OBJETIVOS = [
+  ['Pérdida de grasa',  'Proteína 1,8–2,5 g/kg · Grasa 0,7–1 g/kg (≥20% kcal) · Hidratos el resto · Déficit GET×0,8'],
+  ['Mantenimiento',     'Proteína 1,4–2 g/kg · Grasa 0,8–1,2 g/kg · Hidratos el resto · kcal ≈ GET'],
+  ['Recomposición',     'Proteína 1,8–2,4 g/kg · Grasa 0,8–1 g/kg · Hidratos el resto (más cerca del entreno) · GET o déficit leve'],
+  ['Ganancia muscular', 'Proteína 1,6–2,2 g/kg · Grasa 0,8–1,2 g/kg · Hidratos el resto · Superávit GET×1,05–1,10']
+];
+const RECO_CALC = [
+  ['1 · Peso de cálculo', 'Peso real; o peso corregido si hay sobrepeso/obesidad. Peso ideal = 22 × altura²; peso corregido = ideal + 0,25 × (real − ideal).'],
+  ['2 · GMB', 'Gasto metabólico basal ≈ peso de cálculo × 22.'],
+  ['3 · Factor de actividad', 'Sedentario 1,3–1,6 · Ligero 1,5–1,8 · Activo 1,5–2,0 · Muy activo 1,9–2,2 (cuenta también el NEAT, no solo el gimnasio).'],
+  ['4 · GET', 'Gasto total = GMB × factor de actividad (kcal de mantenimiento).'],
+  ['5 · Objetivo', 'Pérdida: GET×0,75–0,9 (normal 0,8) · Mantenimiento: GET · Ganancia: GET×1,05–1,10.'],
+  ['6 · Macros', 'Fija proteína (g/kg), luego grasa (≥20% kcal o ~0,8–1 g/kg) y los hidratos al resto.'],
+  ['7 · Comida real', 'Proteína en cada comida; verdura y fruta a diario; legumbres, tubérculos e integrales; AOVE y frutos secos.'],
+  ['8 · Revisar', 'Ajusta cada 2–4 semanas según peso medio, perímetros, fuerza, hambre, sueño y adherencia.']
+];
+const RECO_CLAVES = [
+  'La adherencia es el mejor predictor de éxito: la dieta debe poder mantenerse.',
+  'No hay obligación de hacer 5 comidas: 3 o 5 funcionan si las kcal y macros encajan.',
+  'Prioriza comida real y carbohidratos complejos; ajusta los hidratos a tu actividad.',
+  'No bajes la grasa por debajo del 20% de las kcal (~0,8–1 g/kg).',
+  'La báscula no lo es todo: usa media semanal, medidas, fotos, fuerza y energía.'
+];
+function injectRecoCSS(){
+  if(document.getElementById('recoCss')) return;
+  const st=document.createElement('style'); st.id='recoCss';
+  st.textContent=`
+  .reco-plate{display:flex;gap:8px;margin:2px 0 8px}
+  .reco-plate .rp-seg{border-radius:10px;padding:11px 12px;color:#fff;font-family:'Lora',serif;font-size:.9rem;font-weight:600;line-height:1.2;display:flex;flex-direction:column;justify-content:center;min-height:84px}
+  .reco-plate .rp-seg small{display:block;font-family:'DM Mono',monospace;font-size:.6rem;font-weight:400;opacity:.92;margin-top:4px;letter-spacing:.02em}
+  .reco-plate .rp-verd{flex:1;background:#5a6b2c}
+  .reco-plate .rp-col{flex:1;display:flex;flex-direction:column;gap:8px}
+  .reco-plate .rp-prot{flex:1;background:#b5603a}
+  .reco-plate .rp-carb{flex:1;background:#c8742e}
+  .reco-note{font-family:'Lora',serif;font-size:.84rem;color:var(--ink-50,#6b5d49);margin:0 0 8px;line-height:1.5}
+  .reco-bars{display:flex;flex-direction:column;gap:7px;margin-bottom:6px}
+  .reco-bar{display:flex;align-items:center;gap:10px}
+  .reco-bar .rb-l{font-family:'Lora',serif;font-size:.85rem;color:var(--warm,#3a2c1a);width:96px;flex-shrink:0}
+  .reco-bar .rb-track{flex:1;height:14px;background:rgba(44,31,14,.08);border-radius:8px;overflow:hidden}
+  .reco-bar .rb-fill{height:100%;background:var(--olive,#5a6b2c);border-radius:8px}
+  .reco-bar .rb-p{font-family:'DM Mono',monospace;font-size:.72rem;color:var(--terra,#b5603a);width:38px;text-align:right;flex-shrink:0;font-weight:600}
+  .reco-prose ul{margin:2px 0 0;padding-left:18px} .reco-prose li{font-family:'Lora',serif;font-size:.86rem;color:var(--warm,#3a2c1a);line-height:1.5;margin-bottom:5px}`;
+  document.head.appendChild(st);
+}
+function _recoData(){
+  const MP = window.MEAL_PCT || (typeof MEAL_PCT!=='undefined'?MEAL_PCT:{des:.25,com:.35,mer:.15,cen:.25});
+  const meals = [['Desayuno',MP.des],['Comida',MP.com],['Merienda',MP.mer],['Cena',MP.cen]];
+  const guide = (window.WEEKLY_GUIDE || (typeof WEEKLY_GUIDE!=='undefined'?WEEKLY_GUIDE:[]));
+  return {meals, guide};
+}
+function openNutriReco(){
+  injectMeasuresCSS(); injectRecoCSS();
+  const esc = window.escHtml || (s=>String(s));
+  const {meals, guide} = _recoData();
+  const guideItems = guide.map(g=>`<div class="fm-item" data-name="${esc(_fmNorm(g.lbl+' '+(g.rule||'')))}">
+      <span class="fm-n">${esc(g.lbl)}</span><span class="fm-m">${esc(g.rule||'')}</span></div>`).join('');
+  const objItems = RECO_OBJETIVOS.map(([k,v])=>`<div class="fm-item" data-name="${esc(_fmNorm(k+' '+v))}">
+      <span class="fm-n">${esc(k)}</span><span class="fm-m" style="white-space:normal;max-width:62%">${esc(v)}</span></div>`).join('');
+  const barsHtml = meals.map(([lbl,p])=>`<div class="reco-bar"><span class="rb-l">${esc(lbl)}</span><span class="rb-track"><span class="rb-fill" style="width:${Math.round(p*100)}%"></span></span><span class="rb-p">${Math.round(p*100)}%</span></div>`).join('');
+  const calcHtml = RECO_CALC.map(([k,v])=>`<div class="fm-item" data-name="${esc(_fmNorm(k+' '+v))}"><span class="fm-n">${esc(k)}</span><span class="fm-m" style="white-space:normal;max-width:64%">${esc(v)}</span></div>`).join('');
+  const clavesHtml = RECO_CLAVES.map(c=>`<li>${esc(c)}</li>`).join('');
+
+  const back=document.createElement('div'); back.className='fm-back';
+  back.innerHTML=`<div class="fm-page" role="dialog" aria-modal="true" aria-label="Recomendaciones nutricionales">
+    <div class="fm-hd fm-no-print">
+      <h3>🥗 Recomendaciones y menú ideal</h3>
+      <div class="fm-hd-actions">
+        <button class="fm-print" data-print>🖨️ PDF</button>
+        <button class="fm-x" data-x aria-label="Cerrar">✕</button>
+      </div>
+    </div>
+    <div class="fm-intro">Cómo construir un menú equilibrado y calcular tus calorías y macros. Usa el buscador o imprime esta página como PDF.</div>
+    <input class="fm-search fm-no-print" type="search" placeholder="🔎 Buscar (legumbre, proteína, déficit…)" aria-label="Buscar recomendación">
+    <div class="fm-scroll">
+      <div class="reco-prose">
+        <div class="fm-sec"><h4 class="fm-sec-h">🍽️ El plato ideal</h4>
+          <div class="reco-plate">
+            <div class="rp-seg rp-verd">½ Verduras y hortalizas<small>crudas + cocidas</small></div>
+            <div class="rp-col">
+              <div class="rp-seg rp-prot">¼ Proteína<small>magra, pescado, huevo, legumbre, tofu</small></div>
+              <div class="rp-seg rp-carb">¼ Hidratos de calidad<small>integral, patata, legumbre</small></div>
+            </div>
+          </div>
+          <p class="reco-note">+ una porción de grasa saludable (AOVE, aguacate, frutos secos) y agua como bebida. Fruta entera de postre.</p>
+        </div>
+        <div class="fm-sec"><h4 class="fm-sec-h">📊 Reparto de calorías del día</h4><div class="reco-bars">${barsHtml}</div></div>
+      </div>
+      <div class="fm-sec"><h4 class="fm-sec-h">🗓️ Cuánto comer a la semana</h4><div class="fm-items">${guideItems}</div></div>
+      <div class="fm-sec"><h4 class="fm-sec-h">🎯 Macros según objetivo</h4><div class="fm-items">${objItems}</div></div>
+      <div class="fm-sec"><h4 class="fm-sec-h">🧮 Cómo se calculan tus calorías y macros</h4><div class="fm-items">${calcHtml}</div></div>
+      <div class="reco-prose"><div class="fm-sec"><h4 class="fm-sec-h">🔑 Claves</h4><ul>${clavesHtml}</ul></div></div>
+      <div class="fm-empty fm-noresult" style="display:none">Sin recomendaciones que coincidan con la búsqueda.</div>
+    </div>
+  </div>`;
+  document.body.appendChild(back);
+  requestAnimationFrame(()=> back.classList.add('show'));
+
+  const search = back.querySelector('.fm-search');
+  search.addEventListener('input', ()=>{
+    const q = _fmNorm(search.value.trim());
+    let any = false;
+    back.querySelectorAll('.fm-item').forEach(it=>{
+      const ok = !q || it.dataset.name.includes(q);
+      it.style.display = ok ? '' : 'none'; if(ok) any = true;
+    });
+    back.querySelectorAll('.fm-sec').forEach(sec=>{
+      const items = sec.querySelectorAll('.fm-item');
+      if(items.length){ const vis=[...items].some(it=>it.style.display!=='none'); sec.style.display = vis?'':'none'; }
+    });
+    back.querySelectorAll('.reco-prose').forEach(p=> p.style.display = q ? 'none' : '');
+    const nr = back.querySelector('.fm-noresult'); if(nr) nr.style.display = (q && !any) ? '' : 'none';
+  });
+  const pr = back.querySelector('[data-print]'); if(pr) pr.addEventListener('click', ()=> printNutriReco());
+  function close(){ back.classList.remove('show'); setTimeout(()=> back.remove(), 200); document.removeEventListener('keydown', onKey, true); }
+  function onKey(e){ if(e.key==='Escape') close(); }
+  back.addEventListener('click', e=>{ if(e.target.closest('[data-x]') || e.target===back) close(); });
+  document.addEventListener('keydown', onKey, true);
+}
+function printNutriReco(){
+  const esc = window.escHtml || (s=>String(s));
+  const {meals, guide} = _recoData();
+  const guideRows = guide.map(g=>`<tr><td class="n">${esc(g.lbl)}</td><td>${esc(g.rule||'')}</td></tr>`).join('');
+  const objRows = RECO_OBJETIVOS.map(([k,v])=>`<tr><td class="n">${esc(k)}</td><td>${esc(v)}</td></tr>`).join('');
+  const calcRows = RECO_CALC.map(([k,v])=>`<tr><td class="n">${esc(k)}</td><td>${esc(v)}</td></tr>`).join('');
+  const barRows = meals.map(([l,p])=>`<tr><td class="n">${esc(l)}</td><td>${Math.round(p*100)}%</td></tr>`).join('');
+  const claves = RECO_CLAVES.map(c=>`<li>${esc(c)}</li>`).join('');
+  const html = `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Recomendaciones nutricionales</title>
+  <style>*{box-sizing:border-box}body{font-family:Georgia,serif;color:#2c1f0e;margin:24px 30px;font-size:12px}
+  h1{font-size:21px;margin:0 0 2px}.intro{color:#6b5d49;margin:0 0 14px}
+  h2{font-size:13px;margin:16px 0 6px;padding-bottom:4px;border-bottom:1.5px solid #b5603a;color:#b5603a;page-break-after:avoid}
+  table{width:100%;border-collapse:collapse;margin-bottom:8px}td{padding:4px 6px;border-bottom:1px solid #eee;vertical-align:top}td.n{font-weight:bold;width:210px}
+  ul{margin:2px 0 0;padding-left:18px}li{margin-bottom:4px}
+  footer{margin-top:20px;padding-top:10px;border-top:1px solid #ddd;color:#999;font-size:10px;text-align:center}@page{margin:14mm}</style></head><body>
+    <h1>🥗 Recomendaciones y construcción del menú</h1>
+    <p class="intro">Cómo montar un menú equilibrado y calcular tus calorías y macros.</p>
+    <h2>El plato ideal</h2><table><tr><td class="n">½ del plato</td><td>Verduras y hortalizas (crudas + cocidas)</td></tr><tr><td class="n">¼ del plato</td><td>Proteína magra: pescado, huevo, carne magra, legumbre, tofu</td></tr><tr><td class="n">¼ del plato</td><td>Hidratos de calidad: integral, patata, legumbre</td></tr><tr><td class="n">Extra</td><td>Grasa saludable (AOVE, aguacate, frutos secos) · agua · fruta de postre</td></tr></table>
+    <h2>Reparto de calorías del día</h2><table>${barRows}</table>
+    <h2>Cuánto comer a la semana</h2><table>${guideRows}</table>
+    <h2>Macros según objetivo</h2><table>${objRows}</table>
+    <h2>Cómo se calculan tus calorías y macros</h2><table>${calcRows}</table>
+    <h2>Claves</h2><ul>${claves}</ul>
+    <footer>Plan Nutricional · Generado el ${new Date().toLocaleDateString('es')}</footer>
+  </body></html>`;
+  const iframe = document.createElement('iframe');
+  iframe.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0';
+  document.body.appendChild(iframe);
+  const doc = iframe.contentDocument || iframe.contentWindow.document;
+  doc.open(); doc.write(html); doc.close();
+  iframe.contentWindow.onload = ()=>{ setTimeout(()=>{ try{ iframe.contentWindow.focus(); iframe.contentWindow.print(); }catch(e){ alert('No se pudo imprimir: '+e.message);} setTimeout(()=>iframe.remove(),1000); },200); };
+}
+window.openNutriReco = openNutriReco;

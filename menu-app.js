@@ -89,7 +89,7 @@ function hydrate(){
       const id = pp.id || ('P' + i);
       TARGETS[id] = Object.assign(TARGETS[id] || {}, {
         kcal: pp.kcal, p: pp.p, f: pp.f, c: pp.c,
-        name: pp.name || '', sym: pp.sym || PERSON_SYMS[i] || '🧑',
+        name: pp.name || '', sym: pp.sym || PERSON_SYMS[i] || '🧑', icon: pp.icon || '',
         restr: Array.isArray(pp.restr) ? pp.restr : [],
         modifier: (pp.modifier != null && isFinite(pp.modifier)) ? pp.modifier : null
       });
@@ -125,7 +125,7 @@ function persistPersona(){ lsSet(LS.PERSONA, S.p); }
 function persistTargets(){
   const people = PEOPLE.map(id=>{
     const t = TARGETS[id] || {};
-    return { id, kcal:t.kcal, p:t.p, f:t.f, c:t.c, name:t.name||'', sym:t.sym||'', restr:t.restr||[], modifier:(t.modifier!=null?t.modifier:null) };
+    return { id, kcal:t.kcal, p:t.p, f:t.f, c:t.c, name:t.name||'', sym:t.sym||'', icon:t.icon||'', restr:t.restr||[], modifier:(t.modifier!=null?t.modifier:null) };
   });
   lsSet(LS.PEOPLE, people);
 }
@@ -1256,6 +1256,7 @@ function personaLabel(id){
 function personaToken(id){
   if(id==='AB') return {txt:'👥', emoji:true};
   const t = TARGETS[id] || {};
+  if(t.icon) return {txt: t.icon, emoji:true};        // icono elegido por el usuario
   const name = (t.name||'').trim();
   if(!name) return {txt: t.sym || '🧑', emoji:true};
   const U = s => (s||'').toUpperCase();
@@ -1426,6 +1427,7 @@ function wireSecMenu(){
   btn.addEventListener('click', e=>{ e.stopPropagation(); menu.hidden ? open() : close(); });
   menu.querySelectorAll('.sec-mi').forEach(m=> m.addEventListener('click', ()=>{
     close();
+    if(m.dataset.page === 'reco'){ if(typeof window.openNutriReco === 'function') window.openNutriReco(); return; }
     if(m.dataset.page === 'measures'){ if(typeof window.openFoodMeasures === 'function') window.openFoodMeasures(); return; }
     if(m.dataset.page === 'info'){ if(typeof window.pnInfoLegal === 'function') window.pnInfoLegal(); return; }
     if(m.dataset.page === 'save'){ if(window.PNSession && window.PNSession.manualSave) window.PNSession.manualSave(); return; }
@@ -1615,3 +1617,11 @@ document.addEventListener('keydown', (e)=>{
     else { dr.classList.remove('show'); const b=document.getElementById('drawerBg'); if(b) b.classList.remove('show'); document.body.classList.remove('no-scroll'); }
   }
 });
+
+/* Oculta la splash de carga cuando la app está lista (mínimo visible para evitar parpadeo) */
+(function hideSplash(){
+  const sp = document.getElementById('splash'); if(!sp) return;
+  const done = ()=> setTimeout(()=>{ sp.classList.add('hide'); setTimeout(()=>{ if(sp.parentNode) sp.remove(); }, 600); }, 350);
+  if(document.readyState === 'complete') done();
+  else window.addEventListener('load', done, {once:true});
+})();

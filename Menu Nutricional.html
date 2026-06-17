@@ -57,6 +57,19 @@ button{font-family:inherit}
 /* ════════════════════════════════════════════════════════
    STICKY HEADER
 ═════════════════════════════════════════════════════════ */
+/* Splash de carga inicial */
+.splash{position:fixed;inset:0;z-index:9999;background:var(--warm);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:13px;transition:opacity .5s ease,visibility .5s}
+.splash.hide{opacity:0;visibility:hidden;pointer-events:none}
+.splash-mark{font-size:3.2rem;line-height:1;animation:splashPop .6s cubic-bezier(.22,.61,.36,1);filter:drop-shadow(0 6px 16px rgba(0,0,0,.35))}
+.splash-logo{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;color:var(--cream);letter-spacing:-.01em;line-height:1}
+.splash-logo em{color:var(--accent-l);font-style:normal}
+.splash-sub{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.5)}
+.splash-bar{width:158px;height:4px;border-radius:4px;background:rgba(255,255,255,.14);overflow:hidden;margin-top:6px}
+.splash-bar-fill{height:100%;width:38%;border-radius:4px;background:var(--accent-l);animation:splashLoad 1.1s ease-in-out infinite}
+@keyframes splashPop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes splashLoad{0%{transform:translateX(-130%)}100%{transform:translateX(330%)}}
+@media(prefers-reduced-motion:reduce){.splash-bar-fill{animation:none;width:100%}.splash-mark{animation:none}}
+
 .hdr{position:sticky;top:0;z-index:200;background:var(--warm);box-shadow:0 6px 28px rgba(0,0,0,.32)}
 .hdr-top{display:flex;align-items:center;gap:14px;padding:11px 18px 9px;max-width:1280px;margin:0 auto}
 .logo{font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:700;color:var(--cream);letter-spacing:-.02em;line-height:1.1;flex-shrink:0}
@@ -1609,6 +1622,14 @@ body.sec-sport #helpBtn,body.sec-mente #helpBtn{margin-left:auto}
 .sp-filters{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:16px}
 
 .sp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+/* Vista compacta de ejercicios */
+.sp-grid[data-spvm="compact"]{grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:9px}
+.sp-grid[data-spvm="compact"] .sp-card{padding:10px 12px}
+.sp-grid[data-spvm="compact"] .sp-card .msc-row,
+.sp-grid[data-spvm="compact"] .sp-card .sp-card-meta,
+.sp-grid[data-spvm="compact"] .sp-card .sp-focus{display:none}
+.sp-grid[data-spvm="compact"] .sp-card-hd{margin-bottom:5px}
+.sp-grid[data-spvm="compact"] .sp-card-n{font-size:.92rem}
 .sp-card{position:relative;background:var(--white);border:1px solid rgba(44,31,14,.08);border-radius:var(--r-md);padding:15px 16px 14px;cursor:pointer;transition:.18s;box-shadow:0 2px 8px rgba(44,31,14,.04)}
 .sp-card:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(44,31,14,.12);border-color:var(--gold)}
 .sp-card-hd{display:flex;align-items:center;gap:7px;margin-bottom:8px}
@@ -1912,6 +1933,14 @@ img,svg,canvas{max-width:100%}
 </head>
 <body>
 
+<!-- Splash de carga -->
+<div id="splash" class="splash">
+  <div class="splash-mark">🍽️</div>
+  <div class="splash-logo">Plan <em>Nutricional</em></div>
+  <div class="splash-sub">Menú · Deporte · Mente</div>
+  <div class="splash-bar"><div class="splash-bar-fill"></div></div>
+</div>
+
 <!-- HEADER -->
 <header class="hdr">
   <div class="hdr-top">
@@ -1923,6 +1952,7 @@ img,svg,canvas{max-width:100%}
         <button class="sec-mi" data-sec="week" role="menuitem">📆 Semana</button>
         <button class="sec-mi" data-sec="mente" role="menuitem">🧠 Mente</button>
         <div class="sec-menu-div"></div>
+        <button class="sec-mi" data-page="reco" role="menuitem">🥗 Recomendaciones y menú ideal</button>
         <button class="sec-mi" data-page="measures" role="menuitem">📏 Medidas de alimentos</button>
         <button class="sec-mi" data-page="info" role="menuitem">ℹ️ Información y aviso legal</button>
         <div class="sec-menu-div"></div>
