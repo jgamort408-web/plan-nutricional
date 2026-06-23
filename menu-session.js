@@ -18,7 +18,7 @@
   const LS_LASTSAVE = 'mnut:lastSave:v1';
   const MAX_SNAPS   = 6;
   const AUTOSAVE_MS = 5 * 60 * 1000;        // 5 minutos
-  const PREFIXES    = ['mnut:', 'sport:'];
+  const PREFIXES    = ['mnut:', 'sport:', 'mente:'];
 
   const isOwn = k => k === LS_SNAPS;        // no metas el propio anillo dentro de las copias
 

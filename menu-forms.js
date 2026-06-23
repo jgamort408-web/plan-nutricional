@@ -105,7 +105,7 @@ function wireConfigForm(){
 }
 
 /* ── COPIA DE SEGURIDAD (exportar/importar TODO) ─────────── */
-const BACKUP_PREFIXES = ['mnut:', 'sport:'];
+const BACKUP_PREFIXES = ['mnut:', 'sport:', 'mente:'];
 function collectBackup(){
   const store = {};
   for(let i=0; i<localStorage.length; i++){

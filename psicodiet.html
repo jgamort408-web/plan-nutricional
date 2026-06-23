@@ -698,7 +698,16 @@ const todayKey=()=>new Date().toISOString().slice(0,10);
 let state={days:{},mantraId:null,habits:null}; // days[date]={mood,checks{},ritual{},...}
 
 const dayObj=d=>{ if(!state.days[d])state.days[d]={mood:0,checks:{},ritual:{}}; return state.days[d]; };
-const save=async()=>{await kvSet("state",state);};
+/* Persistencia de la EVOLUCIÓN (ánimo, hábitos, notas, referencias a audios/fotos).
+   Se guarda en IndexedDB y, como RESPALDO, también en localStorage 'mente:state:v1'
+   (los blobs de audio/foto siguen solo en IndexedDB). Así la evolución sobrevive
+   aunque IndexedDB no esté disponible (p. ej. build file://) y entra en las copias
+   de seguridad de la app (prefijo 'mente:'). */
+const LS_MENTE_STATE="mente:state:v1";
+const save=async()=>{
+  try{ localStorage.setItem(LS_MENTE_STATE, JSON.stringify(state)); }catch(e){}
+  try{ await kvSet("state",state); }catch(e){}
+};
 
 /* ========== UI helpers ========== */
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
@@ -1327,6 +1336,10 @@ function wireReminders(){
   try{ await openDB(); }catch(e){ toast("No se pudo abrir el almacenamiento"); }
   requestPersistence(); // pide al sistema no descartar los datos
   let s=null; try{ s=await kvGet("state"); }catch(e){}
+  // Respaldo: si IndexedDB no devolvió estado (vacío o no disponible), usa localStorage.
+  if(!s || typeof s!=="object" || !Object.keys(s).length){
+    try{ const ls=localStorage.getItem(LS_MENTE_STATE); if(ls){ const p=JSON.parse(ls); if(p&&typeof p==="object") s=p; } }catch(e){}
+  }
   state=(s&&typeof s==="object")?s:{};
   if(!state.days||typeof state.days!=="object")state.days={};
   if(!("mantraId"in state))state.mantraId=null;
