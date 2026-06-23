@@ -27,6 +27,7 @@
   let _sel = {};          // {catKey: Set(ids)}
   let _filter = {};       // {catKey: foodTypeKey | 'all'}
   let _root = null;
+  let _first = false;     // sólo anima el panel en la primera pintura (evita repetir la animación en cada clic)
 
   function esc(s){ return (typeof escHtml==='function') ? escHtml(s) : String(s==null?'':s); }
 
@@ -76,6 +77,7 @@
       _root.addEventListener('click', onClick);
     }
     document.body.classList.add('no-scroll');
+    _first = true;
     render();
   }
 
@@ -118,7 +120,7 @@
 
     _root.innerHTML = `
       <div class="masst-bg" data-close="1"></div>
-      <div class="masst-panel" role="dialog" aria-label="Asistente de menú">
+      <div class="masst-panel${_first?' anim':''}" role="dialog" aria-label="Asistente de menú">
         <div class="masst-hd">
           <div class="masst-steps">${_steps.map((s,idx)=>`<span class="masst-dot ${idx===_i?'on':''} ${idx<_i?'done':''}">${STEP_META[s].ico}</span>`).join('')}</div>
           <button class="masst-x" data-close="1" aria-label="Cerrar">✕</button>
@@ -139,6 +141,7 @@
         </div>
       </div>`;
     _root.classList.add('show');
+    _first = false;
     const body = _root.querySelector('.masst-body'); if(body) body.scrollTop = 0;
   }
 

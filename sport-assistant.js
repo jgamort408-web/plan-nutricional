@@ -27,7 +27,7 @@
   const DUR  = [30,45,60,75];
   const SEMANAS = [4,8,12,16];
 
-  let _i = 0, _A = {}, _root = null;
+  let _i = 0, _A = {}, _root = null, _first = false;
 
   function esc(s){ return (typeof escHtml==='function') ? escHtml(s) : String(s==null?'':s); }
   function sportsList(){
@@ -68,6 +68,7 @@
       _root.addEventListener('click', onClick);
     }
     document.body.classList.add('no-scroll');
+    _first = true;
     render();
   }
   function close(){ if(_root) _root.classList.remove('show'); document.body.classList.remove('no-scroll'); }
@@ -109,7 +110,7 @@
     const isReview = st.key==='review';
     _root.innerHTML = `
       <div class="masst-bg" data-close="1"></div>
-      <div class="masst-panel" role="dialog" aria-label="Asistente de entrenamiento">
+      <div class="masst-panel${_first?' anim':''}" role="dialog" aria-label="Asistente de entrenamiento">
         <div class="masst-hd">
           <div class="masst-steps">${S.map((s,idx)=>`<span class="masst-dot ${idx===_i?'on':''} ${idx<_i?'done':''}">${s.ico}</span>`).join('')}</div>
           <button class="masst-x" data-close="1" aria-label="Cerrar">✕</button>
@@ -129,6 +130,7 @@
         </div>
       </div>`;
     _root.classList.add('show');
+    _first = false;
     const b = _root.querySelector('.masst-body'); if(b) b.scrollTop = 0;
   }
 

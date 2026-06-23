@@ -525,8 +525,8 @@ function dishCard(id){
   const isUser = id.startsWith('U');
   const viols = dishViolations(id);
   return `
-    <article class="dish ${viols.length?'has-viol':''}${isDishFav(id)?' is-fav':''}" data-id="${id}">
-      ${isDishFav(id)?`<span class="dish-fav-mark" title="En favoritos" aria-label="En favoritos">★</span>`:''}
+    <article class="dish ${viols.length?'has-viol':''}${isDishFav(id)?' is-fav':''}${inCart?' has-cart':''}" data-id="${id}">
+      <button class="dish-fav ${isDishFav(id)?'on':''}" data-fav="${id}" aria-label="${isDishFav(id)?'Quitar de favoritos':'Añadir a favoritos'}" title="Favorito">${isDishFav(id)?'★':'☆'}</button>
       ${isUser?`<span class="user-badge">Tuya</span>`:''}
       ${inCart?`<span class="added-mark" title="Añadido">✓</span>`:''}
       ${viols.length?`<span class="dish-viol" title="Rompe: ${viols.map(v=>RESTRICTIONS_MAP[v]?.lbl||v).join(', ')}">⚠ ${viols.map(v=>RESTRICTIONS_MAP[v]?.ico).join('')}</span>`:''}
@@ -563,6 +563,18 @@ function wireDishNodes(nodes){
       return;
     }
     a.addEventListener('click', ()=> openModal(a.dataset.id));
+    const fav = a.querySelector('.dish-fav');
+    if(fav) fav.addEventListener('click', e=>{
+      e.stopPropagation();
+      const on = toggleDishFav(fav.dataset.fav);
+      // Actualiza en el sitio (sin re-render) para no perder el scroll.
+      fav.classList.toggle('on', on);
+      fav.textContent = on ? '★' : '☆';
+      fav.setAttribute('aria-label', on ? 'Quitar de favoritos' : 'Añadir a favoritos');
+      a.classList.toggle('is-fav', on);
+      // Si está activo el filtro de favoritos, la tarjeta puede salir/entrar → re-render.
+      if((S.filters||[]).includes('favs')){ renderMain(); renderCatNav(); }
+    });
   });
 }
 
