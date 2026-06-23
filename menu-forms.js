@@ -94,6 +94,16 @@ function renderConfigForm(){
         </span>
         <input type="checkbox" id="cfgShowNutr" class="cfg-switch" ${showNutr?'checked':''}>
       </label>
+    </div>
+    <div class="cfg-group">
+      <h3 class="cfg-h">Bienestar</h3>
+      <label class="cfg-row">
+        <span class="cfg-txt">
+          <span class="cfg-lbl">Conectar “Mi día” con Mente</span>
+          <span class="cfg-sub">Muestra un recordatorio suave y opcional en Mi día para registrar cómo te sientes en la sección Mente. Desactivado por defecto y nunca insistente.</span>
+        </span>
+        <input type="checkbox" id="cfgMenteLink" class="cfg-switch" ${(typeof MENTE_LINK!=='undefined'&&MENTE_LINK)?'checked':''}>
+      </label>
     </div>`;
 }
 function wireConfigForm(){
@@ -101,6 +111,10 @@ function wireConfigForm(){
   if(t) t.addEventListener('change', ()=>{
     if(typeof setShowNutr === 'function') setShowNutr(t.checked);
     if(typeof renderAll === 'function') renderAll();
+  });
+  const ml = formBody().querySelector('#cfgMenteLink');
+  if(ml) ml.addEventListener('change', ()=>{
+    if(typeof setMenteLink === 'function') setMenteLink(ml.checked);
   });
 }
 

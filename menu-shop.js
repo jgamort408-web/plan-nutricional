@@ -27,17 +27,22 @@ function buildShoppingData(calData){
   WEEK_DAYS.forEach(d=>{
     const day = calData[d.k]; if(!day) return;
     ['des','com','mer','cen'].forEach(slot=>{
-      (day[slot]||[]).forEach(id=>{
-        const dish = DISHES[id]; if(!dish) return;
+      const cellIds = (day[slot]||[]).filter(id=>DISHES[id]);
+      if(!cellIds.length) return;
+      // Fase 2b: cada receta escala a la necesidad de esa comida; si la celda tiene
+      // varias recetas, la franja se reparte entre ellas (proporcional al tamaño estándar).
+      const sumStd = (typeof sumCellStd === 'function') ? sumCellStd(cellIds) : 0;
+      cellIds.forEach(id=>{
+        const dish = DISHES[id];
         dishes++;
         if(!dish.comp || !dish.comp.length){ if(!legacy.includes(dish.nom)) legacy.push(dish.nom); return; }
         const scaled = {};
-        ppl.forEach(pid=>{ scaled[pid] = dishScaled(dish, pid); });
+        ppl.forEach(pid=>{ scaled[pid] = (typeof dishScaledMeal === 'function') ? dishScaledMeal(dish, pid, slot, sumStd) : dishScaled(dish, pid); });
         dish.comp.forEach((it,i)=>{
           const f = FOODS[it.f]; if(!f) return;
           const a = acc[it.f] = acc[it.f] || {g:{}, cs:false, unit:false};
           if(it.cs){ a.cs = true; return; }
-          ppl.forEach(pid=>{ a.g[pid] = (a.g[pid]||0) + (scaled[pid] ? scaled[pid].rows[i].grams : 0); });
+          ppl.forEach(pid=>{ a.g[pid] = (a.g[pid]||0) + (scaled[pid] && scaled[pid].rows[i] ? scaled[pid].rows[i].grams : 0); });
           if(it.u != null && f.unit) a.unit = true;
         });
       });

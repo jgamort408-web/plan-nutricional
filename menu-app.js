@@ -48,6 +48,14 @@ window.SHOW_NUTR = SHOW_NUTR;
 window.setShowNutr = setShowNutr;
 window.applyNutrClass = applyNutrClass;
 
+/* ── Puente Mi día ↔ Mente (opcional, desactivado por defecto) ──
+   Recordatorio suave y NO invasivo en "Mi día" que invita a registrar
+   el ánimo del día abriendo la sección Mente. No escribe datos en Mente
+   (Mente es la fuente de verdad de su evolución); solo tiende un puente. */
+let MENTE_LINK = lsGet('mnut:mente-link:v1', false);
+function setMenteLink(on){ MENTE_LINK = !!on; lsSet('mnut:mente-link:v1', MENTE_LINK); if(typeof renderDrawer==='function' && document.getElementById('drawer') && document.getElementById('drawer').classList.contains('show')) renderDrawer(); }
+window.setMenteLink = setMenteLink;
+
 /* ── ¿El usuario está escribiendo en un campo? ───────────────
    Se usa para NO re-renderizar (y destruir el input/foco) mientras
    se teclea. Causa del bug "a veces no se puede escribir": un
@@ -1060,7 +1068,21 @@ function renderDrawer(){
     });
     html += `</div>`;
   });
+  // Puente opcional con Mente (no invasivo; sólo si el usuario lo activa en Configuración)
+  if(MENTE_LINK){
+    html += `<div class="dr-mente">
+      <div class="dr-mente-t">🧠 Tu bienestar también cuenta</div>
+      <div class="dr-mente-x">¿Quieres registrar cómo te sientes hoy? Es opcional y privado.</div>
+      <button class="dr-mente-btn" id="drMenteOpen">Abrir Mente →</button>
+    </div>`;
+  }
   items.innerHTML = html;
+
+  const drMente = document.getElementById('drMenteOpen');
+  if(drMente) drMente.addEventListener('click', ()=>{
+    if(typeof closeDrawer === 'function') closeDrawer();
+    if(typeof setSection === 'function') setSection('mente');
+  });
 
   // bind
   items.querySelectorAll('.dr-item').forEach(row=>{
