@@ -361,26 +361,30 @@ function openSpAutoPlan(){
   formBody().querySelectorAll('#apInten .seg-b').forEach(b=> b.addEventListener('click', ()=> formBody().querySelectorAll('#apInten .seg-b').forEach(x=>x.classList.toggle('on', x===b))));
   formBody().querySelectorAll('[data-apwho] .who-b').forEach(b=> b.addEventListener('click', ()=> formBody().querySelectorAll('[data-apwho] .who-b').forEach(x=>x.classList.toggle('on', x===b))));
   document.getElementById('apCancel').addEventListener('click', closeForm);
-  document.getElementById('apRun').addEventListener('click', runAutoPlan);
+  document.getElementById('apRun').addEventListener('click', ()=> runAutoPlan());
   updateMuscVis();
 }
 
-function runAutoPlan(){
-  const disc = document.getElementById('apDisc').value;
-  const nDays = +document.getElementById('apDays').value || 4;
-  const splitKey = document.getElementById('apSplit').value;
-  const dur = Math.min(120, Math.max(15, +document.getElementById('apDur').value||50));
-  const intensity = formBody().querySelector('#apInten .seg-b.on')?.dataset.int || 'media';
-  const who = formBody().querySelector('[data-apwho] .who-b.on')?.dataset.who || 'AB';
-  const start = document.getElementById('apStart').value;
-  const u = document.getElementById('apRangeUnit').value;
-  const rangeVal = +document.getElementById('apRangeVal').value || 8;
-  const keep = document.getElementById('apKeep').checked;
+/* runAutoPlan() lee del formulario "Plan auto".
+   runAutoPlan(P) usa los parámetros de P (lo usa el Asistente de entrenamiento),
+   con P = {disc, nDays, splitKey, dur, intensity, who, start, u, rangeVal, keep, muscles}. */
+function runAutoPlan(P){
+  P = (P && typeof P === 'object' && typeof P.splitKey === 'string') ? P : null;
+  const disc = P ? P.disc : document.getElementById('apDisc').value;
+  const nDays = P ? (+P.nDays||4) : (+document.getElementById('apDays').value || 4);
+  const splitKey = P ? P.splitKey : document.getElementById('apSplit').value;
+  const dur = Math.min(120, Math.max(15, P ? (+P.dur||50) : (+document.getElementById('apDur').value||50)));
+  const intensity = P ? (P.intensity||'media') : (formBody().querySelector('#apInten .seg-b.on')?.dataset.int || 'media');
+  const who = P ? (P.who||'AB') : (formBody().querySelector('[data-apwho] .who-b.on')?.dataset.who || 'AB');
+  const start = P ? P.start : document.getElementById('apStart').value;
+  const u = P ? (P.u||'weeks') : document.getElementById('apRangeUnit').value;
+  const rangeVal = P ? (+P.rangeVal||8) : (+document.getElementById('apRangeVal').value || 8);
+  const keep = P ? !!P.keep : document.getElementById('apKeep').checked;
 
   // 1) slots de reparto
   let slots;
   if(splitKey==='personalizado'){
-    const ms = [...formBody().querySelectorAll('#apMuscles .fchip.on')].map(b=>b.dataset.m);
+    const ms = P ? (P.muscles||[]) : [...formBody().querySelectorAll('#apMuscles .fchip.on')].map(b=>b.dataset.m);
     if(!ms.length){ alert('Elige al menos un músculo para repartir.'); return; }
     _apMuscles = ms;
     // reparte los músculos entre los días (round-robin); cada día ≥3 músculos
