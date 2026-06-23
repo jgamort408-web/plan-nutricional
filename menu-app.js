@@ -12,7 +12,8 @@ const LS = {
   VIEW:    'mnut:view:v1',
   CAL:     'mnut:cal:v1',         // current working calendar
   SAVED:   'mnut:saved:v1',       // saved menus dictionary
-  FB:      'mnut:feedback:v1'     // diner feedback log
+  FB:      'mnut:feedback:v1',    // diner feedback log
+  SHOWNUTR:'mnut:shownutr:v1'    // mostrar kcal/macros de las recetas (def: oculto)
 };
 function lsGet(k, def){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):def; }catch(e){ return def; } }
 let _lsQuotaWarned = false;
@@ -28,6 +29,24 @@ function lsSet(k, v){
 }
 
 function escHtml(s){ return (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+/* ── Visibilidad de kcal/macros de las recetas ───────────────
+   Por defecto NO se muestran (relación más sana y respetuosa con
+   la comida; además la receta es una ración estándar para una
+   persona). El usuario puede activarlas en Ajustes → Preferencias.
+   Se aplica vía clase en <body>: body.hide-nutr oculta .nutr. */
+let SHOW_NUTR = lsGet(LS.SHOWNUTR, false);
+function applyNutrClass(){
+  if(document.body) document.body.classList.toggle('hide-nutr', !SHOW_NUTR);
+}
+function setShowNutr(on){
+  SHOW_NUTR = !!on;
+  lsSet(LS.SHOWNUTR, SHOW_NUTR);
+  applyNutrClass();
+}
+window.SHOW_NUTR = SHOW_NUTR;
+window.setShowNutr = setShowNutr;
+window.applyNutrClass = applyNutrClass;
 
 /* ── ¿El usuario está escribiendo en un campo? ───────────────
    Se usa para NO re-renderizar (y destruir el input/foco) mientras
@@ -147,7 +166,7 @@ const S = {
   view: lsGet(LS.VIEW, 'cat'),
   sort: lsGet('mnut:sort:v1', {key:'def', dir:'desc'}),
   viewMode: lsGet('mnut:viewmode:v1', 'small'),        // detail | big | small (compacta por defecto)
-  collapsed: lsGet('mnut:collapsed:v1', [])            // categorías plegadas (claves)
+  collapsed: lsGet('mnut:collapsed:v1', null)          // categorías plegadas (claves); null = sin preferencia → todas plegadas por defecto
 };
 function persistViewMode(){ lsSet('mnut:viewmode:v1', S.viewMode); }
 function persistCollapsed(){ lsSet('mnut:collapsed:v1', S.collapsed); }
@@ -342,11 +361,23 @@ function renderCatNav(){
   el.querySelectorAll('.cbtn').forEach(b=>{
     b.addEventListener('click', ()=>{
       const k = b.dataset.jump;
-      const t = document.getElementById('cat-'+k);
-      if(t){
-        const y = t.getBoundingClientRect().top + window.scrollY - 168;
-        window.scrollTo({top:y, behavior:'smooth'});
+      // Al elegir una categoría se DESPLIEGA (si estaba plegada) y se hace scroll a ella,
+      // para poder ver y seleccionar sus recetas (evita el salto al final por falta de altura).
+      const wasCollapsed = (S.collapsed||[]).includes(k);
+      if(wasCollapsed){
+        S.collapsed = S.collapsed.filter(x=>x!==k);
+        persistCollapsed();
+        renderMain();
       }
+      S.activeCat = k;
+      el.querySelectorAll('.cbtn').forEach(x=> x.classList.toggle('on', x.dataset.cat===k));
+      requestAnimationFrame(()=>{
+        const t = document.getElementById('cat-'+k);
+        if(t){
+          const y = t.getBoundingClientRect().top + window.scrollY - 168;
+          window.scrollTo({top:y, behavior:'smooth'});
+        }
+      });
     });
   });
 }
@@ -494,8 +525,8 @@ function dishCard(id){
   const isUser = id.startsWith('U');
   const viols = dishViolations(id);
   return `
-    <article class="dish ${viols.length?'has-viol':''}" data-id="${id}">
-      <button class="dish-fav ${isDishFav(id)?'on':''}" data-fav="${id}" aria-label="Favorito" title="Favorito">${isDishFav(id)?'★':'☆'}</button>
+    <article class="dish ${viols.length?'has-viol':''}${isDishFav(id)?' is-fav':''}" data-id="${id}">
+      ${isDishFav(id)?`<span class="dish-fav-mark" title="En favoritos" aria-label="En favoritos">★</span>`:''}
       ${isUser?`<span class="user-badge">Tuya</span>`:''}
       ${inCart?`<span class="added-mark" title="Añadido">✓</span>`:''}
       ${viols.length?`<span class="dish-viol" title="Rompe: ${viols.map(v=>RESTRICTIONS_MAP[v]?.lbl||v).join(', ')}">⚠ ${viols.map(v=>RESTRICTIONS_MAP[v]?.ico).join('')}</span>`:''}
@@ -509,8 +540,8 @@ function dishCard(id){
         <div class="dish-tags">${tagHtml(d)}</div>
         <div class="dish-foods">${foodChipsHtml(d)}</div>
         <div class="dish-bot">
-          <div class="dish-kcal">~${kc} kcal<small>${d.t}${S.p==='AB'?` · ${PEOPLE.length} raciones`:''}</small></div>
-          <div class="dish-mac">
+          <div class="dish-kcal"><span class="nutr">~${kc} kcal</span><small>${d.t}${S.p==='AB'?` · ${PEOPLE.length} raciones`:''}</small></div>
+          <div class="dish-mac nutr">
             <strong>${px(mc.p)}P</strong> · ${px(mc.f)}G · ${px(mc.c)}C
           </div>
         </div>
@@ -532,8 +563,6 @@ function wireDishNodes(nodes){
       return;
     }
     a.addEventListener('click', ()=> openModal(a.dataset.id));
-    const fav = a.querySelector('.dish-fav');
-    if(fav) fav.addEventListener('click', e=>{ e.stopPropagation(); toggleDishFav(fav.dataset.fav); renderMain(); renderCatNav(); });
   });
 }
 
@@ -558,6 +587,8 @@ function loadMoreCat(cat){
 
 function renderMain(){
   const el = document.getElementById('main');
+  // Primer uso (sin preferencia guardada): todas las categorías plegadas.
+  if(S.collapsed === null){ S.collapsed = CATEGORIES.map(c=>c.key); persistCollapsed(); }
   el.dataset.vm = S.viewMode || 'detail';            // modo de vista (detail|big|small)
   _moreState = {};
   if(_moreObserver) _moreObserver.disconnect();
@@ -862,7 +893,7 @@ function renderDrawer(){
   // Header CTA: cargar día del calendario (sólo lo pendiente)
   let cta;
   if(!calHasToday){
-    cta = `<div class="dr-cal-empty">No hay menú para ${todayLabel} en el calendario activo. Ve a Calendario para planificar.</div>`;
+    cta = `<div class="dr-cal-empty">No hay menú para ${todayLabel} en el calendario activo. Ve a Plan Semanal para planificar.</div>`;
   } else if(pending.length > 0){
     cta = `<button class="dr-cal-cta" id="drLoadDay">📅 Añadir ${pending.length} comida${pending.length>1?'s':''} pendiente${pending.length>1?'s':''} de ${todayLabel}</button>
       <button class="dr-cal-replace" id="drReplaceDay" title="Reemplazar Mi día con el calendario completo de hoy">↻ Recargar</button>`;
@@ -997,7 +1028,7 @@ function renderDrawer(){
             <div class="dr-it-ico">${d.icon}</div>
             <div class="dr-it-body">
               <div class="dr-it-n">${d.nom}</div>
-              <div class="dr-it-m">${px(d.kcal)} kcal · ${px(d.mac.p)}P · ${px(d.mac.f)}G · ${px(d.mac.c)}C</div>
+              <div class="dr-it-m nutr">${px(d.kcal)} kcal · ${px(d.mac.p)}P · ${px(d.mac.f)}G · ${px(d.mac.c)}C</div>
             </div>
             <div class="dr-it-acts">
               <button class="dr-it-act" data-act="rep" title="Cambiar por similar">↻</button>
@@ -1096,7 +1127,7 @@ function renderReplaceList(currentId){
             <span class="rr-ic">${d.icon}</span>
             <span class="rr-b">
               <span class="rr-n">${escHtml(d.nom)}</span>
-              <span class="rr-m">${px(d.kcal)} kcal · ${(d.food||[]).slice(0,4).map(f=>FOOD_TYPES[f]?.ico||'').join('')}</span>
+              <span class="rr-m"><span class="nutr">${px(d.kcal)} kcal · </span>${(d.food||[]).slice(0,4).map(f=>FOOD_TYPES[f]?.ico||'').join('')}</span>
             </span>
           </button>`;
         }).join('')}
@@ -1131,8 +1162,8 @@ function openModal(id){
 
       <p style="font-size:.95rem;line-height:1.55;color:rgba(44,31,14,.78);margin-bottom:6px">${d.desc}</p>
 
-      <div class="m-section-hd">Macros · ${S.p==='AB' ? 'Todas · ración combinada' : escHtml(((TARGETS[S.p]||{}).name||'').trim()||('Persona '+(PEOPLE.indexOf(S.p)+1)))}</div>
-      <div class="m-kcal-row">
+      <div class="m-section-hd nutr">Macros · ${S.p==='AB' ? 'Todas · ración combinada' : escHtml(((TARGETS[S.p]||{}).name||'').trim()||('Persona '+(PEOPLE.indexOf(S.p)+1)))}</div>
+      <div class="m-kcal-row nutr">
         <div class="m-k-cell"><div class="m-k-v">${px(d.kcal)}</div><div class="m-k-l">kcal</div></div>
         <div class="m-k-cell"><div class="m-k-v">${px(d.mac.p)}g</div><div class="m-k-l">proteína</div></div>
         <div class="m-k-cell"><div class="m-k-v">${px(d.mac.f)}g</div><div class="m-k-l">grasa</div></div>
@@ -1297,10 +1328,15 @@ function setPersona(p){
 }
 
 /* ── SCROLL SPY ──────────────────────────────────────── */
+let _scrollSpyBound = false;
 function setupScrollSpy(){
-  const sections = CATEGORIES.map(c=>document.getElementById('cat-'+c.key)).filter(Boolean);
-  if(!sections.length) return;
+  // Registrar el listener UNA sola vez (antes se acumulaba uno por render).
+  if(_scrollSpyBound) return;
+  _scrollSpyBound = true;
   window.addEventListener('scroll', ()=>{
+    if(S.view !== 'cat') return;
+    const sections = CATEGORIES.map(c=>document.getElementById('cat-'+c.key)).filter(Boolean);
+    if(!sections.length) return;
     const y = window.scrollY + 180;
     let active = S.activeCat;
     sections.forEach(s=>{
@@ -1317,6 +1353,7 @@ function setupScrollSpy(){
 
 /* ── RENDER ALL ──────────────────────────────────────── */
 function renderAll(){
+  applyNutrClass();
   renderCatNav();
   renderFilters();
   renderMain();
@@ -1379,18 +1416,18 @@ function renderTabbar(section){
     const n = (typeof S !== 'undefined' && S.cart) ? S.cart.length : 0;
     const cv = (typeof S !== 'undefined') ? S.view : 'cat';
     tabs = [
-      {ico:'📖', lbl:'Catálogo',   on:cv==='cat',   fn:()=>switchView('cat')},
-      {ico:'📅', lbl:'Calendario', on:cv==='cal',   fn:()=>switchView('cal')},
-      {ico:'💾', lbl:'Guardados',  on:cv==='saved', fn:()=>switchView('saved')},
+      {ico:'📖', lbl:'Catálogo',    on:cv==='cat',   fn:()=>switchView('cat')},
+      {ico:'📅', lbl:'Plan Semanal',on:cv==='cal',   fn:()=>switchView('cal')},
+      {ico:'💾', lbl:'Guardados',   on:cv==='saved', fn:()=>switchView('saved')},
       {ico:'✚', lbl:'Crear',      fn:()=>openRecipeForm('des')},
       {ico:'🛒', lbl:'Mi día',     badge:n||null, fn:()=>openDrawer()}
     ];
   } else if(section === 'sport'){
     const sv = (typeof sportView !== 'undefined') ? sportView : 'ex';
     tabs = [
-      {ico:'💪', lbl:'Ejercicios', on:sv==='ex',   fn:()=>showSportView('ex')},
-      {ico:'📋', lbl:'Sesiones',   on:sv==='sess', fn:()=>showSportView('sess')},
-      {ico:'🗓️', lbl:'Calendario', on:sv==='scal', fn:()=>showSportView('scal')}
+      {ico:'💪', lbl:'Ejercicios',    on:sv==='ex',   fn:()=>showSportView('ex')},
+      {ico:'📋', lbl:'Sesiones',      on:sv==='sess', fn:()=>showSportView('sess')},
+      {ico:'🗓️', lbl:'Entrenamientos',on:sv==='scal', fn:()=>showSportView('scal')}
     ];
   } // week y mente: sin tabbar (se oculta por CSS / tabs vacíos)
   if(!tabs.length){ tb.style.display = 'none'; tb.innerHTML = ''; document.body.classList.add('no-tabbar'); return; }
@@ -1431,7 +1468,8 @@ function wireSecMenu(){
     if(m.dataset.page === 'measures'){ if(typeof window.openFoodMeasures === 'function') window.openFoodMeasures(); return; }
     if(m.dataset.page === 'info'){ if(typeof window.pnInfoLegal === 'function') window.pnInfoLegal(); return; }
     if(m.dataset.page === 'save'){ if(window.PNSession && window.PNSession.manualSave) window.PNSession.manualSave(); return; }
-    if(m.dataset.page === 'settings'){ if(typeof openSettings === 'function') openSettings(); return; }
+    if(m.dataset.page === 'settings'){ if(typeof openSettings === 'function') openSettings('personas'); return; }
+    if(m.dataset.page === 'config'){ if(typeof openSettings === 'function') openSettings('config'); return; }
     if(typeof window.setSection === 'function') window.setSection(m.dataset.sec);
     else { const sb = document.querySelector('.sec-btn[data-sec="'+m.dataset.sec+'"]'); if(sb) sb.click(); }
   }));

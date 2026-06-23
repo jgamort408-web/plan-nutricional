@@ -315,7 +315,7 @@ function calCellHtml(day, slot){
       <span class="ce-name">${escAttr(d.short || d.nom)}</span>
       ${badge}
       <button class="ce-exp ${isExp?'on':''}" data-exp="${escAttr(expKey)}" title="Ver/ocultar receta" aria-label="Ver receta">▾</button>
-    </div>${isExp ? renderCellDetail(id) : ''}`;
+    </div>${isExp ? renderCellDetail(id, day, slot) : ''}`;
   }).join('');
 
   return `<div class="cal-cell filled ${arr.length>1?'multi':''} ${cellViolations.size?'has-viol':''}" data-day="${day}" data-slot="${slot}" tabindex="0" role="button">
@@ -333,21 +333,38 @@ let _calExpanded = new Set();
 try{ _calExpanded = new Set(JSON.parse(localStorage.getItem(LS_CAL_EXP) || '[]')); }catch(e){}
 function persistCalExp(){ try{ localStorage.setItem(LS_CAL_EXP, JSON.stringify([..._calExpanded])); }catch(e){} }
 
-function renderCellDetail(id){
+function renderCellDetail(id, day, slot){
   const d = DISHES[id]; if(!d) return '';
-  const kc = S.p==='AB' ? `${d.kcal[0]}·${d.kcal[1]}` : px(d.kcal);
-  const mp = S.p==='AB' ? `${d.mac.p[0]}·${d.mac.p[1]}` : px(d.mac.p);
-  const mf = S.p==='AB' ? `${d.mac.f[0]}·${d.mac.f[1]}` : px(d.mac.f);
-  const mc = S.p==='AB' ? `${d.mac.c[0]}·${d.mac.c[1]}` : px(d.mac.c);
+  // Escalado por necesidad de comida, con reparto entre las recetas de la celda.
+  const ids = (CalState.data[day] && CalState.data[day][slot]) ? CalState.data[day][slot].filter(x=>DISHES[x]) : [id];
+  const sStd = sumCellStd(ids);
+  const pA = PEOPLE[0] || 'A', pB = PEOPLE[1] || pA;
+  const scFor = (pk)=> dishScaledMeal(d, pk, slot, sStd);
+  const rnd = n => Math.round(n);
+  let kc, mp, mf, mc;
+  if(S.p === 'AB'){
+    const a = scFor(pA).tot, b = scFor(pB).tot;
+    kc = `${rnd(a.k)}·${rnd(b.k)}`; mp = `${rnd(a.p)}·${rnd(b.p)}`; mf = `${rnd(a.f)}·${rnd(b.f)}`; mc = `${rnd(a.c)}·${rnd(b.c)}`;
+  } else {
+    const t = scFor(S.p).tot; kc = rnd(t.k); mp = rnd(t.p); mf = rnd(t.f); mc = rnd(t.c);
+  }
   const persLbl = S.p==='AB' ? 'Todas' : escAttr(((TARGETS[S.p]||{}).name||'').trim() || ('P'+((typeof PEOPLE!=='undefined'?PEOPLE.indexOf(S.p):0)+1)));
-  const ingHtml = (d.ing && d.ing.length)
-    ? d.ing.map(r=>{
-        const q = S.p==='A' ? r.A : S.p==='B' ? r.B : `${r.A} / ${r.B}`;
-        return `<li><span class="cd-n">${escAttr(r.n)}</span><span class="cd-q">${escAttr(q)}</span></li>`;
-      }).join('')
-    : `<li class="cd-free">${escAttr(d.desc || 'Comida libre — sin desglose.')}</li>`;
+  let ingHtml;
+  if(d.comp && d.comp.length){
+    const scA = scFor(pA), scB = scFor(pB), scOne = (S.p!=='AB') ? scFor(S.p) : null;
+    ingHtml = d.comp.map((it, i)=>{
+      const nm = foodName(it);
+      if(it.cs) return `<li><span class="cd-n">${escAttr(nm)}</span><span class="cd-q">al gusto</span></li>`;
+      const q = S.p==='AB'
+        ? `${fmtQty(it, scA.rows[i].grams)} / ${fmtQty(it, scB.rows[i].grams)}`
+        : fmtQty(it, scOne.rows[i].grams);
+      return `<li><span class="cd-n">${escAttr(nm)}</span><span class="cd-q">${escAttr(q)}</span></li>`;
+    }).join('');
+  } else {
+    ingHtml = `<li class="cd-free">${escAttr(d.desc || 'Comida libre — sin desglose.')}</li>`;
+  }
   return `<div class="ce-detail">
-    <div class="cd-mac">${kc} kcal · <b>${mp}</b>P · ${mf}G · ${mc}C <small>${persLbl}</small></div>
+    <div class="cd-mac"><span class="nutr">${kc} kcal · <b>${mp}</b>P · ${mf}G · ${mc}C </span><small>${persLbl}</small></div>
     <ul class="cd-ings">${ingHtml}</ul>
     <button class="cd-full" data-full="${id}">Ver ficha completa →</button>
   </div>`;
@@ -506,7 +523,7 @@ function renderPicker(){
         ${current.length ? `
           <div class="picker-cur-hd">
             <span class="pch-t">En esta franja · ${current.length} receta${current.length>1?'s':''}</span>
-            <span class="pch-tot">${totK} kcal · ${totP}P · ${totF}G · ${totC}C <small>(${personaLbl})</small></span>
+            <span class="pch-tot"><span class="nutr">${totK} kcal · ${totP}P · ${totF}G · ${totC}C </span><small>(${personaLbl})</small></span>
           </div>
           <div class="picker-cur-list">
             ${current.map((id, idx)=>{
@@ -514,7 +531,7 @@ function renderPicker(){
               return `<div class="picker-cur-it">
                 <span class="pi-ico-sm">${d.icon}</span>
                 <span class="pi-n-sm">${escAttr(d.nom)}</span>
-                <span class="pi-k">${px(d.kcal)} kcal</span>
+                <span class="pi-k nutr">${px(d.kcal)} kcal</span>
                 <button class="picker-cur-rm" data-rm-idx="${idx}" aria-label="Quitar">✕</button>
               </div>`;
             }).join('')}
@@ -540,8 +557,8 @@ function renderPicker(){
               <div class="pi-body">
                 <div class="pi-n">${d.nom}${added?' <span class="pi-added">✓ añadido</span>':''}${violBadge}</div>
                 <div class="pi-m">
-                  <span>${d.kcal[0]}/${d.kcal[1]} kcal</span>
-                  <span>·</span>
+                  <span class="nutr">${d.kcal[0]}/${d.kcal[1]} kcal</span>
+                  <span class="nutr">·</span>
                   <span>${d.t}</span>
                 </div>
               </div>
@@ -678,7 +695,7 @@ function renderGuide(){
         <div class="gih">
           <span class="gico">${ft.ico}</span>
           <span class="gname">${g.lbl}</span>
-          <span class="gval">${v}/${g.target}${g.max>g.target?'·máx '+g.max:''}</span>
+          <span class="gval" title="Llevas ${v} esta semana · recomendado ${g.target===0?('máx '+g.max):g.target}${g.max>g.target?' · máximo '+g.max:''}">${v} <small>${g.target===0?`· máx ${g.max}/sem`:`de ${g.target}${g.max>g.target?` · máx ${g.max}`:''}`}</small></span>
         </div>
         <div class="gbar"><div class="gfill" style="width:${pct}%"></div></div>
         <div class="grule">${escAttr(g.rule)}</div>
@@ -826,16 +843,25 @@ const SLOT_CUM_PCT = {com:0.35, cen:0.60, des:0.85, mer:1.0};
 
 /* Helpers · totales diarios para un día específico (A o B) */
 function dayTotalsFor(data, day){
+  // Modelo por necesidad de comida: cada receta escala a lo que necesita la
+  // persona en esa franja, repartiendo la franja entre las recetas (proporcional).
   const r = {A:{k:0,p:0,f:0,c:0}, B:{k:0,p:0,f:0,c:0}};
   const arr = data[day];
   if(!arr) return r;
+  const pA = PEOPLE[0] || 'A', pB = PEOPLE[1] || PEOPLE[0] || 'B';
   ['des','com','mer','cen'].forEach(s=>{
-    (arr[s]||[]).forEach(id=>{
-      const d = DISHES[id]; if(!d) return;
-      r.A.k += d.kcal[0]; r.A.p += d.mac.p[0]; r.A.f += d.mac.f[0]; r.A.c += d.mac.c[0];
-      r.B.k += d.kcal[1]; r.B.p += d.mac.p[1]; r.B.f += d.mac.f[1]; r.B.c += d.mac.c[1];
+    const ids = (arr[s]||[]).filter(id=>DISHES[id]);
+    if(!ids.length) return;
+    const sStd = sumCellStd(ids);
+    ids.forEach(id=>{
+      const d = DISHES[id];
+      const ta = dishScaledMeal(d, pA, s, sStd).tot;
+      const tb = dishScaledMeal(d, pB, s, sStd).tot;
+      r.A.k+=ta.k; r.A.p+=ta.p; r.A.f+=ta.f; r.A.c+=ta.c;
+      r.B.k+=tb.k; r.B.p+=tb.p; r.B.f+=tb.f; r.B.c+=tb.c;
     });
   });
+  ['A','B'].forEach(p=>['k','p','f','c'].forEach(m=>{ r[p][m] = Math.round(r[p][m]); }));
   return r;
 }
 

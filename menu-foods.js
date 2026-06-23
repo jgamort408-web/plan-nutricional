@@ -399,6 +399,54 @@ function dishScaled(d, personaKey){
   return scaleByFactor(d.comp, mod);
 }
 
+/* ── MODELO "POR NECESIDAD DE COMIDA" (Fase 2b) ──────────────
+   La receta es una RACIÓN ESTÁNDAR de adulto. Cada persona escala
+   la receta a su necesidad de ESA franja (kcal_día × % de la comida).
+   Si la celda tiene varias recetas, la franja se reparte entre ellas
+   proporcional a su tamaño estándar → factor = necesidad / Σ estándar.
+   Así "quien menos necesita" es la base y el resto son múltiplos. */
+function recipeStdKcal(d){
+  if(!d) return 0;
+  if(d.comp && d.comp.length){
+    let k = 0;
+    d.comp.forEach(it=>{ if(it.cs) return; k += gramMacros(it.f, itemGrams(it)).k; });
+    return k;
+  }
+  return Array.isArray(d.kcal) ? (d.kcal[0]||0) : (d.kcal||0);
+}
+function personMealKcal(personaKey, slot){
+  if(personaKey === 'AB') return PEOPLE.reduce((s,id)=> s + personMealKcal(id, slot), 0);
+  const t = TARGETS[personaKey];
+  return t ? (t.kcal||0) * (MEAL_PCT[slot] || 0.25) : 0;
+}
+function sumCellStd(ids){
+  return (ids||[]).reduce((a,id)=> a + (DISHES[id] ? recipeStdKcal(DISHES[id]) : 0), 0) || 1;
+}
+/* Escala TODO el comp por un factor (incluye verduras/fx; cs = al gusto = 0). */
+function scaleAll(comp, factor){
+  const f = (isFinite(factor) && factor > 0) ? factor : 1;
+  const rows = []; const tot = {k:0,p:0,f:0,c:0};
+  comp.forEach(it=>{
+    const g = it.cs ? 0 : itemGrams(it) * f;
+    const m = gramMacros(it.f, g);
+    tot.k+=m.k; tot.p+=m.p; tot.f+=m.f; tot.c+=m.c;
+    rows.push({it, grams:g, units:(it.u!=null && foodOf(it) && foodOf(it).unit) ? g/foodOf(it).unit.g : null});
+  });
+  return {rows, tot, factor:f};
+}
+/* Composición de una receta escalada para una persona en su celda (franja). */
+function dishScaledMeal(d, personaKey, slot, sumStd){
+  if(!d) return {rows:[], tot:{k:0,p:0,f:0,c:0}, factor:1};
+  if(d.comp && d.comp.length){
+    const std = sumStd || recipeStdKcal(d) || 1;
+    return scaleAll(d.comp, personMealKcal(personaKey, slot) / std);
+  }
+  // Sin composición (p. ej. "libre"): usa los kcal/macros precalculados de la persona.
+  const idx = Math.max(0, PEOPLE.indexOf(personaKey));
+  const pick = (a)=> Array.isArray(a) ? (a[idx]!=null?a[idx]:a[0]||0) : (a||0);
+  return {rows:[], tot:{k:pick(d.kcal), p:pick(d.mac&&d.mac.p), f:pick(d.mac&&d.mac.f), c:pick(d.mac&&d.mac.c)}, factor:1};
+}
+
 /* ── Formato de cantidades ──────────────────────────────── */
 function fmtNum(n){
   const r = Math.round(n * 10) / 10;

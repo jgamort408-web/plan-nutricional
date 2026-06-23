@@ -137,7 +137,7 @@ function renderShopList(){
       ${ppl.length>1 ? `<button class="ss-btn ${_shopScope==='AB'?'on':''}" data-scope="AB">👥 Todas</button>` : ''}
     </div>
     <div class="shop-body">
-      ${ids.length ? sectionsHtml + legacyHtml : `<div class="shop-empty">El calendario está vacío. Planifica comidas en la pestaña Calendario para generar la lista.</div>`}
+      ${ids.length ? sectionsHtml + legacyHtml : `<div class="shop-empty">El calendario está vacío. Planifica comidas en la pestaña Plan Semanal para generar la lista.</div>`}
     </div>
     <div class="shop-actions">
       <button class="btn-sec" id="shopCopy">📋 Copiar</button>

@@ -48,11 +48,13 @@ function renderSettings(){
       <button class="ftab ${_settingsTab==='personas'?'on':''}" data-tab="personas">Personas</button>
       <button class="ftab ${_settingsTab==='recetas'?'on':''}" data-tab="recetas">Mis recetas</button>
       <button class="ftab ${_settingsTab==='alimentos'?'on':''}" data-tab="alimentos">Alimentos</button>
+      <button class="ftab ${_settingsTab==='config'?'on':''}" data-tab="config">Configuración</button>
       <button class="ftab ${_settingsTab==='datos'?'on':''}" data-tab="datos">Copia de datos</button>
     </div>
     <div class="form-body">
       ${_settingsTab==='personas' ? renderPersonasForm()
         : _settingsTab==='alimentos' ? renderFoodsManager()
+        : _settingsTab==='config' ? renderConfigForm()
         : _settingsTab==='datos' ? renderDataManager()
         : renderRecipesList()}
     </div>`;
@@ -68,8 +70,38 @@ function renderSettings(){
 
   if(_settingsTab === 'personas') wirePersonasForm();
   else if(_settingsTab === 'alimentos') wireFoodsManager();
+  else if(_settingsTab === 'config') wireConfigForm();
   else if(_settingsTab === 'datos') wireDataManager();
   else wireRecipesList();
+}
+
+/* ── CONFIGURACIÓN · preferencias de la app ─────────────────
+   Pensado para hacer la app más respetuosa con cada usuario.
+   De momento: mostrar/ocultar kcal y macros de las recetas. */
+function renderConfigForm(){
+  const showNutr = (typeof SHOW_NUTR !== 'undefined') ? SHOW_NUTR : false;
+  return `
+    <p style="font-size:.86rem;color:var(--ink-50);line-height:1.55;margin-bottom:14px">
+      Ajusta la app a tu manera. Estas opciones buscan una relación
+      <strong>sana y respetuosa</strong> con la comida y el ejercicio.
+    </p>
+    <div class="cfg-group">
+      <h3 class="cfg-h">Nutrición</h3>
+      <label class="cfg-row">
+        <span class="cfg-txt">
+          <span class="cfg-lbl">Mostrar calorías y macros de las recetas</span>
+          <span class="cfg-sub">Desactivado por defecto. Las recetas son una ración estándar para una persona; ocultar los números ayuda a centrarse en comer bien, no en contar.</span>
+        </span>
+        <input type="checkbox" id="cfgShowNutr" class="cfg-switch" ${showNutr?'checked':''}>
+      </label>
+    </div>`;
+}
+function wireConfigForm(){
+  const t = formBody().querySelector('#cfgShowNutr');
+  if(t) t.addEventListener('change', ()=>{
+    if(typeof setShowNutr === 'function') setShowNutr(t.checked);
+    if(typeof renderAll === 'function') renderAll();
+  });
 }
 
 /* ── COPIA DE SEGURIDAD (exportar/importar TODO) ─────────── */

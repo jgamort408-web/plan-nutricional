@@ -218,7 +218,7 @@ body.sec-sport.spv-sess .hdr-gen{display:flex}
 .cbtn.on .cnum{color:var(--gold-l)}
 
 /* filter row */
-.frow{background:var(--parch);padding:8px 16px 10px;display:flex;flex-direction:column;gap:6px;border-bottom:1px solid rgba(44,31,14,.07);position:sticky;top:0;z-index:1}
+.frow{background:var(--parch);padding:8px 18px 10px;display:flex;flex-direction:column;gap:6px;border-bottom:1px solid rgba(44,31,14,.07);position:sticky;top:0;z-index:1}
 .frow-grp{display:flex;gap:7px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;align-items:center;padding-bottom:2px}
 .frow-grp::-webkit-scrollbar{display:none}
 .frow-lbl{font-family:'DM Mono',monospace;font-size:.58rem;color:var(--ink-50);letter-spacing:.1em;text-transform:uppercase;font-weight:600;white-space:nowrap;padding:5px 8px 5px 2px;flex-shrink:0;line-height:1}
@@ -232,7 +232,7 @@ body.sec-sport.spv-sess .hdr-gen{display:flex}
 .sort-pill .sort-dir{margin-left:4px;font-weight:700}
 
 /* ── Filtros tipo Idealista: quickbar + panel (móvil: bottom-sheet · escritorio: modal) ── */
-.fbar-quick{display:flex;gap:8px;align-items:center;width:100%}
+.fbar-quick{display:flex;gap:8px;align-items:center;width:100%;max-width:1280px;margin:0 auto}
 .fbar-quick.fbar-end{justify-content:flex-end}
 .fbar-quick .dish-search,.fbar-quick .sp-search{flex:1;max-width:440px}
 .fbtn-open{display:inline-flex;align-items:center;gap:6px;flex-shrink:0;border:1.5px solid rgba(44,31,14,.15);background:var(--white);color:var(--warm);font-family:'DM Mono',monospace;font-size:.68rem;text-transform:uppercase;letter-spacing:.04em;font-weight:600;padding:9px 14px;border-radius:22px;cursor:pointer;white-space:nowrap;transition:.18s}
@@ -1124,7 +1124,7 @@ main[data-vm="small"] .dish.add-card{min-height:62px;flex-direction:row}
   .cbtn .cnum{font-size:.58rem}
 
   /* FILTER ROW */
-  .frow{padding:6px 12px 8px;gap:4px}
+  .frow{padding:6px 18px 8px;gap:4px}
   .frow-grp{gap:5px}
   .frow-lbl{font-size:.54rem;padding:4px 4px 4px 2px}
   .fpill{padding:5px 10px;font-size:.62rem;gap:4px;min-height:30px}
@@ -1605,6 +1605,20 @@ body.sec-mente .app-tabbar,body.mente-mode .app-tabbar{display:none!important}
 body{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
 /* Sin tabbar (Semana/Mente): sin hueco fantasma abajo */
 body.no-tabbar{padding-bottom:0}
+/* Ocultar kcal/macros de las recetas (Ajustes → Configuración).
+   Por defecto activo: relación más sana con la comida. */
+body.hide-nutr .nutr{display:none !important}
+/* Configuración · filas de opciones */
+.cfg-group{margin-bottom:18px}
+.cfg-h{font-family:'Playfair Display',serif;font-size:1rem;color:var(--warm);margin:0 0 8px}
+.cfg-row{display:flex;align-items:flex-start;gap:14px;padding:12px 0;border-top:1px solid rgba(44,31,14,.08);cursor:pointer}
+.cfg-txt{display:flex;flex-direction:column;gap:3px;flex:1}
+.cfg-lbl{font-weight:600;font-size:.92rem;color:var(--warm)}
+.cfg-sub{font-size:.76rem;color:var(--ink-50);line-height:1.45}
+.cfg-switch{appearance:none;-webkit-appearance:none;width:44px;height:25px;border-radius:14px;background:rgba(44,31,14,.18);position:relative;cursor:pointer;flex:none;margin-top:2px;transition:.2s}
+.cfg-switch::after{content:'';position:absolute;top:2px;left:2px;width:21px;height:21px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:.2s}
+.cfg-switch:checked{background:var(--gold)}
+.cfg-switch:checked::after{transform:translateX(19px)}
 /* El selector de persona solo tiene sentido en Nutrición/Semana */
 body.sec-sport #ptoggle,body.sec-mente #ptoggle{display:none}
 body.sec-sport #helpBtn,body.sec-mente #helpBtn{margin-left:auto}
@@ -1642,9 +1656,8 @@ body.sec-sport #helpBtn,body.sec-mente #helpBtn{margin-left:auto}
 .sp-card-bot .sp-exn{font-family:'DM Mono',monospace;font-size:.6rem;color:var(--ink-50);text-transform:uppercase;letter-spacing:.05em}
 .sp-card-bot .sp-tot{font-family:'DM Mono',monospace;font-size:.72rem;font-weight:600;color:var(--terra)}
 .sp-badge{position:absolute;top:10px;right:10px;font-family:'DM Mono',monospace;font-size:.5rem;background:var(--olive);color:#fff;padding:2px 6px;border-radius:3px;text-transform:uppercase;letter-spacing:.05em}
-.sp-fav{position:absolute;top:7px;left:9px;border:none;background:transparent;color:var(--ink-30);font-size:1.05rem;line-height:1;cursor:pointer;padding:2px;z-index:2;transition:.12s}
-.sp-fav:hover{transform:scale(1.18)}
-.sp-fav.on{color:var(--gold)}
+/* Marca (no botón) de favorito en la tarjeta de ejercicio — el toggle vive en la ficha */
+.sp-fav-mark{position:absolute;top:7px;left:9px;color:var(--gold);font-size:1rem;line-height:1;z-index:2;filter:drop-shadow(0 1px 2px rgba(44,31,14,.3));pointer-events:none}
 .sp-card .sp-card-hd{padding-left:20px}
 .fpill-row{display:flex;gap:7px;flex-wrap:wrap;width:100%;align-items:center}
 .sp-search,.dish-search{width:100%;max-width:440px;padding:9px 14px;border-radius:22px;border:1.5px solid rgba(44,31,14,.15);background:var(--white);font-family:'Lora',serif;font-size:.92rem;color:var(--warm)}
@@ -1787,9 +1800,8 @@ img,svg,canvas{max-width:100%}
 .fpill.fav.on{background:var(--gold);color:var(--warm);border-color:var(--gold)}
 .btn-sec.on-fav{background:var(--gold);color:var(--warm);border-color:var(--gold)}
 /* recipe favorites */
-.dish-fav{position:absolute;top:8px;left:8px;z-index:3;border:none;background:rgba(255,255,255,.85);color:var(--ink-30);font-size:1.05rem;line-height:1;width:28px;height:28px;border-radius:50%;cursor:pointer;transition:.14s;box-shadow:0 1px 4px rgba(44,31,14,.12)}
-.dish-fav:hover{transform:scale(1.12)}
-.dish-fav.on{color:var(--gold)}
+/* Marca (no botón) de favorito en la tarjeta — el toggle vive en la ficha */
+.dish-fav-mark{position:absolute;top:8px;left:8px;z-index:3;color:var(--gold);font-size:1rem;line-height:1;filter:drop-shadow(0 1px 2px rgba(44,31,14,.35));pointer-events:none}
 .m-cta .m-fav-btn{background:transparent;border:1.5px solid var(--gold);color:var(--terra);margin-bottom:9px;font-size:.92rem}
 .m-cta .m-fav-btn:hover{background:var(--gold);color:var(--warm)}
 .m-cta .m-fav-btn.on{background:var(--gold);color:var(--warm)}
@@ -1957,7 +1969,8 @@ img,svg,canvas{max-width:100%}
         <button class="sec-mi" data-page="info" role="menuitem">ℹ️ Información y aviso legal</button>
         <div class="sec-menu-div"></div>
         <button class="sec-mi" data-page="save" role="menuitem">💾 Guardar avance</button>
-        <button class="sec-mi" data-page="settings" role="menuitem">⚙ Ajustes y recetas</button>
+        <button class="sec-mi" data-page="settings" role="menuitem">👥 Usuarios</button>
+        <button class="sec-mi" data-page="config" role="menuitem">⚙ Configuración</button>
       </div>
     </div>
     <div class="logo">Plan <em>Nutricional</em><small id="logoSub">Menú semanal</small></div>
@@ -1976,14 +1989,14 @@ img,svg,canvas{max-width:100%}
   </div>
   <nav class="vtabs" id="nutriVtabs" aria-label="Vistas">
     <button class="vtab on" data-view="cat"><span class="vti">📖</span>Catálogo</button>
-    <button class="vtab"    data-view="cal"><span class="vti">📅</span>Calendario</button>
+    <button class="vtab"    data-view="cal"><span class="vti">📅</span>Plan Semanal</button>
     <button class="vtab"    data-view="saved"><span class="vti">💾</span>Menús guardados</button>
     <button class="vtab vtab-create" id="vtabCreate"><span class="vti">✚</span>Crear receta</button>
   </nav>
   <nav class="vtabs svtabs hidden" id="sportVtabs" aria-label="Vistas de deporte">
     <button class="svtab on" data-sview="ex"><span class="vti">💪</span>Ejercicios</button>
     <button class="svtab"    data-sview="sess"><span class="vti">📋</span>Sesiones</button>
-    <button class="svtab"    data-sview="scal"><span class="vti">🗓️</span>Calendario</button>
+    <button class="svtab"    data-sview="scal"><span class="vti">🗓️</span>Entrenamientos</button>
   </nav>
   <nav class="catnav" id="catnav" aria-label="Categorías"></nav>
 </header>
@@ -1998,7 +2011,7 @@ img,svg,canvas{max-width:100%}
 <div id="view-cal" class="hidden">
   <div class="cal-wrap">
     <div class="cal-toolbar">
-      <div class="cal-title" id="calTitle">Calendario semanal<small id="calSub">Semana sin guardar</small><button class="cal-title-edit" id="calRename" title="Editar nombre del menú" aria-label="Editar nombre del menú">✎</button></div>
+      <div class="cal-title" id="calTitle">Plan Semanal<small id="calSub">Semana sin guardar</small><button class="cal-title-edit" id="calRename" title="Editar nombre del menú" aria-label="Editar nombre del menú">✎</button></div>
       <div class="cal-tools">
         <button class="cal-btn" id="calAutoFill" title="Autocompletar las franjas vacías">✨ Autocompletar</button>
         <button class="cal-btn" id="calAutoNew" title="Generar un menú nuevo desde cero">🎲 Generar nuevo</button>
@@ -2050,7 +2063,7 @@ img,svg,canvas{max-width:100%}
 <div id="sportview-scal" class="sportview hidden">
   <div class="sp-wrap">
     <div class="sp-toolbar">
-      <div class="sp-title" id="spCalTitle">Calendario <small id="spCalSub">Plan por fechas · hasta 1 año</small><button class="cal-title-edit" id="spCalRename" title="Editar nombre" aria-label="Editar nombre">✎</button></div>
+      <div class="sp-title" id="spCalTitle">Entrenamientos <small id="spCalSub">Plan por fechas · hasta 1 año</small><button class="cal-title-edit" id="spCalRename" title="Editar nombre" aria-label="Editar nombre">✎</button></div>
       <div class="sp-tools">
         <button class="cal-btn" id="spCalAuto" title="Plan automático: genera sesiones distintas por día">🧠 Plan auto</button>
         <button class="cal-btn" id="spCalCadence" title="Generar el plan por cadencia (días · semanas · meses)">⚙ Cadencia</button>

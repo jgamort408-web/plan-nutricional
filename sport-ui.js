@@ -202,15 +202,14 @@ function renderExGrid(){
   grid.innerHTML = ids.length ? ids.map(exCardHtml).join('')
     : `<div class="sp-empty">${q?`Sin ejercicios que coincidan con “${spEsc(_spExSearch)}”.`:(_spFavOnly?'No tienes ejercicios marcados como favoritos para este filtro.':'Sin ejercicios para este filtro.')}</div>`;
   grid.querySelectorAll('.sp-card').forEach(c=> c.addEventListener('click', ()=> openExerciseDetail(c.dataset.id)));
-  grid.querySelectorAll('.sp-fav').forEach(b=> b.addEventListener('click', e=>{ e.stopPropagation(); toggleFav(b.dataset.fav); renderExGrid(); }));
 }
 function exCardHtml(id){
   const ex = EXERCISES[id];
   const t = EX_TYPES[ex.type] || {ico:'•',lbl:ex.type};
   const isUser = !!ex.user;
   const fav = isFav(id);
-  return `<article class="sp-card ex" data-id="${id}">
-    <button class="sp-fav ${fav?'on':''}" data-fav="${id}" aria-label="Favorito" title="Favorito">${fav?'★':'☆'}</button>
+  return `<article class="sp-card ex${fav?' is-fav':''}" data-id="${id}">
+    ${fav?'<span class="sp-fav-mark" title="En favoritos" aria-label="En favoritos">★</span>':''}
     ${isUser?'<span class="sp-badge">Tuyo</span>':''}
     <div class="sp-card-hd"><span class="sp-ico">${t.ico}</span><span class="sp-type">${t.lbl}</span><span class="sp-disc">${(EX_SPORTS[exDisc(ex)]||{}).ico||''}</span></div>
     <div class="sp-card-n">${spEsc(ex.name)}</div>
@@ -768,10 +767,18 @@ function normalizeSession(r){
   if(hAdd) hAdd.addEventListener('click', ()=>{ if(sportView==='sess') openSessionEditor(); else openExerciseEditor(); });
   const hGen = document.getElementById('hdrSportGen');
   if(hGen) hGen.addEventListener('click', ()=> openSessionGenerator());
-  // restaura sección guardada (tras cargar el resto de scripts de deporte)
-  const _sec0 = lsGet('sport:section','nutri');
-  if(_sec0==='sport' || _sec0==='week' || _sec0==='mente') setTimeout(()=> setSection(_sec0), 0);
-  else { document.body.classList.add('sec-nutri'); if(typeof renderTabbar==='function') renderTabbar('nutri'); }   // Nutrición: asegura la tabbar al cargar
+  // restaura sección guardada (tras cargar el resto de scripts de deporte).
+  // OJO: #appTabbar está en el HTML DESPUÉS de los <script>, así que al ejecutarse
+  // este IIFE aún no existe. Diferimos a DOMContentLoaded para que renderTabbar
+  // encuentre el elemento y la tabbar aparezca ya en el primer pintado (antes solo
+  // salía tras navegar a otra pestaña y volver).
+  const _bootSection = ()=>{
+    const _sec0 = lsGet('sport:section','nutri');
+    if(_sec0==='sport' || _sec0==='week' || _sec0==='mente') setSection(_sec0);
+    else { document.body.classList.add('sec-nutri'); if(typeof renderTabbar==='function') renderTabbar('nutri'); }   // Nutrición: asegura la tabbar al cargar
+  };
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', _bootSection, {once:true});
+  else _bootSection();
 })();
 
 window.setSection = setSection;
