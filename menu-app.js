@@ -888,6 +888,7 @@ const RATINGS = [
   {v:5, ico:'😋', lbl:'Excelente'}
 ];
 
+let DR_MIN = lsGet('mnut:dr-min:v1', false);   // panel de objetivos/personas plegado en Mi día
 function renderDrawer(){
   const T = TARGETS[S.p];
   const tot = S.cart.reduce((a,id)=>{
@@ -998,13 +999,24 @@ function renderDrawer(){
       </div>`;
   }).join('');
 
+  const peopleBody = `${balanceBlock}${S.cart.length ? `<div class="tgt-hd">Total del día vs objetivo</div><div class="day-tot">${dayTotHtml}</div>` : ''}`;
   document.getElementById('drTargets').innerHTML = `
     <div class="dr-cal-row">${cta}</div>
-    ${balanceBlock}
-    ${S.cart.length ? `
-      <div class="tgt-hd">Total del día vs objetivo</div>
-      <div class="day-tot">${dayTotHtml}</div>
-    ` : ''}`;
+    ${peopleBody.trim() ? `
+      <div class="dr-people ${DR_MIN?'min':''}" id="drPeople">
+        <button class="dr-people-tog" id="drPeopleTog" aria-expanded="${!DR_MIN}">
+          <span>👥 Tus objetivos de hoy</span>
+          <span class="dr-people-cv">${DR_MIN?'▸ mostrar':'▾ ocultar'}</span>
+        </button>
+        <div class="dr-people-body">${peopleBody}</div>
+      </div>` : ''}`;
+
+  const drPTog = document.getElementById('drPeopleTog');
+  if(drPTog) drPTog.addEventListener('click', ()=>{
+    DR_MIN = !DR_MIN; lsSet('mnut:dr-min:v1', DR_MIN);
+    const wrap = document.getElementById('drPeople');
+    if(wrap){ wrap.classList.toggle('min', DR_MIN); drPTog.setAttribute('aria-expanded', String(!DR_MIN)); drPTog.querySelector('.dr-people-cv').textContent = DR_MIN?'▸ mostrar':'▾ ocultar'; }
+  });
 
   // items (grouped by slot)
   const items = document.getElementById('drItems');
@@ -1300,12 +1312,15 @@ function openDrawer(){
   renderDrawer();
   document.getElementById('drawerBg').classList.add('show');
   document.getElementById('drawer').classList.add('show');
-  document.body.classList.add('no-scroll');
+  document.body.classList.add('dr-open');
+  // En ordenador el panel se acopla (no bloquea): mantener la página usable/scrollable.
+  if(window.innerWidth < 1024) document.body.classList.add('no-scroll');
 }
 function closeDrawer(){
   document.getElementById('drawerBg').classList.remove('show');
   document.getElementById('drawer').classList.remove('show');
   document.body.classList.remove('no-scroll');
+  document.body.classList.remove('dr-open');
 }
 
 /* ── PERSONA: avatar único que cicla entre persona(s) ─── */

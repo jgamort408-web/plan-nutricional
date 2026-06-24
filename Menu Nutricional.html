@@ -456,6 +456,18 @@ main[data-vm="small"] .dish.add-card{min-height:62px;flex-direction:row}
 .dr-close:hover{background:var(--parch)}
 
 .dr-targets{padding:14px 20px 16px;background:var(--white);border-bottom:1px solid rgba(44,31,14,.06)}
+/* Panel de personas/objetivos plegable en Mi día */
+.dr-people-tog{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--white);border:1px solid rgba(44,31,14,.12);border-radius:var(--r-sm);padding:9px 12px;cursor:pointer;font-family:'DM Mono',monospace;font-size:.62rem;text-transform:uppercase;letter-spacing:.06em;color:var(--warm);font-weight:600;margin-bottom:10px;transition:.16s}
+.dr-people-tog:hover{background:var(--parch)}
+.dr-people-cv{color:var(--ink-50);white-space:nowrap}
+.dr-people.min .dr-people-body{display:none}
+.dr-people.min .dr-people-tog{margin-bottom:0}
+/* En ORDENADOR: Mi día se acopla como panel en pantalla (no como cajón modal que bloquea) */
+@media(min-width:1024px){
+  .drawer{max-width:410px;box-shadow:-1px 0 0 rgba(44,31,14,.1),-10px 0 36px rgba(44,31,14,.08)}
+  body.dr-open .drawer-bg{background:transparent;backdrop-filter:none;pointer-events:none}
+  body.dr-open .site-foot{display:none}
+}
 .tgt-hd{font-family:'DM Mono',monospace;font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-50);margin-bottom:12px}
 
 /* ── Total del día · una tarjeta por persona (compacto, sin desbordes) ── */
