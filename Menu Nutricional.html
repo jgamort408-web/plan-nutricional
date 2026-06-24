@@ -1681,6 +1681,32 @@ body.hide-nutr .nutr{display:none !important}
 .masst-pd-row{display:flex;align-items:center;gap:12px;background:var(--white);border:1px solid rgba(44,31,14,.12);border-radius:12px;padding:9px 12px}
 .masst-pd-d{font-family:'DM Mono',monospace;font-weight:700;color:var(--warm);width:42px;flex:none}
 .masst-pd-sel{flex:1;border:1px solid rgba(44,31,14,.18);border-radius:8px;padding:8px 10px;font-family:'Lora',serif;font-size:.9rem;color:var(--warm);background:var(--cream);cursor:pointer}
+/* ── Vista mensual ─────────────────────────────────────── */
+.mv{position:fixed;inset:0;z-index:360;display:none}
+.mv.show{display:block}
+.mv-bg{position:absolute;inset:0;background:rgba(44,31,14,.55);backdrop-filter:blur(2px)}
+.mv-panel{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(620px,94vw);max-height:90vh;background:var(--cream);border-radius:18px;box-shadow:0 24px 70px rgba(0,0,0,.4);display:flex;flex-direction:column;overflow:hidden;animation:slide .28s cubic-bezier(.22,.61,.36,1)}
+.mv-hd{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid rgba(44,31,14,.08)}
+.mv-title{flex:1;text-align:center;font-family:'Playfair Display',serif;color:var(--warm);font-size:1.3rem;margin:0}
+.mv-nav{border:1.5px solid rgba(44,31,14,.14);background:var(--white);color:var(--warm);width:36px;height:36px;border-radius:50%;font-size:1.2rem;cursor:pointer;flex:none}
+.mv-nav:hover{border-color:var(--gold)}
+.mv-x{border:none;background:transparent;font-size:1.1rem;color:var(--ink-50);cursor:pointer;padding:4px 8px;border-radius:8px;flex:none}
+.mv-x:hover{background:rgba(44,31,14,.07)}
+.mv-body{padding:14px 18px 18px;overflow-y:auto}
+.mv-intro{font-size:.86rem;color:var(--ink-50);line-height:1.5;margin:0 0 12px}
+.mv-note{font-size:.84rem;color:var(--terra);background:rgba(200,116,46,.08);border:1px solid rgba(200,116,46,.2);border-radius:10px;padding:10px 12px;margin:0 0 12px;line-height:1.5}
+.mv-weeks{display:flex;flex-direction:column;gap:9px}
+.mv-week{border:1px solid rgba(44,31,14,.12);border-radius:12px;padding:11px 13px;background:var(--white)}
+.mv-week.now{border-color:var(--olive);box-shadow:0 0 0 1.5px var(--olive) inset}
+.mv-wk-h{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:8px}
+.mv-wk-n{font-family:'DM Mono',monospace;font-size:.66rem;text-transform:uppercase;letter-spacing:.06em;color:var(--warm);font-weight:600}
+.mv-wk-r{font-family:'DM Mono',monospace;font-size:.66rem;color:var(--ink-50)}
+.mv-wk-pick{display:flex;gap:8px;align-items:center}
+.mv-sel{flex:1;border:1px solid rgba(44,31,14,.18);border-radius:8px;padding:8px 10px;font-family:'Lora',serif;font-size:.9rem;color:var(--warm);background:var(--cream);cursor:pointer}
+.mv-load{border:1.5px solid var(--olive);background:var(--olive);color:#fff;font-family:'DM Mono',monospace;font-size:.62rem;text-transform:uppercase;letter-spacing:.04em;font-weight:600;padding:9px 13px;border-radius:20px;cursor:pointer;white-space:nowrap;flex:none;transition:.16s}
+.mv-load:hover:not([disabled]){transform:translateY(-1px)}
+.mv-load[disabled]{opacity:.4;cursor:not-allowed;background:transparent;color:var(--ink-50);border-color:rgba(44,31,14,.2)}
+@media(max-width:480px){ .mv-panel{width:100vw;height:100vh;max-height:100vh;border-radius:0;top:0;left:0;transform:none} }
 .masst-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-top:1px solid rgba(44,31,14,.08);background:var(--parch)}
 .masst-count{font-family:'DM Mono',monospace;font-size:.66rem;color:var(--ink-50);text-transform:uppercase;letter-spacing:.06em}
 .masst-actions{display:flex;gap:8px}
@@ -2099,6 +2125,7 @@ main[data-vm="small"] .dish-incart{font-size:.5rem;padding:3px 8px}
       <div class="cal-title" id="calTitle">Plan Semanal<small id="calSub">Semana sin guardar</small><button class="cal-title-edit" id="calRename" title="Editar nombre del menú" aria-label="Editar nombre del menú">✎</button></div>
       <div class="cal-tools">
         <button class="cal-btn primary" id="calAssistant" title="Crea tu menú paso a paso eligiendo lo que te apetece">🧭 Asistente de menú</button>
+        <button class="cal-btn" id="calMonthly" title="Vista mensual: asigna un menú guardado a cada semana">🗓️ Vista mensual</button>
         <button class="cal-btn" id="calAutoFill" title="Autocompletar las franjas vacías">✨ Autocompletar</button>
         <button class="cal-btn" id="calAutoNew" title="Generar un menú nuevo desde cero">🎲 Generar nuevo</button>
         <button class="cal-btn" id="calAutoFav" title="Generar un menú centrado en tus recetas favoritas">⭐ Menú favoritos</button>
@@ -2295,6 +2322,7 @@ main[data-vm="small"] .dish-incart{font-size:.5rem;padding:3px 8px}
 <script src="menu-unified.js"></script>
 <script src="menu-session.js"></script>
 <script src="menu-assistant.js"></script>
+<script src="menu-month.js"></script>
 <script src="sport-assistant.js"></script>
 
 <!-- TABBAR INFERIOR · subvistas de la sección activa (móvil y escritorio) -->
