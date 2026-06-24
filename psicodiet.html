@@ -363,8 +363,11 @@ nav{background:rgba(251,247,239,.94);border-top:1px solid rgba(44,31,14,.07);bor
 nav button{font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.03em;font-size:9.5px}
 nav button.active{color:var(--green-d)}
 /* Fondos suaves cálidos en lugar de gris azulado */
-.mood,.chk,.ritual .slot,.audio-item,.diary-item,.chart-tabs button,.postit-empty{background:var(--soft)}
+.mood,.chk,.ritual .slot,.audio-item,.diary-item,.chart-tabs button,.postit-empty,
+.reminder,.cal-cell,.hm-item,.stat,.diary-item{background:var(--soft)}
 .photo-grid .ph,.color-pick .c{background:var(--soft)}
+.stat b{font-family:'Playfair Display',serif;color:var(--green-d)}
+.cal-cell.has{background:var(--green-l)}
 .mood{border-radius:16px}
 .mood.sel{border-color:var(--green);background:var(--green-l)}
 .chk.done{background:var(--green-l)} .chk.done .box{background:var(--green);border-color:var(--green)}
@@ -392,7 +395,7 @@ textarea:focus,input:focus{border-color:var(--green)}
 <header>
   <p class="hi" id="greeting">Hola</p>
   <h1>🌿 Mente en Forma</h1>
-  <p>Tu compañero psicológico en el camino</p>
+  <p>Tu apoyo emocional para cuidarte y sostener tu alimentación</p>
 </header>
 
 <div class="wrap">
@@ -422,8 +425,8 @@ textarea:focus,input:focus{border-color:var(--green)}
     <div class="day-summary">
       <div class="ring" aria-hidden="true">
         <svg width="64" height="64" viewBox="0 0 64 64">
-          <circle cx="32" cy="32" r="27" fill="none" stroke="#e2e8f0" stroke-width="7"/>
-          <circle id="ringFill" cx="32" cy="32" r="27" fill="none" stroke="#10b981" stroke-width="7"
+          <circle cx="32" cy="32" r="27" fill="none" stroke="#E2D7BE" stroke-width="7"/>
+          <circle id="ringFill" cx="32" cy="32" r="27" fill="none" stroke="#6E8B5B" stroke-width="7"
             stroke-linecap="round" stroke-dasharray="170" stroke-dashoffset="170"
             style="transition:stroke-dashoffset .5s"/>
         </svg>
@@ -738,10 +741,12 @@ async function requestPersistence(){
 const DEFAULT_HABITS=[
   {id:"snackAM",lbl:"Snack media mañana",em:"🥪"},
   {id:"merienda",lbl:"Merienda",em:"🍎"},
-  {id:"pasos",lbl:"Pasos / actividad",em:"👟"},
-  {id:"fruta",lbl:"Fruta",em:"🍓"},
+  {id:"fruta",lbl:"Fruta y verdura",em:"🥗"},
   {id:"agua",lbl:"Hidratación",em:"💧"},
-  {id:"estabilidad",lbl:"Estabilidad (todo como se espera)",em:"⚖️"},
+  {id:"sinPicar",lbl:"Sin picar entre horas",em:"🚫"},
+  {id:"consciente",lbl:"Comer despacio y sin pantallas",em:"🧘"},
+  {id:"pasos",lbl:"Pasos / actividad",em:"👟"},
+  {id:"estabilidad",lbl:"Día estable (todo como esperaba)",em:"⚖️"},
 ];
 const HABITS=()=>state.habits&&state.habits.length?state.habits:DEFAULT_HABITS;
 const todayKey=()=>new Date().toISOString().slice(0,10);
@@ -791,7 +796,7 @@ function renderToday(){
   const pct=Math.round(done/total*100);
   const circ=170, off=circ-(circ*pct/100);
   const ring=$("#ringFill"), rp=$("#ringPct");
-  if(ring){ring.style.strokeDashoffset=off;ring.setAttribute("stroke",pct>=100?"#10b981":pct>=50?"#0ea5e9":"#10b981");}
+  if(ring){ring.style.strokeDashoffset=off;ring.setAttribute("stroke",pct>=100?"#46552A":pct>=50?"#6E8B5B":"#5E8B86");}
   if(rp)rp.textContent=pct+"%";
   const st=$("#summaryTitle"), ss=$("#summarySub");
   if(st&&ss){
@@ -1032,7 +1037,7 @@ function renderMoodChart(){
   // grid
   ctx.strokeStyle="#eef2f7";ctx.lineWidth=1;
   for(let g=0;g<=5;g++){const y=H-pad-(g/5)*(H-pad*2);ctx.beginPath();ctx.moveTo(pad,y);ctx.lineTo(W-pad/2,y);ctx.stroke();}
-  plot(pct,"#0ea5e9");plot(mood,"#10b981");
+  plot(pct,"#5E8B86");plot(mood,"#6E8B5B");
 }
 function renderHabitChart(){
   const c=$("#habitChart"),ctx=c.getContext("2d");
@@ -1043,8 +1048,8 @@ function renderHabitChart(){
     const rate=done/days.length;
     ctx.fillStyle="#475569";ctx.fillText(h.em+" "+h.lbl,4,y+9);
     const bx=W*0.55,bw=W*0.4-8;
-    ctx.fillStyle="#f1f5f9";roundRect(ctx,bx,y,bw,14,7);ctx.fill();
-    const col=rate>=.7?"#10b981":rate>=.4?"#f59e0b":"#ef4444";
+    ctx.fillStyle="#F2EAD7";roundRect(ctx,bx,y,bw,14,7);ctx.fill();
+    const col=rate>=.7?"#6E8B5B":rate>=.4?"#C8742E":"#A5402F";
     ctx.fillStyle=col;roundRect(ctx,bx,y,bw*rate||0.001,14,7);ctx.fill();
     ctx.fillStyle="#334155";ctx.fillText(Math.round(rate*100)+"%",bx+bw+4>W-26?W-26:bx+bw-30,y+11);
   });
@@ -1143,7 +1148,7 @@ function renderInsights(){
 
 /* ========== Calendario ========== */
 let calMonth=new Date();calMonth.setDate(1);
-function moodColor(m){return m>=4?"#10b981":m>=3?"#f59e0b":m>=1?"#ef4444":"transparent";}
+function moodColor(m){return m>=4?"#6E8B5B":m>=3?"#C8742E":m>=1?"#A5402F":"transparent";}
 function renderCalendar(){
   const grid=$("#calGrid");if(!grid)return;
   $("#calLabel").textContent=calMonth.toLocaleDateString("es-ES",{month:"long",year:"numeric"}).replace(/^\w/,c=>c.toUpperCase());
