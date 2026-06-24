@@ -733,6 +733,32 @@ function exportMenuPdf(sourceData, sourceName){
   };
 }
 
+/* PDF COMPLETO: semana + recetas (del menú) + entrenamientos (del plan de deporte),
+   combinando los dos documentos imprimibles en uno solo. */
+function exportFullPdf(){
+  try{
+    const persona = TARGETS[S.p];
+    const menuHtml = buildPrintHtml(CalState.data, CalState.name || 'Menú semanal', persona);
+    const sportHtml = (typeof buildSportPrintHtml === 'function') ? buildSportPrintHtml() : '';
+    const bodyOf = h => { const m = h.match(/<body[^>]*>([\s\S]*?)<\/body>/i); return m ? m[1] : ''; };
+    const stylesOf = h => { const out = []; const re = /<style[^>]*>([\s\S]*?)<\/style>/gi; let m; while(m = re.exec(h)) out.push(m[1]); return out.join('\n'); };
+    const combined = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Plan completo · semana, recetas y entrenamientos</title>
+      <style>${stylesOf(menuHtml)}
+${stylesOf(sportHtml)}
+.full-sep{page-break-before:always}</style></head><body>
+      ${bodyOf(menuHtml)}
+      ${sportHtml ? `<div class="full-sep"></div>${bodyOf(sportHtml)}` : ''}
+      </body></html>`;
+    const iframe = document.createElement('iframe');
+    iframe.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0';
+    document.body.appendChild(iframe);
+    const doc = iframe.contentDocument || iframe.contentWindow.document;
+    doc.open(); doc.write(combined); doc.close();
+    iframe.contentWindow.onload = ()=>{ setTimeout(()=>{ try{ iframe.contentWindow.focus(); iframe.contentWindow.print(); }catch(e){ alert('No se pudo imprimir: '+e.message); } setTimeout(()=> iframe.remove(), 1000); }, 300); };
+  }catch(e){ alert('No se pudo generar el PDF completo: ' + (e && e.message || e)); }
+}
+window.exportFullPdf = exportFullPdf;
+
 function buildPrintHtml(data, name, persona){
   // Calcula contadores semanales
   const com = {};
@@ -962,6 +988,8 @@ const importMenuBtn = document.getElementById('importMenuBtn');
 if(importMenuBtn) importMenuBtn.addEventListener('click', importMenuJson);
 const calExportPdfBtn = document.getElementById('calExportPdf');
 if(calExportPdfBtn) calExportPdfBtn.addEventListener('click', ()=> exportMenuPdf());
+const calExportFullBtn = document.getElementById('calExportFull');
+if(calExportFullBtn) calExportFullBtn.addEventListener('click', ()=> exportFullPdf());
 const calExportJsonBtn = document.getElementById('calExportJson');
 if(calExportJsonBtn) calExportJsonBtn.addEventListener('click', ()=> exportMenuJson());
 
