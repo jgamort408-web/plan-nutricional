@@ -274,6 +274,73 @@ function openExerciseDetail(id){
   });
 }
 
+/* ── Crear ejercicios/sesiones con IA (genera prompt → copiar → importar JSON) ── */
+function spCopyText(text){
+  const ok = ()=> alert('✅ Prompt copiado.\n\nPégalo en tu IA (ChatGPT, Claude…), guarda lo que te devuelva como archivo .json y luego impórtalo en Ajustes → Usuarios → Copia de datos → «Importar ejercicios / Importar sesiones».');
+  const fallback = ()=>{ const ta=document.createElement('textarea'); ta.value=text; ta.style.cssText='position:fixed;left:-9999px;top:0'; document.body.appendChild(ta); ta.focus(); ta.select(); try{ document.execCommand('copy'); ok(); }catch(e){ alert('Copia el prompt manualmente.'); } ta.remove(); };
+  try{ if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(ok).catch(fallback); return; } }catch(e){}
+  fallback();
+}
+function buildExercisePrompt(idea){
+  const types = Object.entries(EX_TYPES).map(([k,v])=>`${k} (${v.lbl})`).join(', ');
+  const pats  = Object.entries(EX_PATTERNS).map(([k,v])=>`${k} (${v.lbl})`).join(', ');
+  const musc  = Object.entries(EX_MUSCLES).map(([k,v])=>`${k} (${v.lbl})`).join(', ');
+  return [
+`Actúa como entrenador personal experto y como experto en seguir formatos de salida al pie de la letra.`,
+``,
+`OBJETIVO: diseña uno o varios EJERCICIOS de entrenamiento según la petición y devuélvelos EXCLUSIVAMENTE como un único JSON válido (un array de objetos). No escribas nada antes ni después del JSON.`,
+``,
+`PETICIÓN: ${idea || '(libre: propón ejercicios útiles y seguros)'}`,
+``,
+`FORMATO de cada ejercicio (usa SOLO los ids válidos que se indican):`,
+`{`,
+`  "name": "Nombre del ejercicio",`,
+`  "type": "uno de: ${types}",`,
+`  "pat": "patrón, uno de: ${pats}",`,
+`  "muscles": ["ids de músculos, de: ${musc}"],`,
+`  "met": número (gasto metabólico aprox, p.ej. 6),`,
+`  "equip": "material (texto libre, puede ir vacío)",`,
+`  "mode": "reps" o "time",`,
+`  "sets": número de series,`,
+`  "reps": número de repeticiones (0 si mode=time),`,
+`  "dur": segundos por serie (0 si mode=reps),`,
+`  "rest": segundos de descanso entre series,`,
+`  "cues": "técnica e indicaciones de ejecución"`,
+`}`,
+``,
+`DEVUELVE: un array JSON, p. ej. [ {…}, {…} ]. Solo el JSON.`
+  ].join('\n');
+}
+function buildSessionPrompt(idea){
+  const types = Object.entries(EX_TYPES).map(([k,v])=>`${k} (${v.lbl})`).join(', ');
+  const catalog = Object.keys(EXERCISES).map(id=>`${id} — ${EXERCISES[id].name}`).join('\n');
+  return [
+`Actúa como entrenador personal experto y como experto en seguir formatos de salida al pie de la letra.`,
+``,
+`OBJETIVO: diseña una SESIÓN de entrenamiento según la petición y devuélvela EXCLUSIVAMENTE como un único JSON válido. No escribas nada antes ni después del JSON.`,
+``,
+`PETICIÓN: ${idea || '(libre: propón una sesión equilibrada)'}`,
+``,
+`IMPORTANTE: en "items[].e" usa SOLO ids de ejercicios que ya existen en la app (lista abajo). No inventes ids.`,
+``,
+`FORMATO:`,
+`{`,
+`  "name": "Nombre de la sesión",`,
+`  "focus": "enfoque breve",`,
+`  "type": "uno de: ${types}",`,
+`  "level": "Principiante | Intermedio | Avanzado",`,
+`  "warmup": "calentamiento sugerido",`,
+`  "notes": "notas",`,
+`  "items": [ { "e": "id_de_ejercicio_existente", "sets": 4, "reps": 10, "dur": 0, "rest": 75 } ]`,
+`}`,
+``,
+`EJERCICIOS DISPONIBLES (id — nombre):`,
+catalog,
+``,
+`DEVUELVE: solo el JSON de la sesión.`
+  ].join('\n');
+}
+
 /* ── Editor de ejercicio ─────────────────────────────────── */
 function openExerciseEditor(editId, prefill){
   const ex = editId ? EXERCISES[editId] : (prefill ? Object.assign({}, prefill) : {name:'', type:'fuerza', muscles:[], met:5, equip:'', mode:'reps', sets:3, reps:10, dur:40, rest:60, cues:''});
@@ -299,10 +366,12 @@ function openExerciseEditor(editId, prefill){
       <div class="fgrp"><label class="flbl">Descanso entre series (s)</label><input class="finp mono" type="number" min="0" name="rest" value="${ex.rest||60}"></div>
       <div class="fgrp"><label class="flbl">Técnica / notas</label><textarea class="ftxt" name="cues" placeholder="Indicaciones de ejecución">${spEsc(ex.cues||'')}</textarea></div>
     </div>
-    <div class="form-actions"><button class="btn-sec" id="exCancel">Cancelar</button><button class="btn-prim" id="exSave">${editId?'Guardar':'Crear ejercicio'}</button></div>`;
+    <div class="form-actions"><button class="btn-sec" id="exAiPrompt" type="button" title="Genera un prompt para crear ejercicios con IA y copiarlo">✨ Crear con IA</button><button class="btn-sec" id="exCancel">Cancelar</button><button class="btn-prim" id="exSave">${editId?'Guardar':'Crear ejercicio'}</button></div>`;
   openForm(html);
   const form = document.getElementById('exForm');
   form.querySelectorAll('#exMuscles .fchip').forEach(b=> b.addEventListener('click', ()=> b.classList.toggle('on')));
+  const exAi = document.getElementById('exAiPrompt');
+  if(exAi) exAi.addEventListener('click', ()=>{ const idea=(form.querySelector('[name="name"]').value||'').trim(); spCopyText(buildExercisePrompt(idea)); });
   document.getElementById('exCancel').addEventListener('click', closeForm);
   document.getElementById('exSave').addEventListener('click', ()=>{
     const v = n => (form.querySelector(`[name="${n}"]`).value||'').trim();
@@ -492,9 +561,11 @@ function openSessionEditor(editId, prefill){
       <div class="fgrp"><label class="flbl">Notas</label><textarea class="ftxt" name="notes">${spEsc(s.notes||'')}</textarea></div>
       <div class="comp-live" id="sessLive"></div>
     </div>
-    <div class="form-actions"><button class="btn-sec" id="sessCancel">Cancelar</button><button class="btn-prim" id="sessSave">${editId?'Guardar':'Crear sesión'}</button></div>`;
+    <div class="form-actions"><button class="btn-sec" id="sessAiPrompt" type="button" title="Genera un prompt para crear una sesión con IA y copiarlo">✨ Crear con IA</button><button class="btn-sec" id="sessCancel">Cancelar</button><button class="btn-prim" id="sessSave">${editId?'Guardar':'Crear sesión'}</button></div>`;
   openForm(html);
   const form = document.getElementById('sessForm');
+  const sessAi = document.getElementById('sessAiPrompt');
+  if(sessAi) sessAi.addEventListener('click', ()=>{ const idea=(form.querySelector('[name="name"]')?.value||'').trim(); spCopyText(buildSessionPrompt(idea)); });
   const wireRow = row=>{
     row.querySelectorAll('select,input').forEach(el=> el.addEventListener('input', sessLive));
     row.querySelector('.si-rm').addEventListener('click', ()=>{ if(form.querySelectorAll('.sess-it').length>1){ row.remove(); sessLive(); } });
