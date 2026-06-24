@@ -1861,6 +1861,11 @@ img,svg,canvas{max-width:100%}
 .dish-fav.on{color:var(--gold)}
 /* Si el plato está en "Mi día" (✓ arriba-derecha), corre el favorito a su izquierda para no solaparse */
 .dish.has-cart .dish-fav{right:46px}
+/* Vista compacta (fila): se reserva un hueco a la derecha para el favorito (no se superpone al texto) */
+main[data-vm="small"] .dish{padding-right:42px}
+main[data-vm="small"] .dish-fav,
+main[data-vm="small"] .dish.has-cart .dish-fav{top:50%;right:7px;transform:translateY(-50%);width:30px;height:30px}
+main[data-vm="small"] .dish.has-cart .added-mark{top:7px;right:7px}
 .m-cta .m-fav-btn{background:transparent;border:1.5px solid var(--gold);color:var(--terra);margin-bottom:9px;font-size:.92rem}
 .m-cta .m-fav-btn:hover{background:var(--gold);color:var(--warm)}
 .m-cta .m-fav-btn.on{background:var(--gold);color:var(--warm)}
@@ -2272,6 +2277,16 @@ img,svg,canvas{max-width:100%}
 
 <!-- TABBAR INFERIOR · subvistas de la sección activa (móvil y escritorio) -->
 <nav id="appTabbar" class="app-tabbar" role="tablist" aria-label="Vistas de la sección"></nav>
+<script>
+/* Puebla la tabbar en cuanto el elemento existe (este script va DESPUÉS del <nav>),
+   sin depender de eventos de carga. Evita que aparezca vacía hasta navegar. */
+(function(){ try{
+  var run=function(){ try{ if(typeof renderTabbar==='function') renderTabbar(); }catch(e){} };
+  run();
+  document.addEventListener('DOMContentLoaded', run, {once:true});
+  window.addEventListener('load', run, {once:true});
+}catch(e){} })();
+</script>
 
 <footer class="site-foot">
   <div class="sf-row">
