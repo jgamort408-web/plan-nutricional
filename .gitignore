@@ -23,3 +23,12 @@ Thumbs.db
 
 # Claude Code local
 .claude/
+
+# Herramientas de revisión visual (capturas headless) — no van a la web
+.shots/
+capture-shots.js
+cdp-shots.js
+package.json
+package-lock.json
+.commitmsg.tmp
+*.output

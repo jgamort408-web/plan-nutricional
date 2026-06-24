@@ -590,6 +590,9 @@ main[data-vm="small"] .dish.add-card{min-height:62px;flex-direction:row}
 .cal-title-edit:hover{background:var(--cream);color:var(--terra)}
 .cal-title small{display:block;font-family:'DM Mono',monospace;font-size:.6rem;color:var(--ink-50);letter-spacing:.08em;text-transform:uppercase;margin-top:2px;font-weight:400}
 .cal-tools{display:flex;gap:7px;flex-wrap:wrap}
+.cal-more{display:flex;gap:7px;flex-wrap:wrap;flex-basis:100%;margin-top:2px}
+.cal-more.hidden{display:none}
+#calMoreBtn[aria-expanded="true"]{border-color:var(--terra);color:var(--terra);background:var(--cream)}
 .cal-btn{border:1.5px solid rgba(44,31,14,.15);background:var(--white);color:var(--warm);font-family:'DM Mono',monospace;font-size:.66rem;text-transform:uppercase;letter-spacing:.06em;padding:8px 12px;border-radius:var(--r-sm);cursor:pointer;transition:.18s;font-weight:500;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
 .cal-btn:hover{border-color:var(--terra);color:var(--terra)}
 .cal-btn.primary{background:var(--terra);color:#fff;border-color:var(--terra)}
@@ -1276,6 +1279,8 @@ main[data-vm="small"] .dish.add-card{min-height:62px;flex-direction:row}
   .cal-tools{order:2;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:5px}
   .cal-tools .cal-btn{padding:8px 9px;font-size:.6rem;letter-spacing:.04em;min-height:38px;gap:4px;line-height:1.2;text-align:center;justify-content:center}
   .cal-tools .cal-btn.primary{grid-column:span 2}
+  .cal-tools .cal-more{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:0}
+  .cal-tools .cal-more.hidden{display:none}
 
   /* RESTRICTIONS BANNER */
   .restr-banner{flex-direction:column;gap:8px;padding:11px 12px}
@@ -2128,16 +2133,19 @@ main[data-vm="small"] .dish-incart{font-size:.5rem;padding:3px 8px}
       <div class="cal-title" id="calTitle">Plan Semanal<small id="calSub">Semana sin guardar</small><button class="cal-title-edit" id="calRename" title="Editar nombre del menú" aria-label="Editar nombre del menú">✎</button></div>
       <div class="cal-tools">
         <button class="cal-btn primary" id="calAssistant" title="Crea tu menú paso a paso eligiendo lo que te apetece">🧭 Asistente de menú</button>
-        <button class="cal-btn" id="calMonthly" title="Vista mensual: asigna un menú guardado a cada semana">🗓️ Vista mensual</button>
         <button class="cal-btn" id="calAutoFill" title="Autocompletar las franjas vacías">✨ Autocompletar</button>
-        <button class="cal-btn" id="calAutoNew" title="Generar un menú nuevo desde cero">🎲 Generar nuevo</button>
-        <button class="cal-btn" id="calAutoFav" title="Generar un menú centrado en tus recetas favoritas">⭐ Menú favoritos</button>
-        <button class="cal-btn" id="calLoadTpl" title="Aplicar plantilla del PDF">📋 Plantilla PDF</button>
-        <button class="cal-btn ghost" id="calClear">🧹 Vaciar</button>
-        <button class="cal-btn" id="calExportPdf" title="Exportar el menú como PDF">📄 PDF menú</button>
-        <button class="cal-btn" id="calExportFull" title="PDF completo: semana + recetas + entrenamientos">📚 PDF completo</button>
-        <button class="cal-btn" id="calShopList" title="Lista de la compra de la semana">🛒 Lista compra</button>
-        <button class="cal-btn" id="calExportJson" title="Exportar menú como JSON" style="display:none" hidden>↧ JSON</button>
+        <button class="cal-btn" id="calMoreBtn" title="Más acciones" aria-expanded="false" aria-controls="calMore">⋯ Más acciones</button>
+        <div class="cal-more hidden" id="calMore">
+          <button class="cal-btn" id="calMonthly" title="Vista mensual: asigna un menú guardado a cada semana">🗓️ Vista mensual</button>
+          <button class="cal-btn" id="calAutoNew" title="Generar un menú nuevo desde cero">🎲 Generar nuevo</button>
+          <button class="cal-btn" id="calAutoFav" title="Generar un menú centrado en tus recetas favoritas">⭐ Menú favoritos</button>
+          <button class="cal-btn" id="calLoadTpl" title="Aplicar plantilla del PDF">📋 Plantilla PDF</button>
+          <button class="cal-btn ghost" id="calClear">🧹 Vaciar</button>
+          <button class="cal-btn" id="calExportPdf" title="Exportar el menú como PDF">📄 PDF menú</button>
+          <button class="cal-btn" id="calExportFull" title="PDF completo: semana + recetas + entrenamientos">📚 PDF completo</button>
+          <button class="cal-btn" id="calShopList" title="Lista de la compra de la semana">🛒 Lista compra</button>
+          <button class="cal-btn" id="calExportJson" title="Exportar menú como JSON" style="display:none" hidden>↧ JSON</button>
+        </div>
         <button class="cal-btn primary" id="calSave">💾 Guardar menú</button>
       </div>
     </div>

@@ -56,14 +56,18 @@ function updateCalSub(){
       if(arr.length){ filledSlots++; totalDishes += arr.length; }
     });
   });
+  const isDefault = (CalState.name === 'Semana sin guardar');
   const base = CalState.id
-    ? `Editando: ${CalState.name}`
-    : (CalState.name === 'Semana sin guardar' ? 'Semana sin guardar' : `Borrador: ${CalState.name}`);
+    ? `Editando «${CalState.name}»`
+    : (isDefault ? 'Menú sin guardar' : `Borrador «${CalState.name}»`);
   const extra = totalDishes > filledSlots ? ` · ${totalDishes} recetas` : '';
-  sub.textContent = `${base} · ${filledSlots}/28 franjas${extra}${CalState.modified?' · sin guardar':''}`;
+  // No repetir "sin guardar" cuando el propio estado ya es "Menú sin guardar"
+  const dirty = (CalState.modified && !isDefault) ? ' · sin guardar' : '';
+  sub.textContent = `${base} · ${filledSlots}/28 franjas${extra}${dirty}`;
   const title = document.getElementById('calTitle');
   if(title){
-    title.childNodes[0].nodeValue = CalState.name;
+    // El H1 muestra el nombre del menú; si aún no tiene, el rótulo de la sección
+    title.childNodes[0].nodeValue = isDefault ? 'Plan Semanal' : CalState.name;
   }
 }
 
@@ -1232,6 +1236,23 @@ const calAutoNewBtn = document.getElementById('calAutoNew');
 if(calAutoNewBtn) calAutoNewBtn.addEventListener('click', autofillFromScratch);
 const calAutoFavBtn = document.getElementById('calAutoFav');
 if(calAutoFavBtn) calAutoFavBtn.addEventListener('click', autofillFromFavorites);
+
+// "⋯ Más acciones": despliega/oculta las acciones secundarias del calendario
+const calMoreBtn = document.getElementById('calMoreBtn');
+const calMorePanel = document.getElementById('calMore');
+if(calMoreBtn && calMorePanel){
+  calMoreBtn.addEventListener('click', ()=>{
+    const open = calMorePanel.classList.toggle('hidden') === false;
+    calMoreBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  // Al elegir una acción secundaria, repliega el panel (móvil sobre todo)
+  calMorePanel.addEventListener('click', (e)=>{
+    if(e.target.closest('.cal-btn')){
+      calMorePanel.classList.add('hidden');
+      calMoreBtn.setAttribute('aria-expanded','false');
+    }
+  });
+}
 
 // Re-render del calendario al cambiar el tamaño REAL de la ventana.
 // Importante: NO re-renderizar si el usuario está escribiendo en un campo
