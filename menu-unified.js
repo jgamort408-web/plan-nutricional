@@ -117,7 +117,7 @@ function renderWeek(){
       <div class="wk-meals">${slotsHtml}</div>
       <div class="wk-sec-h">🏋️ Entreno <button class="wk-add" data-add-sport data-date="${key}" aria-label="Añadir entreno">＋</button></div>
       <div class="wk-sports">${sportHtml}</div>
-      <div class="wk-bal ${remCls}">
+      <div class="wk-bal nutr ${remCls}">
         <div class="wk-bal-row"><span>🍽 ${ing}</span>${burn?`<span>🏋️ +${burn}</span>`:''}</div>
         <div class="wk-bal-net">${rem>=0?'quedan':'exceso'} <b>${Math.abs(rem)}</b></div>
       </div>
@@ -139,7 +139,7 @@ function renderWeek(){
 
   // resumen objetivo
   const objEl = document.getElementById('weekObjetivo');
-  if(objEl) objEl.textContent = `Objetivo ${S.p}: ${T.kcal} kcal/día`;
+  if(objEl){ objEl.textContent = `Objetivo ${S.p}: ${T.kcal} kcal/día`; objEl.classList.add('nutr'); }
 }
 
 /* navegación */
@@ -171,7 +171,7 @@ function openMealPicker(dateKey, slot){
   const cur = ()=> (NutDates[dateKey] ? NutDates[dateKey][slot] : (resolveMeals(dateKey)[slot]||[]));
   function listHtml(){
     const arr=cur();
-    const out = cands.filter(id=> !q || uNorm(DISHES[id].nom).includes(q)).map(id=>{ const d=DISHES[id]; const inc=arr.includes(id); return `<div class="picker-it ${inc?'sel':''}" data-pick="${id}"><div class="pi-ico">${d.icon||'🍽'}</div><div class="pi-body"><div class="pi-n">${uEsc(d.nom)}${inc?' <span class="pi-added">✓</span>':''}</div><div class="pi-m"><span>${px(d.kcal)} kcal</span></div></div></div>`; }).join('');
+    const out = cands.filter(id=> !q || uNorm(DISHES[id].nom).includes(q)).map(id=>{ const d=DISHES[id]; const inc=arr.includes(id); return `<div class="picker-it ${inc?'sel':''}" data-pick="${id}"><div class="pi-ico">${d.icon||'🍽'}</div><div class="pi-body"><div class="pi-n">${uEsc(d.nom)}${inc?' <span class="pi-added">✓</span>':''}</div><div class="pi-m"><span class="nutr">${px(d.kcal)} kcal</span></div></div></div>`; }).join('');
     return out || '<div class="sp-empty">Sin recetas para esta franja.</div>';
   }
   const wd = WEEK_DAYS[(uFromKey(dateKey).getDay()+6)%7];

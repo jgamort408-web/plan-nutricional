@@ -43,10 +43,10 @@ function renderSpCalSummary(){
     <div class="sp-sum-cells">
       <div class="ssc"><b>${m.sessions}</b><i>sesiones · mes</i></div>
       <div class="ssc"><b>${Math.floor(m.min/60)}h ${m.min%60}m</b><i>volumen · mes</i></div>
-      <div class="ssc"><b>♂ ${m.kA}</b><i>kcal mes ♂A</i></div>
-      <div class="ssc"><b>♀ ${m.kB}</b><i>kcal mes ♀B</i></div>
+      <div class="ssc nutr"><b>♂ ${m.kA}</b><i>kcal mes ♂A</i></div>
+      <div class="ssc nutr"><b>♀ ${m.kB}</b><i>kcal mes ♀B</i></div>
     </div>
-    <div class="sp-sum-foot">Plan completo: <strong>${all.sessions}</strong> sesiones · <strong>${Math.floor(all.min/60)}h ${all.min%60}m</strong> · ♂ ${all.kA} · ♀ ${all.kB} kcal</div>
+    <div class="sp-sum-foot">Plan completo: <strong>${all.sessions}</strong> sesiones · <strong>${Math.floor(all.min/60)}h ${all.min%60}m</strong><span class="nutr"> · ♂ ${all.kA} · ♀ ${all.kB} kcal</span></div>
     ${topM.length?`<div class="msc-row" style="margin-top:8px">${muscleChips(topM,{dot:true})}</div>`:''}
   </div>`;
 }
@@ -78,7 +78,7 @@ function renderSpCalMonth(){
         <span class="rc-s-who">${WHO_LBL[e.who]||'♂♀'}</span>
       </div>`;
     }).join('');
-    const kcalFoot = entries.length ? `<div class="rc-kcal">${t.kA?`<span>♂${t.kA}</span>`:''}${t.kB?`<span>♀${t.kB}</span>`:''}</div>` : '';
+    const kcalFoot = entries.length ? `<div class="rc-kcal nutr">${t.kA?`<span>♂${t.kA}</span>`:''}${t.kB?`<span>♀${t.kB}</span>`:''}</div>` : '';
     cells += `<div class="rc-cell ${isToday?'today':''} ${entries.length?'has':''}" data-key="${key}">
       <div class="rc-dnum">${d}${isToday?'<em>hoy</em>':''}</div>
       <div class="rc-stack">${chips}</div>
