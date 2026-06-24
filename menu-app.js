@@ -30,6 +30,35 @@ function lsSet(k, v){
 
 function escHtml(s){ return (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
+/* ── Imprimir/guardar PDF de forma robusta (incluido iOS) ───────
+   iOS Safari NO imprime iframes ocultos por programa: abrimos el
+   documento en una pestaña nueva y el usuario usa Compartir → Imprimir/
+   Guardar PDF. En escritorio/Android se usa el iframe oculto (sin salir). */
+function pnIsIOS(){
+  try{
+    const ua = navigator.userAgent || '';
+    return /iPad|iPhone|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+  }catch(e){ return false; }
+}
+function pnPrintDoc(html){
+  if(pnIsIOS()){
+    const w = window.open('', '_blank');
+    if(!w){ alert('Para generar el PDF en iPhone/iPad, permite las ventanas emergentes de esta web (o vuelve a tocar el botón). Luego usa Compartir → Imprimir/Guardar PDF.'); return; }
+    w.document.open(); w.document.write(html); w.document.close();
+    // Intento de abrir el diálogo; si iOS no lo permite, el usuario usa Compartir.
+    setTimeout(()=>{ try{ w.focus(); w.print(); }catch(e){} }, 600);
+    return;
+  }
+  const iframe = document.createElement('iframe');
+  iframe.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0';
+  document.body.appendChild(iframe);
+  const doc = iframe.contentDocument || iframe.contentWindow.document;
+  doc.open(); doc.write(html); doc.close();
+  iframe.contentWindow.onload = ()=>{ setTimeout(()=>{ try{ iframe.contentWindow.focus(); iframe.contentWindow.print(); }catch(e){ alert('No se pudo imprimir: '+e.message); } setTimeout(()=> iframe.remove(), 1000); }, 300); };
+}
+window.pnPrintDoc = pnPrintDoc;
+window.pnIsIOS = pnIsIOS;
+
 /* ── Visibilidad de kcal/macros de las recetas ───────────────
    Por defecto NO se muestran (relación más sana y respetuosa con
    la comida; además la receta es una ración estándar para una

@@ -702,35 +702,10 @@ function exportMenuPdf(sourceData, sourceName){
   const name = sourceName || CalState.name || 'Menú semanal';
   const persona = TARGETS[S.p];
 
-  // Construye HTML imprimible aislado en un iframe nuevo
+  // Construye HTML imprimible y lo imprime (robusto en iOS vía pnPrintDoc)
   const html = buildPrintHtml(data, name, persona);
-  const iframe = document.createElement('iframe');
-  iframe.style.position = 'fixed';
-  iframe.style.right = '0';
-  iframe.style.bottom = '0';
-  iframe.style.width = '0';
-  iframe.style.height = '0';
-  iframe.style.border = '0';
-  document.body.appendChild(iframe);
-
-  const doc = iframe.contentDocument || iframe.contentWindow.document;
-  doc.open();
-  doc.write(html);
-  doc.close();
-
-  // Dar tiempo a que renderice y abrir el diálogo de impresión
-  iframe.contentWindow.onload = ()=>{
-    setTimeout(()=>{
-      try{
-        iframe.contentWindow.focus();
-        iframe.contentWindow.print();
-      }catch(e){
-        alert('No se ha podido abrir el diálogo de impresión: '+e.message);
-      }
-      // Eliminar tras imprimir (el diálogo es bloqueante en la mayoría de navegadores)
-      setTimeout(()=> iframe.remove(), 1000);
-    }, 200);
-  };
+  if(typeof pnPrintDoc === 'function') pnPrintDoc(html);
+  else { const w=window.open('','_blank'); if(w){ w.document.open(); w.document.write(html); w.document.close(); } }
 }
 
 /* PDF COMPLETO: semana + recetas (del menú) + entrenamientos (del plan de deporte),
@@ -749,12 +724,8 @@ ${stylesOf(sportHtml)}
       ${bodyOf(menuHtml)}
       ${sportHtml ? `<div class="full-sep"></div>${bodyOf(sportHtml)}` : ''}
       </body></html>`;
-    const iframe = document.createElement('iframe');
-    iframe.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0';
-    document.body.appendChild(iframe);
-    const doc = iframe.contentDocument || iframe.contentWindow.document;
-    doc.open(); doc.write(combined); doc.close();
-    iframe.contentWindow.onload = ()=>{ setTimeout(()=>{ try{ iframe.contentWindow.focus(); iframe.contentWindow.print(); }catch(e){ alert('No se pudo imprimir: '+e.message); } setTimeout(()=> iframe.remove(), 1000); }, 300); };
+    if(typeof pnPrintDoc === 'function') pnPrintDoc(combined);
+    else { const w=window.open('','_blank'); if(w){ w.document.open(); w.document.write(combined); w.document.close(); } }
   }catch(e){ alert('No se pudo generar el PDF completo: ' + (e && e.message || e)); }
 }
 window.exportFullPdf = exportFullPdf;

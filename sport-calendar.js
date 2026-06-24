@@ -535,12 +535,8 @@ function spCalExportJson(){
 /* ── Export PDF (calendario + sesiones pormenorizadas) ────── */
 function spCalExportPdf(){
   const html = buildSportPrintHtml();
-  const iframe = document.createElement('iframe');
-  iframe.style.cssText='position:fixed;right:0;bottom:0;width:0;height:0;border:0';
-  document.body.appendChild(iframe);
-  const doc = iframe.contentDocument || iframe.contentWindow.document;
-  doc.open(); doc.write(html); doc.close();
-  iframe.contentWindow.onload = ()=>{ setTimeout(()=>{ try{ iframe.contentWindow.focus(); iframe.contentWindow.print(); }catch(e){ alert('No se pudo imprimir: '+e.message); } setTimeout(()=>iframe.remove(),1000); },300); };
+  if(typeof pnPrintDoc === 'function') pnPrintDoc(html);
+  else { const w=window.open('','_blank'); if(w){ w.document.open(); w.document.write(html); w.document.close(); } }
 }
 function buildSportPrintHtml(){
   const esc = s => (s||'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');

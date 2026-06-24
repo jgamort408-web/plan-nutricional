@@ -724,6 +724,7 @@ function buildMeasuresPrintHtml(){
 }
 function printFoodMeasures(){
   const html = buildMeasuresPrintHtml();
+  if(typeof pnPrintDoc === 'function'){ pnPrintDoc(html); return; }
   const iframe = document.createElement('iframe');
   iframe.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0';
   document.body.appendChild(iframe);
@@ -886,6 +887,7 @@ function printNutriReco(){
     <h2>Claves</h2><ul>${claves}</ul>
     <footer>Plan Nutricional · Generado el ${new Date().toLocaleDateString('es')}</footer>
   </body></html>`;
+  if(typeof pnPrintDoc === 'function'){ pnPrintDoc(html); return; }
   const iframe = document.createElement('iframe');
   iframe.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0';
   document.body.appendChild(iframe);
