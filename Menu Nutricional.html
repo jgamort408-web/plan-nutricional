@@ -1882,6 +1882,9 @@ img,svg,canvas{max-width:100%}
   .cal-btn,.sec-btn,.svtab,.vtab,.rc-navbtn,.who-b,.seg-b,.btn-prim,.btn-sec,.btn-danger,.m-fav-btn,.ftab,.btab{min-height:44px}
   .wk-add{min-width:32px;min-height:32px}
   .rc-s,.wk-meal,.wk-sport,.spc-item{min-height:32px}
+  /* Componentes nuevos: objetivos táctiles cómodos */
+  .masst-btn,.masst-pill,.masst-card,.masst-pd-sel,.mv-load,.mv-sel,.mv-nav,.mv-x,.masst-x{min-height:44px}
+  .mv-nav,.mv-x,.masst-x{min-width:44px}
 }
 
 /* Escritorio amplio: catálogos aprovechan el ancho */
@@ -2348,6 +2351,7 @@ main[data-vm="small"] .dish-incart{font-size:.5rem;padding:3px 8px}
     var steps = [
       function(){ var e=document.getElementById('menuAsst'); if(e&&e.classList.contains('show')){ e.classList.remove('show'); document.body.classList.remove('no-scroll'); return 1; } },
       function(){ var e=document.getElementById('sportAsst'); if(e&&e.classList.contains('show')){ e.classList.remove('show'); document.body.classList.remove('no-scroll'); return 1; } },
+      function(){ var e=document.getElementById('monthView'); if(e&&e.classList.contains('show')){ e.classList.remove('show'); document.body.classList.remove('no-scroll'); return 1; } },
       function(){ var e=document.getElementById('modalBg'); if(e&&e.classList.contains('show')){ if(window.closeModal) closeModal(); else e.classList.remove('show'); return 1; } },
       function(){ var e=document.getElementById('shopBg'); if(e&&e.classList.contains('show')){ if(window.closeShopList) closeShopList(); else e.classList.remove('show'); return 1; } },
       function(){ var e=document.getElementById('pickerBg'); if(e&&e.classList.contains('show')){ if(window.closePicker) closePicker(); else e.classList.remove('show'); return 1; } },
@@ -2375,6 +2379,8 @@ main[data-vm="small"] .dish-incart{font-size:.5rem;padding:3px 8px}
       else { pushGuard(); }
     }
   });
+  // Tecla Escape (escritorio): cierra el overlay superior abierto.
+  document.addEventListener('keydown', function(ev){ if(ev.key==='Escape'){ if(closeTopOverlay()) ev.preventDefault(); } });
   function seed(){ pushGuard(); }
   if(document.readyState==='loading') window.addEventListener('DOMContentLoaded', seed, {once:true});
   else seed();
