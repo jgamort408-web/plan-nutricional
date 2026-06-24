@@ -425,7 +425,8 @@ function runAutoPlan(P){
   spCursor = new Date(spFromKey(start).getFullYear(), spFromKey(start).getMonth(), 1);
   renderSportCalendar();
   if(typeof renderSportActive==='function') renderSportActive();
-  alert(`✓ Plan generado: ${cfgSlots.length} sesiones distintas por semana${failed?` (${failed} día/s sin candidatos)`:''}.`);
+  if(typeof pnToast==='function') pnToast(`Plan generado: ${cfgSlots.length} sesiones/semana${failed?` (${failed} sin candidatos)`:''}`, 'ok');
+  else alert(`✓ Plan generado: ${cfgSlots.length} sesiones distintas por semana${failed?` (${failed} día/s sin candidatos)`:''}.`);
 }
 
 function generateSportPlan(cfg, keep){

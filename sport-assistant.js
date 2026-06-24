@@ -205,8 +205,9 @@
       if(typeof spCursor!=='undefined' && typeof spFromKey==='function' && start){ try{ spCursor = new Date(spFromKey(start).getFullYear(), spFromKey(start).getMonth(), 1); }catch(e){} }
       if(typeof renderSportCalendar==='function') renderSportCalendar();
       if(typeof renderSportActive==='function') renderSportActive();
-      alert(`✓ Plan generado: ${n} sesiones/semana durante ${_A.weeks} semanas.`);
-    }catch(err){ if(typeof pnAlert==='function') pnAlert('No se pudo generar el plan.\n'+(err&&err.message||err)); else alert('No se pudo generar el plan.'); }
+      if(typeof pnToast==='function') pnToast(`Plan generado: ${n} sesiones/semana · ${_A.weeks} semanas`, 'ok');
+      else alert(`✓ Plan generado: ${n} sesiones/semana durante ${_A.weeks} semanas.`);
+    }catch(err){ if(typeof pnAlert==='function') pnAlert('No se pudo generar el plan.\n'+(err&&err.message||err), {type:'error'}); else alert('No se pudo generar el plan.'); }
   }
 
   function wire(){ const b=document.getElementById('spCalAssistant'); if(b && !b._asstWired){ b._asstWired=true; b.addEventListener('click', open); } }

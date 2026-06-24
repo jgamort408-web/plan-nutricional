@@ -491,7 +491,7 @@ textarea:focus,input:focus{border-color:var(--green)}
       <button data-r="30">30 días</button>
       <button data-r="90">3 meses</button>
     </div>
-    <canvas id="moodChart" width="520" height="240"></canvas>
+    <canvas id="moodChart" width="520" height="240" role="img" aria-label="Gráfico de evolución del ánimo y del porcentaje de checklist a lo largo del periodo. El resumen en texto está en «Lo que dicen tus datos»."></canvas>
     <div class="legend"><span><span class="dot" style="background:var(--green)"></span>Ánimo</span><span><span class="dot" style="background:var(--blue)"></span>% checklist</span></div>
   </div>
 
@@ -503,7 +503,7 @@ textarea:focus,input:focus{border-color:var(--green)}
 
   <div class="card">
     <h2><span class="ic">🗓️</span> Cumplimiento por hábito</h2>
-    <canvas id="habitChart" width="520" height="260"></canvas>
+    <canvas id="habitChart" width="520" height="260" role="img" aria-label="Gráfico de cumplimiento por hábito en los últimos días: verde indica constancia y rojo, margen de mejora."></canvas>
     <p class="muted" style="margin-top:10px">Verde = constante · Rojo = a mejorar (últimos <span id="habitRangeLbl">7</span> días)</p>
   </div>
 
