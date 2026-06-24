@@ -63,10 +63,24 @@ const U_SLOTS = [
 
 function uEsc(s){ return (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-/* totales de comidas de un día (persona activa via px) */
+/* totales de comidas de un día — MISMO modelo que el Plan Semanal (Fase 2b):
+   cada receta escala a la necesidad de esa comida de la persona activa, y si una
+   franja tiene varias recetas se reparte entre ellas (sumCellStd + dishScaledMeal). */
 function dayMealKcal(meals){
   let k=0;
-  U_SLOTS.forEach(sm=> (meals[sm.k]||[]).forEach(id=>{ const d=DISHES[id]; if(d) k+=px(d.kcal); }));
+  U_SLOTS.forEach(sm=>{
+    const ids = (meals[sm.k]||[]).filter(id=>DISHES[id]);
+    if(!ids.length) return;
+    const sumStd = (typeof sumCellStd==='function') ? sumCellStd(ids) : 0;
+    ids.forEach(id=>{
+      const d = DISHES[id];
+      if(typeof dishScaledMeal==='function' && d.comp && d.comp.length){
+        k += dishScaledMeal(d, (S.p==='AB'?'AB':S.p), sm.k, sumStd).tot.k;
+      } else {
+        k += px(d.kcal);   // recetas sin composición: valor precalculado
+      }
+    });
+  });
   return Math.round(k);
 }
 function daySportKcal(dateKey){

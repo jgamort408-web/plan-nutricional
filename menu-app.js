@@ -536,7 +536,7 @@ function dishCard(id){
     <article class="dish ${viols.length?'has-viol':''}${isDishFav(id)?' is-fav':''}${inCart?' has-cart':''}" data-id="${id}">
       <button class="dish-fav ${isDishFav(id)?'on':''}" data-fav="${id}" aria-label="${isDishFav(id)?'Quitar de favoritos':'Añadir a favoritos'}" title="Favorito">${isDishFav(id)?'★':'☆'}</button>
       ${isUser?`<span class="user-badge">Tuya</span>`:''}
-      ${inCart?`<span class="added-mark" title="Añadido">✓</span>`:''}
+      ${inCart?`<span class="dish-incart">✓ En Mi día</span>`:''}
       ${viols.length?`<span class="dish-viol" title="Rompe: ${viols.map(v=>RESTRICTIONS_MAP[v]?.lbl||v).join(', ')}">⚠ ${viols.map(v=>RESTRICTIONS_MAP[v]?.ico).join('')}</span>`:''}
       <div class="dish-img${d.img?' has-photo':''}">
         ${d.img ? `<img class="dish-photo" src="${escHtml(d.img)}" alt="" loading="lazy">` : phSvg(d.cat)}

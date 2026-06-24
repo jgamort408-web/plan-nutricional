@@ -1871,13 +1871,15 @@ img,svg,canvas{max-width:100%}
 .dish-fav{position:absolute;top:8px;right:8px;z-index:3;border:none;background:rgba(255,255,255,.9);color:var(--ink-30);font-size:1.05rem;line-height:1;width:30px;height:30px;border-radius:50%;cursor:pointer;transition:.14s;box-shadow:0 2px 8px rgba(44,31,14,.16);display:flex;align-items:center;justify-content:center}
 .dish-fav:hover{transform:scale(1.12);color:var(--gold)}
 .dish-fav.on{color:var(--gold)}
-/* Si el plato está en "Mi día" (✓ arriba-derecha), corre el favorito a su izquierda para no solaparse */
-.dish.has-cart .dish-fav{right:46px}
 /* Vista compacta (fila): se reserva un hueco a la derecha para el favorito (no se superpone al texto) */
 main[data-vm="small"] .dish{padding-right:42px}
-main[data-vm="small"] .dish-fav,
-main[data-vm="small"] .dish.has-cart .dish-fav{top:50%;right:7px;transform:translateY(-50%);width:30px;height:30px}
-main[data-vm="small"] .dish.has-cart .added-mark{top:7px;right:7px}
+main[data-vm="small"] .dish-fav{top:50%;right:7px;transform:translateY(-50%);width:30px;height:30px}
+/* Plato SELECCIONADO (en Mi día): la tarjeta entera se resalta en verde oliva */
+.dish.has-cart{border-color:var(--olive);box-shadow:0 0 0 2px var(--olive) inset,0 6px 18px rgba(78,94,44,.18)}
+.dish.has-cart .dish-img{background:rgba(120,150,80,.1)}
+.dish-incart{position:absolute;left:0;top:0;z-index:3;background:var(--olive);color:#fff;font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:.06em;text-transform:uppercase;font-weight:600;padding:4px 10px;border-radius:8px 0 8px 0;box-shadow:0 2px 8px rgba(78,94,44,.3)}
+.dish.has-cart .user-badge{top:30px;left:0;border-radius:0 6px 6px 0}
+main[data-vm="small"] .dish-incart{font-size:.5rem;padding:3px 8px}
 .m-cta .m-fav-btn{background:transparent;border:1.5px solid var(--gold);color:var(--terra);margin-bottom:9px;font-size:.92rem}
 .m-cta .m-fav-btn:hover{background:var(--gold);color:var(--warm)}
 .m-cta .m-fav-btn.on{background:var(--gold);color:var(--warm)}
@@ -2298,6 +2300,49 @@ main[data-vm="small"] .dish.has-cart .added-mark{top:7px;right:7px}
   document.addEventListener('DOMContentLoaded', run, {once:true});
   window.addEventListener('load', run, {once:true});
 }catch(e){} })();
+</script>
+<script>
+/* ── Botón ATRÁS del móvil ──────────────────────────────────
+   No saca de la app: primero cierra el overlay abierto; si no hay,
+   vuelve a la sección/vista anterior; y solo en la raíz pregunta si
+   se quiere salir. Usa el History API con un estado "colchón". */
+(function backGuard(){
+  function pushGuard(){ try{ history.pushState({app:1}, ''); }catch(e){} }
+  function closeTopOverlay(){
+    var steps = [
+      function(){ var e=document.getElementById('menuAsst'); if(e&&e.classList.contains('show')){ e.classList.remove('show'); document.body.classList.remove('no-scroll'); return 1; } },
+      function(){ var e=document.getElementById('sportAsst'); if(e&&e.classList.contains('show')){ e.classList.remove('show'); document.body.classList.remove('no-scroll'); return 1; } },
+      function(){ var e=document.getElementById('modalBg'); if(e&&e.classList.contains('show')){ if(window.closeModal) closeModal(); else e.classList.remove('show'); return 1; } },
+      function(){ var e=document.getElementById('shopBg'); if(e&&e.classList.contains('show')){ if(window.closeShopList) closeShopList(); else e.classList.remove('show'); return 1; } },
+      function(){ var e=document.getElementById('pickerBg'); if(e&&e.classList.contains('show')){ if(window.closePicker) closePicker(); else e.classList.remove('show'); return 1; } },
+      function(){ var e=document.getElementById('formBg'); if(e&&e.classList.contains('show')){ if(window.closeForm) closeForm(); else e.classList.remove('show'); return 1; } },
+      function(){ var e=document.getElementById('drawer'); if(e&&e.classList.contains('show')){ if(window.closeDrawer) closeDrawer(); else e.classList.remove('show'); return 1; } },
+      function(){ var e=document.getElementById('secMenu'); if(e&&!e.hidden){ e.hidden=true; return 1; } }
+    ];
+    for(var i=0;i<steps.length;i++){ if(steps[i]()) return true; }
+    return false;
+  }
+  window.addEventListener('popstate', function(){
+    // 1) cerrar overlay superior
+    if(closeTopOverlay()){ pushGuard(); return; }
+    var b=document.body;
+    // 2) fuera de Nutrición → volver a Nutrición
+    if(b.classList.contains('sec-sport')||b.classList.contains('sec-week')||b.classList.contains('sec-mente')||b.classList.contains('mente-mode')){
+      if(window.setSection){ setSection('nutri'); pushGuard(); return; }
+    }
+    // 3) en Nutrición pero no en Catálogo → volver a Catálogo
+    if(window.S && S.view && S.view!=='cat' && window.switchView){ switchView('cat'); pushGuard(); return; }
+    // 4) raíz: en móvil preguntar; en escritorio dejar navegar
+    var mobile = (window.matchMedia && window.matchMedia('(max-width:1024px)').matches) || ('ontouchstart' in window);
+    if(mobile){
+      if(confirm('¿Salir de la aplicación?')){ history.back(); }
+      else { pushGuard(); }
+    }
+  });
+  function seed(){ pushGuard(); }
+  if(document.readyState==='loading') window.addEventListener('DOMContentLoaded', seed, {once:true});
+  else seed();
+})();
 </script>
 
 <footer class="site-foot">
