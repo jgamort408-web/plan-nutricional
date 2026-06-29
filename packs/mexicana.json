@@ -1,0 +1,96 @@
+{
+  "kind": "recipe-pack",
+  "cuisine": { "id": "mex", "ico": "🇲🇽", "lbl": "Comida mexicana" },
+  "foods": {
+    "tortilla_maiz": { "name": "Tortilla de maíz", "sec": "pan", "kcal": 218, "p": 5.7, "f": 2.9, "c": 44, "ft": ["apq"], "unit": { "lbl": "tortilla", "g": 30 } },
+    "lima": { "name": "Lima", "sec": "fruta", "kcal": 30, "p": 0.7, "f": 0.2, "c": 10.5, "ft": ["fr"] },
+    "cilantro_fresco": { "name": "Cilantro fresco", "sec": "verd", "kcal": 23, "p": 2.1, "f": 0.5, "c": 3.7, "ft": ["v"] },
+    "maiz_dulce": { "name": "Maíz dulce", "sec": "verd", "kcal": 86, "p": 3.3, "f": 1.2, "c": 19, "ft": ["v"] }
+  },
+  "dishes": {
+    "MEX_C1": {
+      "cat": "com", "short": "Burrito bowl de pollo",
+      "nom": "Bowl de pollo, arroz integral y frijoles negros", "icon": "🌯",
+      "t": "25 min", "eq": "Sartén · Olla", "tipo": "completa", "diet": ["cn", "sg"], "food": ["cb", "leg", "apq"],
+      "desc": "Bowl mexicano equilibrado: arroz integral, frijoles negros, pollo especiado, maíz, tomate y aguacate.",
+      "nota": "Saltea el pollo con comino. Monta el bowl con arroz, frijoles, maíz, tomate y aguacate. Lima y cilantro al final.",
+      "comp": [
+        {"f":"arroz_integral_cocido","g":150,"note":"cocido"},
+        {"f":"frijol_negro_cocido","g":120,"note":"cocido"},
+        {"f":"pechuga_de_pollo","g":130,"note":"crudo"},
+        {"f":"maiz_dulce","g":60},
+        {"f":"tomate","g":80,"as":"Pico de gallo"},
+        {"f":"aguacate","g":50},
+        {"f":"cilantro_fresco","cs":true},
+        {"f":"lima","cs":true},
+        {"f":"aceite_de_oliva","g":8},
+        {"f":"comino","cs":true}
+      ]
+    },
+    "MEX_C2": {
+      "cat": "com", "short": "Tacos de frijol",
+      "nom": "Tacos de frijoles negros, aguacate y maíz", "icon": "🌮",
+      "t": "15 min", "eq": "Sartén", "tipo": null, "diet": ["vg", "vt", "sg"], "food": ["leg", "v", "apq"],
+      "desc": "Tacos vegetales de maíz con frijoles refritos, aguacate, tomate y un toque de lima. Llenos de fibra.",
+      "nota": "Calienta las tortillas, rellena con frijoles, aguacate, maíz y tomate. Lima y cilantro al gusto.",
+      "comp": [
+        {"f":"tortilla_maiz","u":3},
+        {"f":"frijol_negro_cocido","g":150,"note":"cocido"},
+        {"f":"aguacate","g":60},
+        {"f":"maiz_dulce","g":50},
+        {"f":"tomate","g":80},
+        {"f":"cebolla","g":30},
+        {"f":"lima","cs":true},
+        {"f":"aceite_de_oliva","g":8}
+      ]
+    },
+    "MEX_N1": {
+      "cat": "cen", "short": "Huevos rancheros",
+      "nom": "Huevos rancheros con frijoles y tomate", "icon": "🍳",
+      "t": "15 min", "eq": "Sartén", "tipo": null, "diet": ["vt", "sg"], "food": ["hv", "leg", "v"],
+      "desc": "Clásico desayuno-cena mexicano: huevos sobre tortilla de maíz, frijoles y salsa de tomate y pimiento.",
+      "nota": "Sofríe tomate, pimiento y cebolla. Fríe los huevos, sírvelos sobre la tortilla con frijoles y aguacate.",
+      "comp": [
+        {"f":"huevo","u":2},
+        {"f":"frijol_negro_cocido","g":100,"note":"cocido"},
+        {"f":"tortilla_maiz","u":2},
+        {"f":"tomate","g":100},
+        {"f":"pimiento_rojo","g":50},
+        {"f":"cebolla","g":40},
+        {"f":"aguacate","g":40},
+        {"f":"aceite_de_oliva","g":8}
+      ]
+    },
+    "MEX_D1": {
+      "cat": "des", "short": "Tostada de aguacate",
+      "nom": "Tostada de aguacate, huevo y lima", "icon": "🥑",
+      "t": "10 min", "eq": "Tostadora · Sartén", "tipo": null, "diet": ["vt"], "food": ["hv", "fr"],
+      "desc": "Pan integral con aguacate machacado, huevo y un toque de lima. Desayuno saciante y con grasa buena.",
+      "nota": "Machaca el aguacate con lima y sal. Tuesta el pan, extiende, corona con huevo. Fruta de postre.",
+      "comp": [
+        {"f":"pan_integral","g":80},
+        {"f":"aguacate","g":60},
+        {"f":"huevo","u":2},
+        {"f":"tomate","g":80},
+        {"f":"lima","cs":true},
+        {"f":"fruta_temporada","g":150}
+      ]
+    },
+    "MEX_M1": {
+      "cat": "mer", "short": "Guacamole con crudités",
+      "nom": "Guacamole con crudités y totopos", "icon": "🥑",
+      "t": "10 min", "eq": "Sin cocción", "tipo": null, "diet": ["vg", "vt"], "food": ["v", "fr"],
+      "desc": "Merienda fresca: guacamole casero con zanahoria, un par de totopos de maíz y fruta.",
+      "nota": "Machaca aguacate con tomate, cebolla y lima. Acompaña con zanahoria y tortilla tostada.",
+      "comp": [
+        {"f":"aguacate","g":70},
+        {"f":"tomate","g":60},
+        {"f":"cebolla","g":20},
+        {"f":"lima","cs":true},
+        {"f":"zanahoria","g":80,"as":"Zanahoria en bastones"},
+        {"f":"tortilla_maiz","u":1,"as":"Totopos"},
+        {"f":"fruta_temporada","g":150}
+      ]
+    }
+  }
+}

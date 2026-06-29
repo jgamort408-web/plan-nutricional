@@ -1,0 +1,74 @@
+{
+  "kind": "recipe-pack",
+  "cuisine": { "id": "ome", "ico": "🧆", "lbl": "Oriente Medio" },
+  "foods": {
+    "tahini": { "name": "Tahini (pasta de sésamo)", "sec": "desp", "kcal": 595, "p": 17, "f": 53.8, "c": 21.2, "ft": ["fs"] },
+    "bulgur_cocido": { "name": "Bulgur cocido", "sec": "pan", "kcal": 83, "p": 3.1, "f": 0.2, "c": 18.6, "ft": ["apq"] },
+    "hummus": { "name": "Hummus", "sec": "desp", "kcal": 177, "p": 7.9, "f": 9.6, "c": 14.3, "ft": ["leg"] }
+  },
+  "dishes": {
+    "OME_D1": {
+      "cat": "des", "short": "Pita con hummus y huevo",
+      "nom": "Pan de pita con hummus, huevo y tomate", "icon": "🥙",
+      "t": "10 min", "eq": "Tostadora · Olla", "tipo": null, "diet": ["vt"], "food": ["leg", "hv", "apq"],
+      "desc": "Desayuno salado de Oriente Medio: pita templada con hummus, huevo cocido y tomate. Proteico y saciante.",
+      "nota": "Templa la pita, extiende el hummus, añade huevo cocido en rodajas, tomate y pepino. Un hilo de AOVE.",
+      "comp": [
+        {"f":"pan_pita_integral","g":80},
+        {"f":"hummus","g":60},
+        {"f":"huevo","u":1,"note":"cocido"},
+        {"f":"tomate","g":60},
+        {"f":"pepino","g":40},
+        {"f":"aceite_de_oliva","g":5}
+      ]
+    },
+    "OME_C1": {
+      "cat": "com", "short": "Bowl de garbanzos y bulgur",
+      "nom": "Bowl de garbanzos especiados con bulgur y tahini", "icon": "🥗",
+      "t": "20 min", "eq": "Olla · Sartén", "tipo": "completa", "diet": ["vg", "vt"], "food": ["leg", "apq", "v"],
+      "desc": "Garbanzos al comino con bulgur, verduras frescas y aliño de tahini y limón. Vegetal, completo y con fibra.",
+      "nota": "Saltea los garbanzos con comino y pimentón. Monta el bowl con bulgur, tomate y pepino. Aliña con tahini y limón.",
+      "comp": [
+        {"f":"garbanzos","g":180,"note":"cocidos"},
+        {"f":"bulgur_cocido","g":140,"note":"cocido"},
+        {"f":"tomate","g":80},
+        {"f":"pepino","g":60},
+        {"f":"perejil","cs":true},
+        {"f":"tahini","g":15},
+        {"f":"aceite_de_oliva","g":10},
+        {"f":"especias","cs":true,"as":"Comino, pimentón y limón"}
+      ]
+    },
+    "OME_M1": {
+      "cat": "mer", "short": "Hummus con crudités",
+      "nom": "Hummus con crudités y pan de pita", "icon": "🧆",
+      "t": "5 min", "eq": "Sin cocción", "tipo": null, "diet": ["vg", "vt"], "food": ["leg", "v", "fr"],
+      "desc": "Merienda de hummus con zanahoria, pepino y un trozo de pita. Saciante, con fibra y proteína vegetal.",
+      "nota": "Sirve el hummus con bastones de zanahoria y pepino y pita templada. Fruta de acompañamiento.",
+      "comp": [
+        {"f":"hummus","g":70},
+        {"f":"pan_pita_integral","g":40},
+        {"f":"zanahoria","g":80,"as":"Zanahoria en bastones"},
+        {"f":"pepino","g":60},
+        {"f":"fruta_temporada","g":100}
+      ]
+    },
+    "OME_N1": {
+      "cat": "cen", "short": "Tabbouleh con pollo",
+      "nom": "Tabbouleh de bulgur y perejil con pollo", "icon": "🌿",
+      "t": "20 min", "eq": "Plancha · Olla", "tipo": "ligera", "diet": ["cn"], "food": ["cb", "apq", "v"],
+      "desc": "Ensalada fresca de bulgur, mucho perejil, tomate y pepino con pollo a la plancha y limón. Cena ligera.",
+      "nota": "Mezcla el bulgur con perejil picado, tomate, pepino y cebolla. Aliña con limón y AOVE. Pollo a la plancha aparte.",
+      "comp": [
+        {"f":"bulgur_cocido","g":120,"note":"cocido"},
+        {"f":"pechuga_de_pollo","g":120,"note":"crudo"},
+        {"f":"tomate","g":100},
+        {"f":"pepino","g":80},
+        {"f":"perejil","cs":true,"as":"Perejil abundante"},
+        {"f":"cebolla","g":30},
+        {"f":"aceite_de_oliva","g":10},
+        {"f":"especias","cs":true,"as":"Limón y menta"}
+      ]
+    }
+  }
+}
