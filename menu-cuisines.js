@@ -133,7 +133,11 @@
   const BUNDLED = [
     { id:'ita', ico:'🇮🇹', lbl:'Comida italiana', url:'packs/italiana.json' },
     { id:'mex', ico:'🇲🇽', lbl:'Comida mexicana', url:'packs/mexicana.json' },
-    { id:'jap', ico:'🇯🇵', lbl:'Comida japonesa', url:'packs/japonesa.json' }
+    { id:'jap', ico:'🇯🇵', lbl:'Comida japonesa', url:'packs/japonesa.json' },
+    { id:'gri', ico:'🇬🇷', lbl:'Comida griega', url:'packs/griega.json' },
+    { id:'ind', ico:'🇮🇳', lbl:'Comida india', url:'packs/india.json' },
+    { id:'ome', ico:'🧆', lbl:'Oriente Medio', url:'packs/oriente-medio.json' },
+    { id:'tai', ico:'🇹🇭', lbl:'Comida tailandesa', url:'packs/tailandesa.json' }
   ];
   function bundledAvailable(){ return BUNDLED.filter(b=> !_registry[b.id]); }
 

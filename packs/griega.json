@@ -1,0 +1,73 @@
+{
+  "kind": "recipe-pack",
+  "cuisine": { "id": "gri", "ico": "🇬🇷", "lbl": "Comida griega" },
+  "foods": {
+    "queso_feta": { "name": "Queso feta", "sec": "lact", "kcal": 264, "p": 14.2, "f": 21.3, "c": 3.9, "ft": ["qs", "lac"] },
+    "aceituna_negra": { "name": "Aceitunas negras", "sec": "desp", "kcal": 145, "p": 1, "f": 15, "c": 3.8, "ft": [] }
+  },
+  "dishes": {
+    "GRI_D1": {
+      "cat": "des", "short": "Yogur griego con avena",
+      "nom": "Yogur griego con avena, miel y frutos rojos", "icon": "🥣",
+      "t": "5 min", "eq": "Sin cocción", "tipo": null, "diet": ["vt"], "food": ["lac", "fr", "apq"],
+      "desc": "Desayuno griego por excelencia: yogur espeso con avena, miel y frutos rojos. Proteico y saciante.",
+      "nota": "Mezcla el yogur con la avena, deja reposar unos minutos y corona con frutos rojos y miel.",
+      "comp": [
+        {"f":"yogur_griego_natural_0_mg","g":200},
+        {"f":"avena","g":40},
+        {"f":"miel_de_cana","g":10,"as":"Miel"},
+        {"f":"frutos_rojos","g":120},
+        {"f":"fruta_temporada","g":100}
+      ]
+    },
+    "GRI_C1": {
+      "cat": "com", "short": "Souvlaki de pollo",
+      "nom": "Souvlaki de pollo con arroz y ensalada", "icon": "🍢",
+      "t": "25 min", "eq": "Plancha · Olla", "tipo": "completa", "diet": ["cn"], "food": ["cb", "apq", "v"],
+      "desc": "Brochetas de pollo marinado al limón y orégano, con arroz, tomate, pepino y un toque de feta.",
+      "nota": "Marina el pollo con limón, ajo y orégano. Hazlo a la plancha. Sirve con arroz y ensalada con feta.",
+      "comp": [
+        {"f":"pechuga_de_pollo","g":150,"note":"crudo"},
+        {"f":"arroz_blanco","g":150,"note":"cocido"},
+        {"f":"tomate","g":80},
+        {"f":"pepino","g":60},
+        {"f":"cebolla","g":30,"as":"Cebolla morada"},
+        {"f":"queso_feta","g":30},
+        {"f":"aceituna_negra","g":15},
+        {"f":"aceite_de_oliva","g":10},
+        {"f":"especias","cs":true,"as":"Limón y orégano"}
+      ]
+    },
+    "GRI_M1": {
+      "cat": "mer", "short": "Tzatziki con pita",
+      "nom": "Tzatziki con pan de pita y fruta", "icon": "🥒",
+      "t": "10 min", "eq": "Sin cocción", "tipo": null, "diet": ["vt"], "food": ["lac", "v", "fr"],
+      "desc": "Salsa griega de yogur, pepino y ajo con pan de pita integral. Merienda fresca y proteica.",
+      "nota": "Ralla el pepino y escúrrelo. Mézclalo con el yogur, ajo, eneldo y un hilo de AOVE. Pita para mojar.",
+      "comp": [
+        {"f":"yogur_griego_natural_0_mg","g":120},
+        {"f":"pepino","g":60},
+        {"f":"pan_pita_integral","g":60},
+        {"f":"aceite_de_oliva","g":5},
+        {"f":"fruta_temporada","g":100}
+      ]
+    },
+    "GRI_N1": {
+      "cat": "cen", "short": "Ensalada griega",
+      "nom": "Ensalada griega (horiatiki) con feta y pita", "icon": "🥗",
+      "t": "10 min", "eq": "Sin cocción", "tipo": "ligera", "diet": ["vt"], "food": ["qs", "v", "apq"],
+      "desc": "Tomate, pepino, cebolla y pimiento con feta, aceitunas y orégano. Cena mediterránea ligera con pita.",
+      "nota": "Corta las verduras en trozos grandes, corona con feta y aceitunas, aliña con AOVE y orégano. Pita aparte.",
+      "comp": [
+        {"f":"tomate","g":150},
+        {"f":"pepino","g":100},
+        {"f":"cebolla","g":40,"as":"Cebolla morada"},
+        {"f":"pimiento_rojo","g":60},
+        {"f":"queso_feta","g":60},
+        {"f":"aceituna_negra","g":25},
+        {"f":"aceite_de_oliva","g":10},
+        {"f":"pan_pita_integral","g":50}
+      ]
+    }
+  }
+}

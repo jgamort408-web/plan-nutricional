@@ -1,0 +1,70 @@
+{
+  "kind": "recipe-pack",
+  "cuisine": { "id": "ind", "ico": "🇮🇳", "lbl": "Comida india" },
+  "foods": {
+    "leche_de_coco_light": { "name": "Leche de coco light", "sec": "desp", "kcal": 73, "p": 0.7, "f": 7, "c": 1.4, "ft": [] }
+  },
+  "dishes": {
+    "IND_D1": {
+      "cat": "des", "short": "Tortilla masala",
+      "nom": "Tortilla india masala con pan integral", "icon": "🍳",
+      "t": "12 min", "eq": "Sartén", "tipo": null, "diet": ["vt"], "food": ["hv", "v", "apq"],
+      "desc": "Huevos batidos con tomate, cebolla, espinaca y especias. Desayuno salado, proteico y especiado.",
+      "nota": "Sofríe cebolla, tomate y espinaca con especias. Añade el huevo batido y cuaja. Sirve con pan.",
+      "comp": [
+        {"f":"huevo","u":3},
+        {"f":"tomate","g":60},
+        {"f":"cebolla","g":40},
+        {"f":"espinaca","g":50},
+        {"f":"pan_integral","g":60},
+        {"f":"aceite_de_oliva","g":8},
+        {"f":"especias","cs":true,"as":"Cúrcuma, comino y jengibre"}
+      ]
+    },
+    "IND_C1": {
+      "cat": "com", "short": "Dal de lentejas",
+      "nom": "Dal de lentejas con arroz basmati", "icon": "🍛",
+      "t": "30 min", "eq": "Olla", "tipo": "completa", "diet": ["vg", "vt", "sg"], "food": ["leg", "apq", "v"],
+      "desc": "Guiso especiado de lentejas con tomate y un toque de leche de coco, servido con arroz. Reconfortante y rico en fibra.",
+      "nota": "Cuece las lentejas con cebolla, tomate y especias. Termina con leche de coco. Sirve con arroz.",
+      "comp": [
+        {"f":"lentejas","g":230,"note":"cocidas"},
+        {"f":"arroz_blanco","g":120,"note":"cocido"},
+        {"f":"tomate","g":80},
+        {"f":"cebolla","g":50},
+        {"f":"leche_de_coco_light","g":40},
+        {"f":"aceite_de_oliva","g":10},
+        {"f":"especias","cs":true,"as":"Curry, cúrcuma y jengibre"}
+      ]
+    },
+    "IND_M1": {
+      "cat": "mer", "short": "Lassi de yogur y fruta",
+      "nom": "Lassi de yogur con fruta y miel", "icon": "🥭",
+      "t": "5 min", "eq": "Batidora", "tipo": null, "diet": ["vt"], "food": ["lac", "fr"],
+      "desc": "Bebida india de yogur batido con fruta y un toque de miel y cardamomo. Refrescante y proteica.",
+      "nota": "Bate el yogur con la fruta y la miel. Una pizca de cardamomo. Sirve frío.",
+      "comp": [
+        {"f":"yogur_griego_natural_0_mg","g":150},
+        {"f":"fruta_temporada","g":170,"as":"Mango o fruta de temporada"},
+        {"f":"miel_de_cana","g":8,"as":"Miel"}
+      ]
+    },
+    "IND_N1": {
+      "cat": "cen", "short": "Pollo con espinacas",
+      "nom": "Pollo a la india con espinacas (saag)", "icon": "🍗",
+      "t": "25 min", "eq": "Sartén", "tipo": null, "diet": ["cn", "sg"], "food": ["cb", "v"],
+      "desc": "Pollo especiado con espinaca cremosa, tomate y un toque de yogur y coco. Cena ligera y sabrosa.",
+      "nota": "Dora el pollo con especias, añade espinaca, tomate y yogur. Termina con un poco de leche de coco.",
+      "comp": [
+        {"f":"pechuga_de_pollo","g":150,"note":"crudo"},
+        {"f":"espinaca","g":150},
+        {"f":"tomate","g":80},
+        {"f":"cebolla","g":50},
+        {"f":"yogur_griego_natural_0_mg","g":40},
+        {"f":"leche_de_coco_light","g":30},
+        {"f":"aceite_de_oliva","g":8},
+        {"f":"especias","cs":true,"as":"Garam masala y jengibre"}
+      ]
+    }
+  }
+}

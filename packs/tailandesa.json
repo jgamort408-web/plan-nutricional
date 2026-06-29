@@ -1,0 +1,73 @@
+{
+  "kind": "recipe-pack",
+  "cuisine": { "id": "tai", "ico": "🇹🇭", "lbl": "Comida tailandesa" },
+  "foods": {
+    "leche_de_coco_light": { "name": "Leche de coco light", "sec": "desp", "kcal": 73, "p": 0.7, "f": 7, "c": 1.4, "ft": [] },
+    "pasta_de_curry": { "name": "Pasta de curry", "sec": "desp", "kcal": 150, "p": 3, "f": 8, "c": 15, "ft": [] },
+    "fideos_arroz_cocidos": { "name": "Fideos de arroz cocidos", "sec": "pan", "kcal": 109, "p": 0.9, "f": 0.2, "c": 25, "ft": ["apq"] },
+    "cacahuete": { "name": "Cacahuete", "sec": "desp", "kcal": 567, "p": 25.8, "f": 49.2, "c": 16.1, "ft": ["fs"] },
+    "brotes_de_soja": { "name": "Brotes de soja", "sec": "verd", "kcal": 30, "p": 3, "f": 0.2, "c": 6, "ft": ["v"] },
+    "salsa_soja": { "name": "Salsa de soja", "sec": "desp", "kcal": 60, "p": 6, "f": 0.1, "c": 8, "ft": [] }
+  },
+  "dishes": {
+    "TAI_D1": {
+      "cat": "des", "short": "Congee de arroz con huevo",
+      "nom": "Congee (gachas de arroz) con huevo y verdura", "icon": "🥚",
+      "t": "20 min", "eq": "Olla", "tipo": null, "diet": ["vt"], "food": ["apq", "hv", "v"],
+      "desc": "Gachas suaves de arroz cocido en caldo, con huevo, espinaca y jengibre. Desayuno cálido y reconfortante.",
+      "nota": "Cuece el arroz con abundante caldo hasta cremoso. Añade espinaca y jengibre. Corona con huevo y cacahuetes.",
+      "comp": [
+        {"f":"arroz_blanco","g":160,"note":"cocido"},
+        {"f":"huevo","u":1},
+        {"f":"espinaca","g":70},
+        {"f":"cacahuete","g":12},
+        {"f":"salsa_soja","g":8},
+        {"f":"especias","cs":true,"as":"Jengibre y cebolleta"}
+      ]
+    },
+    "TAI_C1": {
+      "cat": "com", "short": "Pad thai de gambas",
+      "nom": "Pad thai de gambas con fideos de arroz", "icon": "🦐",
+      "t": "20 min", "eq": "Wok", "tipo": "completa", "diet": ["ps"], "food": ["pb", "apq", "v"],
+      "desc": "Fideos de arroz salteados con gambas, huevo, brotes de soja y cacahuete, con un toque de lima. Plato estrella tailandés.",
+      "nota": "Saltea las gambas, aparta. Saltea fideos hidratados con salsa, añade huevo, brotes y gambas. Cacahuete y lima al final.",
+      "comp": [
+        {"f":"fideos_arroz_cocidos","g":200,"note":"cocidos"},
+        {"f":"gambas","g":120,"note":"crudo"},
+        {"f":"huevo","u":1},
+        {"f":"brotes_de_soja","g":60},
+        {"f":"cacahuete","g":15},
+        {"f":"salsa_soja","g":10},
+        {"f":"aceite_de_oliva","g":8},
+        {"f":"limon","cs":true,"as":"Lima"}
+      ]
+    },
+    "TAI_M1": {
+      "cat": "mer", "short": "Fruta tropical con cacahuete",
+      "nom": "Fruta tropical con cacahuetes", "icon": "🥭",
+      "t": "5 min", "eq": "Sin cocción", "tipo": null, "diet": ["vg", "vt", "sg"], "food": ["fr", "fs"],
+      "desc": "Merienda sencilla: fruta de temporada con un puñado de cacahuetes. Energía, fibra y grasa buena.",
+      "nota": "Corta la fruta y acompáñala con cacahuetes naturales. Un toque de lima si quieres.",
+      "comp": [
+        {"f":"fruta_temporada","g":220,"as":"Mango, piña o fruta tropical"},
+        {"f":"cacahuete","g":22}
+      ]
+    },
+    "TAI_N1": {
+      "cat": "cen", "short": "Curry verde de pollo",
+      "nom": "Curry verde tailandés de pollo con verduras", "icon": "🍛",
+      "t": "25 min", "eq": "Sartén", "tipo": null, "diet": ["cn", "sg"], "food": ["cb", "v", "apq"],
+      "desc": "Pollo en salsa de curry verde y leche de coco con calabacín y pimiento, sobre un poco de arroz. Cena aromática.",
+      "nota": "Sofríe la pasta de curry, añade leche de coco, pollo y verduras. Cuece y sirve con arroz.",
+      "comp": [
+        {"f":"pechuga_de_pollo","g":140,"note":"crudo"},
+        {"f":"leche_de_coco_light","g":80},
+        {"f":"pasta_de_curry","g":20},
+        {"f":"calabacin","g":80},
+        {"f":"pimiento_rojo","g":60},
+        {"f":"arroz_blanco","g":100,"note":"cocido"},
+        {"f":"aceite_de_oliva","g":5}
+      ]
+    }
+  }
+}
