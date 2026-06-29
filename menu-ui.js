@@ -288,23 +288,31 @@
 
   const TUTORIALS = {
     nutri: { sec:'Nutrición', steps:[
-      {ico:'🥗', t:'Tu menú, a tu medida', x:'Bienvenido a Nutrición. Aquí construyes el menú de cada persona según sus objetivos de kcal y macros. Cada receta se ajusta automáticamente a quien la coma.'},
-      {ico:'👥', t:'Elige a quién ves', x:'Con los botones de persona (arriba) cambias entre cada comensal o ves a todos juntos (A+B). Las cantidades y totales se recalculan al instante.'},
-      {ico:'📖', t:'Catálogo de recetas', x:'En "Catálogo" tienes todas las recetas por categoría (desayuno, comida, merienda, cena). Toca una para ver su ficha y añadirla a "Mi día".'},
-      {ico:'📅', t:'Calendario semanal', x:'En "Calendario" planificas la semana. Usa ✨ Autocompletar para que la app rellene las franjas vacías de forma variada, o genera un menú nuevo desde cero. La ✕ de cada celda la vacía.'},
-      {ico:'✚', t:'Crea tus recetas', x:'Con "Crear receta" añades tus propias recetas indicando ingredientes y cantidades. También puedes generar un prompt para pedírselas a una IA y pegar el resultado.'},
-      {ico:'💾', t:'Todo se guarda solo', x:'Tus cambios se guardan automáticamente en el dispositivo. Con 💾 fuerzas un guardado y en ⚙ Ajustes puedes exportar o restaurar copias.'}
+      {ico:'🥗', t:'Tu menú, a tu medida', x:'En Nutrición construyes el menú de cada persona según sus objetivos de kcal y macros. Cada receta se escala automáticamente a quien la coma, así que un mismo plato sirve para todos.'},
+      {ico:'👥', t:'Elige a quién ves', x:'Con los botones de persona (arriba) cambias entre cada comensal o ves a todos juntos. Las cantidades y los totales se recalculan al instante.'},
+      {ico:'📖', t:'Catálogo de recetas', x:'Las recetas están por categoría (desayuno, comida, merienda, cena). Toca el título de una categoría para desplegarla y toca una receta para ver su ficha.'},
+      {ico:'🔎', t:'Busca y filtra', x:'Usa el buscador y el botón ⚙ Filtros para acotar por dieta (sin gluten, vegetariano…) o tipo de alimento. La ★ marca tus favoritas.'},
+      {ico:'🧭', t:'Asistente de menú', x:'En Plan Semanal, el 🧭 Asistente te guía paso a paso: eliges las recetas que te apetecen y él reparte la semana. Te avisa en rojo si te pasas de alguna recomendación, pero nunca te lo impide.'},
+      {ico:'✨', t:'Plan Semanal', x:'Planifica la semana a mano o con ✨ Autocompletar (rellena solo las franjas vacías). En ⋯ Más acciones tienes Generar de cero, Con mis favoritos, Plantilla base, PDF y lista de la compra.'},
+      {ico:'🍽️', t:'Mi día', x:'El botón 📋 flotante abre "Mi día": añade platos o alimentos sueltos y comprueba cómo va tu balance de kcal y macros de hoy.'},
+      {ico:'✚', t:'Crea tus recetas', x:'En Usuarios → Mis recetas añades las tuyas con ingredientes y cantidades, o generas un prompt para pedírselas a una IA y pegar el resultado.'},
+      {ico:'🌍', t:'Cocinas (paquetes)', x:'En Usuarios → Configuración activas paquetes de cocina (italiana, etc.) para que aparezcan más recetas, o instalas los tuyos desde un archivo.'},
+      {ico:'💾', t:'Todo se guarda solo', x:'Tus cambios se guardan en el dispositivo automáticamente (copia cada 5 min). En Usuarios → Copia de datos exportas o restauras todo.'}
     ]},
     sport: { sec:'Deporte', steps:[
-      {ico:'🏋️', t:'Tu entrenamiento', x:'En Deporte gestionas ejercicios, sesiones y tu calendario de entrenamiento. El gasto calórico se conecta con tu balance de Nutrición.'},
-      {ico:'💪', t:'Ejercicios', x:'En "Ejercicios" tienes la librería completa. Márcalos como favoritos con la ★, créa los tuyos o impórtalos. Toca uno para ver el detalle.'},
-      {ico:'📋', t:'Sesiones', x:'En "Sesiones" agrupas ejercicios en rutinas reutilizables. Puedes generarlas automáticamente o crearlas a mano.'},
-      {ico:'🗓️', t:'Calendario de deporte', x:'En "Calendario" asignas sesiones a tus días. Puedes guardar y cargar planes completos para reutilizarlos.'}
+      {ico:'🏋️', t:'Tu entrenamiento', x:'En Deporte gestionas ejercicios, sesiones y tu plan de Entrenamientos. El gasto calórico se conecta con tu balance de Nutrición en la Agenda.'},
+      {ico:'💪', t:'Ejercicios', x:'La librería completa de ejercicios. Márcalos con la ★, crea los tuyos o impórtalos por JSON. Toca uno para ver técnica y músculos.'},
+      {ico:'📋', t:'Sesiones', x:'Agrupa ejercicios en rutinas reutilizables. Puedes crearlas a mano o generarlas con ayuda de una IA mediante un prompt.'},
+      {ico:'🧭', t:'Asistente con valores por defecto', x:'En Entrenamientos, el 🧭 Asistente te guía por objetivo, días y duración. ¿Con prisa? Pulsa "⚡ Por defecto" en cualquier paso y genera un plan equilibrado al instante.'},
+      {ico:'🗓️', t:'Plan por fechas', x:'Asigna sesiones a tus días. La barra está despejada: lo principal a la vista y el resto en ⋯ Más acciones (cadencia, regenerar, PDF…).'},
+      {ico:'📂', t:'Guardados', x:'Guarda planes completos en 📂 Guardados y cárgalos cuando quieras para reutilizarlos.'}
     ]},
-    week: { sec:'Semana', steps:[
-      {ico:'📆', t:'Vista de la semana', x:'Aquí ves tu plan organizado por fechas reales. Navega entre semanas y consulta de un vistazo qué toca cada día.'},
-      {ico:'📌', t:'Aplica tu plantilla', x:'Puedes volcar tu plantilla semanal a 7 fechas concretas. Quedan como copias editables por día, sin alterar la plantilla original.'},
-      {ico:'🍽️', t:'Detalle por día', x:'Toca cualquier comida para ver su ficha completa con ingredientes y macros, igual que en el calendario de Nutrición.'}
+    week: { sec:'Agenda', steps:[
+      {ico:'📆', t:'Comida + entreno por fechas', x:'La Agenda reúne tu plan de comida y de entreno en fechas reales, con el balance de cada día de un vistazo. Navega entre semanas con ‹ ›.'},
+      {ico:'📚', t:'PDF completo', x:'Aquí está el botón 📚 PDF completo: exporta en un solo documento la semana, las recetas y los entrenamientos. Todo concentrado en un sitio.'},
+      {ico:'🔀', t:'Accesos rápidos', x:'La fila "Ir a:" te lleva en un toque a Plan Semanal, Entrenamientos o Mente, sin pasar por el menú. También están en esas páginas para volver.'},
+      {ico:'📌', t:'Aplica tu plantilla', x:'Vuelca tu plantilla semanal a 7 fechas concretas. Quedan como copias editables por día, sin tocar la plantilla original.'},
+      {ico:'🍽️', t:'Detalle por día', x:'Toca cualquier comida o entreno para ver su ficha completa con ingredientes, macros o ejercicios.'}
     ]},
     mente: { sec:'Mente', steps:[
       {ico:'🧠', t:'Mente en Forma', x:'Esta sección cuida tu bienestar mientras haces la dieta: estado de ánimo, hábitos y herramientas psicológicas. Funciona dentro de la misma app, con su barra de pestañas abajo.'},
@@ -401,16 +409,21 @@
      INFORMACIÓN Y AVISO LEGAL
   ══════════════════════════════════════════════════════════ */
   const INFO_CSS = `
-  .pn-info-back{position:fixed;inset:0;z-index:4400;display:flex;align-items:center;
-    justify-content:center;padding:20px;background:rgba(34,22,8,.5);
-    backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);opacity:0;transition:opacity .2s}
+  .pn-info-back{position:fixed;top:var(--hdr-h,0);left:0;right:0;bottom:0;z-index:180;display:flex;align-items:stretch;
+    justify-content:center;background:var(--cream,#F5EEE4);opacity:0;transition:opacity .2s}
   .pn-info-back.show{opacity:1}
-  .pn-info{background:var(--white,#FFFDF7);width:100%;max-width:560px;border-radius:20px;overflow:hidden;
-    box-shadow:0 28px 80px rgba(34,22,8,.45);display:flex;flex-direction:column;max-height:90vh;
-    transform:translateY(12px) scale(.98);transition:transform .22s cubic-bezier(.2,.9,.3,1)}
+  .pn-info{background:var(--white,#FFFDF7);width:100%;max-width:860px;overflow:hidden;
+    box-shadow:0 0 60px rgba(34,22,8,.12);display:flex;flex-direction:column;height:100%;
+    transform:translateY(8px);transition:transform .22s cubic-bezier(.2,.9,.3,1)}
   .pn-info-back.show .pn-info{transform:none}
-  .pn-info-hd{background:var(--accent,#B5603A);color:#fff;padding:18px 22px;display:flex;
-    align-items:center;justify-content:space-between;gap:12px}
+  .pn-info-hd{background:var(--accent,#B5603A);color:#fff;padding:16px 22px;display:flex;
+    align-items:center;justify-content:space-between;gap:12px;position:sticky;top:0}
+  .pn-info-back-btn{border:none;background:rgba(255,255,255,.18);color:#fff;border-radius:10px;
+    padding:8px 14px;min-height:40px;cursor:pointer;font-size:.85rem;display:flex;align-items:center;gap:6px;transition:.15s}
+  .pn-info-back-btn:hover{background:rgba(255,255,255,.32)}
+  .pn-info-link{border:1.5px solid var(--accent,#B5603A);background:rgba(181,96,58,.08);color:var(--accent,#B5603A);
+    border-radius:10px;padding:10px 14px;min-height:42px;cursor:pointer;font-size:.88rem;font-weight:600;transition:.15s}
+  .pn-info-link:hover{background:var(--accent,#B5603A);color:#fff}
   .pn-info-hd h3{font-family:'Playfair Display',serif;font-weight:700;font-size:1.25rem;margin:0}
   .pn-info-x{border:none;background:rgba(255,255,255,.18);color:#fff;width:32px;height:32px;border-radius:50%;
     cursor:pointer;font-size:.95rem;flex-shrink:0;transition:.15s}
@@ -452,45 +465,92 @@
       y consulta a un profesional ante cualquier duda de salud.</li>
     </ul>
 
+    <h4>Tus datos</h4>
+    <p>Todos tus datos se guardan <strong>localmente en tu dispositivo</strong>. La app no
+    los envía a ningún servidor.</p>
+
     <h4>Descargo de responsabilidad</h4>
+    <p>Esta app es <strong>solo una herramienta</strong> orientativa y <strong>no está
+    pensada para personas con enfermedad</strong>. Lee el descargo completo:</p>
+    <p><button class="pn-info-link" data-go="descargo">⚖️ Ver descargo de responsabilidad →</button></p>
+
+    <p style="font-size:.82rem;color:var(--ink-50,rgba(44,31,14,.5));margin-top:14px">
+    © <span class="pn-info-year">2026</span> Juan María Gámez Ortiz · Licencia CC BY-NC 4.0 ·
+    Desarrollado con la ayuda de Claude.</p>
+  `;
+  const DESCARGO_HTML = `
+    <h4>Esta aplicación no es para tratar enfermedades</h4>
+    <p><strong>Esta aplicación no está pensada para personas que padezcan algún tipo de
+    enfermedad</strong> (metabólica, digestiva, renal, cardiovascular, trastornos de la
+    conducta alimentaria u otras), ni para mujeres embarazadas o en lactancia, ni para
+    personas en tratamiento médico o farmacológico. En esos casos, la alimentación y el
+    ejercicio deben estar supervisados por un profesional sanitario.</p>
+
+    <h4>Solo es una herramienta</h4>
+    <p>Conviene insistir: esto es <strong>únicamente una herramienta</strong> de
+    organización orientativa, no un consejo médico ni un plan terapéutico. Antes de
+    aplicar cualquier cambio en tu dieta o tu actividad física, y especialmente ante
+    cualquier síntoma o duda de salud, <strong>consulta con tu médico/a de familia</strong>.</p>
+
+    <h4>Responsabilidad del usuario</h4>
     <p>El uso de esta aplicación y de la información que contiene es
     <strong>responsabilidad exclusiva del usuario</strong>. El autor no se hace
     responsable de decisiones, daños o perjuicios derivados de su uso. Si tienes una
     condición médica, alergias, intolerancias o sigues un tratamiento, consulta con un
     profesional antes de aplicar cualquier cambio.</p>
-
-    <h4>Tus datos</h4>
-    <p>Todos tus datos se guardan <strong>localmente en tu dispositivo</strong>. La app no
-    los envía a ningún servidor.</p>
-
-    <p style="font-size:.82rem;color:var(--ink-50,rgba(44,31,14,.5));margin-top:14px">
-    © <span class="pn-info-year">2026</span> Juan María Gámez Ortiz · Licencia CC BY-NC 4.0 ·
-    Desarrollado con la ayuda de Claude.</p>
   `;
   function injectInfoCSS(){
     if(document.getElementById('pn-info-css')) return;
     const s=document.createElement('style'); s.id='pn-info-css'; s.textContent=INFO_CSS;
     (document.head||document.documentElement).appendChild(s);
   }
-  function pnInfoLegal(){
+  const LEGAL_PAGES = {
+    info:     { title:'ℹ️ Información y aviso legal', html:()=>INFO_HTML },
+    descargo: { title:'⚖️ Descargo de responsabilidad', html:()=>DESCARGO_HTML }
+  };
+  // Página legal a pantalla completa, con botón Volver e integración con el
+  // botón Atrás del navegador (pushState/popstate) → se comporta como una página.
+  function pnLegalPage(key){
+    key = LEGAL_PAGES[key] ? key : 'info';
     injectInfoCSS();
+    const page = LEGAL_PAGES[key];
     const back=document.createElement('div'); back.className='pn-info-back';
-    back.innerHTML=`<div class="pn-info" role="dialog" aria-modal="true">
-      <div class="pn-info-hd"><h3>ℹ️ Información y aviso legal</h3>
-        <button class="pn-info-x" data-x aria-label="Cerrar">✕</button></div>
-      <div class="pn-info-body">${INFO_HTML}</div>
-      <div class="pn-info-foot"><button data-x>Entendido</button></div>
+    back.innerHTML=`<div class="pn-info" role="region" aria-label="${page.title}">
+      <div class="pn-info-hd">
+        <button class="pn-info-back-btn" data-x aria-label="Volver">← Volver</button>
+        <h3>${page.title}</h3>
+        <span style="width:70px"></span>
+      </div>
+      <div class="pn-info-body">${page.html()}</div>
     </div>`;
     document.body.appendChild(back);
     const yr=back.querySelector('.pn-info-year'); if(yr) yr.textContent=new Date().getFullYear();
     requestAnimationFrame(()=> back.classList.add('show'));
-    function close(){ back.classList.remove('show'); setTimeout(()=>back.remove(),200);
-      document.removeEventListener('keydown',onKey,true); }
+    let closed=false;
+    try{ history.pushState({pnLegal:key}, ''); }catch(e){}
+    function close(fromPop){
+      if(closed) return; closed=true;
+      back.classList.remove('show'); setTimeout(()=>back.remove(),200);
+      document.removeEventListener('keydown',onKey,true);
+      window.removeEventListener('popstate',onPop);
+      if(!fromPop){ try{ history.back(); }catch(e){} }
+    }
     function onKey(e){ if(e.key==='Escape') close(); }
-    back.addEventListener('click', e=>{ if(e.target.closest('[data-x]')||e.target===back) close(); });
+    function onPop(){ close(true); }
+    // Navegación entre páginas legales (enlace al descargo)
+    back.addEventListener('click', e=>{
+      const go = e.target.closest('[data-go]');
+      if(go){ close(); setTimeout(()=> pnLegalPage(go.dataset.go), 60); return; }
+      if(e.target.closest('[data-x]')) close();
+    });
     document.addEventListener('keydown', onKey, true);
+    window.addEventListener('popstate', onPop);
   }
+  function pnInfoLegal(){ pnLegalPage('info'); }
+  function pnDescargo(){ pnLegalPage('descargo'); }
   window.pnInfoLegal = pnInfoLegal;
+  window.pnDescargo  = pnDescargo;
+  window.pnLegalPage = pnLegalPage;
 
   /* Botón ❔ del header → tutorial de la sección activa.
      Además, la PRIMERA vez que se entra a una sección, se abre solo. */

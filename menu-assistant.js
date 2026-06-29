@@ -43,9 +43,10 @@
 
   // Recetas candidatas de una categoría (sin "libre"/"loose", respetando restricciones).
   function candidates(cat){
+    const hidden = (typeof dishHiddenByCuisine==='function') ? dishHiddenByCuisine : ()=>false;
     return Object.keys(DISHES).filter(id=>{
       const d = DISHES[id];
-      return d && d.cat===cat && !d.libre && !d.loose && !violates(id);
+      return d && d.cat===cat && !d.libre && !d.loose && !violates(id) && !hidden(id);
     });
   }
   // Tipos de alimento presentes entre las candidatas (para los filtros).
@@ -88,6 +89,65 @@
 
   function cat(){ return _steps[_i]; }
 
+  // ── Guía nutricional (no bloqueante) ──────────────────────
+  // Simula el reparto round-robin de las elecciones en los 7 días (igual que finish())
+  // para anticipar si alguna recomendación semanal se queda corta o se excede.
+  function simulatedData(){
+    const days = (typeof WEEK_DAYS!=='undefined') ? WEEK_DAYS.map(d=>d.k) : ['lun','mar','mie','jue','vie','sab','dom'];
+    const data = {};
+    _steps.forEach(s=>{
+      const sel = [..._sel[s]];
+      if(!sel.length) return;
+      days.forEach((day, idx)=>{ (data[day]=data[day]||{})[s] = [ sel[idx % sel.length] ]; });
+    });
+    return data;
+  }
+  function countsFrom(data, scope){
+    const counts = {};
+    Object.values(data).forEach(day=>{
+      Object.entries(day).forEach(([slot, arr])=>{
+        if(!arr || !arr.length) return;
+        if(scope==='com' && slot!=='com') return;
+        const seen = new Set();
+        arr.forEach(id=>{ const d=DISHES[id]; if(!d) return; (d.food||[]).forEach(t=>{ if(seen.has(slot+':'+t)) return; seen.add(slot+':'+t); counts[t]=(counts[t]||0)+1; }); });
+      });
+    });
+    return counts;
+  }
+  // Evalúa WEEKLY_GUIDE sobre las elecciones actuales → tipos "excedidos" / "al límite".
+  function guidance(){
+    const empty = {over:new Set(), near:new Set(), items:[]};
+    if(typeof WEEKLY_GUIDE==='undefined') return empty;
+    const data = simulatedData();
+    const com = countsFrom(data,'com'), all = countsFrom(data,'all');
+    const over=new Set(), near=new Set(), items=[];
+    WEEKLY_GUIDE.forEach(g=>{
+      const fk = g.foodKey || g.k; const v = (g.scope==='com'?com:all)[fk] || 0;
+      let status = null;
+      if((g.target===0 && v>0) || v>g.max) status='over';
+      else if(v===g.max && g.max>0) status='near';
+      if(status==='over'){ over.add(fk); items.push({fk,g,v,status}); }
+      else if(status==='near'){ near.add(fk); items.push({fk,g,v,status}); }
+    });
+    return {over, near, items};
+  }
+  function guidanceHtml(gd){
+    if(!gd.items.length) return `<div class="masst-guide ok">✓ De momento tus elecciones encajan con las recomendaciones de la semana.</div>`;
+    const chips = gd.items.slice(0,6).map(it=>{
+      const ftd = FOOD_TYPES[it.fk] || {ico:'•', short:it.g.lbl};
+      const lim = it.g.target===0 ? `máx ${it.g.max}/sem` : `${it.g.target}–${it.g.max}/sem`;
+      return `<span class="mg-chip ${it.status}">${ftd.ico} ${esc(ftd.short||ftd.lbl)} <b>${it.v}</b> <small>${lim}</small></span>`;
+    }).join('');
+    return `<div class="masst-guide warn"><span class="mg-h">⚠ Revisa</span>${chips}<span class="mg-note">Puedes elegirlo igualmente.</span></div>`;
+  }
+  // Clase de aviso para una tarjeta según los tipos excedidos/al límite.
+  function cardWarnClass(id, gd){
+    const foods = (DISHES[id].food||[]);
+    if(foods.some(f=> gd.over.has(f))) return 'warn-over';
+    if(foods.some(f=> gd.near.has(f))) return 'warn-near';
+    return '';
+  }
+
   function render(){
     const k = cat();
     const meta = STEP_META[k];
@@ -96,6 +156,7 @@
     const ft = _filter[k];
     const list = all.filter(id => ft==='all' || (DISHES[id].food||[]).includes(ft));
     const selSet = _sel[k];
+    const gd = guidance();
 
     const pills = [`<button class="masst-pill ${ft==='all'?'on':''}" data-ft="all">Todas</button>`]
       .concat(types.map(t=>`<button class="masst-pill ${ft===t?'on':''}" data-ft="${t}">${FOOD_TYPES[t].ico} ${esc(FOOD_TYPES[t].short||FOOD_TYPES[t].lbl)}</button>`))
@@ -105,12 +166,14 @@
       const d = DISHES[id];
       const on = selSet.has(id);
       const foods = (d.food||[]).slice(0,4).map(f=>FOOD_TYPES[f]?FOOD_TYPES[f].ico:'').join('');
-      return `<button class="masst-card ${on?'on':''}" data-pick="${id}">
+      const warn = cardWarnClass(id, gd);
+      return `<button class="masst-card ${on?'on':''} ${warn}" data-pick="${id}" data-foods="${(d.food||[]).join(',')}">
         <span class="masst-card-ic">${d.icon||meta.ico}</span>
         <span class="masst-card-b">
           <span class="masst-card-n">${esc(d.nom)}</span>
           <span class="masst-card-f">${foods}</span>
         </span>
+        <span class="masst-card-warn">⚠</span>
         <span class="masst-card-chk">${on?'✓':'＋'}</span>
       </button>`;
     }).join('') : `<div class="masst-empty">No hay recetas disponibles aquí con las restricciones actuales. Crea recetas o ajusta restricciones en Usuarios.</div>`;
@@ -128,6 +191,7 @@
         <div class="masst-body">
           <h2 class="masst-title">${meta.ico} ${esc(meta.title)} <small>paso ${_i+1} de ${_steps.length}</small></h2>
           <p class="masst-hint">${esc(meta.hint)}</p>
+          <div class="masst-guide-wrap">${guidanceHtml(gd)}</div>
           <div class="masst-filters">${pills}</div>
           <div class="masst-grid">${cards}</div>
         </div>
@@ -152,9 +216,24 @@
     if(pill){ _filter[cat()] = pill.dataset.ft; render(); return; }
     const card = e.target.closest('[data-pick]');
     if(card){
+      // Actualización in-situ: togglear solo esta tarjeta y el contador, SIN re-render
+      // completo, para no perder la posición de scroll (el usuario no debe "volver arriba").
       const id = card.dataset.pick; const s = _sel[cat()];
-      if(s.has(id)) s.delete(id); else s.add(id);
-      render(); return;
+      const on = !s.has(id);
+      if(on) s.add(id); else s.delete(id);
+      card.classList.toggle('on', on);
+      const chk = card.querySelector('.masst-card-chk'); if(chk) chk.textContent = on ? '✓' : '＋';
+      const nSel = s.size;
+      const cnt = _root.querySelector('.masst-count');
+      if(cnt) cnt.textContent = `${nSel} elegida${nSel===1?'':'s'}`;
+      // Recalcula la guía nutricional y re-sombrea las tarjetas SIN re-render (conserva scroll).
+      const gd = guidance();
+      const gw = _root.querySelector('.masst-guide-wrap'); if(gw) gw.innerHTML = guidanceHtml(gd);
+      _root.querySelectorAll('.masst-card[data-foods]').forEach(c=>{
+        c.classList.remove('warn-over','warn-near');
+        const w = cardWarnClass(c.dataset.pick, gd); if(w) c.classList.add(w);
+      });
+      return;
     }
     const nav = e.target.closest('[data-nav]');
     if(nav){

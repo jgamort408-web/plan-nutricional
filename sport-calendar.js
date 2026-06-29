@@ -618,6 +618,18 @@ function buildSportPrintHtml(){
   b('spCalPdf', spCalExportPdf);
   b('spCalJson', spCalExportJson);
   b('spCalRename', spCalRename);
+  // Dropdown "Más acciones" (mismo patrón que Plan Semanal)
+  const moreBtn = document.getElementById('spCalMoreBtn');
+  const morePanel = document.getElementById('spCalMore');
+  if(moreBtn && morePanel){
+    moreBtn.addEventListener('click', ()=>{
+      const open = morePanel.classList.toggle('hidden') === false;
+      moreBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    morePanel.addEventListener('click', (e)=>{
+      if(e.target.closest('.cal-btn')){ morePanel.classList.add('hidden'); moreBtn.setAttribute('aria-expanded','false'); }
+    });
+  }
 })();
 
 window.renderSportCalendar = renderSportCalendar;
