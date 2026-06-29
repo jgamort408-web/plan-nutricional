@@ -1,0 +1,90 @@
+{
+  "kind": "recipe-pack",
+  "cuisine": { "id": "jap", "ico": "🇯🇵", "lbl": "Comida japonesa" },
+  "foods": {
+    "salsa_soja": { "name": "Salsa de soja", "sec": "desp", "kcal": 60, "p": 6, "f": 0.1, "c": 8, "ft": [] },
+    "edamame": { "name": "Edamame (soja verde)", "sec": "verd", "kcal": 121, "p": 11, "f": 5, "c": 9, "ft": ["leg", "pv"] },
+    "alga_nori": { "name": "Alga nori", "sec": "desp", "kcal": 35, "p": 5.8, "f": 0.3, "c": 5.1, "ft": ["v"] },
+    "sesamo": { "name": "Sésamo", "sec": "desp", "kcal": 573, "p": 17.7, "f": 49.7, "c": 23.4, "ft": ["fs"] },
+    "miso": { "name": "Pasta de miso", "sec": "desp", "kcal": 199, "p": 12, "f": 6, "c": 26, "ft": [] },
+    "fideos_soba": { "name": "Fideos soba cocidos", "sec": "pan", "kcal": 99, "p": 5, "f": 0.1, "c": 21, "ft": ["apq"] }
+  },
+  "dishes": {
+    "JAP_C1": {
+      "cat": "com", "short": "Bowl de salmón teriyaki",
+      "nom": "Bowl de salmón teriyaki con arroz y edamame", "icon": "🍣",
+      "t": "20 min", "eq": "Sartén · Olla", "tipo": "completa", "diet": ["ps"], "food": ["pa", "apq", "v"],
+      "desc": "Salmón glaseado con soja sobre arroz, edamame, zanahoria y pepino. Omega-3 y proteína de calidad.",
+      "nota": "Marca el salmón y glasea con soja. Sirve sobre arroz con edamame, zanahoria y pepino. Sésamo por encima.",
+      "comp": [
+        {"f":"arroz_blanco","g":180,"note":"cocido"},
+        {"f":"salmon","g":120,"note":"crudo"},
+        {"f":"edamame","g":60},
+        {"f":"zanahoria","g":50},
+        {"f":"pepino","g":50},
+        {"f":"salsa_soja","g":10},
+        {"f":"sesamo","g":5},
+        {"f":"aceite_de_oliva","g":5}
+      ]
+    },
+    "JAP_C2": {
+      "cat": "com", "short": "Oyakodon de pollo",
+      "nom": "Oyakodon: pollo y huevo sobre arroz", "icon": "🍚",
+      "t": "20 min", "eq": "Sartén", "tipo": "completa", "diet": ["cn"], "food": ["cb", "hv", "apq"],
+      "desc": "Plato casero japonés: pollo y cebolla cocinados en caldo de soja, ligados con huevo, sobre arroz.",
+      "nota": "Cuece pollo y cebolla con soja y un poco de agua. Añade el huevo batido y cuaja ligeramente. Sirve sobre arroz.",
+      "comp": [
+        {"f":"arroz_blanco","g":180,"note":"cocido"},
+        {"f":"pechuga_de_pollo","g":120,"note":"crudo"},
+        {"f":"huevo","u":1},
+        {"f":"cebolla","g":60},
+        {"f":"edamame","g":40},
+        {"f":"salsa_soja","g":12}
+      ]
+    },
+    "JAP_N1": {
+      "cat": "cen", "short": "Sopa miso con soba",
+      "nom": "Sopa de miso con tofu y fideos soba", "icon": "🍲",
+      "t": "15 min", "eq": "Olla", "tipo": "ligera", "diet": ["vg", "vt"], "food": ["pv", "apq", "v"],
+      "desc": "Cena ligera y reconfortante: caldo de miso con tofu, fideos soba, alga y verdura.",
+      "nota": "Calienta agua, disuelve el miso fuera del hervor. Añade tofu, soba cocida, zanahoria y alga.",
+      "comp": [
+        {"f":"fideos_soba","g":180,"note":"cocidos"},
+        {"f":"tofu_firme","g":160},
+        {"f":"miso","g":20},
+        {"f":"edamame","g":50},
+        {"f":"zanahoria","g":60},
+        {"f":"cebolla","g":30},
+        {"f":"alga_nori","g":3},
+        {"f":"sesamo","g":5}
+      ]
+    },
+    "JAP_D1": {
+      "cat": "des", "short": "Tortilla japonesa con arroz",
+      "nom": "Tamagoyaki (tortilla) con arroz y espinaca", "icon": "🍳",
+      "t": "12 min", "eq": "Sartén", "tipo": null, "diet": ["vt"], "food": ["hv", "apq", "v"],
+      "desc": "Tortilla japonesa enrollada, ligeramente dulce, con arroz y espinaca salteada. Desayuno salado y proteico.",
+      "nota": "Bate los huevos con un poco de soja, cuájalos en capas y enrolla. Sirve con arroz y espinaca.",
+      "comp": [
+        {"f":"huevo","u":3},
+        {"f":"arroz_blanco","g":100,"note":"cocido"},
+        {"f":"espinaca","g":100},
+        {"f":"salsa_soja","g":5},
+        {"f":"sesamo","g":3},
+        {"f":"aceite_de_oliva","g":5}
+      ]
+    },
+    "JAP_M1": {
+      "cat": "mer", "short": "Edamame y fruta",
+      "nom": "Edamame al vapor con sésamo y fruta", "icon": "🫛",
+      "t": "8 min", "eq": "Vapor", "tipo": null, "diet": ["vg", "vt", "sg"], "food": ["leg", "fr"],
+      "desc": "Merienda proteica y vegetal: edamame al vapor con sésamo y sal, más fruta de temporada.",
+      "nota": "Cuece el edamame al vapor 5 min, espolvorea sésamo y sal. Fruta de acompañamiento.",
+      "comp": [
+        {"f":"edamame","g":150},
+        {"f":"sesamo","g":5},
+        {"f":"fruta_temporada","g":150}
+      ]
+    }
+  }
+}

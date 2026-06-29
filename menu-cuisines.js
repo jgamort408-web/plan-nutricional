@@ -63,6 +63,12 @@
     const c = pack.cuisine;
     if(!c.id || c.id==='base') return 0;
     _registry[c.id] = { id:c.id, ico:c.ico||'🍽️', lbl:c.lbl||c.id, builtin:!!pack.builtin };
+    // 1) Alimentos propios del paquetes → se funden en la base FOODS (mismo objeto que usa
+    //    el motor) para que las recetas con `comp` calculen macros/kcal fiables y ESCALEN.
+    if(pack.foods && window.FOODS){
+      Object.entries(pack.foods).forEach(([fid, f])=>{ if(f && !window.FOODS[fid]) window.FOODS[fid] = Object.assign({pack:c.id}, f); });
+    }
+    // 2) Recetas
     let n = 0;
     Object.entries(pack.dishes).forEach(([id, d])=>{
       if(typeof DISHES==='undefined' || !d) return;
@@ -74,6 +80,8 @@
       if(d.comp && typeof RECIPE_COMP!=='undefined'){ RECIPE_COMP[id] = d.comp; DISHES[id].comp = d.comp; }
       n++;
     });
+    // 3) Recalcula composiciones (kcal/macros desde los ingredientes) si hay motor.
+    if(n>0 && typeof recomputeAllComp==='function'){ try{ recomputeAllComp(); }catch(e){} }
     return n;
   }
 
@@ -123,7 +131,9 @@
 
   // Paquetes incluidos con la app que aún no se han cargado (catálogo descargable).
   const BUNDLED = [
-    { id:'ita', ico:'🇮🇹', lbl:'Comida italiana', url:'packs/italiana.json' }
+    { id:'ita', ico:'🇮🇹', lbl:'Comida italiana', url:'packs/italiana.json' },
+    { id:'mex', ico:'🇲🇽', lbl:'Comida mexicana', url:'packs/mexicana.json' },
+    { id:'jap', ico:'🇯🇵', lbl:'Comida japonesa', url:'packs/japonesa.json' }
   ];
   function bundledAvailable(){ return BUNDLED.filter(b=> !_registry[b.id]); }
 
