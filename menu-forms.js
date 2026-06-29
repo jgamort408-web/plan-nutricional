@@ -13,6 +13,7 @@ const PERSON_ICON_CHOICES = ['🧑','👩','👨','👧','👦','🧒','👵','�
 
 function openForm(html){
   formBody().innerHTML = html;
+  formBg().classList.remove('users-mode');
   formBg().classList.add('show');
   document.body.classList.add('no-scroll');
 }
@@ -34,6 +35,7 @@ let _settingsTab = 'personas';
 function openSettings(tab){
   if(tab) _settingsTab = tab;
   renderSettings();
+  formBg().classList.add('users-mode');
   formBg().classList.add('show');
   document.body.classList.add('no-scroll');
 }
@@ -41,8 +43,8 @@ function openSettings(tab){
 function renderSettings(){
   const html = `
     <div class="form-hd">
-      <h2>Ajustes</h2>
-      <span class="form-sub">Objetivos diarios y recetas propias</span>
+      <h2>👥 Usuarios</h2>
+      <span class="form-sub">Perfiles · recetas · alimentos · configuración · copia</span>
     </div>
     <div class="form-tabs">
       <button class="ftab ${_settingsTab==='personas'?'on':''}" data-tab="personas">Personas</button>
@@ -78,6 +80,66 @@ function renderSettings(){
 /* ── CONFIGURACIÓN · preferencias de la app ─────────────────
    Pensado para hacer la app más respetuosa con cada usuario.
    De momento: mostrar/ocultar kcal y macros de las recetas. */
+/* ── Tipos de comida = cocinas (paquetes de recetas) ───────── */
+function renderCuisinesGroup(){
+  if(typeof Cuisines === 'undefined') return '';
+  const chips = Cuisines.list().map(c=>{
+    const base = c.id==='base';
+    return `<button type="button" class="ftchip ${c.on?'on':'off'}" data-cuis="${c.id}" aria-pressed="${c.on}" ${base?'data-base="1"':''} title="${base?'La base siempre está disponible':'Activar / desactivar esta cocina'}">
+        <span class="ftchip-ic">${c.ico}</span>
+        <span class="ftchip-lbl">${escHtml(c.lbl)} <small style="opacity:.6">· ${c.count}</small></span>
+        ${base?'':`<span class="ftchip-x" data-rm="${c.id}" title="Quitar paquete">✕</span>`}
+      </button>`;
+  }).join('');
+  const dl = Cuisines.bundledAvailable().map(b=>`
+      <button type="button" class="ftpack" data-dl="${b.url}" title="Descargar e instalar este paquete">
+        <span class="ftpack-ic">${b.ico}</span><span class="ftpack-lbl">+ ${escHtml(b.lbl)}</span>
+      </button>`).join('');
+  return `
+    <div class="cfg-group" data-cuisines>
+      <h3 class="cfg-h">Tipos de comida (cocinas)</h3>
+      <p class="cfg-sub" style="margin:-2px 0 12px">Activa o desactiva <strong>cocinas</strong>. Cada cocina es un <strong>paquete de recetas</strong> que puedes instalar (incluidos o desde un archivo <code>.json</code>) e ir ampliando con el tiempo. Las recetas de una cocina desactivada no aparecen en el catálogo ni en el asistente.</p>
+      <div class="ftchips">${chips}</div>
+      ${dl ? `<div class="cfg-sub" style="margin:14px 0 6px">Paquetes disponibles para instalar:</div><div class="ftpacks">${dl}</div>` : ''}
+      <div class="data-actions" style="margin-top:12px">
+        <label class="btn-sec data-import-lbl">➕ Instalar paquete (.json)<input type="file" id="cuisImport" accept="application/json,.json" hidden></label>
+      </div>
+    </div>`;
+}
+function wireCuisinesGroup(){
+  const root = formBody();
+  if(!root || typeof Cuisines === 'undefined') return;
+  const refresh = ()=>{
+    const grp = root.querySelector('.cfg-group[data-cuisines]');
+    if(grp){ const tmp = document.createElement('div'); tmp.innerHTML = renderCuisinesGroup(); grp.replaceWith(tmp.firstElementChild); wireCuisinesGroup(); }
+  };
+  root.querySelectorAll('.ftchip[data-cuis]').forEach(b=> b.addEventListener('click', (e)=>{
+    const rm = e.target.closest('[data-rm]');
+    if(rm){ e.stopPropagation();
+      pnConfirm(`¿Quitar la cocina y todas sus recetas?`, {danger:true, okText:'Quitar'}).then(ok=>{ if(ok){ Cuisines.removePack(rm.dataset.rm); refresh(); } });
+      return;
+    }
+    if(b.dataset.base) return;
+    Cuisines.setOn(b.dataset.cuis, !Cuisines.isOn(b.dataset.cuis));
+    if(typeof renderAll==='function') renderAll();
+    refresh();
+  }));
+  root.querySelectorAll('.ftpack[data-dl]').forEach(b=> b.addEventListener('click', async ()=>{
+    b.disabled = true; b.style.opacity = '.5';
+    const n = await Cuisines.fetchPack(b.dataset.dl);
+    if(n>0){ if(typeof pnToast==='function') pnToast(`Paquete instalado · ${n} recetas`); refresh(); }
+    else { if(typeof pnAlert==='function') pnAlert('No se pudo instalar el paquete.'); b.disabled=false; b.style.opacity=''; }
+  }));
+  const imp = root.querySelector('#cuisImport');
+  if(imp) imp.addEventListener('change', async (e)=>{
+    const f = e.target.files && e.target.files[0]; if(!f) return;
+    const n = await Cuisines.importFile(f);
+    if(n>0){ if(typeof pnToast==='function') pnToast(`Paquete instalado · ${n} recetas`); refresh(); }
+    else if(typeof pnAlert==='function') pnAlert('El archivo no es un paquete de recetas válido.');
+    e.target.value='';
+  });
+}
+
 function renderConfigForm(){
   const showNutr = (typeof SHOW_NUTR !== 'undefined') ? SHOW_NUTR : false;
   return `
@@ -95,6 +157,7 @@ function renderConfigForm(){
         <input type="checkbox" id="cfgShowNutr" class="cfg-switch" ${showNutr?'checked':''}>
       </label>
     </div>
+    ${renderCuisinesGroup()}
     <div class="cfg-group">
       <h3 class="cfg-h">Bienestar</h3>
       <label class="cfg-row">
@@ -104,9 +167,57 @@ function renderConfigForm(){
         </span>
         <input type="checkbox" id="cfgMenteLink" class="cfg-switch" ${(typeof MENTE_LINK!=='undefined'&&MENTE_LINK)?'checked':''}>
       </label>
+    </div>
+    ${renderA11yGroup()}`;
+}
+/* ── Accesibilidad e idioma ─────────────────────────────── */
+function renderA11yGroup(){
+  if(typeof AppPrefs === 'undefined') return '';
+  const fs = AppPrefs.fontSize(), ct = AppPrefs.contrast(), lang = AppPrefs.lang();
+  const fsSeg = AppPrefs.FS_OPTS.map(([v,ic,lbl])=>`<button type="button" data-fs="${v}" class="${fs===v?'on':''}" title="${lbl}">${ic}</button>`).join('');
+  const langs = (typeof APP_LANGS!=='undefined') ? APP_LANGS : [['es','Español'],['en','English'],['fr','Français'],['de','Deutsch'],['it','Italiano'],['pt','Português']];
+  const langOpts = langs.map(([code,name])=>`<option value="${code}" ${lang===code?'selected':''}>${name}</option>`).join('');
+  return `
+    <div class="cfg-group">
+      <h3 class="cfg-h">Accesibilidad e idioma</h3>
+      <div class="cfg-field">
+        <span class="cfg-lbl">Tamaño de letra</span>
+        <div class="cfg-seg" id="cfgFontSeg">${fsSeg}</div>
+      </div>
+      <div class="cfg-field">
+        <span class="cfg-lbl">Contraste alto</span>
+        <div class="cfg-seg" id="cfgContrastSeg">
+          <button type="button" data-ct="normal" class="${ct!=='alto'?'on':''}">Normal</button>
+          <button type="button" data-ct="alto" class="${ct==='alto'?'on':''}">Alto</button>
+        </div>
+      </div>
+      <div class="cfg-field">
+        <span class="cfg-lbl">Idioma</span>
+        <select class="cfg-sel" id="cfgLang">${langOpts}</select>
+      </div>
+      <p class="cfg-sub" style="margin-top:6px">El cambio de idioma traduce la app con el traductor de Google y se mantiene guardado. Volver a “Español” quita la traducción.</p>
     </div>`;
 }
+function wireA11yGroup(){
+  const root = formBody(); if(!root || typeof AppPrefs==='undefined') return;
+  root.querySelectorAll('#cfgFontSeg button').forEach(b=> b.addEventListener('click', ()=>{
+    AppPrefs.setFontSize(b.dataset.fs);
+    root.querySelectorAll('#cfgFontSeg button').forEach(x=>x.classList.toggle('on', x===b));
+  }));
+  root.querySelectorAll('#cfgContrastSeg button').forEach(b=> b.addEventListener('click', ()=>{
+    AppPrefs.setContrast(b.dataset.ct);
+    root.querySelectorAll('#cfgContrastSeg button').forEach(x=>x.classList.toggle('on', x===b));
+  }));
+  const lang = root.querySelector('#cfgLang');
+  if(lang) lang.addEventListener('change', ()=>{
+    AppPrefs.setLang(lang.value);
+    if(typeof AppTranslate==='function') AppTranslate(lang.value);
+    else if(lang.value!=='es' && typeof pnToast==='function') pnToast('El traductor se activará en una próxima actualización.');
+  });
+}
 function wireConfigForm(){
+  wireCuisinesGroup();
+  wireA11yGroup();
   const t = formBody().querySelector('#cfgShowNutr');
   if(t) t.addEventListener('change', ()=>{
     if(typeof setShowNutr === 'function') setShowNutr(t.checked);
@@ -394,19 +505,57 @@ function renderPersonasForm(){
 
   const sum = PEOPLE.reduce((a,id)=>{ const t=TARGETS[id]||{}; a.k+=t.kcal||0;a.p+=t.p||0;a.f+=t.f||0;a.c+=t.c||0; return a; }, {k:0,p:0,f:0,c:0});
   return `
-    <p style="font-size:.86rem;color:var(--ink-50);margin-bottom:14px;line-height:1.55">
-      Ajusta los objetivos de cada persona. Puedes <strong>añadir o quitar personas</strong> (mínimo 1). La ración de cada una = ración <strong>base</strong> (la de menor kcal) × su <strong>modificador</strong>. El modo <strong style="color:var(--warm)">Todas</strong> es la suma.
-    </p>
-    <button type="button" class="btn-sec" id="reOnboard" style="width:100%;margin-bottom:12px">🧮 Asistente de cálculo (peso, altura, objetivo…)</button>
-    ${PEOPLE.map((id,i)=> personRow(id, (TARGETS[id]||{}).sym || PERSON_SYMS[i] || '🧑', i)).join('')}
-    <button type="button" class="btn-sec" id="addPerson" style="width:100%;margin-bottom:10px">➕ Añadir persona</button>
-    <div style="font-family:'DM Mono',monospace;font-size:.62rem;color:var(--ink-50);text-transform:uppercase;letter-spacing:.08em;text-align:center;padding:6px">
-      → Total (todas): <span id="abPreview">${sum.k} kcal · ${sum.p}P · ${sum.f}G · ${sum.c}C</span>
-    </div>
-    <div class="form-actions">
-      <button class="btn-sec" id="resetTargets">Restaurar valores</button>
-      <button class="btn-prim" id="saveTargets">Guardar</button>
+    ${renderProfileGallery()}
+    <button type="button" class="btn-sec" id="profEditToggle" style="width:100%;margin-bottom:12px">✏️ Editar perfiles y objetivos</button>
+    <div id="profEditor" hidden>
+      <p style="font-size:.86rem;color:var(--ink-50);margin-bottom:14px;line-height:1.55">
+        Ajusta los objetivos de cada persona. Puedes <strong>añadir o quitar personas</strong> (mínimo 1). La ración de cada una = ración <strong>base</strong> (la de menor kcal) × su <strong>modificador</strong>. El modo <strong style="color:var(--warm)">Todas</strong> es la suma.
+      </p>
+      <button type="button" class="btn-sec" id="reOnboard" style="width:100%;margin-bottom:12px">🧮 Asistente de cálculo (peso, altura, objetivo…)</button>
+      ${PEOPLE.map((id,i)=> personRow(id, (TARGETS[id]||{}).sym || PERSON_SYMS[i] || '🧑', i)).join('')}
+      <button type="button" class="btn-sec" id="addPerson" style="width:100%;margin-bottom:10px">➕ Añadir persona</button>
+      <div style="font-family:'DM Mono',monospace;font-size:.62rem;color:var(--ink-50);text-transform:uppercase;letter-spacing:.08em;text-align:center;padding:6px">
+        → Total (todas): <span id="abPreview">${sum.k} kcal · ${sum.p}P · ${sum.f}G · ${sum.c}C</span>
+      </div>
+      <div class="form-actions">
+        <button class="btn-sec" id="resetTargets">Restaurar valores</button>
+        <button class="btn-prim" id="saveTargets">Guardar</button>
+      </div>
     </div>`;
+}
+
+/* Galería de perfiles · peso/talla/macros ocultos hasta pulsar 👁 (privacidad). */
+function renderProfileGallery(){
+  const restrLbl = (typeof RESTRICTIONS!=='undefined') ? Object.fromEntries(RESTRICTIONS.map(r=>[r.k,r])) : {};
+  const calcInputs = (typeof getCalcInputs==='function') ? getCalcInputs() : {};
+  const cards = PEOPLE.map((id,i)=>{
+    const t = TARGETS[id]||{};
+    const ci = calcInputs[id]||{};
+    const av = t.icon || (t.name ? t.name.trim().charAt(0).toUpperCase() : '🧑');
+    const restr = (t.restr||[]).map(k=> restrLbl[k] ? `<span class="pr-chip">${restrLbl[k].ico} ${restrLbl[k].lbl}</span>` : '').join('') || '<span class="pr-chip">Sin restricciones</span>';
+    const peso = ci.kg ? ci.kg+' kg' : '—';
+    const talla = ci.cm ? ci.cm+' cm' : '—';
+    return `
+      <div class="prof-card" data-prof="${id}">
+        <div class="prof-av">${av}</div>
+        <div class="prof-name">${(t.name||('Persona '+(i+1))).replace(/</g,'&lt;')}</div>
+        <div class="prof-tag">Perfil ${i+1}${i===0?' · base':''}</div>
+        <div class="prof-restr">${restr}</div>
+        <div class="prof-data">
+          <div class="pd-row"><span>Energía objetivo</span><b>${t.kcal||'—'} kcal</b></div>
+          <div class="pd-row"><span>Proteína</span><b>${t.p||'—'} g</b></div>
+          <div class="pd-row"><span>Grasa</span><b>${t.f||'—'} g</b></div>
+          <div class="pd-row"><span>Carbohidrato</span><b>${t.c||'—'} g</b></div>
+          <div class="pd-row"><span>Peso · talla</span><b>${peso} · ${talla}</b></div>
+        </div>
+        <div class="prof-acts">
+          <button type="button" class="prof-eye" data-eye="${id}" aria-pressed="false">👁 Ver datos</button>
+        </div>
+      </div>`;
+  }).join('');
+  return `
+    <div class="prof-priv-note">🔒 <span>Por privacidad, el peso, la talla y los macros están <strong>ocultos</strong>. Pulsa “Ver datos” en cada perfil para mostrarlos solo cuando quieras.</span></div>
+    <div class="prof-gallery">${cards}</div>`;
 }
 
 /* Lee el formulario de personas y vuelca a TARGETS/PEOPLE.
@@ -461,6 +610,23 @@ function savePeopleFromForm(opts){
 }
 
 function wirePersonasForm(){
+  // Galería: botón 👁 muestra/oculta datos sensibles por perfil (privacidad).
+  formBody().querySelectorAll('.prof-eye').forEach(b=> b.addEventListener('click', ()=>{
+    const card = b.closest('.prof-card'); if(!card) return;
+    const on = card.classList.toggle('reveal');
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-pressed', on);
+    b.textContent = on ? '🙈 Ocultar datos' : '👁 Ver datos';
+  }));
+  // Mostrar/ocultar el editor completo.
+  const editToggle = document.getElementById('profEditToggle');
+  const editor = document.getElementById('profEditor');
+  if(editToggle && editor) editToggle.addEventListener('click', ()=>{
+    const show = editor.hasAttribute('hidden');
+    if(show) editor.removeAttribute('hidden'); else editor.setAttribute('hidden','');
+    editToggle.textContent = show ? '✖ Cerrar edición' : '✏️ Editar perfiles y objetivos';
+  });
+
   const refreshPreview = ()=>{
     const tot = {k:0,p:0,f:0,c:0};
     formBody().querySelectorAll('.fcard').forEach(c=>{

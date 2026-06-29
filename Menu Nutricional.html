@@ -37,12 +37,15 @@
   --accent:var(--terra);--accent-l:var(--terra-l);
   --sport:#5E8A3E;--sport-d:#456A2C;--sport-l:#8FBF6A;
   --mente:#3A6E96;--mente-d:#2C547A;--mente-l:#7FB0D0;
+  /* Header: fondo que cambia por sección + color de texto NEUTRO (marfil)
+     distinto de todos los acentos. --hdr-h la fija el JS (alto real). */
+  --hdr-bg:var(--terra-d);--hdr-ink:#FBF7EC;--hdr-h:0px;
 }
-/* Cada sección hereda su color de acento; el resto del diseño es común */
-body.sec-nutri{--accent:var(--terra);--accent-l:var(--terra-l)}
-body.sec-sport{--accent:var(--sport);--accent-l:var(--sport-l)}
-body.sec-week{--accent:var(--gold);--accent-l:var(--gold-l)}
-body.sec-mente,body.mente-mode{--accent:var(--mente);--accent-l:var(--mente-l)}
+/* Cada sección hereda su color de acento Y el fondo de su header; el resto es común */
+body.sec-nutri{--accent:var(--terra);--accent-l:var(--terra-l);--hdr-bg:#8E441F}
+body.sec-sport{--accent:var(--sport);--accent-l:var(--sport-l);--hdr-bg:#456A2C}
+body.sec-week{--accent:var(--gold);--accent-l:var(--gold-l);--hdr-bg:#9A6E15}
+body.sec-mente,body.mente-mode{--accent:var(--mente);--accent-l:var(--mente-l);--hdr-bg:#2C547A}
 *{box-sizing:border-box;margin:0;padding:0}
 /* Barras de scroll con el acento de la sección activa (estilo común) */
 *{scrollbar-width:thin;scrollbar-color:var(--accent,#B5603A) transparent}
@@ -70,7 +73,7 @@ button{font-family:inherit}
 @keyframes splashLoad{0%{transform:translateX(-130%)}100%{transform:translateX(330%)}}
 @media(prefers-reduced-motion:reduce){.splash-bar-fill{animation:none;width:100%}.splash-mark{animation:none}}
 
-.hdr{position:sticky;top:0;z-index:200;background:var(--warm);box-shadow:0 6px 28px rgba(0,0,0,.32)}
+.hdr{position:sticky;top:0;z-index:200;background:var(--hdr-bg);color:var(--hdr-ink);box-shadow:0 6px 28px rgba(0,0,0,.32);transition:background .3s ease}
 .hdr-top{display:flex;align-items:center;gap:14px;padding:11px 18px 9px;max-width:1280px;margin:0 auto}
 .logo{font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:700;color:var(--cream);letter-spacing:-.02em;line-height:1.1;flex-shrink:0}
 .logo em{color:var(--accent-l);font-style:normal;transition:color .25s}
@@ -122,6 +125,11 @@ body.sec-sport.spv-sess .hdr-gen{display:flex}
 
 /* form modal */
 .modal-form{max-width:560px}
+/* Usuarios en "modo página": panel ancho y alto, sensación de pantalla propia */
+#formBg.users-mode .modal-form{max-width:980px;width:96vw;height:92vh;max-height:92vh;display:flex;flex-direction:column}
+#formBg.users-mode .form-body{flex:1;overflow:auto}
+#formBg.users-mode .form-tabs{flex-wrap:wrap}
+@media(min-width:1024px){ #formBg.users-mode .modal-form{height:88vh} }
 .form-hd{padding:22px 22px 6px}
 .form-hd h2{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;line-height:1.2;text-wrap:balance}
 .form-hd .form-sub{font-family:'DM Mono',monospace;font-size:.65rem;color:var(--ink-50);letter-spacing:.08em;text-transform:uppercase;margin-top:6px;display:block}
@@ -1642,6 +1650,69 @@ body.hide-nutr .nutr{display:none !important}
 .cfg-switch::after{content:'';position:absolute;top:2px;left:2px;width:21px;height:21px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:.2s}
 .cfg-switch:checked{background:var(--gold)}
 .cfg-switch:checked::after{transform:translateX(19px)}
+/* ── Tipos de comida (paquetes + chips) ─────────────────── */
+.ftpacks{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.ftpack{display:inline-flex;align-items:center;gap:7px;padding:9px 13px;border-radius:12px;
+  border:1.5px solid rgba(44,31,14,.14);background:rgba(255,255,255,.5);cursor:pointer;
+  font-size:.82rem;color:var(--warm);transition:.15s;min-height:44px}
+.ftpack:hover{border-color:var(--gold);background:rgba(255,255,255,.85)}
+.ftpack.on{border-color:var(--gold);background:var(--gold);color:#3D2C1A;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.ftpack-ic{font-size:1.05rem}
+.ftchips{display:flex;flex-wrap:wrap;gap:7px}
+.ftchip{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:20px;
+  border:1.5px solid rgba(44,31,14,.14);background:rgba(255,255,255,.5);cursor:pointer;
+  font-size:.8rem;color:var(--warm);transition:.15s;min-height:40px}
+.ftchip:hover{border-color:var(--gold)}
+.ftchip.on{border-color:var(--accent,#B5603A);background:rgba(181,96,58,.12);color:var(--warm);font-weight:600}
+.ftchip.off{opacity:.5;filter:grayscale(.6)}
+.ftchip-ic{font-size:1rem}
+.ftchip-x{margin-left:4px;width:18px;height:18px;line-height:16px;text-align:center;border-radius:50%;
+  font-size:.7rem;background:rgba(139,48,48,.12);color:#8B3030;cursor:pointer}
+.ftchip-x:hover{background:#8B3030;color:#fff}
+/* ── Controles de accesibilidad (segmentos) ─────────────── */
+.cfg-seg{display:inline-flex;gap:4px;background:rgba(44,31,14,.07);padding:4px;border-radius:12px;flex-wrap:wrap}
+.cfg-seg button{border:none;background:transparent;border-radius:9px;padding:8px 14px;min-height:40px;cursor:pointer;
+  font-size:.82rem;color:var(--warm);transition:.15s}
+.cfg-seg button.on{background:var(--gold);color:#3D2C1A;font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.cfg-field{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:10px 0;
+  border-top:1px solid rgba(44,31,14,.08)}
+.cfg-field .cfg-lbl{font-weight:600;font-size:.9rem;color:var(--warm)}
+.cfg-sel{appearance:none;border:1.5px solid rgba(44,31,14,.18);border-radius:10px;padding:9px 12px;min-height:42px;
+  background:#fff;font-size:.85rem;color:var(--warm);cursor:pointer;min-width:160px}
+/* ── Accesos rápidos entre páginas ──────────────────────── */
+.quick-access{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 0 4px;margin-bottom:6px}
+.quick-access .qa-lbl{font-family:'DM Mono',monospace;font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-50)}
+.qa-btn{display:inline-flex;align-items:center;gap:6px;border:1.5px solid rgba(44,31,14,.14);background:rgba(255,255,255,.6);
+  color:var(--warm);border-radius:20px;padding:8px 14px;min-height:40px;cursor:pointer;font-size:.82rem;transition:.15s}
+.qa-btn:hover{border-color:var(--accent,#B5603A);background:rgba(181,96,58,.08);color:var(--accent,#B5603A)}
+/* ── Contraste alto ─────────────────────────────────────── */
+:root[data-contrast=alto]{--ink-50:rgba(28,20,8,.82);--ink-30:rgba(28,20,8,.62);--warm:#1d1407;--warm-2:#241a0c}
+:root[data-contrast=alto] .dish,:root[data-contrast=alto] .fcard,:root[data-contrast=alto] .cfg-row,
+:root[data-contrast=alto] .ftchip,:root[data-contrast=alto] .ftpack{border-color:rgba(28,20,8,.4)!important}
+:root[data-contrast=alto] .cfg-sub,:root[data-contrast=alto] .flbl-ex,:root[data-contrast=alto] small{color:rgba(28,20,8,.7)!important}
+/* ── Galería de perfiles (Usuarios) con privacidad ──────── */
+.prof-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin-bottom:16px}
+.prof-card{position:relative;border:1.5px solid rgba(44,31,14,.12);border-radius:16px;padding:16px;
+  background:linear-gradient(160deg,rgba(255,255,255,.85),rgba(245,238,228,.6));box-shadow:0 2px 10px rgba(0,0,0,.05);overflow:hidden}
+.prof-card::before{content:'';position:absolute;inset:0 0 auto 0;height:4px;background:var(--gold)}
+.prof-av{font-size:2.2rem;line-height:1;width:58px;height:58px;display:flex;align-items:center;justify-content:center;
+  border-radius:50%;background:rgba(181,96,58,.12);margin-bottom:10px}
+.prof-name{font-family:'Playfair Display',serif;font-size:1.12rem;color:var(--warm);font-weight:700;margin-bottom:2px}
+.prof-tag{font-size:.72rem;color:var(--ink-50);margin-bottom:10px}
+.prof-restr{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px;min-height:4px}
+.prof-restr .pr-chip{font-size:.68rem;background:rgba(44,31,14,.07);border-radius:10px;padding:3px 8px;color:var(--warm)}
+.prof-data{display:none;border-top:1px dashed rgba(44,31,14,.18);padding-top:10px;margin-top:2px;font-size:.8rem}
+.prof-card.reveal .prof-data{display:block;animation:profFade .25s ease}
+@keyframes profFade{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.prof-data .pd-row{display:flex;justify-content:space-between;padding:3px 0;color:var(--warm)}
+.prof-data .pd-row b{font-family:'DM Mono',monospace;font-weight:600}
+.prof-acts{display:flex;gap:8px;margin-top:12px}
+.prof-eye,.prof-edit{flex:1;border:1.5px solid rgba(44,31,14,.16);background:#fff;border-radius:10px;padding:9px;
+  min-height:42px;cursor:pointer;font-size:.78rem;color:var(--warm);transition:.15s}
+.prof-eye:hover,.prof-edit:hover{border-color:var(--gold)}
+.prof-eye.on{background:var(--gold);border-color:var(--gold);color:#3D2C1A;font-weight:600}
+.prof-priv-note{font-size:.74rem;color:var(--ink-50);background:rgba(181,96,58,.07);border-radius:10px;
+  padding:8px 12px;margin-bottom:12px;display:flex;gap:8px;align-items:center}
 /* ── ASISTENTE DE MENÚ ─────────────────────────────────── */
 .masst{position:fixed;inset:0;z-index:360;display:none}
 .masst.show{display:block}
@@ -1673,6 +1744,23 @@ body.hide-nutr .nutr{display:none !important}
 .masst-card-chk{flex:none;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(44,31,14,.08);color:var(--ink-50);font-weight:700}
 .masst-card.on .masst-card-chk{background:var(--olive);color:#fff}
 .masst-card-sub{font-size:.74rem;color:var(--ink-50);line-height:1.3}
+/* Guía nutricional (no bloqueante) + sombreado de tarjetas */
+.masst-guide-wrap{margin:0 0 12px}
+.masst-guide{display:flex;flex-wrap:wrap;align-items:center;gap:7px;border-radius:12px;padding:9px 12px;font-size:.82rem;line-height:1.3}
+.masst-guide.ok{background:rgba(120,150,80,.1);color:#4c6b2c;border:1px solid rgba(120,150,80,.28)}
+.masst-guide.warn{background:rgba(181,96,58,.08);border:1px solid rgba(181,96,58,.25)}
+.masst-guide .mg-h{font-weight:700;color:#8B3030}
+.masst-guide .mg-note{font-size:.72rem;color:var(--ink-50);margin-left:auto}
+.mg-chip{display:inline-flex;align-items:center;gap:4px;border-radius:20px;padding:3px 9px;font-size:.76rem;background:var(--white);border:1px solid rgba(44,31,14,.14)}
+.mg-chip.over{border-color:#C45B4A;color:#8B3030;background:rgba(196,91,74,.1)}
+.mg-chip.near{border-color:#C99A3A;color:#8a6a16;background:rgba(201,154,58,.12)}
+.mg-chip small{opacity:.7}
+.masst-card-warn{display:none;flex:none;color:#C45B4A;font-size:.95rem}
+.masst-card.warn-over{border-color:#C45B4A;background:rgba(196,91,74,.07)}
+.masst-card.warn-over .masst-card-warn{display:inline}
+.masst-card.warn-near{border-color:#C99A3A;background:rgba(201,154,58,.07)}
+.masst-card.warn-near .masst-card-warn{display:inline;color:#C99A3A}
+.masst-card.on.warn-over,.masst-card.on.warn-near{border-color:var(--olive)}
 .masst-empty{grid-column:1/-1;text-align:center;color:var(--ink-50);font-size:.9rem;padding:30px 10px}
 .masst-sum{list-style:none;margin:0 0 10px;padding:0;display:flex;flex-direction:column;gap:1px;border:1px solid rgba(44,31,14,.1);border-radius:12px;overflow:hidden}
 .masst-sum li{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 14px;background:var(--white)}
@@ -2085,7 +2173,10 @@ main[data-vm="small"] .dish-incart{font-size:.5rem;padding:3px 8px}
         <div class="sec-menu-div"></div>
         <button class="sec-mi" data-page="reco" role="menuitem">🥗 Recomendaciones y menú ideal</button>
         <button class="sec-mi" data-page="measures" role="menuitem">📏 Medidas de alimentos</button>
+        <button class="sec-mi" data-page="teoria" role="menuitem">📖 Teoría de la nutrición</button>
+        <button class="sec-mi" data-page="biblio" role="menuitem">📚 Bibliografía</button>
         <button class="sec-mi" data-page="info" role="menuitem">ℹ️ Información y aviso legal</button>
+        <button class="sec-mi" data-page="descargo" role="menuitem">⚖️ Descargo de responsabilidad</button>
         <div class="sec-menu-div"></div>
         <button class="sec-mi" data-page="save" role="menuitem">💾 Guardar avance</button>
         <button class="sec-mi" data-page="settings" role="menuitem">👥 Usuarios</button>
@@ -2137,17 +2228,21 @@ main[data-vm="small"] .dish-incart{font-size:.5rem;padding:3px 8px}
         <button class="cal-btn" id="calMoreBtn" title="Más acciones" aria-expanded="false" aria-controls="calMore">⋯ Más acciones</button>
         <div class="cal-more hidden" id="calMore">
           <button class="cal-btn" id="calMonthly" title="Vista mensual: asigna un menú guardado a cada semana">🗓️ Vista mensual</button>
-          <button class="cal-btn" id="calAutoNew" title="Generar un menú nuevo desde cero">🎲 Generar nuevo</button>
-          <button class="cal-btn" id="calAutoFav" title="Generar un menú centrado en tus recetas favoritas">⭐ Menú favoritos</button>
-          <button class="cal-btn" id="calLoadTpl" title="Aplicar plantilla del PDF">📋 Plantilla PDF</button>
+          <button class="cal-btn" id="calAutoNew" title="Generar un menú nuevo desde cero">🔄 Generar de cero</button>
+          <button class="cal-btn" id="calAutoFav" title="Generar un menú centrado en tus recetas favoritas">⭐ Con mis favoritos</button>
+          <button class="cal-btn" id="calLoadTpl" title="Aplicar la plantilla semanal base (la del PDF original)">📋 Plantilla base</button>
           <button class="cal-btn ghost" id="calClear">🧹 Vaciar</button>
-          <button class="cal-btn" id="calExportPdf" title="Exportar el menú como PDF">📄 PDF menú</button>
-          <button class="cal-btn" id="calExportFull" title="PDF completo: semana + recetas + entrenamientos">📚 PDF completo</button>
+          <button class="cal-btn" id="calExportPdf" title="Exportar el menú como PDF">📄 PDF del menú</button>
           <button class="cal-btn" id="calShopList" title="Lista de la compra de la semana">🛒 Lista compra</button>
           <button class="cal-btn" id="calExportJson" title="Exportar menú como JSON" style="display:none" hidden>↧ JSON</button>
         </div>
         <button class="cal-btn primary" id="calSave">💾 Guardar menú</button>
       </div>
+    </div>
+    <div class="quick-access">
+      <span class="qa-lbl">Ir a:</span>
+      <button class="qa-btn" data-goto="week">📆 Agenda</button>
+      <button class="qa-btn" data-goto="sport">🏋️ Entrenamientos</button>
     </div>
     <div id="calRestrBanner"></div>
     <div id="calGrid"></div>
@@ -2191,15 +2286,23 @@ main[data-vm="small"] .dish-incart{font-size:.5rem;padding:3px 8px}
       <div class="sp-title" id="spCalTitle">Entrenamientos <small id="spCalSub">Plan por fechas · hasta 1 año</small><button class="cal-title-edit" id="spCalRename" title="Editar nombre" aria-label="Editar nombre">✎</button></div>
       <div class="sp-tools">
         <button class="cal-btn primary" id="spCalAssistant" title="Crea tu entrenamiento paso a paso">🧭 Asistente</button>
-        <button class="cal-btn" id="spCalAuto" title="Plan automático: genera sesiones distintas por día">🧠 Plan auto</button>
-        <button class="cal-btn" id="spCalCadence" title="Generar el plan por cadencia (días · semanas · meses)">⚙ Cadencia</button>
-        <button class="cal-btn" id="spCalGen" title="Regenerar con la última cadencia">🎲 Regenerar</button>
         <button class="cal-btn" id="spCalSave" title="Guardar este plan en la biblioteca">💾 Guardar</button>
-        <button class="cal-btn" id="spCalLib" title="Biblioteca de planes guardados">📂 Biblioteca</button>
-        <button class="cal-btn ghost" id="spCalClear">🧹 Vaciar</button>
-        <button class="cal-btn" id="spCalPdf" title="Exportar a PDF detallado">📄 PDF</button>
-        <button class="cal-btn" id="spCalJson" title="Exportar el plan como JSON">↧ JSON</button>
+        <button class="cal-btn" id="spCalLib" title="Biblioteca de planes guardados">📂 Guardados</button>
+        <button class="cal-btn" id="spCalMoreBtn" title="Más acciones" aria-expanded="false" aria-controls="spCalMore">⋯ Más acciones</button>
+        <div class="cal-more hidden" id="spCalMore">
+          <button class="cal-btn" id="spCalAuto" title="Plan automático: genera sesiones distintas por día">🧠 Plan automático</button>
+          <button class="cal-btn" id="spCalCadence" title="Generar el plan por cadencia (días · semanas · meses)">⚙ Por cadencia</button>
+          <button class="cal-btn" id="spCalGen" title="Regenerar con la última cadencia">🔄 Regenerar</button>
+          <button class="cal-btn ghost" id="spCalClear">🧹 Vaciar</button>
+          <button class="cal-btn" id="spCalPdf" title="Exportar a PDF detallado">📄 PDF</button>
+          <button class="cal-btn" id="spCalJson" title="Exportar el plan como JSON">↧ JSON</button>
+        </div>
       </div>
+    </div>
+    <div class="quick-access">
+      <span class="qa-lbl">Ir a:</span>
+      <button class="qa-btn" data-goto="week">📆 Agenda</button>
+      <button class="qa-btn" data-goto="nutri-cal">🥗 Plan Semanal</button>
     </div>
     <div id="spCalSummary"></div>
     <div id="spCalGrid"></div>
@@ -2215,9 +2318,16 @@ main[data-vm="small"] .dish-incart{font-size:.5rem;padding:3px 8px}
         <button class="rc-navbtn" id="weekPrev" aria-label="Semana anterior">‹</button>
         <span class="wk-title" id="weekTitle"></span>
         <button class="rc-navbtn" id="weekNext" aria-label="Semana siguiente">›</button>
-        <button class="cal-btn" id="weekToday">Hoy</button>
+        <button class="cal-btn" id="weekToday">📍 Hoy</button>
         <button class="cal-btn" id="weekApply" title="Fijar tu plantilla semanal sobre estas 7 fechas">📋 Aplicar plantilla</button>
+        <button class="cal-btn primary" id="calExportFull" title="PDF completo: semana + recetas + entrenamientos">📚 PDF completo</button>
       </div>
+    </div>
+    <div class="quick-access" id="weekQuick">
+      <span class="qa-lbl">Ir a:</span>
+      <button class="qa-btn" data-goto="nutri-cal">🥗 Plan Semanal</button>
+      <button class="qa-btn" data-goto="sport">🏋️ Entrenamientos</button>
+      <button class="qa-btn" data-goto="mente">🧠 Mente</button>
     </div>
     <div id="weekBoard" class="wk-board"></div>
   </div>
@@ -2311,12 +2421,14 @@ main[data-vm="small"] .dish-incart{font-size:.5rem;padding:3px 8px}
 </div>
 
 <script src="menu-ui.js"></script>
+<script src="menu-prefs.js"></script>
 <script src="menu-data.js"></script>
 <script src="menu-foods.js"></script>
 <script src="menu-comp.js"></script>
 <script src="menu-recipes2.js"></script>
 <script src="menu-recipes-junio.js"></script>
 <script src="menu-recipes-comp.js"></script>
+<script src="menu-cuisines.js"></script>
 <script src="menu-app.js"></script>
 <script src="menu-forms.js"></script>
 <script src="menu-onboard.js"></script>
@@ -2335,6 +2447,9 @@ main[data-vm="small"] .dish-incart{font-size:.5rem;padding:3px 8px}
 <script src="menu-assistant.js"></script>
 <script src="menu-month.js"></script>
 <script src="sport-assistant.js"></script>
+<script src="menu-biblio.js"></script>
+<script src="menu-teoria.js"></script>
+<script src="menu-translate.js"></script>
 
 <!-- TABBAR INFERIOR · subvistas de la sección activa (móvil y escritorio) -->
 <nav id="appTabbar" class="app-tabbar" role="tablist" aria-label="Vistas de la sección"></nav>

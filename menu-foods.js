@@ -582,16 +582,17 @@ function injectMeasuresCSS(){
   if(document.getElementById('fmCss')) return;
   const st=document.createElement('style'); st.id='fmCss';
   st.textContent=`
-  .fm-back{position:fixed;inset:0;background:rgba(20,12,4,.55);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);z-index:340;display:flex;align-items:center;justify-content:center;padding:18px;opacity:0;transition:opacity .2s}
+  .fm-back{position:fixed;top:var(--hdr-h,0);left:0;right:0;bottom:0;background:var(--cream,#f6edd8);z-index:180;display:flex;align-items:stretch;justify-content:center;opacity:0;transition:opacity .2s}
   .fm-back.show{opacity:1}
-  .fm-page{background:var(--cream,#f6edd8);width:min(680px,96vw);max-height:90vh;display:flex;flex-direction:column;border-radius:16px;box-shadow:0 24px 64px rgba(0,0,0,.4);overflow:hidden;transform:translateY(10px) scale(.99);transition:transform .2s}
+  .fm-page{background:var(--cream,#f6edd8);width:min(880px,100vw);height:100%;display:flex;flex-direction:column;box-shadow:0 0 60px rgba(0,0,0,.12);overflow:hidden;transform:translateY(8px);transition:transform .2s}
   .fm-back.show .fm-page{transform:none}
-  .fm-hd{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:15px 18px 9px;flex-shrink:0}
+  .fm-hd{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 18px 10px;flex-shrink:0;position:sticky;top:0;background:var(--cream,#f6edd8);border-bottom:1px solid rgba(44,31,14,.08)}
   .fm-hd h3{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--warm,#3a2c1a);margin:0}
   .fm-hd-actions{display:flex;gap:8px;flex-shrink:0}
   .fm-print{border:1.5px solid rgba(44,31,14,.18);background:var(--white,#fff);color:var(--warm,#3a2c1a);font-family:'DM Mono',monospace;font-size:.66rem;text-transform:uppercase;letter-spacing:.04em;font-weight:600;padding:8px 13px;border-radius:20px;cursor:pointer}
   .fm-print:hover{border-color:var(--terra,#b5603a);color:var(--terra,#b5603a)}
-  .fm-x{border:none;background:rgba(44,31,14,.07);width:30px;height:30px;border-radius:50%;font-size:.95rem;cursor:pointer;color:var(--warm,#3a2c1a);flex-shrink:0}
+  .fm-x{border:none;background:rgba(44,31,14,.07);border-radius:10px;padding:8px 14px;min-height:40px;font-size:.85rem;cursor:pointer;color:var(--warm,#3a2c1a);flex-shrink:0;display:flex;align-items:center;gap:6px}
+  .fm-x:hover{background:rgba(44,31,14,.14)}
   .fm-intro{padding:0 18px 8px;font-family:'Lora',serif;font-size:.86rem;color:var(--ink-50,#6b5d49)}
   .fm-search{margin:0 18px 10px;padding:9px 14px;border-radius:22px;border:1.5px solid rgba(44,31,14,.15);background:var(--white,#fff);font-family:'Lora',serif;font-size:.92rem;color:var(--warm,#3a2c1a)}
   .fm-search:focus{outline:none;border-color:var(--gold,#c8742e);box-shadow:0 0 0 3px rgba(200,116,46,.12)}
@@ -647,7 +648,7 @@ function openFoodMeasures(){
       <h3>📏 Medidas de alimentos</h3>
       <div class="fm-hd-actions">
         <button class="fm-print" data-print>🖨️ PDF</button>
-        <button class="fm-x" data-x aria-label="Cerrar">✕</button>
+        <button class="fm-x" data-x aria-label="Volver">← Volver</button>
       </div>
     </div>
     <div class="fm-intro">Equivalencias aproximadas para no tener que pesar a diario. Usa el buscador o imprime esta página como PDF.</div>
@@ -677,10 +678,20 @@ function openFoodMeasures(){
     const nr = back.querySelector('.fm-noresult'); if(nr) nr.style.display = (q && !any) ? '' : 'none';
   });
   const pr = back.querySelector('[data-print]'); if(pr) pr.addEventListener('click', ()=> printFoodMeasures());
-  function close(){ back.classList.remove('show'); setTimeout(()=> back.remove(), 200); document.removeEventListener('keydown', onKey, true); }
+  let _closed=false;
+  try{ history.pushState({pnPage:1}, ''); }catch(e){}
+  function close(fromPop){
+    if(_closed) return; _closed=true;
+    back.classList.remove('show'); setTimeout(()=> back.remove(), 200);
+    document.removeEventListener('keydown', onKey, true);
+    window.removeEventListener('popstate', onPop);
+    if(!fromPop){ try{ history.back(); }catch(e){} }
+  }
   function onKey(e){ if(e.key==='Escape') close(); }
+  function onPop(){ close(true); }
   back.addEventListener('click', e=>{ if(e.target.closest('[data-x]') || e.target===back) close(); });
   document.addEventListener('keydown', onKey, true);
+  window.addEventListener('popstate', onPop);
 }
 
 /* PDF de medidas con el mismo método de la app: HTML aislado en un iframe + print */
@@ -812,7 +823,7 @@ function openNutriReco(){
       <h3>🥗 Recomendaciones y menú ideal</h3>
       <div class="fm-hd-actions">
         <button class="fm-print" data-print>🖨️ PDF</button>
-        <button class="fm-x" data-x aria-label="Cerrar">✕</button>
+        <button class="fm-x" data-x aria-label="Volver">← Volver</button>
       </div>
     </div>
     <div class="fm-intro">Cómo construir un menú equilibrado y calcular tus calorías y macros. Usa el buscador o imprime esta página como PDF.</div>
@@ -857,10 +868,20 @@ function openNutriReco(){
     const nr = back.querySelector('.fm-noresult'); if(nr) nr.style.display = (q && !any) ? '' : 'none';
   });
   const pr = back.querySelector('[data-print]'); if(pr) pr.addEventListener('click', ()=> printNutriReco());
-  function close(){ back.classList.remove('show'); setTimeout(()=> back.remove(), 200); document.removeEventListener('keydown', onKey, true); }
+  let _closed=false;
+  try{ history.pushState({pnPage:1}, ''); }catch(e){}
+  function close(fromPop){
+    if(_closed) return; _closed=true;
+    back.classList.remove('show'); setTimeout(()=> back.remove(), 200);
+    document.removeEventListener('keydown', onKey, true);
+    window.removeEventListener('popstate', onPop);
+    if(!fromPop){ try{ history.back(); }catch(e){} }
+  }
   function onKey(e){ if(e.key==='Escape') close(); }
+  function onPop(){ close(true); }
   back.addEventListener('click', e=>{ if(e.target.closest('[data-x]') || e.target===back) close(); });
   document.addEventListener('keydown', onKey, true);
+  window.addEventListener('popstate', onPop);
 }
 function printNutriReco(){
   const esc = window.escHtml || (s=>String(s));

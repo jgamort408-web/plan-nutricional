@@ -338,6 +338,8 @@ function anyFilter(){ return (S.filters||[]).length > 0; }
 function passesFilter(id){
   const d = DISHES[id];
   if(!d) return false;
+  // Cocinas (paquetes) desactivadas en Configuración → oculta sus recetas.
+  if(typeof dishHiddenByCuisine==='function' && dishHiddenByCuisine(id)) return false;
   if(!dishMatchesSearch(id)) return false;
   const fs = S.filters || [];
   if(!fs.length) return true;
@@ -1545,6 +1547,9 @@ function wireSecMenu(){
     if(m.dataset.page === 'reco'){ if(typeof window.openNutriReco === 'function') window.openNutriReco(); return; }
     if(m.dataset.page === 'measures'){ if(typeof window.openFoodMeasures === 'function') window.openFoodMeasures(); return; }
     if(m.dataset.page === 'info'){ if(typeof window.pnInfoLegal === 'function') window.pnInfoLegal(); return; }
+    if(m.dataset.page === 'descargo'){ if(typeof window.pnDescargo === 'function') window.pnDescargo(); return; }
+    if(m.dataset.page === 'biblio'){ if(typeof window.openBibliografia === 'function') window.openBibliografia(); return; }
+    if(m.dataset.page === 'teoria'){ if(typeof window.openTeoria === 'function') window.openTeoria(); return; }
     if(m.dataset.page === 'save'){ if(window.PNSession && window.PNSession.manualSave) window.PNSession.manualSave(); return; }
     if(m.dataset.page === 'settings'){ if(typeof openSettings === 'function') openSettings('personas'); return; }
     if(m.dataset.page === 'config'){ if(typeof openSettings === 'function') openSettings('config'); return; }
@@ -1554,6 +1559,22 @@ function wireSecMenu(){
   document.addEventListener('click', e=>{ if(!menu.hidden && !menu.contains(e.target) && e.target !== btn) close(); });
 }
 wireSecMenu();
+
+// Accesos rápidos entre páginas (botones .qa-btn[data-goto]) para no depender del menú ☰.
+function goTo(target){
+  if(target==='nutri-cal'){ if(typeof window.setSection==='function') window.setSection('nutri'); if(typeof switchView==='function') switchView('cal'); return; }
+  if(target==='nutri-cat'){ if(typeof window.setSection==='function') window.setSection('nutri'); if(typeof switchView==='function') switchView('cat'); return; }
+  if(typeof window.setSection==='function') window.setSection(target);
+}
+window.goTo = goTo;
+document.addEventListener('click', e=>{ const b=e.target.closest('.qa-btn[data-goto]'); if(b){ e.preventDefault(); goTo(b.dataset.goto); } });
+
+// Alto real del header → para que las páginas a pantalla completa queden DEBAJO
+// del header (que se mantiene visible en todas las pantallas, cambiando de color).
+function updateHdrH(){ const h=document.querySelector('.hdr'); if(h) document.documentElement.style.setProperty('--hdr-h', h.offsetHeight+'px'); }
+updateHdrH();
+window.addEventListener('resize', updateHdrH);
+window.addEventListener('load', updateHdrH);
 
 // Ajustes y Guardar viven ahora en el menú ☰ (ver wireSecMenu); el botón del header se quitó.
 const _sbtn = document.getElementById('settingsBtn'); if(_sbtn) _sbtn.addEventListener('click', ()=> openSettings());

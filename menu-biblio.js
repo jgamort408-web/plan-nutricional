@@ -1,0 +1,254 @@
+/* ══════════════════════════════════════════════════════════
+   BIBLIOGRAFÍA · página con buscador, filtros e índice
+   ----------------------------------------------------------
+   Referencias en normativa (estilo Vancouver/APA abreviado) con
+   enlaces que abren en el navegador tras un AVISO DE REDIRECCIÓN.
+   Indexada por: tipo, tema y año. Buscador por texto libre.
+
+   Para añadir referencias: edita BIBLIO[] (o, en el futuro, cárgalas
+   desde un JSON / base de datos con el mismo formato).
+     {id, tipo, temas:[], year, autores, titulo, fuente, url, cita}
+   tipo ∈ TIPOS · temas ∈ TEMAS
+   ========================================================== */
+(function(){
+  'use strict';
+
+  const TIPOS = {
+    guia:    {ico:'📕', lbl:'Guía / institución'},
+    articulo:{ico:'📄', lbl:'Artículo científico'},
+    libro:   {ico:'📗', lbl:'Libro'},
+    web:     {ico:'🌐', lbl:'Web divulgativa'}
+  };
+  const TEMAS = {
+    nutricion: {ico:'🥗', lbl:'Nutrición'},
+    proteina:  {ico:'🥩', lbl:'Proteína'},
+    grasas:    {ico:'🫒', lbl:'Grasas'},
+    hidratos:  {ico:'🌾', lbl:'Hidratos'},
+    ejercicio: {ico:'🏋️', lbl:'Ejercicio'},
+    saludmental:{ico:'🧠', lbl:'Salud mental'},
+    peso:      {ico:'⚖️', lbl:'Peso y composición'}
+  };
+
+  // Referencias base (ampliables). Las citas usan formato abreviado.
+  const BIBLIO = [
+    {id:'who-diet', tipo:'guia', temas:['nutricion'], year:2020,
+     autores:'Organización Mundial de la Salud (OMS)',
+     titulo:'Alimentación sana — Datos y cifras',
+     fuente:'who.int',
+     url:'https://www.who.int/es/news-room/fact-sheets/detail/healthy-diet',
+     cita:'Organización Mundial de la Salud. Alimentación sana [Internet]. Ginebra: OMS; 2020.'},
+    {id:'efsa-dri', tipo:'guia', temas:['nutricion','proteina','grasas','hidratos'], year:2017,
+     autores:'European Food Safety Authority (EFSA)',
+     titulo:'Dietary Reference Values for nutrients — Summary report',
+     fuente:'EFSA Supporting Publications',
+     url:'https://www.efsa.europa.eu/en/efsajournal/pub/e15121',
+     cita:'EFSA. Dietary Reference Values for nutrients: Summary report. EFSA Supporting Publication; 2017.'},
+    {id:'aesan-recom', tipo:'guia', temas:['nutricion'], year:2022,
+     autores:'AESAN (Agencia Española de Seguridad Alimentaria y Nutrición)',
+     titulo:'Recomendaciones dietéticas sostenibles y actividad física para la población española',
+     fuente:'aesan.gob.es',
+     url:'https://www.aesan.gob.es/AECOSAN/web/seguridad_alimentaria/ampliacion/recomendaciones_dieteticas.htm',
+     cita:'AESAN. Recomendaciones dietéticas sostenibles y de actividad física para la población española. Madrid; 2022.'},
+    {id:'morton-prot', tipo:'articulo', temas:['proteina','ejercicio'], year:2018,
+     autores:'Morton RW, et al.',
+     titulo:'A systematic review, meta-analysis and meta-regression of the effect of protein supplementation on resistance training-induced gains in muscle mass and strength',
+     fuente:'Br J Sports Med. 2018;52(6):376-384',
+     url:'https://bjsm.bmj.com/content/52/6/376',
+     cita:'Morton RW, et al. Br J Sports Med. 2018;52(6):376-384.'},
+    {id:'who-pa', tipo:'guia', temas:['ejercicio'], year:2020,
+     autores:'Organización Mundial de la Salud (OMS)',
+     titulo:'Directrices de la OMS sobre actividad física y hábitos sedentarios',
+     fuente:'who.int',
+     url:'https://www.who.int/es/publications/i/item/9789240015128',
+     cita:'OMS. Directrices sobre actividad física y hábitos sedentarios. Ginebra; 2020.'},
+    {id:'mozaffarian-fat', tipo:'articulo', temas:['grasas'], year:2011,
+     autores:'Mozaffarian D, Wu JHY',
+     titulo:'Omega-3 fatty acids and cardiovascular disease',
+     fuente:'J Am Coll Cardiol. 2011;58(20):2047-2067',
+     url:'https://www.jacc.org/doi/10.1016/j.jacc.2011.06.063',
+     cita:'Mozaffarian D, Wu JHY. J Am Coll Cardiol. 2011;58(20):2047-67.'},
+    {id:'firth-mental', tipo:'articulo', temas:['saludmental','nutricion'], year:2019,
+     autores:'Firth J, et al.',
+     titulo:'The effects of dietary improvement on symptoms of depression and anxiety: a meta-analysis of randomized controlled trials',
+     fuente:'Psychosom Med. 2019;81(3):265-280',
+     url:'https://journals.lww.com/psychosomaticmedicine/abstract/2019/04000/the_effects_of_dietary_improvement_on_symptoms_of.4.aspx',
+     cita:'Firth J, et al. Psychosom Med. 2019;81(3):265-80.'},
+    {id:'hall-energy', tipo:'articulo', temas:['peso','hidratos'], year:2017,
+     autores:'Hall KD, Guo J',
+     titulo:'Obesity energetics: body weight regulation and the effects of diet composition',
+     fuente:'Gastroenterology. 2017;152(7):1718-1727',
+     url:'https://www.gastrojournal.org/article/S0016-5085(17)30152-X/fulltext',
+     cita:'Hall KD, Guo J. Gastroenterology. 2017;152(7):1718-27.'},
+    {id:'harvard-plate', tipo:'web', temas:['nutricion','hidratos','proteina'], year:2011,
+     autores:'Harvard T.H. Chan School of Public Health',
+     titulo:'The Healthy Eating Plate (El Plato para Comer Saludable)',
+     fuente:'nutritionsource.hsph.harvard.edu',
+     url:'https://www.hsph.harvard.edu/nutritionsource/healthy-eating-plate/',
+     cita:'Harvard T.H. Chan School of Public Health. The Healthy Eating Plate. 2011.'}
+  ];
+
+  // Orden de índice: por tema (factor principal), luego año desc.
+  const SORTS = {
+    tema:  {lbl:'Tema'},
+    year:  {lbl:'Año (recientes)'},
+    tipo:  {lbl:'Tipo'},
+    autor: {lbl:'Autor (A-Z)'}
+  };
+
+  window.BiblioData = { TIPOS, TEMAS, BIBLIO, SORTS };
+})();
+
+/* ── Página de Bibliografía (overlay a pantalla completa, estilo app) ── */
+(function(){
+  'use strict';
+  const esc = window.escHtml || (s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])));
+  function norm(s){ return (s||'').toString().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,''); }
+
+  let _state = { q:'', tipo:'all', tema:'all', sort:'tema', root:null, closed:false };
+
+  function injectCSS(){
+    if(document.getElementById('pn-bib-css')) return;
+    const s=document.createElement('style'); s.id='pn-bib-css'; s.textContent=`
+    .bib-back{position:fixed;top:var(--hdr-h,0);left:0;right:0;bottom:0;z-index:180;background:var(--cream,#F5EEE4);display:flex;justify-content:center;opacity:0;transition:opacity .2s}
+    .bib-back.show{opacity:1}
+    .bib-page{background:var(--white,#FFFDF7);width:100%;max-width:900px;height:100%;display:flex;flex-direction:column;box-shadow:0 0 60px rgba(34,22,8,.12)}
+    .bib-hd{background:var(--accent,#B5603A);color:#fff;padding:14px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0}
+    .bib-hd h3{font-family:'Playfair Display',serif;font-weight:700;font-size:1.25rem;margin:0;flex:1}
+    .bib-back-btn{border:none;background:rgba(255,255,255,.18);color:#fff;border-radius:10px;padding:8px 14px;min-height:40px;cursor:pointer;font-size:.85rem}
+    .bib-back-btn:hover{background:rgba(255,255,255,.32)}
+    .bib-tools{padding:14px 20px 6px;display:flex;flex-direction:column;gap:10px;border-bottom:1px solid rgba(44,31,14,.08)}
+    .bib-search{width:100%;border:1.5px solid rgba(44,31,14,.15);border-radius:12px;padding:11px 14px;font-size:.95rem;font-family:'Lora',serif;background:var(--white)}
+    .bib-search:focus{outline:none;border-color:var(--accent,#B5603A)}
+    .bib-frow{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+    .bib-frow .bib-lbl{font-family:'DM Mono',monospace;font-size:.6rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-50);margin-right:2px}
+    .bib-chip{border:1.5px solid rgba(44,31,14,.14);background:var(--white);border-radius:18px;padding:6px 11px;min-height:36px;cursor:pointer;font-size:.78rem;color:var(--warm)}
+    .bib-chip.on{border-color:var(--accent,#B5603A);background:rgba(181,96,58,.12);font-weight:600}
+    .bib-sort{margin-left:auto;border:1.5px solid rgba(44,31,14,.15);border-radius:10px;padding:7px 10px;min-height:38px;background:var(--white);font-size:.8rem;color:var(--warm)}
+    .bib-scroll{flex:1;overflow:auto;padding:14px 20px 28px}
+    .bib-count{font-size:.76rem;color:var(--ink-50);margin-bottom:10px}
+    .bib-group-h{font-family:'Playfair Display',serif;font-size:1rem;color:var(--accent,#B5603A);margin:16px 0 8px;padding-bottom:4px;border-bottom:1.5px solid rgba(181,96,58,.25)}
+    .bib-item{border:1px solid rgba(44,31,14,.1);border-radius:14px;padding:13px 15px;margin-bottom:10px;background:linear-gradient(160deg,rgba(255,255,255,.7),rgba(245,238,228,.4))}
+    .bib-it-top{display:flex;gap:8px;align-items:flex-start;margin-bottom:5px}
+    .bib-it-ic{font-size:1.2rem;flex:none}
+    .bib-it-t{font-family:'Lora',serif;font-weight:600;font-size:.96rem;color:var(--warm);line-height:1.3;flex:1}
+    .bib-it-meta{font-size:.78rem;color:var(--ink-50);margin-bottom:8px}
+    .bib-it-cita{font-size:.8rem;color:var(--ink-70,rgba(44,31,14,.8));font-style:italic;line-height:1.45;margin-bottom:10px;
+      border-left:3px solid rgba(181,96,58,.3);padding-left:10px}
+    .bib-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
+    .bib-tag{font-size:.66rem;background:rgba(44,31,14,.06);border-radius:8px;padding:3px 7px;color:var(--warm)}
+    .bib-open{border:1.5px solid var(--accent,#B5603A);background:var(--white);color:var(--accent,#B5603A);border-radius:10px;
+      padding:9px 14px;min-height:42px;cursor:pointer;font-size:.82rem;font-weight:600}
+    .bib-open:hover{background:var(--accent,#B5603A);color:#fff}
+    .bib-empty{text-align:center;color:var(--ink-50);padding:40px 10px}
+    `;
+    (document.head||document.documentElement).appendChild(s);
+  }
+
+  function filtered(){
+    const {TIPOS,TEMAS,BIBLIO}=window.BiblioData;
+    const q = norm(_state.q);
+    return BIBLIO.filter(r=>{
+      if(_state.tipo!=='all' && r.tipo!==_state.tipo) return false;
+      if(_state.tema!=='all' && !(r.temas||[]).includes(_state.tema)) return false;
+      if(q){ const hay = norm([r.titulo,r.autores,r.fuente,r.cita,(r.temas||[]).join(' ')].join(' ')); if(!hay.includes(q)) return false; }
+      return true;
+    });
+  }
+
+  function groupAndSort(list){
+    const {TEMAS,TIPOS}=window.BiblioData;
+    const s=_state.sort;
+    if(s==='year') return [['', list.slice().sort((a,b)=>b.year-a.year)]];
+    if(s==='autor') return [['', list.slice().sort((a,b)=>(a.autores||'').localeCompare(b.autores||'','es'))]];
+    const key = s==='tipo' ? (r=>r.tipo) : (r=> (r.temas||[])[0] || 'otros');
+    const dict = s==='tipo'?TIPOS:TEMAS;
+    const groups={};
+    list.forEach(r=>{ const k=key(r); (groups[k]=groups[k]||[]).push(r); });
+    return Object.keys(groups).sort().map(k=>{
+      const meta = dict[k] || {ico:'•', lbl:k};
+      return [`${meta.ico} ${meta.lbl}`, groups[k].sort((a,b)=>b.year-a.year)];
+    });
+  }
+
+  function itemHtml(r){
+    const {TIPOS,TEMAS}=window.BiblioData;
+    const tmeta = TIPOS[r.tipo]||{ico:'📄',lbl:r.tipo};
+    const tags = (r.temas||[]).map(t=> TEMAS[t]?`<span class="bib-tag">${TEMAS[t].ico} ${esc(TEMAS[t].lbl)}</span>`:'').join('');
+    return `<div class="bib-item">
+      <div class="bib-it-top"><span class="bib-it-ic">${tmeta.ico}</span><span class="bib-it-t">${esc(r.titulo)}</span></div>
+      <div class="bib-it-meta">${esc(r.autores)} · ${esc(r.fuente)} · ${r.year}</div>
+      <div class="bib-it-cita">${esc(r.cita)}</div>
+      <div class="bib-tags">${tags}</div>
+      ${r.url?`<button class="bib-open" data-url="${esc(r.url)}">🔗 Abrir documento</button>`:''}
+    </div>`;
+  }
+
+  function renderBody(){
+    const root=_state.root; if(!root) return;
+    const list=filtered();
+    const groups=groupAndSort(list);
+    const body = groups.map(([h,items])=>`${h?`<h3 class="bib-group-h">${h}</h3>`:''}${items.map(itemHtml).join('')}`).join('');
+    const scroll = root.querySelector('.bib-scroll');
+    scroll.innerHTML = `<div class="bib-count">${list.length} referencia${list.length===1?'':'s'}</div>${body||'<div class="bib-empty">No hay referencias que coincidan con tu búsqueda o filtros.</div>'}`;
+  }
+
+  // Aviso de redirección antes de abrir en el navegador.
+  async function openExternal(url){
+    const msg = `Vas a salir de la app y abrir en tu navegador:\n\n${url}\n\nEs una web externa que no controlamos.`;
+    const ok = (typeof pnConfirm==='function')
+      ? await pnConfirm(msg, {okText:'Abrir en el navegador'})
+      : window.confirm(msg);
+    if(ok){ try{ window.open(url, '_blank', 'noopener,noreferrer'); }catch(e){ location.href=url; } }
+  }
+
+  function open(){
+    injectCSS();
+    const {TIPOS,TEMAS,SORTS}=window.BiblioData;
+    _state.closed=false;
+    const tipoChips = [`<button class="bib-chip ${_state.tipo==='all'?'on':''}" data-tipo="all">Todos</button>`]
+      .concat(Object.entries(TIPOS).map(([k,v])=>`<button class="bib-chip ${_state.tipo===k?'on':''}" data-tipo="${k}">${v.ico} ${esc(v.lbl)}</button>`)).join('');
+    const temaChips = [`<button class="bib-chip ${_state.tema==='all'?'on':''}" data-tema="all">Todos</button>`]
+      .concat(Object.entries(TEMAS).map(([k,v])=>`<button class="bib-chip ${_state.tema===k?'on':''}" data-tema="${k}">${v.ico} ${esc(v.lbl)}</button>`)).join('');
+    const sortOpts = Object.entries(SORTS).map(([k,v])=>`<option value="${k}" ${_state.sort===k?'selected':''}>Ordenar: ${esc(v.lbl)}</option>`).join('');
+
+    const back=document.createElement('div'); back.className='bib-back';
+    back.innerHTML=`<div class="bib-page" role="region" aria-label="Bibliografía">
+      <div class="bib-hd"><button class="bib-back-btn" data-x>← Volver</button><h3>📚 Bibliografía</h3></div>
+      <div class="bib-tools">
+        <input class="bib-search" type="search" placeholder="🔎 Buscar por título, autor, fuente o tema…" value="${esc(_state.q)}">
+        <div class="bib-frow"><span class="bib-lbl">Tipo</span>${tipoChips}</div>
+        <div class="bib-frow"><span class="bib-lbl">Tema</span>${temaChips}<select class="bib-sort">${sortOpts}</select></div>
+      </div>
+      <div class="bib-scroll"></div>
+    </div>`;
+    document.body.appendChild(back);
+    _state.root=back;
+    renderBody();
+    requestAnimationFrame(()=> back.classList.add('show'));
+    try{ history.pushState({pnBiblio:1}, ''); }catch(e){}
+
+    const search=back.querySelector('.bib-search');
+    search.addEventListener('input', ()=>{ _state.q=search.value; renderBody(); });
+    back.querySelector('.bib-sort').addEventListener('change', e=>{ _state.sort=e.target.value; renderBody(); });
+    back.addEventListener('click', e=>{
+      const t=e.target.closest('[data-tipo]'); if(t){ _state.tipo=t.dataset.tipo; back.querySelectorAll('[data-tipo]').forEach(b=>b.classList.toggle('on', b===t)); renderBody(); return; }
+      const m=e.target.closest('[data-tema]'); if(m){ _state.tema=m.dataset.tema; back.querySelectorAll('[data-tema]').forEach(b=>b.classList.toggle('on', b===m)); renderBody(); return; }
+      const u=e.target.closest('[data-url]'); if(u){ openExternal(u.dataset.url); return; }
+      if(e.target.closest('[data-x]')) close();
+    });
+    document.addEventListener('keydown', onKey, true);
+    window.addEventListener('popstate', onPop);
+  }
+  function close(fromPop){
+    if(_state.closed) return; _state.closed=true;
+    const back=_state.root; if(back){ back.classList.remove('show'); setTimeout(()=>back.remove(),200); }
+    document.removeEventListener('keydown', onKey, true);
+    window.removeEventListener('popstate', onPop);
+    if(!fromPop){ try{ history.back(); }catch(e){} }
+  }
+  function onKey(e){ if(e.key==='Escape') close(); }
+  function onPop(){ close(true); }
+
+  window.openBibliografia = open;
+})();
+

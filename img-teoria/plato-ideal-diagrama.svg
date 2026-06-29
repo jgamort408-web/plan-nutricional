@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 260" font-family="Georgia, serif">
+  <rect width="420" height="260" fill="#FFFDF7"/>
+  <text x="210" y="28" text-anchor="middle" font-size="17" font-weight="bold" fill="#2C1F0E">El plato saludable</text>
+  <!-- plate -->
+  <circle cx="150" cy="150" r="92" fill="#fff" stroke="#3D2C1A" stroke-width="2"/>
+  <!-- half: vegetables (left) -->
+  <path d="M150 58 A92 92 0 0 0 150 242 Z" fill="#7A9A52"/>
+  <!-- quarter top-right: protein -->
+  <path d="M150 150 L150 58 A92 92 0 0 1 242 150 Z" fill="#B98842"/>
+  <!-- quarter bottom-right: carbs -->
+  <path d="M150 150 L242 150 A92 92 0 0 1 150 242 Z" fill="#C89328"/>
+  <line x1="150" y1="58" x2="150" y2="242" stroke="#fff" stroke-width="2"/>
+  <line x1="150" y1="150" x2="242" y2="150" stroke="#fff" stroke-width="2"/>
+  <text x="95" y="155" text-anchor="middle" font-size="12" fill="#fff" font-weight="bold">½ Verduras</text>
+  <text x="195" y="110" text-anchor="middle" font-size="10" fill="#fff" font-weight="bold">¼ Proteína</text>
+  <text x="195" y="200" text-anchor="middle" font-size="10" fill="#fff" font-weight="bold">¼ Hidratos</text>
+  <!-- legend -->
+  <g font-size="12" fill="#3D2C1A">
+    <rect x="280" y="78" width="16" height="16" fill="#7A9A52"/><text x="302" y="91">Verdura y hortalizas</text>
+    <rect x="280" y="108" width="16" height="16" fill="#B98842"/><text x="302" y="121">Proteína de calidad</text>
+    <rect x="280" y="138" width="16" height="16" fill="#C89328"/><text x="302" y="151">Hidratos de calidad</text>
+    <circle cx="288" cy="176" r="8" fill="#5A8C3A"/><text x="302" y="181">+ AOVE y fruta</text>
+  </g>
+</svg>

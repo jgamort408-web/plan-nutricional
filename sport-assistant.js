@@ -63,7 +63,9 @@
 
   function open(){
     if(typeof generateSportPlan!=='function' || typeof buildSessionByCriteria!=='function'){ return; }
-    _i = 0; _A = {disc:'gimnasio', days:[0,2,4], measure:'time', amount:45, weeks:8, daySport:{}};
+    // Defaults COMPLETOS: el usuario puede pulsar "⚡ Valores por defecto" en cualquier
+    // paso y generar sin rellenar nada (objetivo "estar en forma" 3 días/sem, 45 min, 8 sem).
+    _i = 0; _A = {objetivo:'forma', disc:'gimnasio', days:[0,2,4], measure:'time', amount:45, weeks:8, daySport:{}};
     if(!_root){ _root = document.createElement('div'); _root.id='sportAsst'; _root.className='masst'; document.body.appendChild(_root); _root.addEventListener('click', onClick); }
     document.body.classList.add('no-scroll'); _first = true; render();
   }
@@ -139,6 +141,7 @@
           <span class="masst-count">${isReview?'Listo para generar':(st.type==='multi'?'Elige uno o varios':'Elige una opción')}</span>
           <div class="masst-actions">
             ${_i>0 ? `<button class="masst-btn ghost" data-nav="back">← Atrás</button>` : ''}
+            ${!isReview ? `<button class="masst-btn ghost" data-nav="quickdefault" title="Salta al resumen con los valores por defecto">⚡ Por defecto</button>` : ''}
             ${isReview ? `<button class="masst-btn primary" data-nav="generate">🧭 Generar plan</button>`
                        : (showNext ? `<button class="masst-btn primary" data-nav="next">Siguiente →</button>` : `<button class="masst-btn ghost" data-nav="next">Siguiente →</button>`)}
           </div>
@@ -160,6 +163,7 @@
     if(nav){
       const a=nav.dataset.nav;
       if(a==='back'){ if(_i>0){ _i--; render(); } return; }
+      if(a==='quickdefault'){ _i = steps().length-1; render(); return; }   // salta al resumen con defaults
       if(a==='next'){
         const st=steps()[_i];
         if(st.key==='days' && !(_A.days||[]).length){ return; }   // exige al menos un día

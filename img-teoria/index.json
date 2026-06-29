@@ -1,0 +1,30 @@
+{
+  "_comment": "Índice de imágenes ilustrativas de la sección Teoría. Cada entrada relaciona un archivo con los artículos donde aparece y sus etiquetas, para poder buscar/insertar imágenes por tema. Añade aquí cada nuevo diagrama (.svg/.png).",
+  "version": 1,
+  "images": [
+    {
+      "name": "plato-saludable",
+      "file": "plato-saludable.svg",
+      "titulo": "Comer comida real (grupos de alimentos)",
+      "tipo": "ilustracion",
+      "tags": ["fundamentos", "alimentos", "comida real"],
+      "articulos": ["que-es-comer-bien"]
+    },
+    {
+      "name": "plato-ideal-diagrama",
+      "file": "plato-ideal-diagrama.svg",
+      "titulo": "El plato saludable (½ verdura · ¼ proteína · ¼ hidratos)",
+      "tipo": "diagrama",
+      "tags": ["practica", "plato", "raciones"],
+      "articulos": ["plato-ideal"]
+    },
+    {
+      "name": "balance-energetico",
+      "file": "balance-energetico.svg",
+      "titulo": "Balance energético (entrada vs. gasto)",
+      "tipo": "diagrama-flujo",
+      "tags": ["energia", "peso", "calorias"],
+      "articulos": ["energia-balance"]
+    }
+  ]
+}

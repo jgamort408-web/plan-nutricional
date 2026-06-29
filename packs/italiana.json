@@ -1,0 +1,99 @@
+{
+  "kind": "recipe-pack",
+  "cuisine": { "id": "ita", "ico": "🇮🇹", "lbl": "Comida italiana" },
+  "dishes": {
+    "ITA_C1": {
+      "cat": "com",
+      "short": "Pasta al pesto y pollo",
+      "nom": "Pasta integral al pesto con pollo y tomate cherry",
+      "icon": "🍝",
+      "t": "20 min",
+      "eq": "Olla · Sartén",
+      "tags": [],
+      "tipo": "completa",
+      "diet": ["cn"],
+      "food": ["apq", "cb", "v"],
+      "desc": "Pasta integral con pesto de albahaca, pechuga de pollo salteada y tomate cherry. Un plato italiano equilibrado y saciante.",
+      "kcal": [710, 455],
+      "mac": { "p": [48, 31], "f": [24, 15], "c": [72, 46] },
+      "ing": [
+        { "n": "Pasta integral (cruda)", "A": "90g", "B": "60g" },
+        { "n": "Pechuga de pollo", "A": "160g", "B": "110g" },
+        { "n": "Pesto de albahaca", "A": "25g", "B": "18g" },
+        { "n": "Tomate cherry", "A": "120g", "B": "90g" },
+        { "n": "Parmesano rallado", "A": "15g", "B": "10g" },
+        { "n": "AOVE", "A": "10g", "B": "7g" }
+      ],
+      "nota": "Cuece la pasta al dente. Saltea el pollo a dados. Mezcla con pesto, tomate partido y parmesano fuera del fuego."
+    },
+    "ITA_C2": {
+      "cat": "com",
+      "short": "Minestrone con alubias",
+      "nom": "Minestrone de verduras y alubias blancas",
+      "icon": "🥣",
+      "t": "30 min",
+      "eq": "Olla",
+      "tags": [],
+      "tipo": null,
+      "diet": ["vg", "vt", "sg"],
+      "food": ["leg", "v", "apq"],
+      "desc": "Sopa italiana de verdura de temporada con alubias blancas y un toque de pasta. Reconfortante y rica en fibra.",
+      "kcal": [620, 400],
+      "mac": { "p": [28, 18], "f": [18, 12], "c": [82, 53] },
+      "ing": [
+        { "n": "Alubias blancas cocidas", "A": "200g", "B": "130g" },
+        { "n": "Verdura variada (calabacín, zanahoria, apio)", "A": "300g", "B": "220g" },
+        { "n": "Tomate triturado", "A": "120g", "B": "90g" },
+        { "n": "Pasta corta integral", "A": "40g", "B": "25g" },
+        { "n": "AOVE", "A": "15g", "B": "10g" }
+      ],
+      "nota": "Sofríe la verdura, añade tomate y caldo, cuece 20 min. Incorpora alubias y pasta al final."
+    },
+    "ITA_N1": {
+      "cat": "cen",
+      "short": "Caprese de burrata",
+      "nom": "Ensalada caprese de burrata con tomate y albahaca",
+      "icon": "🍅",
+      "t": "10 min",
+      "eq": "Sin cocción",
+      "tags": [],
+      "tipo": "ligera",
+      "diet": ["vt", "sg"],
+      "food": ["qs", "v"],
+      "desc": "Burrata cremosa sobre tomate maduro, albahaca fresca y un hilo de AOVE. Cena ligera y mediterránea.",
+      "kcal": [480, 305],
+      "mac": { "p": [26, 17], "f": [34, 22], "c": [18, 12] },
+      "ing": [
+        { "n": "Burrata", "A": "125g", "B": "80g" },
+        { "n": "Tomate maduro", "A": "200g", "B": "150g" },
+        { "n": "Albahaca fresca", "A": "al gusto", "B": "al gusto" },
+        { "n": "AOVE", "A": "12g", "B": "8g" },
+        { "n": "Pan integral", "A": "40g", "B": "30g" }
+      ],
+      "nota": "Corta el tomate y la burrata. Alterna en el plato con albahaca, aliña con AOVE y sal en escamas."
+    },
+    "ITA_D1": {
+      "cat": "des",
+      "short": "Ricotta y frutos rojos",
+      "nom": "Tostada de ricotta con frutos rojos y miel",
+      "icon": "🫐",
+      "t": "5 min",
+      "eq": "Tostadora",
+      "tags": [],
+      "tipo": null,
+      "diet": ["vt"],
+      "food": ["qs", "fr"],
+      "desc": "Pan integral con ricotta batida, frutos rojos y un toque de miel. Desayuno italiano dulce pero equilibrado.",
+      "kcal": [500, 320],
+      "mac": { "p": [28, 18], "f": [16, 10], "c": [62, 40] },
+      "ing": [
+        { "n": "Pan integral", "A": "80g", "B": "50g" },
+        { "n": "Ricotta", "A": "120g", "B": "80g" },
+        { "n": "Frutos rojos", "A": "120g", "B": "90g" },
+        { "n": "Miel", "A": "10g", "B": "7g" },
+        { "n": "Fruta de temporada", "A": "150g", "B": "150g" }
+      ],
+      "nota": "Tuesta el pan, extiende la ricotta, corona con frutos rojos y un hilo de miel."
+    }
+  }
+}
