@@ -255,6 +255,7 @@
     .bib-filterbtn.has{border-color:var(--accent,#B5603A);background:rgba(181,96,58,.08)}
     .bib-fbadge{background:var(--accent,#B5603A);color:#fff;border-radius:10px;font-size:.66rem;font-weight:700;min-width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;padding:0 4px}
     .bib-filters{display:flex;flex-direction:column;gap:10px;padding-top:4px}
+    .bib-filters[hidden]{display:none}
     .bib-search{width:100%;border:1.5px solid rgba(44,31,14,.15);border-radius:12px;padding:11px 14px;font-size:.95rem;font-family:'Lora',serif;background:var(--white)}
     .bib-search:focus{outline:none;border-color:var(--accent,#B5603A)}
     .bib-frow{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
@@ -265,7 +266,8 @@
     .bib-scroll{flex:1;overflow:auto;padding:14px 20px 28px}
     .bib-count{font-size:.76rem;color:var(--ink-50);margin-bottom:10px}
     .bib-group-h{font-family:'Playfair Display',serif;font-size:1rem;color:var(--accent,#B5603A);margin:16px 0 8px;padding-bottom:4px;border-bottom:1.5px solid rgba(181,96,58,.25)}
-    .bib-item{border:1px solid rgba(44,31,14,.1);border-radius:14px;padding:13px 15px;margin-bottom:10px;background:linear-gradient(160deg,rgba(255,255,255,.7),rgba(245,238,228,.4))}
+    .bib-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin-bottom:6px}
+    .bib-item{border:1px solid rgba(44,31,14,.1);border-radius:14px;padding:13px 15px;background:linear-gradient(160deg,rgba(255,255,255,.7),rgba(245,238,228,.4));display:flex;flex-direction:column}
     .bib-it-top{display:flex;gap:8px;align-items:flex-start;margin-bottom:5px}
     .bib-it-ic{font-size:1.2rem;flex:none}
     .bib-it-t{font-family:'Lora',serif;font-weight:600;font-size:.96rem;color:var(--warm);line-height:1.3;flex:1}
@@ -275,7 +277,7 @@
     .bib-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
     .bib-tag{font-size:.66rem;background:rgba(44,31,14,.06);border-radius:8px;padding:3px 7px;color:var(--warm)}
     .bib-open{border:1.5px solid var(--accent,#B5603A);background:var(--white);color:var(--accent,#B5603A);border-radius:10px;
-      padding:9px 14px;min-height:42px;cursor:pointer;font-size:.82rem;font-weight:600}
+      padding:9px 14px;min-height:42px;cursor:pointer;font-size:.82rem;font-weight:600;align-self:flex-start;margin-top:auto}
     .bib-open:hover{background:var(--accent,#B5603A);color:#fff}
     .bib-empty{text-align:center;color:var(--ink-50);padding:40px 10px}
     `;
@@ -325,7 +327,7 @@
     const root=_state.root; if(!root) return;
     const list=filtered();
     const groups=groupAndSort(list);
-    const body = groups.map(([h,items])=>`${h?`<h3 class="bib-group-h">${h}</h3>`:''}${items.map(itemHtml).join('')}`).join('');
+    const body = groups.map(([h,items])=>`${h?`<h3 class="bib-group-h">${h}</h3>`:''}<div class="bib-grid">${items.map(itemHtml).join('')}</div>`).join('');
     const scroll = root.querySelector('.bib-scroll');
     scroll.innerHTML = `<div class="bib-count">${list.length} referencia${list.length===1?'':'s'}</div>${body||'<div class="bib-empty">No hay referencias que coincidan con tu búsqueda o filtros.</div>'}`;
   }

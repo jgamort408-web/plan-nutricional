@@ -29,6 +29,7 @@ function closeForm(fromPop){
     bg.classList.remove('users-mode');
     document.body.classList.remove('page-users');
     if(!document.querySelector('.app-page')) document.body.classList.remove('app-page-open');
+    try{ if(window.AppPage) AppPage.restoreSubtitle(); }catch(e){}
     if(_settingsPop){ window.removeEventListener('popstate', _settingsPop); _settingsPop=null; if(!fromPop){ try{ history.back(); }catch(e){} } }
     _syncHdrH();
   }
@@ -48,11 +49,12 @@ document.addEventListener('keydown', e=>{
 ══════════════════════════════════════════════════════════ */
 // Chrome común (reutiliza el modo página de #formBg). Color de cabecera propio
 // vía body.page-users (teal) para distinguir estas páginas de las secciones.
-function _showSettingsPage(){
+function _showSettingsPage(subtitle){
   try{ if(window.AppPage && AppPage.current) AppPage.close(true); }catch(e){}
   const bg = formBg();
   bg.classList.add('users-mode','show');
   document.body.classList.add('no-scroll','app-page-open','page-users');
+  try{ if(window.AppPage) AppPage.setSubtitle(subtitle||'Tu cuenta'); }catch(e){}
   formBody().scrollTop = 0;
   const fb = formBody().querySelector('.form-body'); if(fb) fb.scrollTop = 0;
   _syncHdrH();
@@ -72,7 +74,7 @@ function openUsuarios(){
       <section class="us-sec"><h3 class="us-h">🥫 Mis alimentos</h3>${renderFoodsManager()}</section>
     </div>`;
   wirePersonasForm(); wireRecipesList(); wireFoodsManager();
-  _showSettingsPage();
+  _showSettingsPage('Tu cuenta');
 }
 
 function openConfig(){
@@ -94,7 +96,7 @@ function openConfig(){
     const m=document.getElementById('cfgSaveMsg'); if(m){ m.className='data-msg ok'; m.textContent='✓ Progreso guardado en este dispositivo.'; setTimeout(()=>{ if(m) m.textContent=''; }, 2800); }
     if(typeof pnToast==='function') pnToast('Progreso guardado');
   });
-  _showSettingsPage();
+  _showSettingsPage('Datos y ajustes');
 }
 // Compatibilidad: openSettings(tab) enruta a la página correspondiente.
 function openSettings(tab){ if(tab==='config' || tab==='datos') openConfig(); else openUsuarios(); }

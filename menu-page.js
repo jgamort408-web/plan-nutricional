@@ -16,6 +16,20 @@
   const GROUPS = { info: ['reco','measures','teoria','biblio','infolegal','descargo'] };
   const OPENERS = {};        // key → función que abre esa página
   let _cur = null;           // página actual {el, key, group, close}
+  let _savedSub = null;      // subtítulo del logo previo a abrir una página
+
+  // Subtítulo del logo (#logoSub) contextual mientras hay una página abierta.
+  // Guarda el original la PRIMERA vez (no al navegar entre páginas del grupo).
+  function setSubtitle(text){
+    const el=document.getElementById('logoSub'); if(!el) return;
+    if(_savedSub===null) _savedSub=el.textContent;
+    if(text!=null) el.textContent=text;
+  }
+  function restoreSubtitle(){
+    const el=document.getElementById('logoSub');
+    if(el && _savedSub!==null) el.textContent=_savedSub;
+    _savedSub=null;
+  }
 
   function injectCSS(){
     if(document.getElementById('app-page-css')) return;
@@ -75,6 +89,7 @@
     }
     document.body.classList.remove('page-info');
     clearHeaderAction();
+    restoreSubtitle();
     syncHdrH();
     if(!silent){ try{ history.back(); }catch(e){} }
   }
@@ -100,6 +115,7 @@
     document.body.classList.add('app-page-open');
     // Color de cabecera propio de las páginas de info (ciruela), distinto de las secciones.
     if(opts.group==='info' || opts.bodyClass) document.body.classList.add(opts.bodyClass || 'page-info');
+    setSubtitle(opts.subtitle!=null ? opts.subtitle : (opts.group==='info' ? 'Guía y referencias' : null));
     syncHdrH();
     const bodyEl = back.querySelector('.app-page-body');
     try{ if(opts.render) opts.render(bodyEl, back); }catch(e){ console.error('AppPage render', e); }
@@ -181,6 +197,7 @@
   })();
 
   window.AppPage = { open, close, register, GROUPS, setHeaderAction, clearHeaderAction,
+    setSubtitle, restoreSubtitle,
     get current(){ return _cur; },
     consumeDir(){ const d=_navDir; _navDir=null; return d; } };
 })();
