@@ -66,7 +66,13 @@
     // Defaults COMPLETOS: el usuario puede pulsar "⚡ Valores por defecto" en cualquier
     // paso y generar sin rellenar nada (objetivo "estar en forma" 3 días/sem, 45 min, 8 sem).
     _i = 0; _A = {objetivo:'forma', disc:'gimnasio', days:[0,2,4], measure:'time', amount:45, weeks:8, daySport:{}};
-    if(!_root){ _root = document.createElement('div'); _root.id='sportAsst'; _root.className='masst'; document.body.appendChild(_root); _root.addEventListener('click', onClick); }
+    if(!_root){ _root = document.createElement('div'); _root.id='sportAsst'; _root.className='masst'; document.body.appendChild(_root); _root.addEventListener('click', onClick);
+      // Swipe móvil: izquierda = siguiente, derecha = atrás (reutiliza los botones de navegación).
+      if(typeof pnSwipe==='function') pnSwipe(_root,
+        ()=>{ const b=_root.querySelector('[data-nav="next"]'); if(b) b.click(); },
+        ()=>{ const b=_root.querySelector('[data-nav="back"]'); if(b) b.click(); },
+        { guard:(t)=> !!(t.closest && t.closest('select, .masst-pd-sel')) });
+    }
     document.body.classList.add('no-scroll'); _first = true; render();
   }
   function close(){ if(_root) _root.classList.remove('show'); document.body.classList.remove('no-scroll'); }

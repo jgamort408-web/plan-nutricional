@@ -1551,8 +1551,8 @@ function wireSecMenu(){
     if(m.dataset.page === 'biblio'){ if(typeof window.openBibliografia === 'function') window.openBibliografia(); return; }
     if(m.dataset.page === 'teoria'){ if(typeof window.openTeoria === 'function') window.openTeoria(); return; }
     if(m.dataset.page === 'save'){ if(window.PNSession && window.PNSession.manualSave) window.PNSession.manualSave(); return; }
-    if(m.dataset.page === 'settings'){ if(typeof openSettings === 'function') openSettings('personas'); return; }
-    if(m.dataset.page === 'config'){ if(typeof openSettings === 'function') openSettings('config'); return; }
+    if(m.dataset.page === 'settings'){ if(typeof window.openUsuarios === 'function') window.openUsuarios(); return; }
+    if(m.dataset.page === 'config'){ if(typeof window.openConfig === 'function') window.openConfig(); return; }
     if(typeof window.setSection === 'function') window.setSection(m.dataset.sec);
     else { const sb = document.querySelector('.sec-btn[data-sec="'+m.dataset.sec+'"]'); if(sb) sb.click(); }
   }));

@@ -46,6 +46,10 @@ body.sec-nutri{--accent:var(--terra);--accent-l:var(--terra-l);--hdr-bg:#8E441F}
 body.sec-sport{--accent:var(--sport);--accent-l:var(--sport-l);--hdr-bg:#456A2C}
 body.sec-week{--accent:var(--gold);--accent-l:var(--gold-l);--hdr-bg:#9A6E15}
 body.sec-mente,body.mente-mode{--accent:var(--mente);--accent-l:var(--mente-l);--hdr-bg:#2C547A}
+/* Páginas especiales: color de cabecera PROPIO para identificarlas de un vistazo
+   (distinto de las 4 secciones). Mientras están abiertas cubren toda la pantalla. */
+body.page-info{--accent:#7E63A0;--accent-l:#9D86B8;--hdr-bg:#574071}   /* info · legal · teoría · biblio · medidas · recomendaciones → ciruela */
+body.page-users{--accent:#3F8F8A;--accent-l:#62AEA8;--hdr-bg:#246460}  /* usuarios · configuración → petróleo */
 *{box-sizing:border-box;margin:0;padding:0}
 /* Barras de scroll con el acento de la sección activa (estilo común) */
 *{scrollbar-width:thin;scrollbar-color:var(--accent,#B5603A) transparent}
@@ -75,7 +79,7 @@ button{font-family:inherit}
 
 .hdr{position:sticky;top:0;z-index:200;background:var(--hdr-bg);color:var(--hdr-ink);box-shadow:0 6px 28px rgba(0,0,0,.32);transition:background .3s ease}
 .hdr-top{display:flex;align-items:center;gap:14px;padding:11px 18px 9px;max-width:1280px;margin:0 auto}
-.logo{font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:700;color:var(--cream);letter-spacing:-.02em;line-height:1.1;flex-shrink:0}
+.logo{font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:700;color:var(--cream);letter-spacing:-.02em;line-height:1.1;flex:1 1 auto;min-width:0}
 .logo em{color:var(--accent-l);font-style:normal;transition:color .25s}
 .logo small{display:block;font-family:'DM Mono',monospace;font-size:.55rem;color:rgba(255,255,255,.42);letter-spacing:.1em;text-transform:uppercase;font-weight:400;margin-top:1px}
 
@@ -125,11 +129,24 @@ body.sec-sport.spv-sess .hdr-gen{display:flex}
 
 /* form modal */
 .modal-form{max-width:560px}
-/* Usuarios en "modo página": panel ancho y alto, sensación de pantalla propia */
-#formBg.users-mode .modal-form{max-width:980px;width:96vw;height:92vh;max-height:92vh;display:flex;flex-direction:column}
+/* Usuarios/Configuración como PÁGINA real: ocupa el área bajo el header (que
+   se mantiene mostrando solo Ayuda), sin fondo modal ni botón de cierre interno. */
+#formBg.users-mode{position:fixed;inset:auto;top:var(--hdr-h,0);left:0;right:0;bottom:0;
+  background:var(--cream,#F5EEE4);backdrop-filter:none;-webkit-backdrop-filter:none;
+  display:block;padding:0;z-index:150;animation:none}
+#formBg.users-mode .modal-form{max-width:900px;width:100%;height:100%;max-height:none;margin:0 auto;
+  border-radius:0;box-shadow:0 0 60px rgba(34,22,8,.10);border-top:4px solid var(--accent,#B5603A);
+  display:flex;flex-direction:column;animation:none}
+#formBg.users-mode .m-close{display:none}
+#formBg.users-mode #formBody{flex:1;min-height:0;display:flex;flex-direction:column}
 #formBg.users-mode .form-body{flex:1;overflow:auto}
-#formBg.users-mode .form-tabs{flex-wrap:wrap}
-@media(min-width:1024px){ #formBg.users-mode .modal-form{height:88vh} }
+/* Secciones apiladas (en vertical, sin tabs) de Usuarios y Configuración */
+.us-sec{margin:0 0 24px;padding-bottom:20px;border-bottom:1px solid rgba(44,31,14,.1)}
+.us-sec:last-child{border-bottom:none;margin-bottom:0}
+.us-h{font-family:'Playfair Display',serif;font-size:1.18rem;color:var(--accent,#B5603A);margin:2px 0 14px;
+  padding-bottom:8px;border-bottom:2px solid color-mix(in srgb, var(--accent,#B5603A) 22%, transparent)}
+#formBg.users-mode .form-tabs{flex-wrap:wrap;position:sticky;top:0;background:var(--white,#FFFDF7);z-index:3;padding-top:6px}
+@media(max-width:760px){ #formBg.users-mode .modal-form{border-top-width:3px} }
 .form-hd{padding:22px 22px 6px}
 .form-hd h2{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;line-height:1.2;text-wrap:balance}
 .form-hd .form-sub{font-family:'DM Mono',monospace;font-size:.65rem;color:var(--ink-50);letter-spacing:.08em;text-transform:uppercase;margin-top:6px;display:block}
@@ -1497,12 +1514,11 @@ main[data-vm="small"] .dish.add-card{min-height:62px;flex-direction:row}
 .emoji-field{position:relative}
 .emoji-btn{display:flex;align-items:center;gap:8px;width:100%;border:1.5px solid rgba(44,31,14,.15);background:var(--white);border-radius:var(--r-sm);padding:9px 12px;cursor:pointer;font-size:1.3rem;line-height:1}
 .emoji-btn .emoji-caret{margin-left:auto;font-size:.7rem;color:var(--ink-50)}
-.emoji-pop{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--white);border:1.5px solid rgba(44,31,14,.14);border-radius:var(--r-sm);box-shadow:0 12px 32px rgba(44,31,14,.22);z-index:40;padding:8px;display:none;grid-template-columns:repeat(10,1fr);gap:2px;max-height:210px;overflow-y:auto}
+.emoji-pop{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--white);border:1.5px solid rgba(44,31,14,.14);border-radius:var(--r-sm);box-shadow:0 12px 32px rgba(44,31,14,.22);z-index:40;padding:8px;display:none;grid-template-columns:repeat(auto-fill,minmax(42px,1fr));gap:4px;max-height:230px;overflow-y:auto}
 .emoji-pop.show{display:grid}
-.emoji-opt{border:none;background:transparent;font-size:1.15rem;line-height:1;padding:5px 0;border-radius:6px;cursor:pointer;transition:.12s}
+.emoji-opt{border:none;background:transparent;font-size:1.4rem;line-height:1;min-height:42px;display:flex;align-items:center;justify-content:center;border-radius:8px;cursor:pointer;transition:.12s}
 .emoji-opt:hover{background:var(--cream)}
 .emoji-opt.on{background:var(--gold-l);box-shadow:inset 0 0 0 1.5px var(--gold)}
-@media(max-width:480px){ .emoji-pop{grid-template-columns:repeat(8,1fr)} }
 .btab{border:none;background:transparent;color:var(--ink-50);font-family:'Lora',serif;font-size:.9rem;padding:9px 14px;cursor:pointer;border-bottom:2px solid transparent;transition:.18s}
 .btab.on{color:var(--terra);border-bottom-color:var(--terra);font-weight:500}
 
@@ -2178,8 +2194,7 @@ main[data-vm="small"] .dish-incart{font-size:.5rem;padding:3px 8px}
         <button class="sec-mi" data-page="info" role="menuitem">ℹ️ Información y aviso legal</button>
         <button class="sec-mi" data-page="descargo" role="menuitem">⚖️ Descargo de responsabilidad</button>
         <div class="sec-menu-div"></div>
-        <button class="sec-mi" data-page="save" role="menuitem">💾 Guardar avance</button>
-        <button class="sec-mi" data-page="settings" role="menuitem">👥 Usuarios</button>
+        <button class="sec-mi" data-page="settings" role="menuitem">🪪 Usuarios</button>
         <button class="sec-mi" data-page="config" role="menuitem">⚙ Configuración</button>
       </div>
     </div>
@@ -2422,6 +2437,7 @@ main[data-vm="small"] .dish-incart{font-size:.5rem;padding:3px 8px}
 
 <script src="menu-ui.js"></script>
 <script src="menu-prefs.js"></script>
+<script src="menu-page.js"></script>
 <script src="menu-data.js"></script>
 <script src="menu-foods.js"></script>
 <script src="menu-comp.js"></script>

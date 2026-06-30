@@ -116,7 +116,15 @@
     .bib-hd h3{font-family:'Playfair Display',serif;font-weight:700;font-size:1.25rem;margin:0;flex:1}
     .bib-back-btn{border:none;background:rgba(255,255,255,.18);color:#fff;border-radius:10px;padding:8px 14px;min-height:40px;cursor:pointer;font-size:.85rem}
     .bib-back-btn:hover{background:rgba(255,255,255,.32)}
-    .bib-tools{padding:14px 20px 6px;display:flex;flex-direction:column;gap:10px;border-bottom:1px solid rgba(44,31,14,.08)}
+    .bib-tools{padding:0 0 12px;display:flex;flex-direction:column;gap:10px;border-bottom:1px solid rgba(44,31,14,.08);margin-bottom:6px;position:sticky;top:0;background:var(--white,#FFFDF7);z-index:2}
+    .app-page-body .bib-scroll{padding:0;overflow:visible}
+    .bib-searchrow{display:flex;gap:8px;align-items:center}
+    .bib-searchrow .bib-search{flex:1;min-width:0}
+    .bib-filterbtn{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;border:1.5px solid rgba(44,31,14,.16);background:var(--white);color:var(--warm);border-radius:12px;padding:10px 14px;min-height:44px;cursor:pointer;font-size:.84rem;white-space:nowrap}
+    .bib-filterbtn:hover,.bib-filterbtn[aria-expanded="true"]{border-color:var(--accent,#B5603A);color:var(--accent,#B5603A)}
+    .bib-filterbtn.has{border-color:var(--accent,#B5603A);background:rgba(181,96,58,.08)}
+    .bib-fbadge{background:var(--accent,#B5603A);color:#fff;border-radius:10px;font-size:.66rem;font-weight:700;min-width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;padding:0 4px}
+    .bib-filters{display:flex;flex-direction:column;gap:10px;padding-top:4px}
     .bib-search{width:100%;border:1.5px solid rgba(44,31,14,.15);border-radius:12px;padding:11px 14px;font-size:.95rem;font-family:'Lora',serif;background:var(--white)}
     .bib-search:focus{outline:none;border-color:var(--accent,#B5603A)}
     .bib-frow{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
@@ -211,44 +219,41 @@
       .concat(Object.entries(TEMAS).map(([k,v])=>`<button class="bib-chip ${_state.tema===k?'on':''}" data-tema="${k}">${v.ico} ${esc(v.lbl)}</button>`)).join('');
     const sortOpts = Object.entries(SORTS).map(([k,v])=>`<option value="${k}" ${_state.sort===k?'selected':''}>Ordenar: ${esc(v.lbl)}</option>`).join('');
 
-    const back=document.createElement('div'); back.className='bib-back';
-    back.innerHTML=`<div class="bib-page" role="region" aria-label="Bibliografía">
-      <div class="bib-hd"><button class="bib-back-btn" data-x>← Volver</button><h3>📚 Bibliografía</h3></div>
-      <div class="bib-tools">
-        <input class="bib-search" type="search" placeholder="🔎 Buscar por título, autor, fuente o tema…" value="${esc(_state.q)}">
-        <div class="bib-frow"><span class="bib-lbl">Tipo</span>${tipoChips}</div>
-        <div class="bib-frow"><span class="bib-lbl">Tema</span>${temaChips}<select class="bib-sort">${sortOpts}</select></div>
-      </div>
-      <div class="bib-scroll"></div>
-    </div>`;
-    document.body.appendChild(back);
-    _state.root=back;
-    renderBody();
-    requestAnimationFrame(()=> back.classList.add('show'));
-    try{ history.pushState({pnBiblio:1}, ''); }catch(e){}
-
-    const search=back.querySelector('.bib-search');
-    search.addEventListener('input', ()=>{ _state.q=search.value; renderBody(); });
-    back.querySelector('.bib-sort').addEventListener('change', e=>{ _state.sort=e.target.value; renderBody(); });
-    back.addEventListener('click', e=>{
-      const t=e.target.closest('[data-tipo]'); if(t){ _state.tipo=t.dataset.tipo; back.querySelectorAll('[data-tipo]').forEach(b=>b.classList.toggle('on', b===t)); renderBody(); return; }
-      const m=e.target.closest('[data-tema]'); if(m){ _state.tema=m.dataset.tema; back.querySelectorAll('[data-tema]').forEach(b=>b.classList.toggle('on', b===m)); renderBody(); return; }
-      const u=e.target.closest('[data-url]'); if(u){ openExternal(u.dataset.url); return; }
-      if(e.target.closest('[data-x]')) close();
+    if(typeof AppPage==='undefined') return;
+    AppPage.open({
+      key:'biblio', group:'info', title:'📚 Bibliografía',
+      render(body){
+        _state.root = body;
+        const activeN = (_state.tipo!=='all'?1:0)+(_state.tema!=='all'?1:0);
+        body.innerHTML=`
+          <div class="bib-tools">
+            <div class="bib-searchrow">
+              <input class="bib-search" type="search" placeholder="🔎 Buscar por título, autor, fuente o tema…" value="${esc(_state.q)}">
+              <button class="bib-filterbtn ${activeN?'has':''}" type="button" aria-expanded="false">⚙ Filtros y orden${activeN?`<span class="bib-fbadge">${activeN}</span>`:''}</button>
+            </div>
+            <div class="bib-filters" hidden>
+              <div class="bib-frow"><span class="bib-lbl">Tipo</span>${tipoChips}</div>
+              <div class="bib-frow"><span class="bib-lbl">Tema</span>${temaChips}</div>
+              <div class="bib-frow"><span class="bib-lbl">Orden</span><select class="bib-sort">${sortOpts}</select></div>
+            </div>
+          </div>
+          <div class="bib-scroll"></div>`;
+        renderBody();
+        const fbtn=body.querySelector('.bib-filterbtn'), fpanel=body.querySelector('.bib-filters');
+        fbtn.addEventListener('click', ()=>{ const open=fpanel.hasAttribute('hidden'); if(open) fpanel.removeAttribute('hidden'); else fpanel.setAttribute('hidden',''); fbtn.setAttribute('aria-expanded', open); });
+        const refreshBadge=()=>{ const n=(_state.tipo!=='all'?1:0)+(_state.tema!=='all'?1:0); fbtn.classList.toggle('has', !!n); let b=fbtn.querySelector('.bib-fbadge'); if(n){ if(!b){ b=document.createElement('span'); b.className='bib-fbadge'; fbtn.appendChild(b);} b.textContent=n; } else if(b){ b.remove(); } };
+        body.querySelector('.bib-search').addEventListener('input', e=>{ _state.q=e.target.value; renderBody(); });
+        body.querySelector('.bib-sort').addEventListener('change', e=>{ _state.sort=e.target.value; renderBody(); });
+        body.addEventListener('click', e=>{
+          const t=e.target.closest('[data-tipo]'); if(t){ _state.tipo=t.dataset.tipo; body.querySelectorAll('[data-tipo]').forEach(b=>b.classList.toggle('on', b===t)); refreshBadge(); renderBody(); return; }
+          const m=e.target.closest('[data-tema]'); if(m){ _state.tema=m.dataset.tema; body.querySelectorAll('[data-tema]').forEach(b=>b.classList.toggle('on', b===m)); refreshBadge(); renderBody(); return; }
+          const u=e.target.closest('[data-url]'); if(u){ openExternal(u.dataset.url); return; }
+        });
+      }
     });
-    document.addEventListener('keydown', onKey, true);
-    window.addEventListener('popstate', onPop);
   }
-  function close(fromPop){
-    if(_state.closed) return; _state.closed=true;
-    const back=_state.root; if(back){ back.classList.remove('show'); setTimeout(()=>back.remove(),200); }
-    document.removeEventListener('keydown', onKey, true);
-    window.removeEventListener('popstate', onPop);
-    if(!fromPop){ try{ history.back(); }catch(e){} }
-  }
-  function onKey(e){ if(e.key==='Escape') close(); }
-  function onPop(){ close(true); }
 
   window.openBibliografia = open;
+  if(typeof AppPage!=='undefined') AppPage.register('biblio', open);
 })();
 

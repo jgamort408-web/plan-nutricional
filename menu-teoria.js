@@ -196,50 +196,36 @@
 
   function render(){
     if(!_root) return;
-    const scroll=_root.querySelector('.teo-scroll');
-    const title=_root.querySelector('.teo-hd h3');
-    if(_view==='article' && art(_articleId)){
-      scroll.innerHTML = articleHtml(art(_articleId));
-      title.textContent = '📖 Teoría';
-    } else {
-      scroll.innerHTML = indexHtml();
-      title.textContent = '📖 Teoría de la nutrición';
+    const inArticle = _view==='article' && art(_articleId);
+    _root.innerHTML = inArticle ? articleHtml(art(_articleId)) : indexHtml();
+    const sc=_root.closest('.app-page-scroll'); if(sc) sc.scrollTop=0;
+    // Botón en la cabecera para volver SIEMPRE al índice mientras lees un artículo.
+    if(typeof AppPage!=='undefined'){
+      if(inArticle) AppPage.setHeaderAction('← Índice', goIndex);
+      else AppPage.clearHeaderAction();
     }
-    scroll.scrollTop=0;
   }
 
   function goArticle(id){ if(!art(id)) return; _view='article'; _articleId=id; render(); }
   function goIndex(){ _view='index'; _articleId=null; render(); }
 
   function open(){
-    injectCSS(); _closed=false; _view='index'; _articleId=null;
-    const back=document.createElement('div'); back.className='teo-back';
-    back.innerHTML=`<div class="teo-page" role="region" aria-label="Teoría">
-      <div class="teo-hd"><button class="teo-back-btn" data-back>← Volver</button><h3>📖 Teoría de la nutrición</h3></div>
-      <div class="teo-scroll"></div>
-    </div>`;
-    document.body.appendChild(back); _root=back; render();
-    requestAnimationFrame(()=> back.classList.add('show'));
-    try{ history.pushState({pnTeoria:1}, ''); }catch(e){}
-    back.addEventListener('click', e=>{
-      const a=e.target.closest('[data-art]'); if(a){ goArticle(a.dataset.art); return; }
-      const home=e.target.closest('[data-home]'); if(home){ goIndex(); return; }
-      const ref=e.target.closest('[data-ref]'); if(ref){ if(typeof openBibliografia==='function'){ close(); setTimeout(openBibliografia,60); } return; }
-      const bk=e.target.closest('[data-back]');
-      if(bk){ if(_view==='article'){ goIndex(); } else { close(); } return; }
+    injectCSS();
+    if(typeof AppPage==='undefined') return;
+    _view='index'; _articleId=null;
+    AppPage.open({
+      key:'teoria', group:'info', title:'📖 Teoría de la nutrición',
+      render(body){
+        _root = body; render();
+        body.addEventListener('click', e=>{
+          const a=e.target.closest('[data-art]'); if(a){ goArticle(a.dataset.art); return; }
+          const home=e.target.closest('[data-home]'); if(home){ goIndex(); return; }
+          const ref=e.target.closest('[data-ref]'); if(ref){ if(typeof openBibliografia==='function') openBibliografia(); return; }
+        });
+      }
     });
-    document.addEventListener('keydown', onKey, true);
-    window.addEventListener('popstate', onPop);
   }
-  function close(fromPop){
-    if(_closed) return; _closed=true;
-    if(_root){ _root.classList.remove('show'); const r=_root; setTimeout(()=>r.remove(),200); _root=null; }
-    document.removeEventListener('keydown', onKey, true);
-    window.removeEventListener('popstate', onPop);
-    if(!fromPop){ try{ history.back(); }catch(e){} }
-  }
-  function onKey(e){ if(e.key==='Escape'){ if(_view==='article'){ goIndex(); } else { close(); } } }
-  function onPop(){ close(true); }
 
   window.openTeoria = open;
+  if(typeof AppPage!=='undefined') AppPage.register('teoria', open);
 })();

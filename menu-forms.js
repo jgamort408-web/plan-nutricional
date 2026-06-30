@@ -17,65 +17,89 @@ function openForm(html){
   formBg().classList.add('show');
   document.body.classList.add('no-scroll');
 }
-function closeForm(){
-  formBg().classList.remove('show');
+let _settingsPop = null;
+function _syncHdrH(){ requestAnimationFrame(()=>{ const h=document.querySelector('.hdr'); if(h) document.documentElement.style.setProperty('--hdr-h', h.offsetHeight+'px'); }); }
+function closeForm(fromPop){
+  fromPop = fromPop === true;
+  const bg = formBg();
+  const wasUsers = bg.classList.contains('users-mode');
+  bg.classList.remove('show');
   document.body.classList.remove('no-scroll');
+  if(wasUsers){
+    bg.classList.remove('users-mode');
+    document.body.classList.remove('page-users');
+    if(!document.querySelector('.app-page')) document.body.classList.remove('app-page-open');
+    if(_settingsPop){ window.removeEventListener('popstate', _settingsPop); _settingsPop=null; if(!fromPop){ try{ history.back(); }catch(e){} } }
+    _syncHdrH();
+  }
 }
 
-document.getElementById('formClose').addEventListener('click', closeForm);
+document.getElementById('formClose').addEventListener('click', ()=> closeForm());
 document.getElementById('formBg').addEventListener('click', e=>{
-  if(e.target.id === 'formBg') closeForm();
+  // En modo página (Usuarios) no hay fondo que cerrar; solo cierra el modal normal.
+  if(e.target.id === 'formBg' && !formBg().classList.contains('users-mode')) closeForm();
 });
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape' && formBg().classList.contains('users-mode') && formBg().classList.contains('show')) closeForm();
+}, true);
 
 /* ══════════════════════════════════════════════════════════
-   SETTINGS · personas + my recipes (tabs)
+   PÁGINAS · Usuarios y Configuración (sin tabs, secciones en vertical)
 ══════════════════════════════════════════════════════════ */
-let _settingsTab = 'personas';
-
-function openSettings(tab){
-  if(tab) _settingsTab = tab;
-  renderSettings();
-  formBg().classList.add('users-mode');
-  formBg().classList.add('show');
-  document.body.classList.add('no-scroll');
+// Chrome común (reutiliza el modo página de #formBg). Color de cabecera propio
+// vía body.page-users (teal) para distinguir estas páginas de las secciones.
+function _showSettingsPage(){
+  try{ if(window.AppPage && AppPage.current) AppPage.close(true); }catch(e){}
+  const bg = formBg();
+  bg.classList.add('users-mode','show');
+  document.body.classList.add('no-scroll','app-page-open','page-users');
+  formBody().scrollTop = 0;
+  const fb = formBody().querySelector('.form-body'); if(fb) fb.scrollTop = 0;
+  _syncHdrH();
+  if(!_settingsPop){
+    _settingsPop = ()=> closeForm(true);
+    window.addEventListener('popstate', _settingsPop);
+    try{ history.pushState({pnSettings:1}, ''); }catch(e){}
+  }
 }
 
-function renderSettings(){
-  const html = `
-    <div class="form-hd">
-      <h2>👥 Usuarios</h2>
-      <span class="form-sub">Perfiles · recetas · alimentos · configuración · copia</span>
-    </div>
-    <div class="form-tabs">
-      <button class="ftab ${_settingsTab==='personas'?'on':''}" data-tab="personas">Personas</button>
-      <button class="ftab ${_settingsTab==='recetas'?'on':''}" data-tab="recetas">Mis recetas</button>
-      <button class="ftab ${_settingsTab==='alimentos'?'on':''}" data-tab="alimentos">Alimentos</button>
-      <button class="ftab ${_settingsTab==='config'?'on':''}" data-tab="config">Configuración</button>
-      <button class="ftab ${_settingsTab==='datos'?'on':''}" data-tab="datos">Copia de datos</button>
-    </div>
+function openUsuarios(){
+  formBody().innerHTML = `
+    <div class="form-hd"><h2>🪪 Usuarios</h2><span class="form-sub">Perfiles, preferencias y tus recetas</span></div>
     <div class="form-body">
-      ${_settingsTab==='personas' ? renderPersonasForm()
-        : _settingsTab==='alimentos' ? renderFoodsManager()
-        : _settingsTab==='config' ? renderConfigForm()
-        : _settingsTab==='datos' ? renderDataManager()
-        : renderRecipesList()}
+      <section class="us-sec"><h3 class="us-h">👤 Perfiles y preferencias</h3>${renderPersonasForm()}</section>
+      <section class="us-sec"><h3 class="us-h">📖 Mis recetas</h3>${renderRecipesList()}</section>
+      <section class="us-sec"><h3 class="us-h">🥫 Mis alimentos</h3>${renderFoodsManager()}</section>
     </div>`;
-
-  formBody().innerHTML = html;
-
-  formBody().querySelectorAll('.ftab').forEach(b=>{
-    b.addEventListener('click', ()=>{
-      _settingsTab = b.dataset.tab;
-      renderSettings();
-    });
-  });
-
-  if(_settingsTab === 'personas') wirePersonasForm();
-  else if(_settingsTab === 'alimentos') wireFoodsManager();
-  else if(_settingsTab === 'config') wireConfigForm();
-  else if(_settingsTab === 'datos') wireDataManager();
-  else wireRecipesList();
+  wirePersonasForm(); wireRecipesList(); wireFoodsManager();
+  _showSettingsPage();
 }
+
+function openConfig(){
+  formBody().innerHTML = `
+    <div class="form-hd"><h2>⚙️ Configuración</h2><span class="form-sub">Datos y opciones de la app</span></div>
+    <div class="form-body">
+      <section class="us-sec"><h3 class="us-h">💾 Tu progreso</h3>
+        <p class="cfg-sub" style="margin:-2px 0 10px">Tus datos se guardan solos cada pocos minutos. Pulsa para guardar ahora mismo.</p>
+        <button type="button" class="btn-prim" id="cfgSaveNow" style="width:100%">💾 Guardar progreso ahora</button>
+        <div id="cfgSaveMsg" class="data-msg" style="margin-top:8px"></div>
+      </section>
+      <section class="us-sec"><h3 class="us-h">⚙️ Opciones</h3>${renderConfigForm()}</section>
+      <section class="us-sec"><h3 class="us-h">🗄️ Copia de datos</h3>${renderDataManager()}</section>
+    </div>`;
+  wireConfigForm(); wireDataManager();
+  const sv=document.getElementById('cfgSaveNow');
+  if(sv) sv.addEventListener('click', ()=>{
+    try{ if(window.PNSession && PNSession.manualSave) PNSession.manualSave(); }catch(e){}
+    const m=document.getElementById('cfgSaveMsg'); if(m){ m.className='data-msg ok'; m.textContent='✓ Progreso guardado en este dispositivo.'; setTimeout(()=>{ if(m) m.textContent=''; }, 2800); }
+    if(typeof pnToast==='function') pnToast('Progreso guardado');
+  });
+  _showSettingsPage();
+}
+// Compatibilidad: openSettings(tab) enruta a la página correspondiente.
+function openSettings(tab){ if(tab==='config' || tab==='datos') openConfig(); else openUsuarios(); }
+window.openUsuarios = openUsuarios;
+window.openConfig = openConfig;
 
 /* ── CONFIGURACIÓN · preferencias de la app ─────────────────
    Pensado para hacer la app más respetuosa con cada usuario.
