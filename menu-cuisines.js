@@ -42,19 +42,21 @@
   function loadPacksLS(){ try{ const a = JSON.parse(localStorage.getItem(LS_PACKS)); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
   function savePacksLS(arr){ try{ localStorage.setItem(LS_PACKS, JSON.stringify(arr)); }catch(e){} }
 
-  function isOn(id){ return id==='base' || !_off.has(id); }
+  function isOn(id){ return !_off.has(id); }
   function setOn(id, on){
-    if(id==='base') return;                 // la base no se puede desactivar
     if(on) _off.delete(id); else _off.add(id);
     saveOff();
   }
 
-  // Oculta una receta solo si su cocina está registrada y desactivada.
-  // Recetas sin cocina (base, propias del usuario) nunca se ocultan.
+  // Oculta una receta si su cocina está desactivada. La cocina "base"
+  // (recetas que vienen con la app) también puede desactivarse, pero las
+  // recetas PROPIAS del usuario (ids "U…") nunca se ocultan por cocina.
   function dishHiddenByCuisine(id){
     const D = (typeof DISHES!=='undefined') ? DISHES[id] : null;
-    if(!D || !D.cuisine || D.cuisine==='base') return false;
-    return !isOn(D.cuisine);
+    if(!D) return false;
+    if(typeof id==='string' && id[0]==='U') return false;   // recetas del usuario: siempre visibles
+    const cui = (D.cuisine && D.cuisine!=='base') ? D.cuisine : 'base';
+    return !isOn(cui);
   }
 
   // Funde un paquete en el catálogo (sin persistir). Devuelve nº de recetas.
@@ -125,7 +127,11 @@
   // Lista para la UI: base + cocinas cargadas, con nº de recetas y estado.
   function list(){
     const counts = {};
-    if(typeof DISHES!=='undefined') Object.values(DISHES).forEach(d=>{ const k=d.cuisine||'base'; counts[k]=(counts[k]||0)+1; });
+    if(typeof DISHES!=='undefined') Object.entries(DISHES).forEach(([id,d])=>{
+      if(typeof id==='string' && id[0]==='U') return;      // recetas propias: no cuentan para cocinas
+      const k = (d.cuisine && d.cuisine!=='base') ? d.cuisine : 'base';
+      counts[k]=(counts[k]||0)+1;
+    });
     return Object.values(_registry).map(c=> Object.assign({}, c, { count:counts[c.id]||0, on:isOn(c.id) }));
   }
 

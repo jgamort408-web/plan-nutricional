@@ -111,7 +111,7 @@ function renderCuisinesGroup(){
   if(typeof Cuisines === 'undefined') return '';
   const chips = Cuisines.list().map(c=>{
     const base = c.id==='base';
-    return `<button type="button" class="ftchip ${c.on?'on':'off'}" data-cuis="${c.id}" aria-pressed="${c.on}" ${base?'data-base="1"':''} title="${base?'La base siempre está disponible':'Activar / desactivar esta cocina'}">
+    return `<button type="button" class="ftchip ${c.on?'on':'off'}" data-cuis="${c.id}" aria-pressed="${c.on}" title="${base?'Activar / desactivar las recetas base de la app':'Activar / desactivar esta cocina'}">
         <span class="ftchip-ic">${c.ico}</span>
         <span class="ftchip-lbl">${escHtml(c.lbl)} <small style="opacity:.6">· ${c.count}</small></span>
         ${base?'':`<span class="ftchip-x" data-rm="${c.id}" title="Quitar paquete">✕</span>`}
@@ -124,7 +124,7 @@ function renderCuisinesGroup(){
   return `
     <div class="cfg-group" data-cuisines>
       <h3 class="cfg-h">Tipos de comida (cocinas)</h3>
-      <p class="cfg-sub" style="margin:-2px 0 12px">Activa o desactiva <strong>cocinas</strong>. Cada cocina es un <strong>paquete de recetas</strong> que puedes instalar (incluidos o desde un archivo <code>.json</code>) e ir ampliando con el tiempo. Las recetas de una cocina desactivada no aparecen en el catálogo ni en el asistente.</p>
+      <p class="cfg-sub" style="margin:-2px 0 12px">Activa o desactiva <strong>cocinas</strong>, incluida la <strong>base</strong> (las recetas que vienen con la app). Cada cocina es un <strong>paquete de recetas</strong> que puedes instalar (incluidos o desde un archivo <code>.json</code>) e ir ampliando con el tiempo. Las recetas de una cocina desactivada no aparecen en el catálogo ni en el asistente; tus recetas propias siguen siempre visibles.</p>
       <div class="ftchips">${chips}</div>
       ${dl ? `<div class="cfg-sub" style="margin:14px 0 6px">Paquetes disponibles para instalar:</div><div class="ftpacks">${dl}</div>` : ''}
       <div class="data-actions" style="margin-top:12px">
@@ -139,14 +139,23 @@ function wireCuisinesGroup(){
     const grp = root.querySelector('.cfg-group[data-cuisines]');
     if(grp){ const tmp = document.createElement('div'); tmp.innerHTML = renderCuisinesGroup(); grp.replaceWith(tmp.firstElementChild); wireCuisinesGroup(); }
   };
-  root.querySelectorAll('.ftchip[data-cuis]').forEach(b=> b.addEventListener('click', (e)=>{
+  root.querySelectorAll('.ftchip[data-cuis]').forEach(b=> b.addEventListener('click', async (e)=>{
     const rm = e.target.closest('[data-rm]');
     if(rm){ e.stopPropagation();
       pnConfirm(`¿Quitar la cocina y todas sus recetas?`, {danger:true, okText:'Quitar'}).then(ok=>{ if(ok){ Cuisines.removePack(rm.dataset.rm); refresh(); } });
       return;
     }
-    if(b.dataset.base) return;
-    Cuisines.setOn(b.dataset.cuis, !Cuisines.isOn(b.dataset.cuis));
+    const id = b.dataset.cuis;
+    const turningOff = Cuisines.isOn(id);
+    // Evita dejar el catálogo sin ninguna cocina activa (quedarían solo tus recetas).
+    if(turningOff){
+      const others = Cuisines.list().filter(c=> c.id!==id && c.on);
+      if(others.length===0){
+        const go = await pnConfirm('Vas a desactivar la última cocina activa. El catálogo solo mostrará tus recetas propias. ¿Continuar?', {okText:'Desactivar'});
+        if(!go) return;
+      }
+    }
+    Cuisines.setOn(id, !Cuisines.isOn(id));
     if(typeof renderAll==='function') renderAll();
     refresh();
   }));
