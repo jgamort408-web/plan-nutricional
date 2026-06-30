@@ -46,6 +46,10 @@ body.sec-nutri{--accent:var(--terra);--accent-l:var(--terra-l);--hdr-bg:#8E441F}
 body.sec-sport{--accent:var(--sport);--accent-l:var(--sport-l);--hdr-bg:#456A2C}
 body.sec-week{--accent:var(--gold);--accent-l:var(--gold-l);--hdr-bg:#9A6E15}
 body.sec-mente,body.mente-mode{--accent:var(--mente);--accent-l:var(--mente-l);--hdr-bg:#2C547A}
+/* Páginas especiales: color de cabecera PROPIO para identificarlas de un vistazo
+   (distinto de las 4 secciones). Mientras están abiertas cubren toda la pantalla. */
+body.page-info{--accent:#7E63A0;--accent-l:#9D86B8;--hdr-bg:#574071}   /* info · legal · teoría · biblio · medidas · recomendaciones → ciruela */
+body.page-users{--accent:#3F8F8A;--accent-l:#62AEA8;--hdr-bg:#246460}  /* usuarios · configuración → petróleo */
 *{box-sizing:border-box;margin:0;padding:0}
 /* Barras de scroll con el acento de la sección activa (estilo común) */
 *{scrollbar-width:thin;scrollbar-color:var(--accent,#B5603A) transparent}
@@ -75,7 +79,7 @@ button{font-family:inherit}
 
 .hdr{position:sticky;top:0;z-index:200;background:var(--hdr-bg);color:var(--hdr-ink);box-shadow:0 6px 28px rgba(0,0,0,.32);transition:background .3s ease}
 .hdr-top{display:flex;align-items:center;gap:14px;padding:11px 18px 9px;max-width:1280px;margin:0 auto}
-.logo{font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:700;color:var(--cream);letter-spacing:-.02em;line-height:1.1;flex-shrink:0}
+.logo{font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:700;color:var(--cream);letter-spacing:-.02em;line-height:1.1;flex:1 1 auto;min-width:0}
 .logo em{color:var(--accent-l);font-style:normal;transition:color .25s}
 .logo small{display:block;font-family:'DM Mono',monospace;font-size:.55rem;color:rgba(255,255,255,.42);letter-spacing:.1em;text-transform:uppercase;font-weight:400;margin-top:1px}
 
@@ -134,7 +138,13 @@ body.sec-sport.spv-sess .hdr-gen{display:flex}
   border-radius:0;box-shadow:0 0 60px rgba(34,22,8,.10);border-top:4px solid var(--accent,#B5603A);
   display:flex;flex-direction:column;animation:none}
 #formBg.users-mode .m-close{display:none}
+#formBg.users-mode #formBody{flex:1;min-height:0;display:flex;flex-direction:column}
 #formBg.users-mode .form-body{flex:1;overflow:auto}
+/* Secciones apiladas (en vertical, sin tabs) de Usuarios y Configuración */
+.us-sec{margin:0 0 24px;padding-bottom:20px;border-bottom:1px solid rgba(44,31,14,.1)}
+.us-sec:last-child{border-bottom:none;margin-bottom:0}
+.us-h{font-family:'Playfair Display',serif;font-size:1.18rem;color:var(--accent,#B5603A);margin:2px 0 14px;
+  padding-bottom:8px;border-bottom:2px solid color-mix(in srgb, var(--accent,#B5603A) 22%, transparent)}
 #formBg.users-mode .form-tabs{flex-wrap:wrap;position:sticky;top:0;background:var(--white,#FFFDF7);z-index:3;padding-top:6px}
 @media(max-width:760px){ #formBg.users-mode .modal-form{border-top-width:3px} }
 .form-hd{padding:22px 22px 6px}
@@ -2184,8 +2194,7 @@ main[data-vm="small"] .dish-incart{font-size:.5rem;padding:3px 8px}
         <button class="sec-mi" data-page="info" role="menuitem">ℹ️ Información y aviso legal</button>
         <button class="sec-mi" data-page="descargo" role="menuitem">⚖️ Descargo de responsabilidad</button>
         <div class="sec-menu-div"></div>
-        <button class="sec-mi" data-page="save" role="menuitem">💾 Guardar avance</button>
-        <button class="sec-mi" data-page="settings" role="menuitem">👥 Usuarios</button>
+        <button class="sec-mi" data-page="settings" role="menuitem">🪪 Usuarios</button>
         <button class="sec-mi" data-page="config" role="menuitem">⚙ Configuración</button>
       </div>
     </div>

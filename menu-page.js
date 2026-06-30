@@ -47,6 +47,11 @@
     body.app-page-open .catnav,
     body.app-page-open .cart-fab,
     body.app-page-open .app-tabbar{ display:none !important; }
+    /* Acción contextual en la cabecera (p. ej. "← Índice" en Teoría), a la derecha junto a Ayuda. */
+    .app-hdr-action{flex:0 0 auto;border:none;background:rgba(255,255,255,.16);color:var(--hdr-ink,#FBF7EC);
+      border-radius:18px;padding:7px 13px;min-height:36px;cursor:pointer;font-size:.82rem;
+      display:inline-flex;align-items:center;gap:6px;transition:.15s;white-space:nowrap}
+    .app-hdr-action:hover{background:rgba(255,255,255,.3)}
     `;
     (document.head||document.documentElement).appendChild(s);
   }
@@ -68,6 +73,8 @@
     if(!document.getElementById('formBg') || !document.getElementById('formBg').classList.contains('users-mode')){
       document.body.classList.remove('app-page-open');
     }
+    document.body.classList.remove('page-info');
+    clearHeaderAction();
     syncHdrH();
     if(!silent){ try{ history.back(); }catch(e){} }
   }
@@ -91,6 +98,8 @@
     </div></div>`;
     document.body.appendChild(back);
     document.body.classList.add('app-page-open');
+    // Color de cabecera propio de las páginas de info (ciruela), distinto de las secciones.
+    if(opts.group==='info' || opts.bodyClass) document.body.classList.add(opts.bodyClass || 'page-info');
     syncHdrH();
     const bodyEl = back.querySelector('.app-page-body');
     try{ if(opts.render) opts.render(bodyEl, back); }catch(e){ console.error('AppPage render', e); }
@@ -126,6 +135,19 @@
 
   function register(key, fn){ OPENERS[key]=fn; }
 
+  // Acción contextual en la cabecera de la app (p. ej. "← Índice" en Teoría).
+  // Aparece a la derecha, junto al botón de ayuda. Se limpia al cerrar la página.
+  function setHeaderAction(label, onClick){
+    clearHeaderAction();
+    const top = document.querySelector('.hdr-top'); const help = document.getElementById('helpBtn');
+    if(!top) return;
+    const b = document.createElement('button');
+    b.className = 'app-hdr-action'; b.type='button'; b.innerHTML = label;
+    b.addEventListener('click', onClick);
+    if(help) top.insertBefore(b, help); else top.appendChild(b);
+  }
+  function clearHeaderAction(){ const b=document.querySelector('.app-hdr-action'); if(b) b.remove(); }
+
   injectCSS();   // inyecta ya las reglas (incluido body.app-page-open) para que Ajustes también las use
 
   // Helper reutilizable de swipe horizontal (móvil). Ignora gestos verticales,
@@ -158,7 +180,7 @@
     function hasOverlay(){ return !!document.querySelector('.app-page, .masst.show, #sportAsst.show, .mv.show, .modal-bg.show, .drawer.show, .pn-tut-back, .ob-back'); }
   })();
 
-  window.AppPage = { open, close, register, GROUPS,
+  window.AppPage = { open, close, register, GROUPS, setHeaderAction, clearHeaderAction,
     get current(){ return _cur; },
     consumeDir(){ const d=_navDir; _navDir=null; return d; } };
 })();

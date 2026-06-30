@@ -196,8 +196,14 @@
 
   function render(){
     if(!_root) return;
-    _root.innerHTML = (_view==='article' && art(_articleId)) ? articleHtml(art(_articleId)) : indexHtml();
+    const inArticle = _view==='article' && art(_articleId);
+    _root.innerHTML = inArticle ? articleHtml(art(_articleId)) : indexHtml();
     const sc=_root.closest('.app-page-scroll'); if(sc) sc.scrollTop=0;
+    // Botón en la cabecera para volver SIEMPRE al índice mientras lees un artículo.
+    if(typeof AppPage!=='undefined'){
+      if(inArticle) AppPage.setHeaderAction('← Índice', goIndex);
+      else AppPage.clearHeaderAction();
+    }
   }
 
   function goArticle(id){ if(!art(id)) return; _view='article'; _articleId=id; render(); }
