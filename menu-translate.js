@@ -46,10 +46,17 @@
     .pn-tr-s{font-size:.84rem;color:var(--ink-50,#6b5d49);margin-bottom:14px;min-height:1.2em}
     .pn-tr-bar{height:8px;border-radius:6px;background:rgba(44,31,14,.12);overflow:hidden}
     .pn-tr-fill{height:100%;width:5%;background:var(--accent,#B5603A);border-radius:6px;transition:width .3s ease}
-    /* Oculta la barra superior y el tooltip de Google */
-    .goog-te-banner-frame,.skiptranslate{display:none!important}
-    body{top:0!important}
-    #google_translate_element{position:absolute;left:-9999px;height:0;overflow:hidden}
+    /* Oculta TODA la interfaz de Google Translate: barra superior, gadget,
+       el globo de "¿te gusta la traducción?" y el tooltip al pasar el ratón. */
+    .goog-te-banner-frame,.skiptranslate,iframe.skiptranslate,
+    .goog-te-balloon-frame,#goog-gt-tt,#goog-gt-,.goog-tooltip,.goog-tooltip:hover,
+    .jfk-bubble,.VIpgJd-yAWNEb-L7lbkb,.VIpgJd-yAWNEb-hvhgNd,.VIpgJd-ZVi9od-aZ2wEe-wOHMyf{
+      display:none!important;visibility:hidden!important}
+    /* Neutraliza el resaltado/subrayado amarillo que Google pone al texto traducido. */
+    .goog-text-highlight,font.goog-text-highlight{background:none!important;box-shadow:none!important}
+    /* Evita el desplazamiento que Google añade al <body> con su barra. */
+    body{top:0!important;position:static!important}
+    #google_translate_element{position:absolute!important;left:-9999px!important;top:auto!important;height:0!important;width:0!important;overflow:hidden!important}
     `;
     (document.head||document.documentElement).appendChild(s);
   }
@@ -111,37 +118,32 @@
   }
 
   // ── API principal ──
-  async function translateTo(lang){
+  // El cambio es INMEDIATO y fiable: fijamos la cookie googtrans y recargamos.
+  // Al cargar de nuevo, el gadget de Google detecta la cookie y traduce sin
+  // intervención (la vía del combo en caliente fallaba hasta reiniciar). Antes
+  // de recargar guardamos el progreso para no perder cambios en memoria.
+  function translateTo(lang){
+    injectCSS();
     lang = lang || ORIG;
-    // Volver al original = QUITAR traducción (no retraducir): borra cookie y recarga.
+    try{ if(window.PNSession && PNSession.manualSave) PNSession.manualSave(); }catch(e){}
     if(lang===ORIG){
       setCookie('');
-      showProgress('Quitando traducción'); setProgress(40,'Restaurando el texto original…');
-      setTimeout(()=> location.reload(), 350);
-      return;
+      showProgress('Quitando traducción'); setProgress(60,'Restaurando el texto original…');
+    }else{
+      setCookie(`/${ORIG}/${lang}`);
+      showProgress('Cambiando idioma'); setProgress(60,'Aplicando la traducción…');
     }
-    showProgress('Traduciendo la app');
-    setProgress(10,'Cargando el traductor de Google…');
-    const ok = await loadGadget();
-    if(!ok){ setProgress(100,'No se pudo cargar el traductor.'); setTimeout(hideProgress,1500);
-      if(typeof pnToast==='function') pnToast('No hay conexión con el traductor de Google.','error'); return; }
-    setProgress(45,'Aplicando el idioma…');
-    setCookie(`/${ORIG}/${lang}`);
-    const applied = await applyViaCombo(lang);
-    setProgress(80,'Traduciendo los textos…');
-    // Da tiempo a que Google reemplace los nodos.
-    setTimeout(()=>{
-      setProgress(100, applied?'¡Listo!':'Traducción aplicada.');
-      setTimeout(hideProgress, 700);
-    }, 1400);
+    setTimeout(()=>{ try{ location.reload(); }catch(e){ location.href=location.href; } }, 320);
   }
 
   // Al arrancar: si hay idioma guardado distinto del original, reaplica en silencio.
   function bootApply(){
+    injectCSS();   // oculta ya la interfaz de Google (banner, globos, tooltips)
     let lang = ORIG;
     try{ lang = (window.AppPrefs && AppPrefs.lang()) || localStorage.getItem('mnut:lang:v1') || ORIG; }catch(e){}
     if(lang && lang!==ORIG){
-      // sólo si la cookie no está ya puesta (evita doble trabajo)
+      // La cookie ya suele estar puesta (translateTo la fija antes de recargar);
+      // el gadget traduce solo al detectarla. applyViaCombo queda de refuerzo.
       if(document.cookie.indexOf(`${COOKIE}=/`)<0) setCookie(`/${ORIG}/${lang}`);
       loadGadget().then(()=> applyViaCombo(lang));
     }

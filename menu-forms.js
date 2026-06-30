@@ -230,7 +230,7 @@ function renderA11yGroup(){
         <span class="cfg-lbl">Idioma</span>
         <select class="cfg-sel" id="cfgLang">${langOpts}</select>
       </div>
-      <p class="cfg-sub" style="margin-top:6px">El cambio de idioma traduce la app con el traductor de Google y se mantiene guardado. Volver a “Español” quita la traducción.</p>
+      <p class="cfg-sub" style="margin-top:6px">El cambio de idioma traduce la app al instante con el traductor de Google y se mantiene guardado. Volver a “Español” quita la traducción.</p>
     </div>`;
 }
 function wireA11yGroup(){
