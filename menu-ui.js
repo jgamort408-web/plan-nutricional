@@ -395,6 +395,10 @@
       else if(b.dataset.act==='next'){ if(i<tut.steps.length-1){ i++; render(); } else close(); }
     });
     document.addEventListener('keydown', onKey, true);
+    // Swipe móvil: izquierda = siguiente, derecha = anterior.
+    if(typeof pnSwipe==='function') pnSwipe(back,
+      ()=>{ if(i<tut.steps.length-1){ i++; render(); } else close(); },
+      ()=>{ if(i>0){ i--; render(); } });
     render();
   }
 
@@ -508,49 +512,29 @@
     info:     { title:'ℹ️ Información y aviso legal', html:()=>INFO_HTML },
     descargo: { title:'⚖️ Descargo de responsabilidad', html:()=>DESCARGO_HTML }
   };
-  // Página legal a pantalla completa, con botón Volver e integración con el
-  // botón Atrás del navegador (pushState/popstate) → se comporta como una página.
+  // Página legal usando el shell común AppPage (sin cabecera interna ni "Atrás").
   function pnLegalPage(key){
     key = LEGAL_PAGES[key] ? key : 'info';
     injectInfoCSS();
     const page = LEGAL_PAGES[key];
-    const back=document.createElement('div'); back.className='pn-info-back';
-    back.innerHTML=`<div class="pn-info" role="region" aria-label="${page.title}">
-      <div class="pn-info-hd">
-        <button class="pn-info-back-btn" data-x aria-label="Volver">← Volver</button>
-        <h3>${page.title}</h3>
-        <span style="width:70px"></span>
-      </div>
-      <div class="pn-info-body">${page.html()}</div>
-    </div>`;
-    document.body.appendChild(back);
-    const yr=back.querySelector('.pn-info-year'); if(yr) yr.textContent=new Date().getFullYear();
-    requestAnimationFrame(()=> back.classList.add('show'));
-    let closed=false;
-    try{ history.pushState({pnLegal:key}, ''); }catch(e){}
-    function close(fromPop){
-      if(closed) return; closed=true;
-      back.classList.remove('show'); setTimeout(()=>back.remove(),200);
-      document.removeEventListener('keydown',onKey,true);
-      window.removeEventListener('popstate',onPop);
-      if(!fromPop){ try{ history.back(); }catch(e){} }
-    }
-    function onKey(e){ if(e.key==='Escape') close(); }
-    function onPop(){ close(true); }
-    // Navegación entre páginas legales (enlace al descargo)
-    back.addEventListener('click', e=>{
-      const go = e.target.closest('[data-go]');
-      if(go){ close(); setTimeout(()=> pnLegalPage(go.dataset.go), 60); return; }
-      if(e.target.closest('[data-x]')) close();
+    if(typeof AppPage==='undefined'){ return; }
+    AppPage.open({
+      key: key==='info' ? 'infolegal' : 'descargo',
+      group: 'info', title: page.title,
+      render(body){
+        body.classList.add('pn-info-body');
+        body.innerHTML = page.html();
+        const yr=body.querySelector('.pn-info-year'); if(yr) yr.textContent=new Date().getFullYear();
+        body.addEventListener('click', e=>{ const go=e.target.closest('[data-go]'); if(go) pnLegalPage(go.dataset.go); });
+      }
     });
-    document.addEventListener('keydown', onKey, true);
-    window.addEventListener('popstate', onPop);
   }
   function pnInfoLegal(){ pnLegalPage('info'); }
   function pnDescargo(){ pnLegalPage('descargo'); }
   window.pnInfoLegal = pnInfoLegal;
   window.pnDescargo  = pnDescargo;
   window.pnLegalPage = pnLegalPage;
+  if(typeof AppPage!=='undefined'){ AppPage.register('infolegal', pnInfoLegal); AppPage.register('descargo', pnDescargo); }
 
   /* Botón ❔ del header → tutorial de la sección activa.
      Además, la PRIMERA vez que se entra a una sección, se abre solo. */

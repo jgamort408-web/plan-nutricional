@@ -596,6 +596,12 @@ function injectMeasuresCSS(){
   .fm-intro{padding:0 18px 8px;font-family:'Lora',serif;font-size:.86rem;color:var(--ink-50,#6b5d49)}
   .fm-search{margin:0 18px 10px;padding:9px 14px;border-radius:22px;border:1.5px solid rgba(44,31,14,.15);background:var(--white,#fff);font-family:'Lora',serif;font-size:.92rem;color:var(--warm,#3a2c1a)}
   .fm-search:focus{outline:none;border-color:var(--gold,#c8742e);box-shadow:0 0 0 3px rgba(200,116,46,.12)}
+  /* Dentro del shell de página común: la barra de buscador + PDF y sin márgenes heredados */
+  .app-page-body .fm-intro{padding:0 0 10px}
+  .app-page-body .fm-search{margin:0;flex:1;min-width:0}
+  .fm-toolbar{display:flex;gap:8px;align-items:center;margin-bottom:14px}
+  .fm-toolbar .fm-print{flex:0 0 auto;border:1.5px solid var(--accent,#b5603a);background:var(--white,#fff);color:var(--accent,#b5603a);font-family:'DM Mono',monospace;font-size:.66rem;text-transform:uppercase;letter-spacing:.04em;font-weight:600;padding:10px 14px;border-radius:22px;cursor:pointer;min-height:42px}
+  .fm-toolbar .fm-print:hover{background:var(--accent,#b5603a);color:#fff}
   .fm-scroll{overflow-y:auto;padding:2px 18px 18px;-webkit-overflow-scrolling:touch}
   .fm-refs{display:grid;grid-template-columns:1fr;gap:6px;background:var(--white,#fff);border-radius:12px;padding:12px 14px;margin-bottom:16px;border:1px solid rgba(44,31,14,.07)}
   .fm-ref{display:flex;gap:10px;font-size:.84rem;line-height:1.4}
@@ -642,56 +648,27 @@ function openFoodMeasures(){
     </div>`;
   }).join('');
   const refsHtml = MEASURE_REFS.map(([k,v])=>`<div class="fm-ref"><b>${esc(k)}</b><span>${esc(v)}</span></div>`).join('');
-  const back=document.createElement('div'); back.className='fm-back';
-  back.innerHTML=`<div class="fm-page" role="dialog" aria-modal="true" aria-label="Medidas de alimentos">
-    <div class="fm-hd fm-no-print">
-      <h3>📏 Medidas de alimentos</h3>
-      <div class="fm-hd-actions">
-        <button class="fm-print" data-print>🖨️ PDF</button>
-        <button class="fm-x" data-x aria-label="Volver">← Volver</button>
-      </div>
-    </div>
-    <div class="fm-intro">Equivalencias aproximadas para no tener que pesar a diario. Usa el buscador o imprime esta página como PDF.</div>
-    <input class="fm-search fm-no-print" type="search" placeholder="🔎 Buscar alimento…" aria-label="Buscar alimento">
-    <div class="fm-scroll">
-      <div class="fm-refs">${refsHtml}</div>
-      ${listHtml || '<div class="fm-empty">No hay medidas registradas.</div>'}
-      <div class="fm-empty fm-noresult" style="display:none">Sin alimentos que coincidan con la búsqueda.</div>
-    </div>
-  </div>`;
-  document.body.appendChild(back);
-  requestAnimationFrame(()=> back.classList.add('show'));
-
-  const search = back.querySelector('.fm-search');
-  search.addEventListener('input', ()=>{
-    const q = _fmNorm(search.value.trim());
-    let any = false;
-    back.querySelectorAll('.fm-item').forEach(it=>{
-      const ok = !q || it.dataset.name.includes(q);
-      it.style.display = ok ? '' : 'none'; if(ok) any = true;
-    });
-    back.querySelectorAll('.fm-sec').forEach(sec=>{
-      const vis = [...sec.querySelectorAll('.fm-item')].some(it=> it.style.display !== 'none');
-      sec.style.display = vis ? '' : 'none';
-    });
-    const refsBox = back.querySelector('.fm-refs'); if(refsBox) refsBox.style.display = q ? 'none' : '';
-    const nr = back.querySelector('.fm-noresult'); if(nr) nr.style.display = (q && !any) ? '' : 'none';
+  if(typeof AppPage==='undefined') return;
+  AppPage.open({
+    key:'measures', group:'info', title:'📏 Medidas de alimentos',
+    render(body){
+      body.innerHTML=`
+        <div class="fm-intro">Equivalencias aproximadas para no tener que pesar a diario. Usa el buscador o descárgalo como PDF.</div>
+        <div class="fm-toolbar"><input class="fm-search" type="search" placeholder="🔎 Buscar alimento…" aria-label="Buscar alimento"><button class="fm-print" type="button">🖨️ PDF</button></div>
+        <div class="fm-refs">${refsHtml}</div>
+        ${listHtml || '<div class="fm-empty">No hay medidas registradas.</div>'}
+        <div class="fm-empty fm-noresult" style="display:none">Sin alimentos que coincidan con la búsqueda.</div>`;
+      const search = body.querySelector('.fm-search');
+      search.addEventListener('input', ()=>{
+        const q = _fmNorm(search.value.trim()); let any=false;
+        body.querySelectorAll('.fm-item').forEach(it=>{ const ok=!q||it.dataset.name.includes(q); it.style.display=ok?'':'none'; if(ok)any=true; });
+        body.querySelectorAll('.fm-sec').forEach(sec=>{ const vis=[...sec.querySelectorAll('.fm-item')].some(it=>it.style.display!=='none'); sec.style.display=vis?'':'none'; });
+        const refsBox=body.querySelector('.fm-refs'); if(refsBox) refsBox.style.display=q?'none':'';
+        const nr=body.querySelector('.fm-noresult'); if(nr) nr.style.display=(q&&!any)?'':'none';
+      });
+      const pr=body.querySelector('.fm-print'); if(pr) pr.addEventListener('click', ()=> printFoodMeasures());
+    }
   });
-  const pr = back.querySelector('[data-print]'); if(pr) pr.addEventListener('click', ()=> printFoodMeasures());
-  let _closed=false;
-  try{ history.pushState({pnPage:1}, ''); }catch(e){}
-  function close(fromPop){
-    if(_closed) return; _closed=true;
-    back.classList.remove('show'); setTimeout(()=> back.remove(), 200);
-    document.removeEventListener('keydown', onKey, true);
-    window.removeEventListener('popstate', onPop);
-    if(!fromPop){ try{ history.back(); }catch(e){} }
-  }
-  function onKey(e){ if(e.key==='Escape') close(); }
-  function onPop(){ close(true); }
-  back.addEventListener('click', e=>{ if(e.target.closest('[data-x]') || e.target===back) close(); });
-  document.addEventListener('keydown', onKey, true);
-  window.addEventListener('popstate', onPop);
 }
 
 /* PDF de medidas con el mismo método de la app: HTML aislado en un iframe + print */
@@ -817,71 +794,42 @@ function openNutriReco(){
   const calcHtml = RECO_CALC.map(([k,v])=>`<div class="fm-item" data-name="${esc(_fmNorm(k+' '+v))}"><span class="fm-n">${esc(k)}</span><span class="fm-m" style="white-space:normal;max-width:64%">${esc(v)}</span></div>`).join('');
   const clavesHtml = RECO_CLAVES.map(c=>`<li>${esc(c)}</li>`).join('');
 
-  const back=document.createElement('div'); back.className='fm-back';
-  back.innerHTML=`<div class="fm-page" role="dialog" aria-modal="true" aria-label="Recomendaciones nutricionales">
-    <div class="fm-hd fm-no-print">
-      <h3>🥗 Recomendaciones y menú ideal</h3>
-      <div class="fm-hd-actions">
-        <button class="fm-print" data-print>🖨️ PDF</button>
-        <button class="fm-x" data-x aria-label="Volver">← Volver</button>
-      </div>
-    </div>
-    <div class="fm-intro">Cómo construir un menú equilibrado y calcular tus calorías y macros. Usa el buscador o imprime esta página como PDF.</div>
-    <input class="fm-search fm-no-print" type="search" placeholder="🔎 Buscar (legumbre, proteína, déficit…)" aria-label="Buscar recomendación">
-    <div class="fm-scroll">
-      <div class="reco-prose">
-        <div class="fm-sec"><h4 class="fm-sec-h">🍽️ El plato ideal</h4>
-          <div class="reco-plate">
-            <div class="rp-seg rp-verd">½ Verduras y hortalizas<small>crudas + cocidas</small></div>
-            <div class="rp-col">
-              <div class="rp-seg rp-prot">¼ Proteína<small>magra, pescado, huevo, legumbre, tofu</small></div>
-              <div class="rp-seg rp-carb">¼ Hidratos de calidad<small>integral, patata, legumbre</small></div>
+  if(typeof AppPage==='undefined') return;
+  AppPage.open({
+    key:'reco', group:'info', title:'🥗 Recomendaciones y menú ideal',
+    render(body){
+      body.innerHTML=`
+        <div class="fm-intro">Cómo construir un menú equilibrado y calcular tus calorías y macros. Usa el buscador o descárgalo como PDF.</div>
+        <div class="fm-toolbar"><input class="fm-search" type="search" placeholder="🔎 Buscar (legumbre, proteína, déficit…)" aria-label="Buscar recomendación"><button class="fm-print" type="button">🖨️ PDF</button></div>
+        <div class="reco-prose">
+          <div class="fm-sec"><h4 class="fm-sec-h">🍽️ El plato ideal</h4>
+            <div class="reco-plate">
+              <div class="rp-seg rp-verd">½ Verduras y hortalizas<small>crudas + cocidas</small></div>
+              <div class="rp-col">
+                <div class="rp-seg rp-prot">¼ Proteína<small>magra, pescado, huevo, legumbre, tofu</small></div>
+                <div class="rp-seg rp-carb">¼ Hidratos de calidad<small>integral, patata, legumbre</small></div>
+              </div>
             </div>
+            <p class="reco-note">+ una porción de grasa saludable (AOVE, aguacate, frutos secos) y agua como bebida. Fruta entera de postre.</p>
           </div>
-          <p class="reco-note">+ una porción de grasa saludable (AOVE, aguacate, frutos secos) y agua como bebida. Fruta entera de postre.</p>
+          <div class="fm-sec"><h4 class="fm-sec-h">📊 Reparto de calorías del día</h4><div class="reco-bars">${barsHtml}</div></div>
         </div>
-        <div class="fm-sec"><h4 class="fm-sec-h">📊 Reparto de calorías del día</h4><div class="reco-bars">${barsHtml}</div></div>
-      </div>
-      <div class="fm-sec"><h4 class="fm-sec-h">🗓️ Cuánto comer a la semana</h4><div class="fm-items">${guideItems}</div></div>
-      <div class="fm-sec"><h4 class="fm-sec-h">🎯 Macros según objetivo</h4><div class="fm-items">${objItems}</div></div>
-      <div class="fm-sec"><h4 class="fm-sec-h">🧮 Cómo se calculan tus calorías y macros</h4><div class="fm-items">${calcHtml}</div></div>
-      <div class="reco-prose"><div class="fm-sec"><h4 class="fm-sec-h">🔑 Claves</h4><ul>${clavesHtml}</ul></div></div>
-      <div class="fm-empty fm-noresult" style="display:none">Sin recomendaciones que coincidan con la búsqueda.</div>
-    </div>
-  </div>`;
-  document.body.appendChild(back);
-  requestAnimationFrame(()=> back.classList.add('show'));
-
-  const search = back.querySelector('.fm-search');
-  search.addEventListener('input', ()=>{
-    const q = _fmNorm(search.value.trim());
-    let any = false;
-    back.querySelectorAll('.fm-item').forEach(it=>{
-      const ok = !q || it.dataset.name.includes(q);
-      it.style.display = ok ? '' : 'none'; if(ok) any = true;
-    });
-    back.querySelectorAll('.fm-sec').forEach(sec=>{
-      const items = sec.querySelectorAll('.fm-item');
-      if(items.length){ const vis=[...items].some(it=>it.style.display!=='none'); sec.style.display = vis?'':'none'; }
-    });
-    back.querySelectorAll('.reco-prose').forEach(p=> p.style.display = q ? 'none' : '');
-    const nr = back.querySelector('.fm-noresult'); if(nr) nr.style.display = (q && !any) ? '' : 'none';
+        <div class="fm-sec"><h4 class="fm-sec-h">🗓️ Cuánto comer a la semana</h4><div class="fm-items">${guideItems}</div></div>
+        <div class="fm-sec"><h4 class="fm-sec-h">🎯 Macros según objetivo</h4><div class="fm-items">${objItems}</div></div>
+        <div class="fm-sec"><h4 class="fm-sec-h">🧮 Cómo se calculan tus calorías y macros</h4><div class="fm-items">${calcHtml}</div></div>
+        <div class="reco-prose"><div class="fm-sec"><h4 class="fm-sec-h">🔑 Claves</h4><ul>${clavesHtml}</ul></div></div>
+        <div class="fm-empty fm-noresult" style="display:none">Sin recomendaciones que coincidan con la búsqueda.</div>`;
+      const search = body.querySelector('.fm-search');
+      search.addEventListener('input', ()=>{
+        const q=_fmNorm(search.value.trim()); let any=false;
+        body.querySelectorAll('.fm-item').forEach(it=>{ const ok=!q||it.dataset.name.includes(q); it.style.display=ok?'':'none'; if(ok)any=true; });
+        body.querySelectorAll('.fm-sec').forEach(sec=>{ const items=sec.querySelectorAll('.fm-item'); if(items.length){ const vis=[...items].some(it=>it.style.display!=='none'); sec.style.display=vis?'':'none'; } });
+        body.querySelectorAll('.reco-prose').forEach(p=> p.style.display=q?'none':'');
+        const nr=body.querySelector('.fm-noresult'); if(nr) nr.style.display=(q&&!any)?'':'none';
+      });
+      const pr=body.querySelector('.fm-print'); if(pr) pr.addEventListener('click', ()=> printNutriReco());
+    }
   });
-  const pr = back.querySelector('[data-print]'); if(pr) pr.addEventListener('click', ()=> printNutriReco());
-  let _closed=false;
-  try{ history.pushState({pnPage:1}, ''); }catch(e){}
-  function close(fromPop){
-    if(_closed) return; _closed=true;
-    back.classList.remove('show'); setTimeout(()=> back.remove(), 200);
-    document.removeEventListener('keydown', onKey, true);
-    window.removeEventListener('popstate', onPop);
-    if(!fromPop){ try{ history.back(); }catch(e){} }
-  }
-  function onKey(e){ if(e.key==='Escape') close(); }
-  function onPop(){ close(true); }
-  back.addEventListener('click', e=>{ if(e.target.closest('[data-x]') || e.target===back) close(); });
-  document.addEventListener('keydown', onKey, true);
-  window.addEventListener('popstate', onPop);
 }
 function printNutriReco(){
   const esc = window.escHtml || (s=>String(s));
@@ -917,3 +865,4 @@ function printNutriReco(){
   iframe.contentWindow.onload = ()=>{ setTimeout(()=>{ try{ iframe.contentWindow.focus(); iframe.contentWindow.print(); }catch(e){ alert('No se pudo imprimir: '+e.message);} setTimeout(()=>iframe.remove(),1000); },200); };
 }
 window.openNutriReco = openNutriReco;
+if(typeof AppPage!=='undefined'){ AppPage.register('measures', openFoodMeasures); AppPage.register('reco', openNutriReco); }

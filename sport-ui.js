@@ -14,6 +14,10 @@ let sportView = lsGet('sport:view', 'ex');
 const SPORT_VIEWS = ['ex','sess','scal'];
 
 function setSection(sec){
+  // Cambiar de sección es navegar: cierra cualquier página de contenido o de Usuarios
+  // que estuviera abierta (no deben quedar superpuestas sobre la sección).
+  try{ if(window.AppPage && AppPage.current) AppPage.close(true); }catch(e){}
+  try{ var _bg=document.getElementById('formBg'); if(_bg && _bg.classList.contains('users-mode') && _bg.classList.contains('show') && typeof closeForm==='function') closeForm(true); }catch(e){}
   sportMode = (sec === 'sport');
   const weekMode = (sec === 'week');
   const menteMode = (sec === 'mente');

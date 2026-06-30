@@ -76,6 +76,11 @@
       _root.className = 'masst';
       document.body.appendChild(_root);
       _root.addEventListener('click', onClick);
+      // Swipe móvil: izquierda = siguiente paso, derecha = paso anterior.
+      if(typeof pnSwipe==='function') pnSwipe(_root,
+        ()=>{ if(_i<_steps.length-1) advance(false); },
+        ()=>{ if(_i>0){ _i--; render(); } },
+        { guard:(t)=> !!(t.closest && t.closest('.masst-pill')) });
     }
     document.body.classList.add('no-scroll');
     _first = true;

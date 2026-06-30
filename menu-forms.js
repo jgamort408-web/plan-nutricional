@@ -17,15 +17,30 @@ function openForm(html){
   formBg().classList.add('show');
   document.body.classList.add('no-scroll');
 }
-function closeForm(){
-  formBg().classList.remove('show');
+let _settingsPop = null;
+function _syncHdrH(){ requestAnimationFrame(()=>{ const h=document.querySelector('.hdr'); if(h) document.documentElement.style.setProperty('--hdr-h', h.offsetHeight+'px'); }); }
+function closeForm(fromPop){
+  fromPop = fromPop === true;
+  const bg = formBg();
+  const wasUsers = bg.classList.contains('users-mode');
+  bg.classList.remove('show');
   document.body.classList.remove('no-scroll');
+  if(wasUsers){
+    bg.classList.remove('users-mode');
+    if(!document.querySelector('.app-page')) document.body.classList.remove('app-page-open');
+    if(_settingsPop){ window.removeEventListener('popstate', _settingsPop); _settingsPop=null; if(!fromPop){ try{ history.back(); }catch(e){} } }
+    _syncHdrH();
+  }
 }
 
-document.getElementById('formClose').addEventListener('click', closeForm);
+document.getElementById('formClose').addEventListener('click', ()=> closeForm());
 document.getElementById('formBg').addEventListener('click', e=>{
-  if(e.target.id === 'formBg') closeForm();
+  // En modo página (Usuarios) no hay fondo que cerrar; solo cierra el modal normal.
+  if(e.target.id === 'formBg' && !formBg().classList.contains('users-mode')) closeForm();
 });
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape' && formBg().classList.contains('users-mode') && formBg().classList.contains('show')) closeForm();
+}, true);
 
 /* ══════════════════════════════════════════════════════════
    SETTINGS · personas + my recipes (tabs)
@@ -33,11 +48,19 @@ document.getElementById('formBg').addEventListener('click', e=>{
 let _settingsTab = 'personas';
 
 function openSettings(tab){
+  try{ if(window.AppPage && AppPage.current) AppPage.close(true); }catch(e){}
   if(tab) _settingsTab = tab;
   renderSettings();
-  formBg().classList.add('users-mode');
-  formBg().classList.add('show');
-  document.body.classList.add('no-scroll');
+  const bg = formBg();
+  bg.classList.add('users-mode');
+  bg.classList.add('show');
+  document.body.classList.add('no-scroll','app-page-open');
+  _syncHdrH();
+  if(!_settingsPop){
+    _settingsPop = ()=> closeForm(true);
+    window.addEventListener('popstate', _settingsPop);
+    try{ history.pushState({pnSettings:1}, ''); }catch(e){}
+  }
 }
 
 function renderSettings(){
