@@ -469,9 +469,25 @@
       y consulta a un profesional ante cualquier duda de salud.</li>
     </ul>
 
-    <h4>Tus datos</h4>
-    <p>Todos tus datos se guardan <strong>localmente en tu dispositivo</strong>. La app no
-    los envía a ningún servidor.</p>
+    <h4>Privacidad y tus datos</h4>
+    <p>Todos tus datos (perfiles, objetivos, recetas, menús, calendario, planes de
+    entrenamiento, favoritos y todo lo de <strong>Mente</strong>, incluidas fotos y notas
+    de voz) se guardan <strong>únicamente en este dispositivo</strong>, en el
+    almacenamiento del navegador. La app <strong>no los envía a ningún servidor</strong>,
+    no usa cookies de seguimiento ni herramientas de analítica, y no comparte nada con
+    terceros.</p>
+    <ul>
+      <li>La única petición externa es la descarga de las <strong>tipografías</strong>
+      (Google Fonts); si estás sin conexión, la app funciona igual con la fuente del
+      sistema.</li>
+      <li>Puedes <strong>exportar una copia</strong> de todos tus datos y volver a
+      importarla desde <em>Configuración → Copia de datos</em>.</li>
+      <li>Puedes <strong>borrar todo</strong> de este dispositivo en cualquier momento
+      desde esa misma pantalla; la eliminación es inmediata y no se puede deshacer.</li>
+    </ul>
+    <p style="font-size:.86rem;color:var(--ink-50,rgba(44,31,14,.5))">Como los datos viven
+    solo en este dispositivo, si lo cambias, reinstalas el navegador o borras sus datos,
+    se perderán salvo que hayas exportado una copia antes.</p>
 
     <h4>Descargo de responsabilidad</h4>
     <p>Esta app es <strong>solo una herramienta</strong> orientativa y <strong>no está
