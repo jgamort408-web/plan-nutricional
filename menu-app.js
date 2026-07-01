@@ -789,6 +789,8 @@ const FB = (function(){
   return Array.isArray(stored) ? stored : [];
 })();
 function persistFB(){ lsSet(LS.FB, FB); }
+window.getFeedbackLog = ()=> FB;               // registro de sensaciones (para la evolución)
+window.FB_RATINGS = ()=> RATINGS;
 function getFB(date, slot, dishId, persona){
   return FB.find(e => e.date===date && e.slot===slot && e.dishId===dishId && e.persona===persona) || null;
 }
@@ -1588,6 +1590,11 @@ document.getElementById('cartFab').addEventListener('click', openDrawer);
 document.getElementById('cbOpen').addEventListener('click', openDrawer);
 document.getElementById('drClose').addEventListener('click', closeDrawer);
 document.getElementById('drawerBg').addEventListener('click', closeDrawer);
+const drEvoBtn = document.getElementById('drEvo');
+if(drEvoBtn) drEvoBtn.addEventListener('click', ()=>{
+  if(typeof closeDrawer === 'function') closeDrawer();
+  if(typeof openFeedbackEvolution === 'function') openFeedbackEvolution();
+});
 
 document.getElementById('drClear').addEventListener('click', ()=>{
   S.cart = [];
