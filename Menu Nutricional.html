@@ -21,6 +21,8 @@
 <meta name="application-name" content="Plan Nutricional">
 <meta name="mobile-web-app-capable" content="yes">
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lora:ital,wght@0,400;0,500;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -57,7 +59,9 @@ body.page-users{--accent:#3F8F8A;--accent-l:#62AEA8;--hdr-bg:#246460}  /* usuari
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--accent,#B5603A);border-radius:20px;border:2px solid var(--cream,#F6EDD8);background-clip:padding-box}
 ::-webkit-scrollbar-thumb:hover{background:var(--accent-l,#D4896A);background-clip:padding-box}
-html{scroll-behavior:smooth;scroll-padding-top:165px}
+/* Anclas: usa el alto REAL del header (--hdr-h lo fija el JS) para no
+   tapar el destino; 165px de reserva hasta que el JS calcula el valor. */
+html{scroll-behavior:smooth;scroll-padding-top:calc(var(--hdr-h, 165px) + 10px)}
 body{background:var(--cream);color:var(--warm);font-family:'Lora',Georgia,serif;min-height:100vh;padding-bottom:140px;-webkit-tap-highlight-color:transparent}
 button{font-family:inherit}
 
