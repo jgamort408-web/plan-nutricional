@@ -90,8 +90,8 @@ html[data-theme="dark"] .dish-fav.on{color:#B8860B}
 html[data-theme="dark"] .cal-cell .ce-rm,
 html[data-theme="dark"] .rc-add{color:rgba(44,31,14,.5)}
 html[data-theme="dark"] .cal-cell.filled:hover .ce-rm{color:rgba(44,31,14,.72)}
-/* 3) Superficies CLARAS fijas → tonos oscuros para que el texto (claro) se vea. */
-html[data-theme="dark"] .prof-card{background:linear-gradient(160deg,var(--white),var(--parch))}
+/* 3) Superficies CLARAS fijas → tonos oscuros para que el texto (claro) se vea.
+   (.prof-card ya es theme-aware tras el rediseño → no necesita override.) */
 html[data-theme="dark"] .cr-blk{background:rgba(255,255,255,.06)}
 html[data-theme="dark"] .rc-s,
 html[data-theme="dark"] .wk-sport{background:rgba(120,150,70,.22)}
@@ -1796,28 +1796,33 @@ body.hide-nutr .nutr{display:none !important}
 :root[data-contrast=alto] .ftchip,:root[data-contrast=alto] .ftpack{border-color:rgba(28,20,8,.4)!important}
 :root[data-contrast=alto] .cfg-sub,:root[data-contrast=alto] .flbl-ex,:root[data-contrast=alto] small{color:rgba(28,20,8,.7)!important}
 /* ── Galería de perfiles (Usuarios) con privacidad ──────── */
-.prof-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin-bottom:16px}
-.prof-card{position:relative;border:1.5px solid rgba(var(--ink-rgb,44,31,14),.12);border-radius:16px;padding:16px;
-  background:linear-gradient(160deg,rgba(255,255,255,.85),rgba(245,238,228,.6));box-shadow:0 2px 10px rgba(0,0,0,.05);overflow:hidden}
-.prof-card::before{content:'';position:absolute;inset:0 0 auto 0;height:4px;background:var(--gold)}
-.prof-av{font-size:2.2rem;line-height:1;width:58px;height:58px;display:flex;align-items:center;justify-content:center;
-  border-radius:50%;background:rgba(181,96,58,.12);margin-bottom:10px}
-.prof-name{font-family:'Playfair Display',serif;font-size:1.12rem;color:var(--ink);font-weight:700;margin-bottom:2px}
-.prof-tag{font-size:.72rem;color:var(--ink-50);margin-bottom:10px}
-.prof-restr{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px;min-height:4px}
-.prof-restr .pr-chip{font-size:.68rem;background:rgba(var(--ink-rgb,44,31,14),.07);border-radius:10px;padding:3px 8px;color:var(--ink)}
-.prof-data{display:none;border-top:1px dashed rgba(var(--ink-rgb,44,31,14),.18);padding-top:10px;margin-top:2px;font-size:.8rem}
+.prof-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px;margin-bottom:16px}
+.prof-card{position:relative;text-align:center;border:1px solid rgba(var(--ink-rgb,44,31,14),.1);border-radius:18px;padding:24px 16px 16px;
+  background:linear-gradient(165deg,var(--white),var(--parch));box-shadow:0 4px 18px rgba(var(--ink-rgb,44,31,14),.07);overflow:hidden;
+  transition:transform .18s ease,box-shadow .18s ease}
+.prof-card:hover{transform:translateY(-3px);box-shadow:0 14px 32px rgba(var(--ink-rgb,44,31,14),.15)}
+.prof-card::before{content:'';position:absolute;inset:0 0 auto 0;height:5px;background:linear-gradient(90deg,var(--gold),var(--terra-l))}
+.prof-av{font-size:2rem;line-height:1;width:76px;height:76px;margin:0 auto 13px;display:flex;align-items:center;justify-content:center;
+  border-radius:50%;background:radial-gradient(circle at 32% 26%,var(--gold-l),var(--gold));color:#3D2C1A;font-weight:700;
+  font-family:'Playfair Display',serif;box-shadow:0 5px 16px rgba(var(--ink-rgb,44,31,14),.2),inset 0 0 0 3px rgba(255,255,255,.35)}
+.prof-name{font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--ink);font-weight:700;margin-bottom:4px;line-height:1.15;word-break:break-word}
+.prof-tag{font-family:'DM Mono',monospace;font-size:.58rem;color:var(--ink-50);text-transform:uppercase;letter-spacing:.12em;margin-bottom:13px}
+.prof-restr{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-bottom:14px;min-height:4px}
+.prof-restr .pr-chip{font-size:.66rem;background:rgba(var(--ink-rgb,44,31,14),.06);border:1px solid rgba(var(--ink-rgb,44,31,14),.09);border-radius:20px;padding:3px 10px;color:var(--ink)}
+.prof-data{display:none;text-align:left;border-top:1px dashed rgba(var(--ink-rgb,44,31,14),.16);padding-top:12px;margin-top:2px;font-size:.8rem}
 .prof-card.reveal .prof-data{display:block;animation:profFade .25s ease}
 @keyframes profFade{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
-.prof-data .pd-row{display:flex;justify-content:space-between;padding:3px 0;color:var(--ink)}
-.prof-data .pd-row b{font-family:'DM Mono',monospace;font-weight:600}
-.prof-acts{display:flex;gap:8px;margin-top:12px}
-.prof-eye,.prof-edit{flex:1;border:1.5px solid rgba(var(--ink-rgb,44,31,14),.16);background:#fff;border-radius:10px;padding:9px;
-  min-height:42px;cursor:pointer;font-size:.78rem;color:var(--ink);transition:.15s}
-.prof-eye:hover,.prof-edit:hover{border-color:var(--gold)}
+.prof-data .pd-row{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:5px 0;color:var(--ink);border-bottom:1px solid rgba(var(--ink-rgb,44,31,14),.06)}
+.prof-data .pd-row:last-child{border-bottom:none}
+.prof-data .pd-row span{color:var(--ink-50)}
+.prof-data .pd-row b{font-family:'DM Mono',monospace;font-weight:600;white-space:nowrap}
+.prof-acts{display:flex;gap:8px;margin-top:14px}
+.prof-eye,.prof-edit{flex:1;border:1.5px solid rgba(var(--ink-rgb,44,31,14),.16);background:var(--white);border-radius:22px;padding:9px;
+  min-height:42px;cursor:pointer;font-size:.76rem;color:var(--ink);transition:.15s}
+.prof-eye:hover,.prof-edit:hover{border-color:var(--gold);background:rgba(200,147,40,.09)}
 .prof-eye.on{background:var(--gold);border-color:var(--gold);color:#3D2C1A;font-weight:600}
-.prof-priv-note{font-size:.74rem;color:var(--ink-50);background:rgba(181,96,58,.07);border-radius:10px;
-  padding:8px 12px;margin-bottom:12px;display:flex;gap:8px;align-items:center}
+.prof-priv-note{font-size:.74rem;color:var(--ink-50);background:rgba(181,96,58,.08);border-radius:12px;
+  padding:9px 13px;margin-bottom:14px;display:flex;gap:8px;align-items:center}
 /* ── ASISTENTE DE MENÚ ─────────────────────────────────── */
 .masst{position:fixed;inset:0;z-index:360;display:none}
 .masst.show{display:block}
