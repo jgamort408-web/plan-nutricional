@@ -989,8 +989,17 @@ function renderMantraPlayer(){
   box.innerHTML=html||"";
   if(hasAudio){
     blobGet(state.mantraId).then(b=>{
-      const audio=`<audio controls src="${URL.createObjectURL(b)}" style="width:100%;margin:10px 0 0"></audio>`;
+      const audio=`<audio controls src="${URL.createObjectURL(b)}" style="width:100%;margin:10px 0 0"></audio>`+
+        `<button class="btn red sm mantra-del" style="margin-top:8px" aria-label="Eliminar mensaje de motivación">🗑️ Borrar mensaje</button>`;
       box.innerHTML=audio+(box.innerHTML||"");
+      const delBtn=box.querySelector(".mantra-del");
+      if(delBtn) delBtn.onclick=async()=>{
+        if(!await pdConfirm("¿Eliminar tu mensaje de motivación? No se puede deshacer.",{danger:true,ok:"Eliminar"}))return;
+        try{ await blobDel(state.mantraId); }catch(e){}
+        state.mantraId=null; await save();
+        if(typeof renderMantraSetup==="function") renderMantraSetup();
+        renderMantraPlayer(); toast("Motivación eliminada 🗑️");
+      };
     });
   }
 }
@@ -1141,7 +1150,7 @@ function renderNotes(){
   });
 }
 async function deleteNote(ts){
-  if(!confirm("¿Borrar esta nota?"))return;
+  if(!await pdConfirm("¿Borrar esta nota? No se puede deshacer.",{danger:true,ok:"Borrar"}))return;
   Object.values(state.days).forEach(dv=>{ if(dv.notes) dv.notes=dv.notes.filter(n=>n.ts!==ts); });
   await save();renderNotes();toast("Nota borrada 🗑");
 }
