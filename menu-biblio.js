@@ -1498,7 +1498,8 @@
     .bib-fbadge{background:var(--accent,#B5603A);color:#fff;border-radius:10px;font-size:.66rem;font-weight:700;min-width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;padding:0 4px}
     .bib-filters{display:flex;flex-direction:column;gap:10px;padding-top:4px}
     .bib-filters[hidden]{display:none}
-    .bib-search{width:100%;border:1.5px solid rgba(var(--ink-rgb,44,31,14),.15);border-radius:12px;padding:11px 14px;font-size:.95rem;font-family:'Lora',serif;background:var(--white)}
+    .bib-search{width:100%;border:1.5px solid rgba(var(--ink-rgb,44,31,14),.15);border-radius:12px;padding:11px 14px;font-size:.95rem;font-family:'Lora',serif;background:var(--white);color:var(--ink)}
+    .bib-search::placeholder{color:var(--ink-50)}
     .bib-search:focus{outline:none;border-color:var(--accent,#B5603A)}
     .bib-frow{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
     .bib-frow .bib-lbl{font-family:'DM Mono',monospace;font-size:.6rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-50);margin-right:2px}
