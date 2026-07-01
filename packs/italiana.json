@@ -79,6 +79,21 @@
         {"f":"aceite_de_oliva","g":5},
         {"f":"fruta_temporada","g":150}
       ]
+    },
+    "ITA_C3": {
+      "cat": "com", "short": "Risotto de champiñones",
+      "nom": "Risotto de champiñones y pollo", "icon": "🍚",
+      "t": "30 min", "eq": "Sartén · Cazo", "tipo": "completa", "diet": ["cn"], "food": ["apq", "cb", "v"],
+      "desc": "Arroz cremoso al estilo risotto con champiñones salteados, pollo y parmesano. Un clásico reconfortante del norte de Italia.",
+      "nota": "Sofríe la cebolla y añade el arroz. Ve incorporando caldo caliente poco a poco sin dejar de remover. A media cocción añade los champiñones y el pollo dorado. Termina con parmesano fuera del fuego.",
+      "comp": [
+        {"f":"arroz_integral_cocido","g":180,"note":"cocido"},
+        {"f":"pechuga_de_pollo","g":120,"note":"crudo"},
+        {"f":"champinones","g":150},
+        {"f":"cebolla","g":50},
+        {"f":"queso_parmesano","g":18,"as":"Parmesano rallado"},
+        {"f":"aceite_de_oliva","g":10}
+      ]
     }
   }
 }

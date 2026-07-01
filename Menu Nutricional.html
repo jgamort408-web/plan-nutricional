@@ -1522,6 +1522,26 @@ main[data-vm="small"] .dish.add-card{min-height:62px;flex-direction:row}
 .btab{border:none;background:transparent;color:var(--ink-50);font-family:'Lora',serif;font-size:.9rem;padding:9px 14px;cursor:pointer;border-bottom:2px solid transparent;transition:.18s}
 .btab.on{color:var(--terra);border-bottom-color:var(--terra);font-weight:500}
 
+/* Asistente de creación por pasos (wizard) */
+.cr-stepper{display:flex;gap:6px;margin:0 0 16px}
+.cr-si{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;border:none;background:transparent;
+  cursor:pointer;color:var(--ink-50);font-family:'DM Mono',monospace;font-size:.66rem;text-transform:uppercase;letter-spacing:.03em;padding:2px 0}
+.cr-si b{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;
+  background:rgba(44,31,14,.1);color:var(--ink-50);transition:.18s;position:relative}
+.cr-si::after{content:'';position:absolute}
+.cr-si.on{color:var(--terra)}
+.cr-si.on b{background:var(--terra,var(--accent));color:#fff}
+.cr-si.done b{background:var(--sage,#6E8B5B);color:#fff}
+.cr-si.done b::before{content:'✓'}
+.cr-si.done b{font-size:0}
+.cr-si.done b::before{font-size:.85rem}
+.cr-step{display:none}
+.cr-step.on{display:block;animation:crFade .2s ease}
+@keyframes crFade{from{opacity:.4;transform:translateY(4px)}to{opacity:1;transform:none}}
+.cr-nav{display:flex;justify-content:space-between;gap:10px;margin-top:18px}
+.cr-nav .cr-back{min-width:110px}
+.cr-nav .cr-next{margin-left:auto;min-width:140px}
+
 .comp-list{display:flex;flex-direction:column;gap:6px}
 .comp-row{display:grid;grid-template-columns:1fr 70px 58px 34px 30px;gap:6px;align-items:center}
 .comp-row .cr-food{position:relative}

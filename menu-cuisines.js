@@ -143,7 +143,9 @@
     { id:'gri', ico:'🇬🇷', lbl:'Comida griega', url:'packs/griega.json' },
     { id:'ind', ico:'🇮🇳', lbl:'Comida india', url:'packs/india.json' },
     { id:'ome', ico:'🧆', lbl:'Oriente Medio', url:'packs/oriente-medio.json' },
-    { id:'tai', ico:'🇹🇭', lbl:'Comida tailandesa', url:'packs/tailandesa.json' }
+    { id:'tai', ico:'🇹🇭', lbl:'Comida tailandesa', url:'packs/tailandesa.json' },
+    { id:'per', ico:'🇵🇪', lbl:'Comida peruana', url:'packs/peru.json' },
+    { id:'cor', ico:'🇰🇷', lbl:'Comida coreana', url:'packs/corea.json' }
   ];
   function bundledAvailable(){ return BUNDLED.filter(b=> !_registry[b.id]); }
 
