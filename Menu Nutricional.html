@@ -69,6 +69,38 @@ html[data-theme="dark"] body{background:var(--cream)}
 html[data-theme="dark"] .splash-logo,
 html[data-theme="dark"] .logo,
 html[data-theme="dark"] .cb-mt .v{color:#F6EDD8}
+/* ── Pulido de contraste en oscuro (pasada tras revisión visual) ── */
+/* 1) Tinta OSCURA sobre acentos claros (dorado): --ink es claro en
+   oscuro y no contrasta con el dorado. */
+html[data-theme="dark"] .fav.on,
+html[data-theme="dark"] .on-fav,
+html[data-theme="dark"] .fav-pill.on,
+html[data-theme="dark"] .m-fav-btn.on,
+html[data-theme="dark"] .m-fav-btn:hover,
+html[data-theme="dark"] .cb-open,
+html[data-theme="dark"] .pbtn.on,
+html[data-theme="dark"] .rc-today:hover,
+html[data-theme="dark"] .rc-navbtn:hover,
+html[data-theme="dark"] .rc-add:hover{color:#2C1F0E}
+/* 2) Iconos sobre círculos CLAROS fijos (estrella fav, ✕/＋ de celdas).
+   El círculo es blanco en ambos temas → icono oscuro; la estrella
+   marcada, ámbar oscuro para que contraste con el blanco. */
+html[data-theme="dark"] .dish-fav{color:rgba(44,31,14,.5)}
+html[data-theme="dark"] .dish-fav.on{color:#B8860B}
+html[data-theme="dark"] .cal-cell .ce-rm,
+html[data-theme="dark"] .rc-add{color:rgba(44,31,14,.5)}
+html[data-theme="dark"] .cal-cell.filled:hover .ce-rm{color:rgba(44,31,14,.72)}
+/* 3) Superficies CLARAS fijas → tonos oscuros para que el texto (claro) se vea. */
+html[data-theme="dark"] .prof-card{background:linear-gradient(160deg,var(--white),var(--parch))}
+html[data-theme="dark"] .cr-blk{background:rgba(255,255,255,.06)}
+html[data-theme="dark"] .rc-s,
+html[data-theme="dark"] .wk-sport{background:rgba(120,150,70,.22)}
+html[data-theme="dark"] .rc-s:hover,
+html[data-theme="dark"] .wk-sport:hover{background:rgba(120,150,70,.30)}
+html[data-theme="dark"] .rc-kcal{color:var(--olive-l)}
+html[data-theme="dark"] .cal-cell.has-viol,
+html[data-theme="dark"] .picker-it.has-viol{background:rgba(200,80,70,.18)}
+html[data-theme="dark"] .picker-it.has-viol:hover{background:rgba(200,80,70,.26)}
 /* Cada sección hereda su color de acento Y el fondo de su header; el resto es común */
 body.sec-nutri{--accent:var(--terra);--accent-l:var(--terra-l);--hdr-bg:#8E441F}
 body.sec-sport{--accent:var(--sport);--accent-l:var(--sport-l);--hdr-bg:#456A2C}
