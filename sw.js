@@ -4,7 +4,7 @@
      · online  → siempre lo más reciente (no rompe el desarrollo)
      · offline → responde desde caché
 ══════════════════════════════════════════════════════════ */
-const CACHE = 'plan-nutri-v66';
+const CACHE = 'plan-nutri-v67';
 const SHELL = [
   'Menu%20Nutricional.html',
   'menu-ui.js','menu-prefs.js','menu-page.js',
@@ -38,7 +38,15 @@ self.addEventListener('fetch', (e)=>{
   if(url.origin !== location.origin) return;            // externos (CDNs) → red directa
   e.respondWith(
     fetch(req)
-      .then(res => { const copy = res.clone(); caches.open(CACHE).then(c=>c.put(req, copy)); return res; })
+      .then(res => {
+        // Solo cacheamos respuestas válidas de mismo origen (evita servir
+        // offline un 404/500/opaca guardada por error). Un fallo puntual
+        // conserva la copia buena previa.
+        if(res && res.ok && res.status === 200 && (res.type === 'basic' || res.type === 'default')){
+          const copy = res.clone(); caches.open(CACHE).then(c=>c.put(req, copy));
+        }
+        return res;
+      })
       .catch(()=> caches.match(req).then(r => r || caches.match('Menu%20Nutricional.html')))
   );
 });
