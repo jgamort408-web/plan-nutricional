@@ -948,46 +948,59 @@ function scoreCandidate(dishId, ctx){
   // 7) Cena: pequeño bonus a tipo "ligera"
   if(ctx.slot === 'cen' && d.tipo === 'ligera') score += 25;
 
-  // 8) Ajuste a kcal y macros objetivo (la pieza nueva)
-  //    Compara el total del día (incluyendo este candidato) con el % esperado
-  //    para la franja, según el objetivo de cada persona. Penaliza más pasarse
-  //    que quedarse corto.
+  // 8) Ajuste a kcal y MACROS objetivo (acota P/F/C, no sólo kcal).
+  //    Clave del modelo: cada receta se ESCALA para cubrir las kcal de su
+  //    franja (dishScaledMeal), así que las kcal del día siempre cuadran; lo
+  //    que varía —y hay que acotar— es el REPARTO de macros según el perfil
+  //    de la receta elegida. Por eso comparamos la contribución REAL escalada
+  //    (no los valores crudos d.kcal[i]) contra el % esperado tras esta franja.
+  //    Tratamos la proteína como SUELO (penaliza quedarse corto) y grasa/
+  //    carbohidratos/kcal como TECHO (penaliza pasarse), que es como el propio
+  //    panel marca los límites.
   if(ctx.dayTotals && ctx.dayTotals[ctx.day] && SLOT_CUM_PCT[ctx.slot]){
     const expectedPct = SLOT_CUM_PCT[ctx.slot];
-    let macroPenalty = 0;
-    let counts = 0;
-    PEOPLE.forEach((p, i)=>{
+    const std = (typeof recipeStdKcal === 'function' ? recipeStdKcal(d) : 0) || 1;
+    const perPerson = [];
+    PEOPLE.forEach((p)=>{
       const tgt = TARGETS[p];
       if(!tgt || !tgt.kcal) return;
-      counts++;
+      let penP = 0;
       const cur = (ctx.dayTotals[ctx.day] && ctx.dayTotals[ctx.day][p]) || {k:0,p:0,f:0,c:0};
-      // valores tras añadir este candidato
-      const k  = cur.k + (+d.kcal[i]||0);
-      const pp = cur.p + (+(d.mac.p[i])||0);
-      const ff = cur.f + (+(d.mac.f[i])||0);
-      const cc = cur.c + (+(d.mac.c[i])||0);
+      // Contribución REAL de esta receta a la franja para esta persona.
+      const mm = (typeof dishScaledMeal === 'function')
+        ? dishScaledMeal(d, p, ctx.slot, std).tot
+        : {k:0,p:0,f:0,c:0};
+      const k  = cur.k + mm.k;
+      const pp = cur.p + mm.p;
+      const ff = cur.f + mm.f;
+      const cc = cur.c + mm.c;
       // Objetivos esperados acumulados tras esta franja
       const tK = expectedPct * tgt.kcal;
       const tP = expectedPct * (tgt.p || 0);
       const tF = expectedPct * (tgt.f || 0);
       const tC = expectedPct * (tgt.c || 0);
-      // Desviación relativa (sobre el objetivo diario completo)
-      const wKcal  = (k  - tK) / Math.max(tgt.kcal, 1);
-      const wProt  = (pp - tP) / Math.max(tgt.p || 1, 1);
-      const wFat   = (ff - tF) / Math.max(tgt.f || 1, 1);
-      const wCarb  = (cc - tC) / Math.max(tgt.c || 1, 1);
-      // El kcal pesa más; las grasas un poco menos.
-      // Pasarse pesa el doble (factor 2.0) que quedarse corto (factor 1.0)
-      const w = (x, weight) => weight * (x > 0 ? x * 2.0 : -x * 1.0);
-      macroPenalty +=
-        w(wKcal, 2.5) +
-        w(wProt, 1.2) +
-        w(wFat,  0.9) +
-        w(wCarb, 1.0);
+      // Desviación relativa (sobre el objetivo diario completo de cada macro)
+      const dK = (k  - tK) / Math.max(tgt.kcal, 1);
+      const dP = (pp - tP) / Math.max(tgt.p || 1, 1);
+      const dF = (ff - tF) / Math.max(tgt.f || 1, 1);
+      const dC = (cc - tC) / Math.max(tgt.c || 1, 1);
+      // pen(x, pasarse, quedarse-corto): asimétrico según techo/suelo.
+      const pen = (x, over, under) => x > 0 ? x * over : -x * under;
+      penP =
+        1.0 * pen(dK, 1.6, 0.6) +   // kcal → techo suave (ya casi fijo)
+        2.4 * pen(dP, 0.5, 3.2) +   // proteína → SUELO (hay que alcanzarla)
+        1.5 * pen(dF, 1.8, 0.7) +   // grasa → techo
+        2.5 * pen(dC, 2.6, 0.5);    // carbohidratos → techo (tendían a dispararse)
+      perPerson.push(penP);
     });
-    if(counts) macroPenalty /= counts;
-    // Aplica como penalización: 0 deviation → +250 ; 0.4 → -250
-    score += 250 - macroPenalty * 1250;
+    if(perPerson.length){
+      // Las recetas se comparten entre personas (misma receta, distinta escala):
+      // sus objetivos pueden entrar en conflicto y no hay receta que satisfaga a
+      // ambas a la vez. Promediar reparte el compromiso de forma equilibrada.
+      const macroPenalty = perPerson.reduce((a,b)=>a+b,0) / perPerson.length;
+      // 0 desviación → +320 ; penaliza fuerte los repartos que se salen de la banda.
+      score += 320 - macroPenalty * 900;
+    }
   }
 
   // 9) NB: la aleatoriedad real se aplica en pickBest (selección entre los
@@ -1086,7 +1099,7 @@ function autofillCalendar(opts){
             (DISHES[id]?.food||[]).forEach(f=>{ ctx.gotCom[f] = (ctx.gotCom[f]||0) + 1; });
           }
           const d = DISHES[id];
-          if(d && ctx.dayTotals[day]) addToTotals(ctx.dayTotals[day], d);
+          if(d && ctx.dayTotals[day]) addToTotals(ctx.dayTotals[day], d, slot, sumCellStd(arr));
         });
       });
     });
@@ -1094,11 +1107,17 @@ function autofillCalendar(opts){
     CalState.data = emptyCal();
   }
 
-  // Suma los macros de un plato a los totales por persona (clave = id de PEOPLE)
-  function addToTotals(totals, d){
-    PEOPLE.forEach((id, i)=>{
-      const t = totals[id]; if(!t || !d.kcal) return;
-      t.k += (+d.kcal[i]||0); t.p += (+(d.mac.p[i])||0); t.f += (+(d.mac.f[i])||0); t.c += (+(d.mac.c[i])||0);
+  // Suma la contribución REAL (escalada a la franja) de un plato a los totales
+  // por persona. Debe coincidir con dayTotalsFor para que el proyectado durante
+  // el autocompletado refleje lo que finalmente se muestra.
+  function addToTotals(totals, d, slot, sumStd){
+    const std = sumStd || (typeof recipeStdKcal === 'function' ? recipeStdKcal(d) : 0) || 1;
+    PEOPLE.forEach((id)=>{
+      const t = totals[id]; if(!t) return;
+      const mm = (typeof dishScaledMeal === 'function')
+        ? dishScaledMeal(d, id, slot, std).tot
+        : {k:0,p:0,f:0,c:0};
+      t.k += mm.k; t.p += mm.p; t.f += mm.f; t.c += mm.c;
     });
   }
   // Helper para registrar el pick y actualizar dayTotals
@@ -1106,7 +1125,7 @@ function autofillCalendar(opts){
     ctx.usedCount[id] = (ctx.usedCount[id]||0) + 1;
     ctx.lastBySlot[slot] = id;
     const d = DISHES[id];
-    if(d && ctx.dayTotals[day]) addToTotals(ctx.dayTotals[day], d);
+    if(d && ctx.dayTotals[day]) addToTotals(ctx.dayTotals[day], d, slot, recipeStdKcal(d));
   };
 
   // Orden de relleno: COMIDAS primero (más restrictivo por plantilla),
