@@ -38,19 +38,22 @@
      titulo:'Alimentación sana — Datos y cifras',
      fuente:'who.int',
      url:'https://www.who.int/es/news-room/fact-sheets/detail/healthy-diet',
-     cita:'Organización Mundial de la Salud. Alimentación sana [Internet]. Ginebra: OMS; 2020.'},
+     cita:'Organización Mundial de la Salud. Alimentación sana [Internet]. Ginebra: OMS; 2020.',
+     resumen:'Hoja informativa de la OMS con las bases de una alimentación sana. Mensajes clave para adultos: equilibrar la energía ingerida con la gastada; tomar al menos 400 g de frutas y verduras al día; limitar los azúcares libres a menos del 10 % de la energía total (idealmente por debajo del 5 %); mantener las grasas por debajo del 30 % de la energía, sustituyendo las saturadas y las grasas trans por insaturadas; y reducir la sal a menos de 5 g al día, preferiblemente yodada. La dieta concreta se adapta a la persona, la cultura y los alimentos disponibles.'},
     {id:'efsa-dri', tipo:'guia', temas:['nutricion','proteina','grasas','hidratos'], year:2017,
      autores:'European Food Safety Authority (EFSA)',
      titulo:'Dietary Reference Values for nutrients — Summary report',
      fuente:'EFSA Supporting Publications',
      url:'https://www.efsa.europa.eu/en/efsajournal/pub/e15121',
-     cita:'EFSA. Dietary Reference Values for nutrients: Summary report. EFSA Supporting Publication; 2017.'},
+     cita:'EFSA. Dietary Reference Values for nutrients: Summary report. EFSA Supporting Publication; 2017.',
+     resumen:'Informe resumen de la EFSA que recopila los Valores de Referencia de Nutrientes (DRV) para la población europea: ingesta de referencia poblacional (PRI), necesidad media (AR), ingesta adecuada (AI) y rango de referencia (RI) de energía, macronutrientes (proteínas, grasas, hidratos, fibra y agua) y micronutrientes. Son referencias poblacionales, no objetivos individuales, pensadas para orientar dietas y políticas. Incluye, por ejemplo, una ingesta de referencia de proteína de 0,83 g/kg de peso al día en adultos y rangos de referencia para grasas e hidratos expresados como porcentaje de la energía.'},
     {id:'aesan-recom', tipo:'guia', temas:['nutricion'], year:2022,
      autores:'AESAN (Agencia Española de Seguridad Alimentaria y Nutrición)',
      titulo:'Recomendaciones dietéticas sostenibles y actividad física para la población española',
      fuente:'aesan.gob.es',
      url:'https://www.aesan.gob.es/AECOSAN/web/seguridad_alimentaria/ampliacion/recomendaciones_dieteticas.htm',
-     cita:'AESAN. Recomendaciones dietéticas sostenibles y de actividad física para la población española. Madrid; 2022.'},
+     cita:'AESAN. Recomendaciones dietéticas sostenibles y de actividad física para la población española. Madrid; 2022.',
+     resumen:'Informe del comité científico de la AESAN (2022) con recomendaciones dietéticas orientadas también a la sostenibilidad. Prioriza los alimentos de origen vegetal: un mínimo de 3 raciones de verduras y hortalizas y 2-3 de fruta al día, legumbres varias veces por semana, cereales integrales, frutos secos y aceite de oliva virgen. Recomienda moderar la carne (especialmente roja y procesada), los alimentos ultraprocesados, las bebidas azucaradas, la sal y el alcohol, y tener en cuenta criterios de sostenibilidad (productos de temporada y proximidad, menos desperdicio). Acompaña las pautas de alimentación con recomendaciones de actividad física.'},
     {id:'morton-prot', tipo:'articulo', temas:['proteina','ejercicio'], year:2018,
      autores:'Morton RW, et al.',
      titulo:'A systematic review, meta-analysis and meta-regression of the effect of protein supplementation on resistance training-induced gains in muscle mass and strength',
@@ -86,7 +89,8 @@
      titulo:'The Healthy Eating Plate (El Plato para Comer Saludable)',
      fuente:'nutritionsource.hsph.harvard.edu',
      url:'https://www.hsph.harvard.edu/nutritionsource/healthy-eating-plate/',
-     cita:'Harvard T.H. Chan School of Public Health. The Healthy Eating Plate. 2011.'},
+     cita:'Harvard T.H. Chan School of Public Health. The Healthy Eating Plate. 2011.',
+     resumen:'Guía visual de la Escuela de Salud Pública de Harvard que traduce la evidencia en un plato equilibrado. Propone llenar la mitad del plato con verduras y frutas (cuanta más variedad y color, mejor; la patata no cuenta como verdura); un cuarto con cereales integrales; y un cuarto con proteínas saludables (pescado, aves, legumbres y frutos secos, limitando la carne roja y evitando la procesada). Recomienda usar aceites vegetales saludables con moderación, beber agua, café o té sin azúcar (limitando lácteos y zumos y evitando las bebidas azucaradas) y mantenerse físicamente activo. Es la alternativa basada en evidencia a MyPlate del USDA.'},
 
     /* ── Fisiología metabólica, macronutrientes y crononutrición ── */
     {id:'bmr-organ-model', tipo:'articulo', temas:['metabolismo'],
@@ -1516,6 +1520,12 @@
       border-left:3px solid rgba(181,96,58,.3);padding-left:10px}
     .bib-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
     .bib-tag{font-size:.66rem;background:rgba(var(--ink-rgb,44,31,14),.06);border-radius:8px;padding:3px 7px;color:var(--ink)}
+    .bib-abs{margin-bottom:10px;border-top:1px dashed rgba(var(--ink-rgb,44,31,14),.14);padding-top:8px}
+    .bib-abs summary{cursor:pointer;font-family:'DM Mono',monospace;font-size:.66rem;text-transform:uppercase;letter-spacing:.06em;color:var(--accent,#B5603A);font-weight:600;list-style:none;display:flex;align-items:center;gap:6px;min-height:26px;user-select:none}
+    .bib-abs summary::-webkit-details-marker{display:none}
+    .bib-abs summary::after{content:'▾';margin-left:auto;transition:transform .2s}
+    .bib-abs[open] summary::after{transform:rotate(180deg)}
+    .bib-abs-body{margin-top:8px;font-size:.82rem;line-height:1.55;color:var(--ink-70,rgba(var(--ink-rgb,44,31,14),.82));white-space:pre-line}
     .bib-open{border:1.5px solid var(--accent,#B5603A);background:var(--white);color:var(--accent,#B5603A);border-radius:10px;
       padding:9px 14px;min-height:42px;cursor:pointer;font-size:.82rem;font-weight:600;align-self:flex-start;margin-top:auto}
     .bib-open:hover{background:var(--accent,#B5603A);color:#fff}
@@ -1530,7 +1540,7 @@
     return BIBLIO.filter(r=>{
       if(_state.tipo!=='all' && r.tipo!==_state.tipo) return false;
       if(_state.tema!=='all' && !(r.temas||[]).includes(_state.tema)) return false;
-      if(q){ const hay = norm([r.titulo,r.autores,r.fuente,r.cita,(r.temas||[]).join(' ')].join(' ')); if(!hay.includes(q)) return false; }
+      if(q){ const hay = norm([r.titulo,r.autores,r.fuente,r.cita,r.resumen,(r.temas||[]).join(' ')].join(' ')); if(!hay.includes(q)) return false; }
       return true;
     });
   }
@@ -1559,6 +1569,7 @@
       <div class="bib-it-meta">${esc(r.autores)} · ${esc(r.fuente)}${r.year?(' · '+r.year):''}</div>
       <div class="bib-it-cita">${esc(r.cita)}</div>
       <div class="bib-tags">${tags}</div>
+      ${r.resumen?`<details class="bib-abs"><summary>📄 Resumen</summary><div class="bib-abs-body">${esc(r.resumen)}</div></details>`:''}
       ${r.url?`<button class="bib-open" data-url="${esc(r.url)}">🔗 Abrir documento</button>`:''}
     </div>`;
   }
