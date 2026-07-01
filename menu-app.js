@@ -736,8 +736,8 @@ function renderCartBar(){
   }, {k:0,p:0,f:0,c:0});
 
   const T = TARGETS[S.p];
-  const pct  = (v,t)=> Math.min(100, Math.round(v/t*100));
-  const over = (v,t)=> v > t*1.05;
+  const pct  = (v,t)=> t>0 ? Math.min(100, Math.round(v/t*100)) : 0;
+  const over = (v,t)=> t>0 && v > t*1.05;
 
   document.getElementById('cbMtots').innerHTML = `
     <div class="cb-mt">
@@ -959,17 +959,18 @@ function renderDrawer(){
 
   // status: under 80% deficit · 80-94% close · 95-105% on target · over 105% over
   const status = (v,t) => {
+    if(!(t>0)) return {cls:'st-near', ico:'', lbl:'sin meta'};
     const p = v/t;
     if(p < .80)  return {cls:'st-low',  ico:'',  lbl:'déficit'};
     if(p < .95)  return {cls:'st-near', ico:'',  lbl:'cerca'};
     if(p <=1.05) return {cls:'st-on',   ico:'✓', lbl:'objetivo'};
     return            {cls:'st-over', ico:'⚠', lbl:'excedido'};
   };
-  const pctMin = (v,t)=> Math.min(100, Math.round(v/t*100));
+  const pctMin = (v,t)=> t>0 ? Math.min(100, Math.round(v/t*100)) : 0;
 
   const tgt = (name, v, t, macroClr) => {
     const st = status(v, t);
-    const rawPct = Math.round(v/t*100);
+    const rawPct = t>0 ? Math.round(v/t*100) : 0;
     return `
     <div class="tgt-block ${st.cls}">
       <div class="tgt-top">
