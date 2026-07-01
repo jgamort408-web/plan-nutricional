@@ -28,7 +28,5 @@ Thumbs.db
 .shots/
 capture-shots.js
 cdp-shots.js
-package.json
-package-lock.json
 .commitmsg.tmp
 *.output
