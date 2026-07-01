@@ -182,7 +182,15 @@ textarea:focus,input:focus{outline:none;border-color:var(--green)}
 .photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
 .photo-grid .ph{aspect-ratio:1;border-radius:14px;overflow:hidden;background:#f1f5f9;position:relative}
 .photo-grid .ph img{width:100%;height:100%;object-fit:cover}
-.photo-grid .ph .dl{position:absolute;bottom:4px;right:4px;background:rgba(0,0,0,.6);color:#fff;border-radius:8px;font-size:14px;width:26px;height:26px;display:flex;align-items:center;justify-content:center}
+.photo-grid .ph img{cursor:zoom-in}
+.photo-grid .ph .ph-btn{position:absolute;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:8px;font-size:14px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;line-height:1}
+.photo-grid .ph .dl{bottom:4px;right:4px}
+.photo-grid .ph .del{top:4px;right:4px;background:rgba(165,64,47,.85)}
+.audio-item .audio-btns{display:flex;flex-direction:column;gap:6px;flex:0 0 auto}
+/* Visor de foto a pantalla completa */
+.pd-lb{position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center;padding:20px}
+.pd-lb img{max-width:100%;max-height:100%;border-radius:12px;object-fit:contain}
+.pd-lb-x{position:absolute;top:14px;right:16px;background:rgba(255,255,255,.16);color:#fff;border:none;width:42px;height:42px;border-radius:50%;font-size:24px;cursor:pointer;line-height:1}
 
 /* Banner aviso (file:// sin micro) */
 .banner{
@@ -332,19 +340,11 @@ textarea:focus,input:focus{outline:none;border-color:var(--green)}
 /* Cuando "Mente" va embebida dentro de Plan Nutricional: se oculta su
    cabecera propia (ya hay un header general arriba) y su tutorial interno
    (se usa el tutorial general de la app). La tabbar inferior se mantiene. */
-/* Header de Mente: barra compacta FIJA en todas las pestañas, con color de
-   fondo distinto por pestaña y texto marfil (neutro, distinto de los acentos). */
-html.embedded header{display:block!important;position:sticky;top:0;z-index:60;border-radius:0;
-  padding:11px 16px;margin:0;text-align:center;color:#FBF7EC;box-shadow:0 4px 16px rgba(0,0,0,.2);
-  transition:background .3s ease}
-html.embedded header .hi,html.embedded header>p{display:none}
-html.embedded header h1{font-size:16px;color:#FBF7EC;margin:0}
-html.embedded body header,
-html.embedded body[data-view="hoy"] header{background:linear-gradient(135deg,#3A6E96,#2C547A)}
-html.embedded body[data-view="diario"] header{background:linear-gradient(135deg,#7A5AA0,#523A72)}
-html.embedded body[data-view="tendencia"] header{background:linear-gradient(135deg,#2C8A7A,#1F6357)}
-html.embedded body[data-view="apoyo"] header{background:linear-gradient(135deg,#5E9C3E,#456A2C)}
-html.embedded body[data-view="ajustes"] header{background:linear-gradient(135deg,#A56A2C,#7A4A1C)}
+/* Embebida en Plan Nutricional ya existe el header general de la app (con el
+   color de la sección Mente). Por eso NO mostramos aquí un segundo header con
+   el nombre de la pestaña: ahorra espacio en móvil y evita cabeceras dobles.
+   La pestaña activa se identifica por la barra de navegación inferior. */
+html.embedded header{display:none!important}
 html.embedded body{padding-top:0}
 html.embedded #tutorial{display:none!important}
 /* Confirmación con estilo propio (sustituye al confirm nativo) */
@@ -749,6 +749,13 @@ const kvGet=k=>idb(STORE,"readonly",s=>s.get(k));
 const kvSet=(k,v)=>idb(STORE,"readwrite",s=>s.put(v,k));
 const blobSet=(k,v)=>idb(BLOBS,"readwrite",s=>s.put(v,k));
 const blobGet=k=>idb(BLOBS,"readonly",s=>s.get(k));
+const blobDel=k=>idb(BLOBS,"readwrite",s=>s.delete(k));
+// Quita la referencia a un audio/foto del día que la contenga.
+function removeMediaRef(kind,id){
+  for(const dk in state.days){ const arr=state.days[dk][kind];
+    if(Array.isArray(arr)){ const i=arr.findIndex(x=>x&&x.id===id); if(i>=0){ arr.splice(i,1); return true; } } }
+  return false;
+}
 // Pide al sistema NO borrar el almacenamiento (clave en PWA de iOS/Android)
 async function requestPersistence(){
   try{
@@ -901,9 +908,15 @@ async function renderMantraSetup(){
     const url=URL.createObjectURL(b);
     box.innerHTML=`<audio controls src="${url}" style="width:100%;margin:8px 0"></audio>
       <div class="row"><button class="btn ghost sm" id="dlMantra">⬇️ Descargar</button>
-      <button class="btn red sm" id="reMantra">🔄 Regrabar</button></div>`;
+      <button class="btn red sm" id="reMantra">🔄 Regrabar</button>
+      <button class="btn red sm" id="delMantra">🗑️ Eliminar</button></div>`;
     $("#dlMantra").onclick=()=>downloadBlob(b,"mi-motivacion."+blobExt(b));
     $("#reMantra").onclick=recordMantra;
+    $("#delMantra").onclick=async()=>{
+      if(!await pdConfirm("¿Eliminar tu mensaje de motivación? No se puede deshacer.",{danger:true,ok:"Eliminar"}))return;
+      try{ await blobDel(state.mantraId); }catch(e){}
+      state.mantraId=null; await save(); renderMantraSetup(); renderMantraPlayer(); toast("Motivación eliminada 🗑️");
+    };
   }else{
     box.innerHTML=`<button class="btn" id="recMantra">⏺️ Grabar mi motivación</button>`;
     $("#recMantra").onclick=recordMantra;
@@ -1008,8 +1021,15 @@ async function renderVoiceList(){
     const el=document.createElement("div");el.className="audio-item";
     el.innerHTML=`<div class="meta"><b>${new Date(v.ts).toLocaleString("es-ES",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}</b>
       <span>Nota de voz</span><audio controls src="${URL.createObjectURL(b)}" style="width:100%;margin-top:6px"></audio></div>
-      <button class="btn ghost sm" style="flex:0 0 auto">⬇️</button>`;
-    el.querySelector("button").onclick=()=>downloadBlob(b,"voz-"+v.ts+"."+blobExt(b));
+      <div class="audio-btns">
+        <button class="btn ghost sm dl" title="Descargar" aria-label="Descargar nota de voz">⬇️</button>
+        <button class="btn red sm del" title="Eliminar" aria-label="Eliminar nota de voz">🗑️</button>
+      </div>`;
+    el.querySelector(".dl").onclick=()=>downloadBlob(b,"voz-"+v.ts+"."+blobExt(b));
+    el.querySelector(".del").onclick=async()=>{
+      if(!await pdConfirm("¿Eliminar esta nota de voz? No se puede deshacer.",{danger:true,ok:"Eliminar"}))return;
+      await blobDel(v.id); removeMediaRef("voices",v.id); await save(); renderVoiceList(); toast("Nota de voz eliminada 🗑️");
+    };
     list.appendChild(el);
   }
 }
@@ -1024,13 +1044,32 @@ async function renderPhotos(){
   const g=$("#photoGrid");g.innerHTML="";
   const all=[];Object.values(state.days).forEach(dv=>(dv.photos||[]).forEach(p=>all.push(p)));
   all.sort((a,b)=>b.ts-a.ts);
+  if(!all.length){ g.innerHTML='<p class="empty" style="grid-column:1/-1">Sin fotos aún</p>'; return; }
   for(const p of all){
     const b=await blobGet(p.id);if(!b)continue;
+    const url=URL.createObjectURL(b);
     const div=document.createElement("div");div.className="ph";
-    div.innerHTML=`<img src="${URL.createObjectURL(b)}"><div class="dl">⬇️</div>`;
-    div.querySelector(".dl").onclick=ev=>{ev.stopPropagation();downloadBlob(b,p.name||"foto.jpg");};
+    div.innerHTML=`<img src="${url}" alt="Foto de seguimiento">
+      <button class="ph-btn dl" title="Descargar" aria-label="Descargar foto">⬇️</button>
+      <button class="ph-btn del" title="Eliminar" aria-label="Eliminar foto">🗑️</button>`;
+    div.querySelector("img").onclick=()=>openLightbox(url);
+    div.querySelector(".dl").onclick=ev=>{ev.stopPropagation();downloadBlob(b,p.name||("foto-"+p.ts+".jpg"));};
+    div.querySelector(".del").onclick=async ev=>{ev.stopPropagation();
+      if(!await pdConfirm("¿Eliminar esta foto? No se puede deshacer.",{danger:true,ok:"Eliminar"}))return;
+      await blobDel(p.id); removeMediaRef("photos",p.id); await save(); renderPhotos(); toast("Foto eliminada 🗑️");
+    };
     g.appendChild(div);
   }
+}
+// Visor de foto a pantalla completa (cerrar con toque fuera, la × o Escape).
+function openLightbox(url){
+  const bk=document.createElement("div");bk.className="pd-lb";
+  bk.innerHTML=`<img src="${url}" alt="Foto ampliada"><button class="pd-lb-x" aria-label="Cerrar">×</button>`;
+  const close=()=>{ bk.remove(); document.removeEventListener("keydown",esc); };
+  function esc(ev){ if(ev.key==="Escape") close(); }
+  bk.onclick=e=>{ if(e.target===bk || e.target.classList.contains("pd-lb-x")) close(); };
+  document.addEventListener("keydown",esc);
+  document.body.appendChild(bk);
 }
 $("#saveNoteBtn").onclick=async()=>{
   const t=$("#noteText").value.trim();if(!t)return;
