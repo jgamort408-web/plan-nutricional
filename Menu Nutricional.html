@@ -101,6 +101,13 @@ html[data-theme="dark"] .rc-kcal{color:var(--olive-l)}
 html[data-theme="dark"] .cal-cell.has-viol,
 html[data-theme="dark"] .picker-it.has-viol{background:rgba(200,80,70,.18)}
 html[data-theme="dark"] .picker-it.has-viol:hover{background:rgba(200,80,70,.26)}
+/* 4) Totales diarios por persona en el cuadrante semanal: los fondos de
+   estado eran claros fijos (verde/naranja/azul/rojo) y el texto (--ink)
+   quedaba invisible en oscuro. Tinte oscuro para que se lean las kcal. */
+html[data-theme="dark"] .cal-dtot.st-on{background:rgba(92,128,48,.22)}
+html[data-theme="dark"] .cal-dtot.st-near{background:rgba(200,147,40,.20)}
+html[data-theme="dark"] .cal-dtot.st-low{background:rgba(58,110,150,.22)}
+html[data-theme="dark"] .cal-dtot.st-over{background:rgba(165,60,48,.26)}
 /* Cada sección hereda su color de acento Y el fondo de su header; el resto es común */
 body.sec-nutri{--accent:var(--terra);--accent-l:var(--terra-l);--hdr-bg:#8E441F}
 body.sec-sport{--accent:var(--sport);--accent-l:var(--sport-l);--hdr-bg:#456A2C}

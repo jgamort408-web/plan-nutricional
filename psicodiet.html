@@ -436,6 +436,10 @@ textarea:focus,input:focus{border-color:var(--green)}
 .streak{background:var(--green-l);color:var(--green-d)}
 .toast{background:var(--ink);border-radius:14px;font-family:'DM Mono',monospace;font-size:12px}
 .empty{font-family:'Lora',serif;font-style:italic}
+/* Botón de borrar en cada nota */
+.diary-item .dt{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.note-del{border:none;background:rgba(0,0,0,.08);color:var(--muted);width:22px;height:22px;border-radius:50%;font-size:11px;line-height:1;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:.15s}
+.note-del:hover{background:var(--bad);color:#fff}
 /* ── MODO OSCURO · redefine la paleta semántica + superficies claras
    hardcodeadas. La app usa el mismo esquema; el tema llega por el script
    del <head> (data-theme). Los acentos verde/azul se aclaran para
@@ -458,6 +462,7 @@ html[data-theme="dark"] .reminder,
 html[data-theme="dark"] .hm-item,
 html[data-theme="dark"] .stat{background:var(--soft)}
 html[data-theme="dark"] .tut-card p{color:var(--muted)}
+html[data-theme="dark"] .res .body{color:var(--ink)}
 html[data-theme="dark"] .toast{background:#2C1F0E;color:#F0E6CF}
 html[data-theme="dark"] textarea,
 html[data-theme="dark"] input[type=text]{background:var(--card);color:var(--ink)}
@@ -1130,9 +1135,15 @@ function renderNotes(){
   if(!all.length){list.innerHTML='<p class="empty">Sin notas aún</p>';return;}
   all.forEach(n=>{
     const el=document.createElement("div");el.className="diary-item";
-    el.innerHTML=`<div class="dt">${new Date(n.ts).toLocaleString("es-ES",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}</div>${n.text.replace(/</g,"&lt;")}`;
+    el.innerHTML=`<div class="dt"><span>${new Date(n.ts).toLocaleString("es-ES",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}</span><button class="note-del" title="Borrar nota" aria-label="Borrar nota">✕</button></div>${n.text.replace(/</g,"&lt;")}`;
+    el.querySelector(".note-del").addEventListener("click",()=>deleteNote(n.ts));
     list.appendChild(el);
   });
+}
+async function deleteNote(ts){
+  if(!confirm("¿Borrar esta nota?"))return;
+  Object.values(state.days).forEach(dv=>{ if(dv.notes) dv.notes=dv.notes.filter(n=>n.ts!==ts); });
+  await save();renderNotes();toast("Nota borrada 🗑");
 }
 
 /* ========== Download helper ========== */
