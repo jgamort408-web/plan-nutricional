@@ -1001,7 +1001,10 @@ function scoreCandidate(dishId, ctx){
    margen del mejor (o el top-N), y elegimos uno al azar ponderando por
    calidad. Resultado: variedad real respetando guía, cuotas y restricciones. */
 function pickBest(slot, day, ctx, currentDayCom){
-  const candidates = Object.keys(DISHES).filter(id => DISHES[id].cat === slot && !DISHES[id].libre && !DISHES[id].loose);
+  let candidates = Object.keys(DISHES).filter(id => DISHES[id].cat === slot && !DISHES[id].libre && !DISHES[id].loose);
+  // Modo "sólo favoritos": limita los candidatos a los favoritos activos.
+  // Si no hay ninguno para esta franja, se deja vacía (no se rellena con otras).
+  if(ctx.strictFav && ctx.favSet){ candidates = candidates.filter(id => ctx.favSet.has(id)); }
   if(!candidates.length) return null;
   ctx.day = day;
   ctx.slot = slot;
@@ -1051,8 +1054,9 @@ function autofillCalendar(opts){
     lastBySlot:{},     // {slot: lastDishId}
     quota:     {...AUTO_WEEKLY_QUOTA.com},
     restrictions,
-    favSet:    opts.favorites ? new Set(getDishFavs()) : null,
+    favSet:    opts.favorites ? new Set(opts.favList || getDishFavs()) : null,
     favBoost:  opts.favorites ? 4000 : 0,
+    strictFav: !!opts.favoritesStrict,   // sólo favoritos: no rellenar con otras recetas
     dayTotals: {}      // {day: {A:{k,p,f,c}, B:{k,p,f,c}}}
   };
   // Init per-day totals (una entrada por persona activa)
@@ -1214,10 +1218,16 @@ async function autofillFromScratch(){
 }
 
 async function autofillFromFavorites(){
-  const favs = getDishFavs();
-  if(!favs.length){ pnAlert('Aún no tienes recetas favoritas.\nMarca algunas con la ★ en el catálogo y vuelve a intentarlo.'); return; }
-  if(!await pnConfirm(`¿Generar un menú con tus ${favs.length} recetas favoritas?\nSe prioriza lo que te gusta y se completa con otras sólo si falta variedad. Se borrará el menú actual.`, {danger:true, okText:'Generar'})) return;
-  safeAutofill({respectExisting:false, favorites:true});
+  // SÓLO favoritos ACTIVOS: existentes y no ocultos por una cocina desactivada.
+  const favs = getDishFavs().filter(id => DISHES[id] && !(typeof dishHiddenByCuisine==='function' && dishHiddenByCuisine(id)));
+  if(!favs.length){ pnAlert('Aún no tienes recetas favoritas activas.\nMarca algunas con la ★ en el catálogo (y comprueba que su cocina esté activada) y vuelve a intentarlo.'); return; }
+  // ¿Hay favoritos para cada franja? Avisa de las que quedarán vacías.
+  const byCat = {};
+  favs.forEach(id=>{ const c = DISHES[id].cat; byCat[c] = (byCat[c]||0) + 1; });
+  const missing = CATEGORIES.filter(c=> !byCat[c.key]).map(c=> c.label);
+  const warn = missing.length ? `\n\nNo tienes favoritos para: ${missing.join(', ')}. Esas franjas quedarán vacías (puedes completarlas a mano).` : '';
+  if(!await pnConfirm(`¿Generar un menú SÓLO con tus ${favs.length} recetas favoritas?\nSe usarán únicamente tus favoritos actuales; no se añadirá ninguna otra receta. Se borrará el menú actual.${warn}`, {danger:true, okText:'Generar'})) return;
+  safeAutofill({respectExisting:false, favorites:true, favoritesStrict:true, favList:favs});
 }
 
 /* ── BIND ──────────────────────────────────────────── */
