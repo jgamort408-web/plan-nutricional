@@ -975,7 +975,7 @@ function renderRecipesList(){
       <div class="ur" data-id="${id}">
         <div class="ur-ico">${d.icon||'🍴'}</div>
         <div class="ur-body">
-          <div class="ur-n">${d.nom}</div>
+          <div class="ur-n">${escHtml(d.nom)}</div>
           <div class="ur-m"><span class="cat">${catLbl[d.cat]}</span> · ${d.kcal[0]} / ${d.kcal[1]} kcal</div>
         </div>
         <div class="ur-acts">

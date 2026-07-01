@@ -559,7 +559,7 @@ function renderPicker(){
             <div class="picker-it ${added?'sel':''} ${viols.length?'has-viol':''}" data-pick="${id}">
               <div class="pi-ico">${d.icon}</div>
               <div class="pi-body">
-                <div class="pi-n">${d.nom}${added?' <span class="pi-added">✓ añadido</span>':''}${violBadge}</div>
+                <div class="pi-n">${escHtml(d.nom)}${added?' <span class="pi-added">✓ añadido</span>':''}${violBadge}</div>
                 <div class="pi-m">
                   <span class="nutr">${d.kcal[0]}/${d.kcal[1]} kcal</span>
                   <span class="nutr">·</span>

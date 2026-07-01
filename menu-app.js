@@ -1093,7 +1093,7 @@ function renderDrawer(){
           <div class="dr-it-top">
             <div class="dr-it-ico">${d.icon}</div>
             <div class="dr-it-body">
-              <div class="dr-it-n">${d.nom}</div>
+              <div class="dr-it-n">${escHtml(d.nom)}</div>
               <div class="dr-it-m nutr">${px(d.kcal)} kcal · ${px(d.mac.p)}P · ${px(d.mac.f)}G · ${px(d.mac.c)}C</div>
             </div>
             <div class="dr-it-acts">
@@ -1236,11 +1236,11 @@ function openModal(id){
         ${foodChipsHtml(d)}
       </div>
       <div class="m-meta" style="margin-bottom:14px">
-        <span class="ttime">⏱ ${d.t}</span>
-        <span class="ttime">🍳 ${d.eq}</span>
+        <span class="ttime">⏱ ${escHtml(d.t)}</span>
+        <span class="ttime">🍳 ${escHtml(d.eq)}</span>
       </div>
 
-      <p style="font-size:.95rem;line-height:1.55;color:rgba(44,31,14,.78);margin-bottom:6px">${d.desc}</p>
+      <p style="font-size:.95rem;line-height:1.55;color:rgba(44,31,14,.78);margin-bottom:6px">${escHtml(d.desc)}</p>
 
       <div class="m-section-hd nutr">Macros · ${S.p==='AB' ? 'Todas · ración combinada' : escHtml(((TARGETS[S.p]||{}).name||'').trim()||('Persona '+(PEOPLE.indexOf(S.p)+1)))}</div>
       <div class="m-kcal-row nutr">
@@ -1262,7 +1262,7 @@ function openModal(id){
         <tbody>
           ${d.ing.map(i=>`
             <tr>
-              <td class="ing-n">${i.n}</td>
+              <td class="ing-n">${escHtml(i.n)}</td>
               ${PEOPLE.map(id=>`<td class="qty ${S.p===id?'hi':''}">${i[id]!=null?i[id]:''}</td>`).join('')}
               ${PEOPLE.length>1?`<td class="qty ab ${S.p==='AB'?'hi':''}">${sumQtyAll(i)}</td>`:''}
             </tr>`).join('')}
