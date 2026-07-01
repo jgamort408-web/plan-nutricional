@@ -9,7 +9,7 @@
    openModal, persistCustom, renderAll, openSettings (menu-forms/app)
 ══════════════════════════════════════════════════════════ */
 
-function esc(s){ return (s||'').toString().replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+function esc(s){ return (s==null?'':s).toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 /* paleta de emojis representativos para recetas */
 const RECIPE_EMOJIS = [
@@ -733,7 +733,7 @@ function recomputeBuilderLive(form){
       const T = (typeof TARGETS!=='undefined' && TARGETS[id]) ? TARGETS[id] : {};
       const sym = T.sym || (id==='A'?'♂':id==='B'?'♀':'🧑');
       const name = T.name || id;
-      return `<div class="cl-ab-i${i%2?' b':''}"><strong>${sym} ${name}</strong> ·${mod!==1?` ×${mod} ·`:''} ${catLbl}: ${Math.round(s.tot.k)} kcal · ${Math.round(s.tot.p)}P ${Math.round(s.tot.f)}G ${Math.round(s.tot.c)}C</div>`;
+      return `<div class="cl-ab-i${i%2?' b':''}"><strong>${esc(sym)} ${esc(name)}</strong> ·${mod!==1?` ×${mod} ·`:''} ${esc(catLbl)}: ${Math.round(s.tot.k)} kcal · ${Math.round(s.tot.p)}P ${Math.round(s.tot.f)}G ${Math.round(s.tot.c)}C</div>`;
     }).join('');
   } else {
     document.getElementById('clAb').innerHTML = `<div class="cl-ab-i">Añade alimentos para ver el cálculo por persona</div>`;

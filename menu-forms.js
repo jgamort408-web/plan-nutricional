@@ -348,7 +348,9 @@ function wireDataManager(){
       try{
         // borra los datos actuales de la app
         for(let i=localStorage.length-1; i>=0; i--){ const k=localStorage.key(i); if(k && BACKUP_PREFIXES.some(p=>k.startsWith(p))) localStorage.removeItem(k); }
-        Object.entries(obj.store).forEach(([k,v])=>{ if(typeof v==='string') localStorage.setItem(k, v); });
+        // Defensa: solo restauramos claves con un prefijo conocido de la app
+        // (un fichero manipulado no puede inyectar claves ajenas).
+        Object.entries(obj.store).forEach(([k,v])=>{ if(typeof v==='string' && BACKUP_PREFIXES.some(p=>k.startsWith(p))) localStorage.setItem(k, v); });
         location.reload();
       }catch(err){ if(msg){msg.className='data-msg err'; msg.textContent='✘ No se pudo restaurar: '+err.message;} }
     };
