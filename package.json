@@ -1,0 +1,13 @@
+{
+  "name": "plan-nutricional",
+  "version": "1.0.0",
+  "description": "Plan Nutricional · app web/PWA de planificación nutricional, deporte y hábitos.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "^0.24.0"
+  }
+}
