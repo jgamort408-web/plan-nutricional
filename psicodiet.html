@@ -256,6 +256,18 @@ textarea:focus,input:focus{outline:none;border-color:var(--green)}
 .hm-add{display:flex;gap:8px;margin-top:10px}
 .hm-add input.emoji{width:54px;text-align:center;font-size:20px;flex:0 0 auto}
 .hm-add input.name{flex:1}
+/* Selector de icono para hábitos (desplegable de iconos afines a bienestar) */
+.hm-emoji-pick{position:relative;flex:0 0 auto}
+.hm-emoji-btn{width:54px;min-height:44px;height:100%;border:1.5px solid var(--line);border-radius:14px;background:#FFFDF8;font-size:22px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.hm-emoji-btn:hover,.hm-emoji-btn[aria-expanded="true"]{border-color:var(--green)}
+.hm-emoji-pop{position:absolute;bottom:calc(100% + 6px);left:0;z-index:60;display:none;
+  grid-template-columns:repeat(6,1fr);gap:4px;width:min(288px,74vw);max-height:220px;overflow-y:auto;
+  padding:8px;background:#FFFDF8;border:1.5px solid var(--line);border-radius:14px;box-shadow:0 14px 34px rgba(44,31,14,.24)}
+.hm-emoji-pop.show{display:grid}
+.hm-emoji-opt{border:none;background:transparent;font-size:20px;min-height:38px;border-radius:8px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:.12s}
+.hm-emoji-opt:hover{background:var(--green-l)}
+.hm-emoji-opt.sel{background:var(--green-l);box-shadow:inset 0 0 0 1.5px var(--green)}
 
 /* Insight cards */
 .insight{display:flex;gap:12px;padding:14px;border-radius:16px;background:linear-gradient(135deg,#f0fdfa,#e0f2fe);margin-bottom:10px}
@@ -651,25 +663,18 @@ textarea:focus,input:focus{border-color:var(--green)}
     <p class="muted">Añade o quita lo que quieras seguir cada día. Quitar uno conserva el historial.</p>
     <div id="habitManager"></div>
     <div class="hm-add">
-      <input class="emoji" id="newHabitEmoji" maxlength="2" placeholder="🥗" aria-label="Emoji">
+      <div class="hm-emoji-pick">
+        <button type="button" class="hm-emoji-btn" id="newHabitEmojiBtn" aria-label="Elegir icono" aria-haspopup="true" aria-expanded="false">🥗</button>
+        <input type="hidden" id="newHabitEmoji" value="🥗">
+        <div class="hm-emoji-pop" id="newHabitEmojiPop" role="listbox" aria-label="Iconos para el hábito"></div>
+      </div>
       <input class="name" id="newHabitName" type="text" placeholder="Nuevo hábito" aria-label="Nombre del hábito">
       <button class="btn sm" id="addHabitBtn" style="flex:0 0 auto">Añadir</button>
     </div>
   </div>
 
-  <div class="card">
-    <h2><span class="ic">🔄</span> Copia de seguridad</h2>
-    <p class="muted" style="margin-bottom:12px">Tus datos viven solo en este dispositivo. Exporta una copia para guardarla o pasarla a otro móvil. La importación reemplaza los datos actuales.</p>
-    <button class="btn ghost sm" id="exportBtn" style="margin-bottom:8px;width:100%">⬇️ Exportar copia (JSON)</button>
-    <input type="file" id="importInput" accept="application/json,.json" hidden>
-    <button class="btn blue sm" id="importBtn" style="width:100%">⬆️ Importar copia</button>
-    <p class="muted" style="margin-top:10px;font-size:11.5px">Nota: la copia incluye tu registro y ajustes. Los audios y fotos se descargan aparte con su botón ⬇️.</p>
-  </div>
-
-  <div class="card">
-    <h2><span class="ic">⚙️</span> Datos</h2>
-    <button class="btn ghost sm" id="replayTutBtn" style="width:100%;margin-bottom:8px">🎓 Ver el tutorial otra vez</button>
-    <button class="btn red sm" id="resetBtn" style="width:100%">🗑️ Borrar todos los datos</button>
+  <div class="card pd-data-note">
+    <p class="muted" style="margin:0">Las copias de seguridad y el borrado de datos están ahora en <strong>Configuración</strong> (menú general de la app), para tenerlo todo en un solo sitio. Cada foto y nota de voz puedes descargarla o eliminarla desde <strong>Diario</strong>.</p>
   </div>
 </section>
 
@@ -686,7 +691,7 @@ textarea:focus,input:focus{border-color:var(--green)}
   <button data-v="diario"><span class="ic">📖</span>Diario</button>
   <button data-v="tendencia"><span class="ic">📊</span>Tendencia</button>
   <button data-v="apoyo"><span class="ic">💚</span>Apoyo</button>
-  <button data-v="ajustes"><span class="ic">⚙️</span>Ajustes</button>
+  <button data-v="ajustes"><span class="ic">🎨</span>Personaliza</button>
 </nav>
 
 <div class="modal" id="dayModal">
@@ -928,7 +933,7 @@ function renderMantraPlayer(){
   const postits=state.postits||[];
   const hasAudio=!!state.mantraId;
   if(!hasAudio && !postits.length){
-    box.innerHTML=`<p class="muted">Aún no has añadido tus motivos. Ve a Ajustes ⚙️ para grabar un mensaje o escribir tarjetas.</p>`;return;
+    box.innerHTML=`<p class="muted">Aún no has añadido tus motivos. Ve a Personaliza 🎨 para grabar un mensaje o escribir tarjetas.</p>`;return;
   }
   let html="";
   if(postits.length){
@@ -1142,19 +1147,22 @@ $$("#rangeTabs button").forEach(b=>b.onclick=()=>{
   curRange=+b.dataset.r;renderCharts();renderInsights();
 });
 
-/* ========== Export / Reset ========== */
-$("#exportBtn").onclick=()=>{
+/* ========== Export / Reset ==========
+   La copia de seguridad y el borrado de datos se gestionan ahora en
+   Configuración (menú general de la app). Estos controles ya no están en
+   Mente; los handlers quedan protegidos por si se abre en modo autónomo. */
+$("#exportBtn")&&($("#exportBtn").onclick=()=>{
   downloadBlob(new Blob([JSON.stringify(state,null,2)],{type:"application/json"}),"mente-en-forma-"+todayKey()+".json");
-};
-$("#resetBtn").onclick=async()=>{
+});
+$("#resetBtn")&&($("#resetBtn").onclick=async()=>{
   if(!await pdConfirm("¿Borrar TODOS los datos, audios y fotos? No se puede deshacer.",{danger:true,ok:"Borrar todo"}))return;
   await idb(STORE,"readwrite",s=>s.clear());await idb(BLOBS,"readwrite",s=>s.clear());
   state={days:{},mantraId:null,habits:null};location.reload();
-};
+});
 
 /* ========== Nav ========== */
 // Header de Mente: cambia color de fondo y título por pestaña (texto marfil).
-const MENTE_TABS={hoy:"🏠 Hoy",diario:"📖 Diario",tendencia:"📊 Tendencia",apoyo:"💚 Apoyo",ajustes:"⚙️ Ajustes"};
+const MENTE_TABS={hoy:"🏠 Hoy",diario:"📖 Diario",tendencia:"📊 Tendencia",apoyo:"💚 Apoyo",ajustes:"🎨 Personaliza"};
 function setMenteHeader(v){
   document.body.dataset.view=v;
   const h1=document.querySelector("header h1");
@@ -1303,13 +1311,35 @@ function renderHabitManager(){
     };
   });
 }
+/* Selector de icono para nuevos hábitos: desplegable con iconos afines al
+   bienestar (comida, hidratación, movimiento, descanso, mente, rutina). */
+const HABIT_ICONS=["🥗","🥦","🥕","🍎","🍓","🥑","🐟","🍗","🥚","🫘","🌰","🥛","🍽️",
+  "💧","🚰","🍵","🏋️","🤸","🚶","🏃","🚴","🧘","😴","🛌","🌙","☀️","🧠","🙏","😊",
+  "📝","📖","⏰","✅","🎯","🔥","🌿","🪥","🚭","🍷","📵"];
+const DEFAULT_HABIT_ICON="🥗";
+(function initHabitEmojiPicker(){
+  const btn=$("#newHabitEmojiBtn"), pop=$("#newHabitEmojiPop"), hid=$("#newHabitEmoji");
+  if(!btn||!pop||!hid) return;
+  pop.innerHTML=HABIT_ICONS.map(e=>`<button type="button" role="option" class="hm-emoji-opt${e===hid.value?" sel":""}" data-e="${e}" aria-label="${e}">${e}</button>`).join("");
+  const close=()=>{pop.classList.remove("show");btn.setAttribute("aria-expanded","false");};
+  btn.onclick=(ev)=>{ev.stopPropagation();const open=pop.classList.toggle("show");btn.setAttribute("aria-expanded",open?"true":"false");};
+  pop.querySelectorAll(".hm-emoji-opt").forEach(o=>o.onclick=()=>{
+    hid.value=o.dataset.e; btn.textContent=o.dataset.e;
+    pop.querySelectorAll(".hm-emoji-opt").forEach(x=>x.classList.toggle("sel",x===o));
+    close();
+  });
+  document.addEventListener("click",e=>{ if(pop.classList.contains("show") && !pop.contains(e.target) && e.target!==btn) close(); });
+  document.addEventListener("keydown",e=>{ if(e.key==="Escape") close(); });
+})();
 $("#addHabitBtn")&&($("#addHabitBtn").onclick=()=>{
   const name=$("#newHabitName").value.trim();
   const em=$("#newHabitEmoji").value.trim()||"✅";
   if(!name){toast("Escribe un nombre");return;}
   const id="h_"+Date.now();
   state.habits=HABITS().slice();state.habits.push({id,lbl:name,em});
-  save();$("#newHabitName").value="";$("#newHabitEmoji").value="";
+  save();$("#newHabitName").value="";
+  $("#newHabitEmoji").value=DEFAULT_HABIT_ICON;
+  const eb=$("#newHabitEmojiBtn"); if(eb) eb.textContent=DEFAULT_HABIT_ICON;
   renderHabitManager();renderToday();toast("Hábito añadido ✅");
 });
 
@@ -1367,8 +1397,8 @@ const TUTORIAL=[
   {emoji:"📖",title:"Diario",text:"Graba notas de voz, haz fotos y escribe cómo va tu día. Todo queda guardado y puedes descargarlo al teléfono.",nav:"diario"},
   {emoji:"📊",title:"Tendencia",text:"Mira tu evolución con calma: gráficos, un calendario para revisar días pasados y mensajes amables sobre cómo te sientes.",nav:"tendencia"},
   {emoji:"💚",title:"Apoyo",text:"Aquí está la ayuda psicológica: respiración guiada, técnicas para la ansiedad sin comer y recursos para los días flojos.",nav:"apoyo"},
-  {emoji:"⚙️",title:"Ajustes",text:"Personaliza tus hábitos y guarda una copia de seguridad para llevarla a otro móvil. Tus datos son solo tuyos.",nav:"ajustes"},
-  {emoji:"✨",title:"Listo para empezar",text:"Empieza grabando tu mensaje de motivación en Ajustes y marca tu primer día. Cuídate con amabilidad.",center:true,nav:"hoy"},
+  {emoji:"🎨",title:"Personaliza",text:"Graba tu mensaje de motivación, escribe tus motivos y ajusta tu checklist a tu medida. Es tu espacio.",nav:"ajustes"},
+  {emoji:"✨",title:"Listo para empezar",text:"Empieza grabando tu mensaje de motivación en Personaliza y marca tu primer día. Cuídate con amabilidad.",center:true,nav:"hoy"},
 ];
 let tutStep=0;
 function goToView(v){

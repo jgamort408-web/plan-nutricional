@@ -298,7 +298,12 @@ function renderDataManager(){
         <button class="btn-sec" id="impSportSess">📋 Importar sesiones</button>
       </div>
     </div>
-    ${renderSnapshotsBlock()}`;
+    ${renderSnapshotsBlock()}
+    <div class="snap-sec">
+      <h3 class="snap-h">⚠️ Zona de riesgo</h3>
+      <button class="btn-danger" id="dataWipeAll" style="width:100%">🗑 Borrar todos los datos</button>
+      <p style="font-size:.74rem;color:var(--ink-30);margin-top:8px;line-height:1.5">Elimina de este dispositivo <strong>todos</strong> tus datos: perfiles, recetas, menús, calendario, entrenos, favoritos, feedback y todo lo de <strong>Mente</strong> (incluidas fotos y notas de voz). No se puede deshacer. Exporta una copia antes si quieres conservarlos.</p>
+    </div>`;
 }
 
 /* ── Copias automáticas restaurables (sesión) ──────────────── */
@@ -366,6 +371,20 @@ function wireDataManager(){
       const id = +b.dataset.snap;
       if(window.PNSession) window.PNSession.restoreSnap(id);
     });
+  });
+
+  // Borrar TODOS los datos de la app (centralizado aquí; antes también en Mente).
+  const wipe = document.getElementById('dataWipeAll');
+  if(wipe) wipe.addEventListener('click', async ()=>{
+    const ok = await pnConfirm('¿Borrar TODOS los datos de este dispositivo?\n\nPerfiles, recetas, menús, calendario, entrenos, favoritos, feedback y todo lo de Mente (incluidas fotos y notas de voz). No se puede deshacer.', {danger:true, okText:'Borrar todo'});
+    if(!ok) return;
+    try{
+      for(let i=localStorage.length-1; i>=0; i--){ const k=localStorage.key(i); if(k && BACKUP_PREFIXES.some(p=>k.startsWith(p))) localStorage.removeItem(k); }
+    }catch(e){}
+    // Mente guarda audios/fotos en IndexedDB (mismo origen): elimínala también.
+    try{ if(window.indexedDB && indexedDB.deleteDatabase) indexedDB.deleteDatabase('menteEnFormaDB'); }catch(e){}
+    if(msg){ msg.className='data-msg ok'; msg.textContent='Datos borrados. Recargando…'; }
+    setTimeout(()=>{ try{ location.reload(); }catch(e){ location.href=location.href; } }, 300);
   });
 }
 
