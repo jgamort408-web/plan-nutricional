@@ -1505,7 +1505,9 @@
     .bib-count{font-size:.76rem;color:var(--ink-50);margin-bottom:10px}
     .bib-group-h{font-family:'Playfair Display',serif;font-size:1rem;color:var(--accent,#B5603A);margin:16px 0 8px;padding-bottom:4px;border-bottom:1.5px solid rgba(181,96,58,.25)}
     .bib-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin-bottom:6px}
-    .bib-item{border:1px solid rgba(var(--ink-rgb,44,31,14),.1);border-radius:14px;padding:13px 15px;background:linear-gradient(160deg,rgba(255,255,255,.7),rgba(245,238,228,.4));display:flex;flex-direction:column}
+    .bib-item{border:1px solid rgba(var(--ink-rgb,44,31,14),.1);border-radius:14px;padding:13px 15px;background:linear-gradient(160deg,var(--white),var(--parch));display:flex;flex-direction:column;transition:box-shadow .2s,border-color .2s}
+    .bib-item.bib-hl{border-color:var(--accent,#B5603A);box-shadow:0 0 0 3px rgba(181,96,58,.28),0 10px 26px rgba(var(--ink-rgb,44,31,14),.14);animation:bibPop .5s ease}
+    @keyframes bibPop{0%{transform:scale(.99)}40%{transform:scale(1.012)}100%{transform:scale(1)}}
     .bib-it-top{display:flex;gap:8px;align-items:flex-start;margin-bottom:5px}
     .bib-it-ic{font-size:1.2rem;flex:none}
     .bib-it-t{font-family:'Lora',serif;font-weight:600;font-size:.96rem;color:var(--ink);line-height:1.3;flex:1}
@@ -1552,7 +1554,7 @@
     const {TIPOS,TEMAS}=window.BiblioData;
     const tmeta = TIPOS[r.tipo]||{ico:'📄',lbl:r.tipo};
     const tags = (r.temas||[]).map(t=> TEMAS[t]?`<span class="bib-tag">${TEMAS[t].ico} ${esc(TEMAS[t].lbl)}</span>`:'').join('');
-    return `<div class="bib-item">
+    return `<div class="bib-item" data-id="${esc(r.id)}">
       <div class="bib-it-top"><span class="bib-it-ic">${tmeta.ico}</span><span class="bib-it-t">${esc(r.titulo)}</span></div>
       <div class="bib-it-meta">${esc(r.autores)} · ${esc(r.fuente)}${r.year?(' · '+r.year):''}</div>
       <div class="bib-it-cita">${esc(r.cita)}</div>
@@ -1579,10 +1581,13 @@
     if(ok){ try{ window.open(url, '_blank', 'noopener,noreferrer'); }catch(e){ location.href=url; } }
   }
 
-  function open(){
+  function open(targetId){
     injectCSS();
     const {TIPOS,TEMAS,SORTS}=window.BiblioData;
     _state.closed=false;
+    // Si llegamos desde una referencia de Teoría, limpiamos filtros para
+    // garantizar que la entrada objetivo esté visible.
+    if(targetId){ _state.q=''; _state.tipo='all'; _state.tema='all'; }
     const tipoChips = [`<button class="bib-chip ${_state.tipo==='all'?'on':''}" data-tipo="all">Todos</button>`]
       .concat(Object.entries(TIPOS).map(([k,v])=>`<button class="bib-chip ${_state.tipo===k?'on':''}" data-tipo="${k}">${v.ico} ${esc(v.lbl)}</button>`)).join('');
     const temaChips = [`<button class="bib-chip ${_state.tema==='all'?'on':''}" data-tema="all">Todos</button>`]
@@ -1609,6 +1614,14 @@
           </div>
           <div class="bib-scroll"></div>`;
         renderBody();
+        // Salto a una referencia concreta (desde Teoría): scroll + resaltado.
+        if(targetId){
+          requestAnimationFrame(()=>{
+            const sel = (window.CSS&&CSS.escape) ? CSS.escape(targetId) : targetId;
+            const el = body.querySelector('.bib-item[data-id="'+sel+'"]');
+            if(el){ try{ el.scrollIntoView({behavior:'smooth',block:'center'}); }catch(_){ el.scrollIntoView(); } el.classList.add('bib-hl'); setTimeout(()=>el.classList.remove('bib-hl'), 2600); }
+          });
+        }
         const fbtn=body.querySelector('.bib-filterbtn'), fpanel=body.querySelector('.bib-filters');
         fbtn.addEventListener('click', ()=>{ const open=fpanel.hasAttribute('hidden'); if(open) fpanel.removeAttribute('hidden'); else fpanel.setAttribute('hidden',''); fbtn.setAttribute('aria-expanded', open); });
         const refreshBadge=()=>{ const n=(_state.tipo!=='all'?1:0)+(_state.tema!=='all'?1:0); fbtn.classList.toggle('has', !!n); let b=fbtn.querySelector('.bib-fbadge'); if(n){ if(!b){ b=document.createElement('span'); b.className='bib-fbadge'; fbtn.appendChild(b);} b.textContent=n; } else if(b){ b.remove(); } };
