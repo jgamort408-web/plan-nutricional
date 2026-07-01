@@ -1,0 +1,78 @@
+{
+  "kind": "recipe-pack",
+  "cuisine": { "id": "cor", "ico": "🇰🇷", "lbl": "Comida coreana" },
+  "foods": {
+    "gochujang": { "name": "Gochujang (pasta picante)", "sec": "cond", "kcal": 210, "p": 5, "f": 2, "c": 40, "ft": [] },
+    "salsa_soja": { "name": "Salsa de soja", "sec": "cond", "kcal": 60, "p": 6, "f": 0, "c": 6, "ft": [] },
+    "aceite_de_sesamo": { "name": "Aceite de sésamo", "sec": "gras", "kcal": 884, "p": 0, "f": 100, "c": 0, "ft": [] }
+  },
+  "dishes": {
+    "COR_D1": {
+      "cat": "des", "short": "Tostada coreana de huevo",
+      "nom": "Tostada coreana de huevo y col", "icon": "🥪",
+      "t": "12 min", "eq": "Sartén · Tostadora", "tipo": null, "diet": ["vt"], "food": ["hv", "v", "qs"],
+      "desc": "La tostada callejera de Seúl: tortilla plana de huevo con col y zanahoria dentro de pan tostado con queso. Reconfortante.",
+      "nota": "Bate los huevos con la col y la zanahoria ralladas y una pizca de sal. Cuájalos como tortilla plana. Tuesta el pan, coloca la tortilla y el queso, y cierra.",
+      "comp": [
+        {"f":"pan_integral","g":80},
+        {"f":"huevo","u":2},
+        {"f":"repollo","g":80,"as":"Col en juliana"},
+        {"f":"zanahoria","g":40},
+        {"f":"queso_fresco","g":30},
+        {"f":"aceite_de_oliva","g":5}
+      ]
+    },
+    "COR_C1": {
+      "cat": "com", "short": "Bibimbap de ternera",
+      "nom": "Bibimbap de ternera y verduras", "icon": "🍚",
+      "t": "30 min", "eq": "Sartén · Cazo", "tipo": "completa", "diet": ["cn"], "food": ["cr", "apq", "v", "hv"],
+      "desc": "El bol coreano clásico: arroz con verduras salteadas por separado, ternera, huevo a la plancha y gochujang. Colorido y completo.",
+      "nota": "Cuece el arroz. Saltea por separado la espinaca, la zanahoria y los champiñones. Dora la ternera en tiras. Monta el bol con el arroz, las verduras, la carne, el huevo a la plancha, gochujang y sésamo.",
+      "comp": [
+        {"f":"arroz_integral_cocido","g":150,"note":"cocido"},
+        {"f":"ternera_magra","g":130,"note":"crudo"},
+        {"f":"espinaca","g":80},
+        {"f":"zanahoria","g":60},
+        {"f":"champinones","g":60},
+        {"f":"huevo","u":1},
+        {"f":"gochujang","g":20},
+        {"f":"sesamo_semillas","g":8},
+        {"f":"aceite_de_sesamo","g":6},
+        {"f":"ajo","cs":true}
+      ]
+    },
+    "COR_M1": {
+      "cat": "mer", "short": "Pepino picante y huevo",
+      "nom": "Pepino picante coreano con huevo", "icon": "🥒",
+      "t": "10 min", "eq": "Cazo · Bol", "tipo": null, "diet": ["vt", "sl"], "food": ["v", "hv"],
+      "desc": "Oi-muchim: pepino aliñado con gochujang y sésamo, con huevo cocido y unas tortitas de arroz. Ligero y con chispa.",
+      "nota": "Corta el pepino en medias lunas y alíñalo con gochujang, sésamo y unas gotas de aceite de sésamo. Acompaña con huevo cocido y tortitas de arroz.",
+      "comp": [
+        {"f":"pepino","g":150},
+        {"f":"huevo","u":2,"note":"cocido"},
+        {"f":"gochujang","g":12},
+        {"f":"sesamo_semillas","g":5},
+        {"f":"aceite_de_sesamo","g":3},
+        {"f":"tortitas_arroz","g":12}
+      ]
+    },
+    "COR_N1": {
+      "cat": "cen", "short": "Pollo bulgogi",
+      "nom": "Pollo bulgogi con verduras", "icon": "🍗",
+      "t": "22 min", "eq": "Sartén/Wok", "tipo": "completa", "diet": ["cn", "sl"], "food": ["cb", "v"],
+      "desc": "Pollo marinado al estilo bulgogi, salteado a fuego fuerte con cebolla, pimiento y zanahoria. Dulce, salado y aromático.",
+      "nota": "Marina el pollo en tiras con salsa de soja, gochujang y ajo 10 min. Saltéalo a fuego fuerte con la cebolla, el pimiento y la zanahoria. Termina con sésamo y unas gotas de aceite de sésamo.",
+      "comp": [
+        {"f":"pechuga_de_pollo","g":180,"note":"crudo"},
+        {"f":"cebolla","g":70},
+        {"f":"pimiento_rojo","g":70},
+        {"f":"zanahoria","g":50},
+        {"f":"salsa_soja","g":18},
+        {"f":"gochujang","g":10},
+        {"f":"sesamo_semillas","g":6},
+        {"f":"aceite_de_sesamo","g":6},
+        {"f":"ajo","cs":true}
+      ]
+    }
+  }
+}

@@ -1,0 +1,75 @@
+{
+  "kind": "recipe-pack",
+  "cuisine": { "id": "per", "ico": "🇵🇪", "lbl": "Comida peruana" },
+  "foods": {
+    "aji_amarillo": { "name": "Ají amarillo (pasta)", "sec": "cond", "kcal": 45, "p": 1.5, "f": 1, "c": 8, "ft": [] },
+    "salsa_soja": { "name": "Salsa de soja", "sec": "cond", "kcal": 60, "p": 6, "f": 0, "c": 6, "ft": [] },
+    "cilantro": { "name": "Cilantro fresco", "sec": "verd", "kcal": 23, "p": 2.1, "f": 0.5, "c": 3.7, "ft": ["v"] }
+  },
+  "dishes": {
+    "PER_D1": {
+      "cat": "des", "short": "Pan con palta y huevo",
+      "nom": "Pan con palta, huevo y tomate", "icon": "🥑",
+      "t": "10 min", "eq": "Cazo · Tostadora", "tipo": null, "diet": ["vt"], "food": ["hv", "v", "fr"],
+      "desc": "El desayuno peruano de calle: pan tostado con palta (aguacate) machacada, huevo y tomate. Cremoso y saciante.",
+      "nota": "Cuece los huevos 9 min y pélalos. Machaca la palta con zumo de limón y sal. Tuesta el pan, extiende la palta y coloca el huevo laminado y el tomate.",
+      "comp": [
+        {"f":"pan_integral","g":80},
+        {"f":"aguacate","g":70,"as":"Palta"},
+        {"f":"huevo","u":2},
+        {"f":"tomate","g":100},
+        {"f":"limon","cs":true,"as":"Zumo de limón y sal"},
+        {"f":"aceite_de_oliva","g":5}
+      ]
+    },
+    "PER_C1": {
+      "cat": "com", "short": "Ceviche con camote",
+      "nom": "Ceviche de pescado con camote y choclo", "icon": "🐟",
+      "t": "20 min", "eq": "Cuchillo/Bol · Cazo", "tipo": "completa", "diet": ["ps", "sg", "sl"], "food": ["pb", "v", "fr"],
+      "desc": "Pescado blanco curado en leche de tigre (lima, ají y cilantro) con cebolla morada, camote dulce y choclo. Fresco y proteico.",
+      "nota": "Corta el pescado en dados y cúbrelo con zumo de lima con sal 10 min. Añade cebolla morada en pluma, ají amarillo y cilantro picado. Sirve con camote cocido y maíz.",
+      "comp": [
+        {"f":"pescado_blanco","g":220,"note":"crudo"},
+        {"f":"limon","g":60,"as":"Zumo de lima/limón"},
+        {"f":"cebolla_morada","g":60},
+        {"f":"aji_amarillo","g":15},
+        {"f":"cilantro","cs":true,"as":"Cilantro picado"},
+        {"f":"boniato","g":150,"as":"Camote"},
+        {"f":"maiz","g":60,"as":"Choclo / cancha"},
+        {"f":"aceite_de_oliva","g":5}
+      ]
+    },
+    "PER_M1": {
+      "cat": "mer", "short": "Camote con guacamole",
+      "nom": "Camote asado con guacamole", "icon": "🍠",
+      "t": "20 min", "eq": "Horno", "tipo": null, "diet": ["vg", "vt", "sg", "sl"], "food": ["v", "fs"],
+      "desc": "Rodajas de camote (boniato) al horno con guacamole y semillas. Merienda dulce-salada rica en fibra.",
+      "nota": "Asa el camote en rodajas hasta que esté tierno. Sírvelo con guacamole y espolvorea semillas de girasol por encima.",
+      "comp": [
+        {"f":"boniato","g":150,"as":"Camote"},
+        {"f":"guacamole","g":60},
+        {"f":"limon","cs":true},
+        {"f":"semillas_de_girasol","g":15}
+      ]
+    },
+    "PER_N1": {
+      "cat": "cen", "short": "Lomo saltado",
+      "nom": "Lomo saltado de ternera con arroz", "icon": "🥩",
+      "t": "25 min", "eq": "Sartén/Wok", "tipo": "completa", "diet": ["cn"], "food": ["cr", "v", "apq"],
+      "desc": "El salteado peruano por excelencia: ternera a fuego fuerte con cebolla, tomate y ají, papas y arroz. Sabroso y contundente.",
+      "nota": "Saltea la ternera en tiras a fuego muy fuerte y resérvala. Saltea cebolla, tomate y pimiento; devuelve la carne con la salsa de soja y el ají. Sirve con las papas al horno y el arroz.",
+      "comp": [
+        {"f":"ternera_magra","g":150,"note":"crudo"},
+        {"f":"cebolla","g":80},
+        {"f":"tomate","g":100},
+        {"f":"pimiento_rojo","g":60},
+        {"f":"patata","g":90,"note":"crudo","as":"Papas al horno"},
+        {"f":"arroz_integral_cocido","g":75,"note":"cocido"},
+        {"f":"salsa_soja","g":15},
+        {"f":"aji_amarillo","g":10},
+        {"f":"aceite_de_oliva","g":10},
+        {"f":"ajo","cs":true}
+      ]
+    }
+  }
+}

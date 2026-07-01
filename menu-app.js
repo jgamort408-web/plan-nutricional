@@ -1269,10 +1269,10 @@ function openModal(id){
       </table>
 
       <div class="m-section-hd">Preparación</div>
-      ${(()=>{ const steps=(d.nota||'').split('\n').map(s=>s.trim()).filter(Boolean);
+      ${(()=>{ const steps = (typeof toSteps==='function') ? toSteps(d.nota) : (d.nota||'').split('\n').map(s=>s.trim()).filter(Boolean);
         return steps.length>1
           ? `<ol class="m-steps">${steps.map(s=>`<li>${escHtml(s)}</li>`).join('')}</ol>`
-          : `<div class="pnote">📋 ${escHtml(d.nota||'—')}</div>`; })()}
+          : `<div class="pnote">📋 ${escHtml((steps[0])||d.nota||'—')}</div>`; })()}
 
       <div class="m-cta">
         <button id="ctaFav" class="m-fav-btn ${isDishFav(id)?'on':''}" data-id="${id}">

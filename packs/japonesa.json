@@ -85,6 +85,24 @@
         {"f":"sesamo","g":5},
         {"f":"fruta_temporada","g":150}
       ]
+    },
+    "JAP_C3": {
+      "cat": "com", "short": "Pollo teriyaki con arroz",
+      "nom": "Pollo teriyaki con arroz y brócoli", "icon": "🍗",
+      "t": "20 min", "eq": "Sartén/Wok · Cazo", "tipo": "completa", "diet": ["cn", "sl"], "food": ["apq", "cb", "v"],
+      "desc": "Pollo glaseado en salsa teriyaki casera (soja y miel) con arroz y brócoli al vapor. Dulce, salado y equilibrado.",
+      "nota": "Dora el pollo en tiras. Añade la salsa de soja y la miel y deja que reduzca hasta glasear. Sirve sobre el arroz con el brócoli al vapor y sésamo por encima.",
+      "comp": [
+        {"f":"arroz_integral_cocido","g":180,"note":"cocido"},
+        {"f":"pechuga_de_pollo","g":150,"note":"crudo"},
+        {"f":"salsa_soja","g":20},
+        {"f":"miel","g":8,"as":"Miel (glaseado)"},
+        {"f":"brocoli","g":120},
+        {"f":"zanahoria","g":50},
+        {"f":"sesamo","g":5},
+        {"f":"aceite_de_oliva","g":6},
+        {"f":"ajo","cs":true}
+      ]
     }
   }
 }

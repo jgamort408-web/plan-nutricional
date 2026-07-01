@@ -150,6 +150,27 @@ function splitSteps(s){
   if(!s || s==='—') return [];
   return s.split(/\n+|(?:^|\s)\d+[\.\)]\s+/).map(x=>x.trim()).filter(Boolean);
 }
+// Convierte CUALQUIER preparación en PASOS DISCRETOS: primero por líneas o
+// numeración; si viene en un solo párrafo (recetas antiguas), lo divide por
+// frases sin romper decimales ni abreviaturas típicas (min., aprox., ud.…).
+function toSteps(nota){
+  if(nota==null) return [];
+  const t = String(nota).trim();
+  if(!t || t==='—') return [];
+  const byLine = splitSteps(t);
+  if(byLine.length > 1) return byLine;
+  const ABBR = /(?:\d|min|aprox|ud|uds|g|kg|ml|cl|nº|núm|sr|sra|etc|máx|mín|temp)\.$/i;
+  const segs = t.split(/(?<=[.!?])\s+/);
+  const out = []; let buf = '';
+  segs.forEach(seg=>{
+    buf = buf ? buf + ' ' + seg : seg;
+    if(ABBR.test(buf)) return;                 // no cortar tras abreviatura/decimal
+    out.push(buf.replace(/\s+/g,' ').trim()); buf = '';
+  });
+  if(buf.trim()) out.push(buf.replace(/\s+/g,' ').trim());
+  return out.filter(Boolean);
+}
+window.toSteps = toSteps;
 
 function openRecipeForm(catKey, editId){
   const editing = !!editId;
@@ -172,7 +193,12 @@ function openRecipeForm(catKey, editId){
     <div class="form-body" id="recipeForm">
       <div id="builderVisual">
         ${editing?'':`<button type="button" class="loose-link" id="looseFromBuilder">🍎 ¿Solo un alimento suelto (fruta, yogur…) con su cantidad? Añádelo aquí →</button>`}
-        ${legacyNoComp?`<div class="comp-hint" style="color:var(--rose)">Esta receta es antigua y no tiene desglose por alimentos. Añádelos abajo para recalcular sus macros automáticamente.</div>`:''}
+        <div class="cr-stepper" id="crStepper">
+          <button type="button" class="cr-si on" data-go="1"><b>1</b><span>Datos</span></button>
+          <button type="button" class="cr-si" data-go="2"><b>2</b><span>Alimentos</span></button>
+          <button type="button" class="cr-si" data-go="3"><b>3</b><span>Preparación</span></button>
+        </div>
+        <div class="cr-step on" data-step="1">
         <div class="frow-2">
           <div class="fgrp">
             <label class="flbl">Categoría</label>
@@ -237,6 +263,9 @@ function openRecipeForm(catKey, editId){
           </div>
         </div>
 
+        </div>
+        <div class="cr-step" data-step="2">
+        ${legacyNoComp?`<div class="comp-hint" style="color:var(--rose)">Esta receta es antigua y no tiene desglose por alimentos. Añádelos abajo para recalcular sus macros automáticamente.</div>`:''}
         <div class="fgrp">
           <label class="flbl">Ingredientes · ración de referencia</label>
           <div class="comp-hint">Cantidad para <strong>1 ración estándar</strong>. La app calcula las de ♂ A y ♀ B escalando al objetivo de cada comida. Marca <span class="legend-fix">🔒</span> en verduras y aliños para que no se escalen.</div>
@@ -252,12 +281,19 @@ function openRecipeForm(catKey, editId){
           <div class="cl-ab" id="clAb"></div>
         </div>
 
+        </div>
+        <div class="cr-step" data-step="3">
         <div class="fgrp" style="margin-top:14px">
           <label class="flbl">Preparación · pasos</label>
           <div class="steps-list" id="stepsList">
-            ${(splitSteps(d.nota).length?splitSteps(d.nota):['']).map(stepRowHtml).join('')}
+            ${(toSteps(d.nota).length?toSteps(d.nota):['']).map(stepRowHtml).join('')}
           </div>
           <button type="button" class="ing-add-btn" id="addStepBtn">＋ Añadir paso</button>
+        </div>
+        </div>
+        <div class="cr-nav">
+          <button type="button" class="btn-sec cr-back" id="crBack">‹ Atrás</button>
+          <button type="button" class="btn-prim cr-next" id="crNext">Siguiente ›</button>
         </div>
       </div>
 
@@ -359,6 +395,31 @@ function wireRecipeForm(editId){
       document.getElementById('builderJsonPane').style.display = b.dataset.btab==='json' ? '' : 'none';
     });
   });
+
+  // ── Asistente por pasos (1 Datos · 2 Alimentos · 3 Preparación) ──
+  (function wizard(){
+    const steps = [...form.querySelectorAll('.cr-step')];
+    if(!steps.length) return;
+    const stepper = form.querySelector('#crStepper');
+    const back = form.querySelector('#crBack'), next = form.querySelector('#crNext');
+    const total = steps.length; let cur = 1;
+    function show(n){
+      cur = Math.max(1, Math.min(total, n));
+      steps.forEach(s=> s.classList.toggle('on', +s.dataset.step===cur));
+      if(stepper) stepper.querySelectorAll('.cr-si').forEach(si=>{
+        const k=+si.dataset.go; si.classList.toggle('on', k===cur); si.classList.toggle('done', k<cur);
+      });
+      if(back) back.style.visibility = cur>1 ? '' : 'hidden';
+      if(next) next.style.display = cur<total ? '' : 'none';
+      const body = form.closest('.form-body-scroll') || form.parentNode;
+      if(body && body.scrollTo) body.scrollTo({top:0, behavior:'smooth'});
+      const first = steps[cur-1].querySelector('input,textarea,select,button'); // foco al entrar
+    }
+    if(back) back.addEventListener('click', ()=> show(cur-1));
+    if(next) next.addEventListener('click', ()=> show(cur+1));
+    if(stepper) stepper.querySelectorAll('.cr-si').forEach(si=> si.addEventListener('click', ()=> show(+si.dataset.go)));
+    show(1);
+  })();
 
   // diet + tipo chips
   form.querySelectorAll('#dietChips .fchip').forEach(b=> b.addEventListener('click', ()=> b.classList.toggle('on')));
