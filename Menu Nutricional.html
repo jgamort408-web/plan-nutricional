@@ -2490,8 +2490,45 @@ main[data-vm="small"] .dish-incart{font-size:.5rem;padding:3px 8px}
 <script src="menu-assistant.js"></script>
 <script src="menu-month.js"></script>
 <script src="sport-assistant.js"></script>
-<script src="menu-biblio.js"></script>
-<script src="menu-teoria.js"></script>
+<script>
+/* ── Carga diferida del "pack de contenido" · Teoría + Bibliografía ──
+   Son ~364 KB de texto que la mayoría de sesiones no abren. No se
+   descargan ni ejecutan hasta que el usuario entra en una de las dos
+   secciones. Se cargan JUNTAS porque Teoría enlaza referencias de
+   Bibliografía (biblio primero: teoría lee window.BiblioData).
+   Siguen en el SHELL del service worker, así que offline se sirven
+   desde caché al pedirlas. */
+(function(){
+  var loaded=false, loading=null;
+  function inject(src){
+    return new Promise(function(res,rej){
+      var s=document.createElement('script'); s.src=src; s.async=false;
+      s.onload=res; s.onerror=function(){ rej(new Error('No se pudo cargar '+src)); };
+      document.body.appendChild(s);
+    });
+  }
+  function load(){
+    if(loaded) return Promise.resolve();
+    if(loading) return loading;
+    loading = inject('menu-biblio.js')
+      .then(function(){ return inject('menu-teoria.js'); })
+      .then(function(){ loaded=true; })
+      .catch(function(err){ loading=null; try{ if(window.pnToast) pnToast('No se pudo cargar el contenido, revisa tu conexión','err'); }catch(_){}; throw err; });
+    return loading;
+  }
+  window.pnLoadContentPack = load;
+  // Stubs: activan la carga y luego llaman a la función real (que los
+  // propios módulos reasignan sobre window al ejecutarse).
+  function stub(name){
+    var fn = function(){
+      load().then(function(){ var f=window[name]; if(typeof f==='function' && f!==fn) f(); });
+    };
+    window[name] = fn;
+  }
+  stub('openTeoria');
+  stub('openBibliografia');
+})();
+</script>
 <script src="menu-feedback.js"></script>
 <script src="menu-translate.js"></script>
 
