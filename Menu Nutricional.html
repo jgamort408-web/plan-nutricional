@@ -2591,7 +2591,8 @@ main[data-vm="small"] .dish-incart{font-size:.5rem;padding:3px 8px}
   // propios módulos reasignan sobre window al ejecutarse).
   function stub(name){
     var fn = function(){
-      load().then(function(){ var f=window[name]; if(typeof f==='function' && f!==fn) f(); });
+      var args = arguments;
+      load().then(function(){ var f=window[name]; if(typeof f==='function' && f!==fn) f.apply(null, args); });
     };
     window[name] = fn;
   }
