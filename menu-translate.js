@@ -42,9 +42,9 @@
       box-shadow:0 24px 64px rgba(0,0,0,.4)}
     .pn-tr-ic{font-size:2.6rem;animation:pnTrSpin 1.4s ease-in-out infinite;display:inline-block}
     @keyframes pnTrSpin{0%{transform:scale(1) rotate(0)}50%{transform:scale(1.12) rotate(8deg)}100%{transform:scale(1) rotate(0)}}
-    .pn-tr-t{font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--warm,#2C1F0E);margin:12px 0 4px}
+    .pn-tr-t{font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--ink,#2C1F0E);margin:12px 0 4px}
     .pn-tr-s{font-size:.84rem;color:var(--ink-50,#6b5d49);margin-bottom:14px;min-height:1.2em}
-    .pn-tr-bar{height:8px;border-radius:6px;background:rgba(44,31,14,.12);overflow:hidden}
+    .pn-tr-bar{height:8px;border-radius:6px;background:rgba(var(--ink-rgb,44,31,14),.12);overflow:hidden}
     .pn-tr-fill{height:100%;width:5%;background:var(--accent,#B5603A);border-radius:6px;transition:width .3s ease}
     /* Oculta TODA la interfaz de Google Translate: barra superior, gadget,
        el globo de "¿te gusta la traducción?" y el tooltip al pasar el ratón. */

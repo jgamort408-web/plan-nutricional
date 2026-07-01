@@ -46,7 +46,7 @@
     .app-page-scroll{flex:1;overflow:auto;padding:20px 22px 40px;font-family:'Lora',Georgia,serif}
     .app-page-title{font-family:'Playfair Display',serif;font-weight:700;font-size:clamp(1.35rem,4.5vw,1.7rem);
       color:var(--accent,#B5603A);line-height:1.2;margin:0 0 14px;padding-bottom:12px;
-      border-bottom:1px solid rgba(44,31,14,.1)}
+      border-bottom:1px solid rgba(var(--ink-rgb,44,31,14),.1)}
     .app-page-swipe-hint{display:none;text-align:center;font-size:.72rem;color:var(--ink-50,#6b5d49);
       padding:6px 0 0;font-family:'DM Mono',monospace;letter-spacing:.04em}
     @media(max-width:760px){ .app-page-inner{max-width:none;border-top-width:3px} .app-page-swipe-hint{display:block} }

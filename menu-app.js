@@ -1240,7 +1240,7 @@ function openModal(id){
         <span class="ttime">🍳 ${escHtml(d.eq)}</span>
       </div>
 
-      <p style="font-size:.95rem;line-height:1.55;color:rgba(44,31,14,.78);margin-bottom:6px">${escHtml(d.desc)}</p>
+      <p style="font-size:.95rem;line-height:1.55;color:rgba(var(--ink-rgb,44,31,14),.78);margin-bottom:6px">${escHtml(d.desc)}</p>
 
       <div class="m-section-hd nutr">Macros · ${S.p==='AB' ? 'Todas · ración combinada' : escHtml(((TARGETS[S.p]||{}).name||'').trim()||('Persona '+(PEOPLE.indexOf(S.p)+1)))}</div>
       <div class="m-kcal-row nutr">

@@ -24,21 +24,21 @@
     backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
     opacity:0;transition:opacity .18s ease}
   .pn-dlg-back.show{opacity:1}
-  .pn-dlg{background:var(--white,#FFFDF7);color:var(--warm,#2C1F0E);
+  .pn-dlg{background:var(--white,#FFFDF7);color:var(--ink,#2C1F0E);
     width:100%;max-width:380px;border-radius:18px;
     box-shadow:0 24px 70px rgba(34,22,8,.4);overflow:hidden;
     transform:translateY(10px) scale(.98);transition:transform .2s cubic-bezier(.2,.9,.3,1);
-    border:1px solid rgba(44,31,14,.08)}
+    border:1px solid rgba(var(--ink-rgb,44,31,14),.08)}
   .pn-dlg-back.show .pn-dlg{transform:none}
   .pn-dlg-top{height:5px;background:var(--accent,var(--terra,#B5603A))}
   .pn-dlg-body{padding:22px 22px 8px;text-align:center}
   .pn-dlg-ico{font-size:2rem;line-height:1;margin-bottom:10px}
   .pn-dlg-title{font-family:'Playfair Display',serif;font-weight:700;font-size:1.18rem;
-    margin:0 0 6px;color:var(--warm,#2C1F0E)}
+    margin:0 0 6px;color:var(--ink,#2C1F0E)}
   .pn-dlg-msg{font-family:'Lora',Georgia,serif;font-size:.95rem;line-height:1.5;
-    color:var(--ink-70,rgba(44,31,14,.78));white-space:pre-line;margin:0}
-  .pn-dlg-input{width:100%;margin-top:14px;border:1.5px solid rgba(44,31,14,.18);
-    background:var(--cream,#F6EDD8);color:var(--warm,#2C1F0E);font-family:'Lora',serif;
+    color:var(--ink-70,rgba(var(--ink-rgb,44,31,14),.78));white-space:pre-line;margin:0}
+  .pn-dlg-input{width:100%;margin-top:14px;border:1.5px solid rgba(var(--ink-rgb,44,31,14),.18);
+    background:var(--cream,#F6EDD8);color:var(--ink,#2C1F0E);font-family:'Lora',serif;
     font-size:1rem;padding:11px 13px;border-radius:11px;transition:.18s}
   .pn-dlg-input:focus{outline:none;border-color:var(--accent,var(--terra,#B5603A));
     box-shadow:0 0 0 3px rgba(181,96,58,.14);background:#fff}
@@ -49,15 +49,15 @@
   .pn-dlg-btn.prim{background:var(--accent,var(--terra,#B5603A));color:#fff;
     box-shadow:0 4px 14px rgba(181,96,58,.3)}
   .pn-dlg-btn.prim:hover{filter:brightness(1.07);transform:translateY(-1px)}
-  .pn-dlg-btn.ghost{background:transparent;border:1.5px solid rgba(44,31,14,.18);
-    color:var(--warm,#2C1F0E)}
+  .pn-dlg-btn.ghost{background:transparent;border:1.5px solid rgba(var(--ink-rgb,44,31,14),.18);
+    color:var(--ink,#2C1F0E)}
   .pn-dlg-btn.ghost:hover{border-color:var(--warm,#2C1F0E);background:var(--cream,#F6EDD8)}
   .pn-dlg-btn.danger{background:var(--rose,#C0584A);color:#fff;box-shadow:0 4px 14px rgba(192,88,74,.3)}
   .pn-dlg-btn.danger:hover{filter:brightness(1.07);transform:translateY(-1px)}
 
   /* Toast flotante (reutiliza .pn-toast si menu-session ya lo definió) */
   .pn-toast2{position:fixed;left:50%;bottom:96px;transform:translateX(-50%) translateY(16px);
-    z-index:4200;background:var(--warm,#2C1F0E);color:var(--cream,#F6EDD8);
+    z-index:4200;background:var(--warm,#2C1F0E);color:#F6EDD8;
     font-family:'Lora',serif;font-size:.9rem;padding:12px 20px;border-radius:30px;
     box-shadow:0 12px 36px rgba(0,0,0,.34);opacity:0;transition:.26s cubic-bezier(.2,.9,.3,1);
     pointer-events:none;max-width:88vw;text-align:center;display:flex;align-items:center;gap:9px}
@@ -264,18 +264,18 @@
   .pn-tut-body{padding:26px 24px 8px;text-align:center;overflow-y:auto}
   .pn-tut-ico{font-size:2.8rem;line-height:1;margin-bottom:14px}
   .pn-tut-title{font-family:'Playfair Display',serif;font-weight:700;font-size:1.32rem;
-    color:var(--warm,#2C1F0E);margin:0 0 10px}
+    color:var(--ink,#2C1F0E);margin:0 0 10px}
   .pn-tut-txt{font-family:'Lora',Georgia,serif;font-size:.98rem;line-height:1.6;
-    color:var(--ink-70,rgba(44,31,14,.78));margin:0 auto;max-width:340px;white-space:pre-line}
+    color:var(--ink-70,rgba(var(--ink-rgb,44,31,14),.78));margin:0 auto;max-width:340px;white-space:pre-line}
   .pn-tut-dots{display:flex;gap:7px;justify-content:center;padding:16px 0 6px}
-  .pn-tut-dot{width:8px;height:8px;border-radius:50%;background:rgba(44,31,14,.16);transition:.2s;cursor:pointer}
+  .pn-tut-dot{width:8px;height:8px;border-radius:50%;background:rgba(var(--ink-rgb,44,31,14),.16);transition:.2s;cursor:pointer}
   .pn-tut-dot.on{background:var(--accent,#B5603A);transform:scale(1.25)}
   .pn-tut-foot{display:flex;gap:10px;padding:14px 20px 20px;align-items:center}
   .pn-tut-btn{border:none;border-radius:12px;font-family:'DM Mono',monospace;font-size:.74rem;
     letter-spacing:.05em;text-transform:uppercase;font-weight:600;padding:13px 18px;cursor:pointer;transition:.15s}
-  .pn-tut-btn.prim{background:var(--accent,#B5603A);color:#fff;flex:1;box-shadow:0 4px 14px rgba(44,31,14,.18)}
+  .pn-tut-btn.prim{background:var(--accent,#B5603A);color:#fff;flex:1;box-shadow:0 4px 14px rgba(var(--ink-rgb,44,31,14),.18)}
   .pn-tut-btn.prim:hover{filter:brightness(1.08);transform:translateY(-1px)}
-  .pn-tut-btn.ghost{background:transparent;border:1.5px solid rgba(44,31,14,.18);color:var(--warm,#2C1F0E)}
+  .pn-tut-btn.ghost{background:transparent;border:1.5px solid rgba(var(--ink-rgb,44,31,14),.18);color:var(--ink,#2C1F0E)}
   .pn-tut-btn.ghost:hover{border-color:var(--warm,#2C1F0E);background:var(--cream,#F6EDD8)}
   .pn-tut-btn:disabled{opacity:.35;cursor:default;transform:none;box-shadow:none}
   @media(max-width:560px){ .pn-tut{max-width:none} .pn-tut-title{font-size:1.18rem} }
@@ -433,8 +433,8 @@
     cursor:pointer;font-size:.95rem;flex-shrink:0;transition:.15s}
   .pn-info-x:hover{background:rgba(255,255,255,.32)}
   .pn-info-body{padding:20px 22px 8px;overflow-y:auto;font-family:'Lora',Georgia,serif;
-    font-size:.95rem;line-height:1.62;color:var(--ink-70,rgba(44,31,14,.82))}
-  .pn-info-body h4{font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--warm,#2C1F0E);
+    font-size:.95rem;line-height:1.62;color:var(--ink-70,rgba(var(--ink-rgb,44,31,14),.82))}
+  .pn-info-body h4{font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--ink,#2C1F0E);
     margin:16px 0 6px;font-weight:700}
   .pn-info-body p{margin:0 0 10px}
   .pn-info-body ul{margin:0 0 12px;padding-left:20px}
@@ -485,7 +485,7 @@
       <li>Puedes <strong>borrar todo</strong> de este dispositivo en cualquier momento
       desde esa misma pantalla; la eliminación es inmediata y no se puede deshacer.</li>
     </ul>
-    <p style="font-size:.86rem;color:var(--ink-50,rgba(44,31,14,.5))">Como los datos viven
+    <p style="font-size:.86rem;color:var(--ink-50,rgba(var(--ink-rgb,44,31,14),.5))">Como los datos viven
     solo en este dispositivo, si lo cambias, reinstalas el navegador o borras sus datos,
     se perderán salvo que hayas exportado una copia antes.</p>
 
@@ -494,7 +494,7 @@
     pensada para personas con enfermedad</strong>. Lee el descargo completo:</p>
     <p><button class="pn-info-link" data-go="descargo">⚖️ Ver descargo de responsabilidad →</button></p>
 
-    <p style="font-size:.82rem;color:var(--ink-50,rgba(44,31,14,.5));margin-top:14px">
+    <p style="font-size:.82rem;color:var(--ink-50,rgba(var(--ink-rgb,44,31,14),.5));margin-top:14px">
     © <span class="pn-info-year">2026</span> Juan María Gámez Ortiz · Licencia CC BY-NC 4.0 ·
     Desarrollado con la ayuda de Claude.</p>
   `;
