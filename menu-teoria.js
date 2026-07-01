@@ -207,7 +207,40 @@
        </ul>
        <p>Elige uno y dale semanas para valorarlo. La <strong>constancia</strong> y la <strong>adherencia</strong> pesan más que el horario perfecto.</p>`,
      verAlso:['crononutricion-reloj','proteina-musculo-edad','hidratos-flexibilidad'],
-     refs:['leucine-trigger','melatonin-circadian-t2d']}
+     refs:['leucine-trigger','melatonin-circadian-t2d']},
+
+    /* ── N1 · Patrones dietéticos, ultraprocesados y determinantes comerciales ── */
+    {id:'patrones-saludables', tema:'fundamentos', nivel:'basico',
+     titulo:'El poder de la Dieta Mediterránea y DASH: mucho más que contar calorías',
+     lead:'Los patrones ricos en plantas, grasas saludables y alimentos enteros superan a cualquier dieta de moda en prevención y longevidad.',
+     cuerpo:`<p>La ciencia nutricional moderna ha demostrado que enfocar la salud en nutrientes aislados (como obsesionarse solo con las grasas o los carbohidratos) es un error. El cuerpo responde a <strong>patrones dietéticos completos</strong>.</p><p>La evidencia clínica más sólida a nivel mundial señala que la <strong>Dieta Mediterránea</strong>, el enfoque <strong>DASH</strong> (diseñado médicamente para reducir la presión arterial) y las dietas basadas en plantas no procesadas son el estándar de oro para vivir más y mejor.</p><ul><li><strong>Base vegetal predominante:</strong> los tres patrones se construyen sobre una base diaria de verduras, frutas, legumbres y cereales de grano entero (integrales).</li><li><strong>Grasas de alta calidad:</strong> priorizan el aceite de oliva virgen extra y los frutos secos, con efecto antiinflamatorio.</li><li><strong>Proteínas saludables:</strong> desplazan las carnes rojas y los embutidos en favor del pescado, las aves y las proteínas vegetales (legumbres).</li></ul><p>Frente a dietas restrictivas extremas como la cetogénica, que pueden ser útiles a corto plazo pero presentan riesgos cardiovasculares a largo plazo por la grasa saturada, la Dieta Mediterránea ha demostrado en estudios de décadas que previene infartos, ayuda a controlar la diabetes y protege frente al deterioro cognitivo.</p>`,
+     nota:'Basado en metaanálisis de la Colaboración Cochrane y grandes estudios observacionales: certeza alta para el control de factores de riesgo y moderada para eventos graves. No sustituye el consejo de un profesional.',
+     verAlso:['comida-real-vs-ultraprocesados','que-es-comer-bien'],
+     refs:['cochrane-med-diet-2019','cochrane-dash-2025','popiolek-keto-2024']},
+
+    {id:'comida-real-vs-ultraprocesados', tema:'practica', nivel:'medio',
+     titulo:'La trampa de los ultraprocesados y el sistema NOVA',
+     lead:'No importa cuánta vitamina añadan a unas galletas o a un refresco: el daño real está en cómo su procesamiento industrial confunde a tu biología.',
+     cuerpo:`<p>En 2009, investigadores de salud pública propusieron la <strong>clasificación NOVA</strong>, que agrupa los alimentos no por sus calorías, sino por su nivel de procesamiento industrial.</p><ul><li><strong>Grupo 1 (comida real, mínimamente procesada):</strong> frutas, verduras, carnes magras, huevos, legumbres secas y leche. Son la base de la salud.</li><li><strong>Grupo 4 (ultraprocesados):</strong> formulaciones con aditivos (colorantes, texturizantes) y técnicas como la extrusión, diseñadas para ser rentables e hiperpalatables (refrescos, bollería, cereales azucarados, carnes reconstituidas).</li></ul><p><strong>El problema real:</strong> quienes basan su dieta en ultraprocesados tienen más riesgo de obesidad, infartos, cáncer y depresión. Ahora bien, el sistema NOVA no es perfecto: agrupa injustamente alimentos útiles (como bebidas vegetales fortificadas) junto a la comida basura. Por eso la regla de oro es sencilla: basa tu alimentación en ingredientes frescos del Grupo 1 y reduce de forma sistemática los ultraprocesados ricos en azúcares añadidos, grasas refinadas y sal.</p>`,
+     nota:'La asociación entre ultraprocesados y mortalidad es fuerte, aunque los expertos aún debaten cómo afinar la clasificación para no penalizar procesados saludables.',
+     verAlso:['impacto-matriz-alimentaria','patrones-saludables','calorias-calidad'],
+     refs:['monteiro-nova-2019','louie-nova-critiques-2025','upf-weight-gain']},
+
+    {id:'impacto-matriz-alimentaria', tema:'energia', nivel:'avanzado',
+     titulo:'La matriz alimentaria: por qué no todas las calorías son iguales',
+     lead:'La saciedad y el control del peso no dependen solo de qué comes, sino de la estructura física del alimento. La industria rompe esa "matriz" y te hace comer de más.',
+     cuerpo:`<p>En nutrición, la <strong>matriz alimentaria</strong> es la arquitectura física microscópica de un alimento: cómo la fibra, el agua, las proteínas y las grasas están entretejidas dentro de sus células.</p><p>Al comer alimentos enteros (una manzana, frutos secos), el sistema digestivo trabaja para romper esa red celular. Eso ralentiza la digestión y lleva nutrientes al tramo final del intestino, disparando hormonas de saciedad potentes (como el GLP-1) que avisan al cerebro de que estamos llenos.</p><ul><li><strong>El colapso de la matriz:</strong> la industria aplica fuerzas extremas (molienda ultrafina, extrusión) que destruyen esa estructura.</li><li><strong>El efecto en el peso:</strong> un ensayo del NIH (Dr. Kevin Hall, 2019) mostró que con alimentos de matriz destruida (ultraprocesados) las personas comen involuntariamente <strong>unas 500 kcal extra al día</strong> frente a comida real, aun con el mismo azúcar, grasa y fibra.</li></ul><p>Al comer purés, panes industriales o batidos ultraprocesados, los nutrientes se absorben de golpe, con picos de insulina y señales de saciedad bloqueadas. Por eso reformular un ultraprocesado para que tenga "menos azúcar" no arregla el fondo: su estructura sigue colapsada.</p>`,
+     nota:'Mecanismo respaldado por ensayos controlados en unidades metabólicas cerradas (certeza alta): relaciona el procesamiento físico del alimento con la sobreingesta.',
+     verAlso:['comida-real-vs-ultraprocesados','calorias-calidad'],
+     refs:['upf-weight-gain','tef-whole-vs-processed']},
+
+    {id:'sesgos-industria-nutricion', tema:'fundamentos', nivel:'avanzado',
+     titulo:'Conflictos de interés: cómo la industria distorsiona la ciencia',
+     lead:'Distinguir la ciencia independiente del marketing encubierto es clave para decidir con libertad qué pones en el plato.',
+     cuerpo:`<p>Buena parte de la investigación nutricional que llega a los medios está financiada por corporaciones de alimentación y bebidas. Las evaluaciones muestran que esto genera un profundo <strong>"sesgo de financiación"</strong>.</p><ul><li>Un estudio de referencia auditó más de 200 artículos y halló que los financiados por la industria tenían casi <strong>8 veces más probabilidad</strong> de concluir que el producto del patrocinador era saludable.</li><li>Con los refrescos azucarados, las revisiones pagadas por la industria fueron cinco veces más proclives a negar que el azúcar engordara, distorsionando el consenso científico.</li></ul><p>La industria rara vez inventa datos: manipula el diseño de los estudios (compara su producto con otros peores, usa dosis irreales, o entierra los resultados desfavorables sin publicarlos).</p><p>Por eso, para cuidarte sin dogmas, prioriza las recomendaciones de organismos públicos (OMS, AESAN) y la investigación de financiación independiente.</p>`,
+     nota:'Sustentado en revisiones sistemáticas sobre conflictos de interés en la literatura nutricional.',
+     verAlso:['patrones-saludables','comida-real-vs-ultraprocesados'],
+     refs:['lesser-funding-2007','bes-rastrollo-ssb-2013']}
   ];
 
   window.TeoriaData = { TEMAS, NIVELES, ARTICULOS };
