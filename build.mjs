@@ -104,8 +104,18 @@ async function main(){
   // cliente con el SW anterior podía seguir sirviendo código antiguo).
   const swPath = join(ROOT, 'sw.js');
   const sw = readFileSync(swPath, 'utf8');
-  const swNew = sw.replace(/const CACHE = '[^']*';/, `const CACHE = 'plan-nutri-${hash}';`);
+  const swNew = sw
+    .replace(/const CACHE = '[^']*';/, `const CACHE = 'plan-nutri-${hash}';`)
+    .replace(/'app\.min\.js(\?v=[^']*)?'/, `'app.min.js?v=${hash}'`);
   if (swNew !== sw) writeFileSync(swPath, swNew);
+
+  // Cache-busting: la URL del bundle lleva el hash, así ni la caché HTTP del
+  // navegador ni la CDN pueden servir una versión antigua (la URL cambia).
+  const htmlPath = join(ROOT, 'Menu Nutricional.html');
+  const html = readFileSync(htmlPath, 'utf8');
+  const htmlNew = html.replace(/<script src="app\.min\.js(\?v=[^"]*)?"><\/script>/,
+    `<script src="app.min.js?v=${hash}"></script>`);
+  if (htmlNew !== html) writeFileSync(htmlPath, htmlNew);
 
   const outBytes = Buffer.byteLength(bundle);
   const kb = n => (n / 1024).toFixed(0) + ' KB';

@@ -1743,9 +1743,27 @@ renderAll();
 // view restoration happens in menu-saved.js (loaded last) so calendar/saved
 // functions are defined by the time switchView runs
 
-/* ── PWA · registro del service worker (offline) ─────────── */
+/* ── PWA · registro del service worker (offline) ───────────
+   Con AUTO-ACTUALIZACIÓN: sin esto, un cliente que ya tenía la app
+   instalada se quedaba con el service worker antiguo sirviendo código
+   viejo indefinidamente (ni desinstalar la PWA lo arregla: el SW vive
+   en los datos del sitio). Ahora, al abrir la app se comprueba si hay
+   una versión nueva; cuando el SW nuevo toma el control, se recarga
+   una sola vez para aplicarla. */
 if('serviceWorker' in navigator){
-  window.addEventListener('load', ()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); });
+  const hadController = !!navigator.serviceWorker.controller;
+  let reloading = false;
+  navigator.serviceWorker.addEventListener('controllerchange', ()=>{
+    // En la primera instalación no había controlador: no hace falta recargar.
+    if(!hadController || reloading) return;
+    reloading = true;
+    location.reload();
+  });
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('sw.js')
+      .then(reg=>{ try{ reg.update(); }catch(e){} })
+      .catch(()=>{});
+  });
 }
 
 /* ── A11y · cerrar el modal/cajón visible con la tecla Escape ─ */
