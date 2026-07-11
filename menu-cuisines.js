@@ -137,6 +137,7 @@
 
   // Paquetes incluidos con la app que aún no se han cargado (catálogo descargable).
   const BUNDLED = [
+    { id:'cas', ico:'🏠', lbl:'Cocina casera', url:'packs/casera.json' },
     { id:'ita', ico:'🇮🇹', lbl:'Comida italiana', url:'packs/italiana.json' },
     { id:'mex', ico:'🇲🇽', lbl:'Comida mexicana', url:'packs/mexicana.json' },
     { id:'jap', ico:'🇯🇵', lbl:'Comida japonesa', url:'packs/japonesa.json' },
