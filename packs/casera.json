@@ -3,7 +3,7 @@
   "cuisine": {
     "id": "cas",
     "ico": "🏠",
-    "lbl": "Cocina casera (lista propia)"
+    "lbl": "Cocina casera"
   },
   "foods": {
     "canonigos": {
@@ -4884,6 +4884,1282 @@
           "f": "especias",
           "cs": true,
           "as": "Sal, pimienta y laurel"
+        }
+      ]
+    },
+    "CAS_LEG1": {
+      "cat": "com",
+      "short": "Lentejas",
+      "nom": "Lentejas guisadas con verduras y arroz",
+      "icon": "🫘",
+      "t": "45 min",
+      "eq": "Cazuela",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl",
+        "vg",
+        "vt"
+      ],
+      "desc": "Lentejas guisadas con sofrito de verduras y un poco de arroz. Hidratos complejos, fibra y proteína vegetal.",
+      "nota": "Sofríe bien ajo, cebolla, pimiento, zanahoria y tomate antes de añadir la legumbre: ahí está el sabor.",
+      "comp": [
+        {
+          "f": "lentejas",
+          "g": 250,
+          "note": "cocidas"
+        },
+        {
+          "f": "arroz_blanco",
+          "g": 60,
+          "note": "cocido"
+        },
+        {
+          "f": "zanahoria",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "cebolla",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "pimiento_verde",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "tomate_triturado",
+          "g": 100,
+          "fx": true
+        },
+        {
+          "f": "ajo",
+          "g": 6,
+          "fx": true
+        },
+        {
+          "f": "caldo_vegetal",
+          "g": 200,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 14,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta, laurel y pimentón"
+        }
+      ]
+    },
+    "CAS_LEG2": {
+      "cat": "com",
+      "short": "Sopa de garbanzos",
+      "nom": "Sopa de garbanzos con verduras y pollo",
+      "icon": "🍲",
+      "t": "35 min",
+      "eq": "Cazuela",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl"
+      ],
+      "desc": "Sopa de garbanzos con verduras, arroz y pollo desmenuzado. Plato único, reconfortante y completo.",
+      "nota": "Añade los garbanzos ya cocidos al final; solo necesitan coger el sabor del caldo.",
+      "comp": [
+        {
+          "f": "garbanzos",
+          "g": 200,
+          "note": "cocidos"
+        },
+        {
+          "f": "pechuga_de_pollo",
+          "g": 90,
+          "note": "desmenuzado"
+        },
+        {
+          "f": "arroz_blanco",
+          "g": 60,
+          "note": "cocido"
+        },
+        {
+          "f": "zanahoria",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "puerro",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "cebolla",
+          "g": 40,
+          "fx": true
+        },
+        {
+          "f": "apio",
+          "g": 30,
+          "fx": true
+        },
+        {
+          "f": "espinaca",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "caldo_pollo",
+          "g": 300,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y perejil"
+        }
+      ]
+    },
+    "CAS_LEG3": {
+      "cat": "com",
+      "short": "Potaje amarillo",
+      "nom": "Potaje amarillo de habichuelas con calabaza",
+      "icon": "🫘",
+      "t": "50 min",
+      "eq": "Cazuela",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl",
+        "vt"
+      ],
+      "desc": "Potaje de alubias blancas con calabaza, zanahoria y patata, con su punto de cúrcuma y huevo cocido.",
+      "nota": "La calabaza espesa el caldo al deshacerse: no hace falta harina ni nada más.",
+      "comp": [
+        {
+          "f": "alubias_blancas_cocidas",
+          "g": 220,
+          "note": "cocidas"
+        },
+        {
+          "f": "patata",
+          "g": 100
+        },
+        {
+          "f": "huevo",
+          "g": 55,
+          "note": "1 huevo cocido"
+        },
+        {
+          "f": "calabaza",
+          "g": 120,
+          "fx": true
+        },
+        {
+          "f": "zanahoria",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "cebolla",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "pimiento_verde",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "judia_verde",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "ajo",
+          "g": 6,
+          "fx": true
+        },
+        {
+          "f": "caldo_vegetal",
+          "g": 200,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 14,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta, laurel y cúrcuma"
+        }
+      ]
+    },
+    "CAS_LEG4": {
+      "cat": "com",
+      "short": "Potaje rojo",
+      "nom": "Potaje rojo de habichuelas blancas",
+      "icon": "🫘",
+      "t": "50 min",
+      "eq": "Cazuela",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl",
+        "vt"
+      ],
+      "desc": "Potaje de alubias blancas con sofrito rojo de tomate y pimentón, con patata y huevo cocido.",
+      "nota": "Cuida la cantidad de aceite y no escatimes en verdura: es lo que equilibra el plato.",
+      "comp": [
+        {
+          "f": "alubias_blancas_cocidas",
+          "g": 220,
+          "note": "cocidas"
+        },
+        {
+          "f": "patata",
+          "g": 100
+        },
+        {
+          "f": "huevo",
+          "g": 55,
+          "note": "1 huevo cocido"
+        },
+        {
+          "f": "tomate_triturado",
+          "g": 120,
+          "fx": true
+        },
+        {
+          "f": "pimiento_rojo",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "cebolla",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "zanahoria",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "ajo",
+          "g": 6,
+          "fx": true
+        },
+        {
+          "f": "caldo_vegetal",
+          "g": 200,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 14,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta, laurel y pimentón"
+        }
+      ]
+    },
+    "CAS_LEG5": {
+      "cat": "com",
+      "short": "Guisantes con patata",
+      "nom": "Guisantes guisados con jamón y patata",
+      "icon": "🫛",
+      "t": "30 min",
+      "eq": "Cazuela",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl"
+      ],
+      "desc": "Guisantes guisados con sofrito de ajo y cebolla, jamón serrano y patata. Sencillo y saciante.",
+      "nota": "Añade el jamón al final para que no se reseque ni sale de más el guiso.",
+      "comp": [
+        {
+          "f": "guisantes",
+          "g": 250
+        },
+        {
+          "f": "jamon_serrano",
+          "g": 60
+        },
+        {
+          "f": "patata",
+          "g": 120
+        },
+        {
+          "f": "cebolla",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "zanahoria",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "ajo",
+          "g": 6,
+          "fx": true
+        },
+        {
+          "f": "caldo_vegetal",
+          "g": 150,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y perejil"
+        }
+      ]
+    },
+    "CAS_LEG6": {
+      "cat": "com",
+      "short": "Pasta de lentejas fría",
+      "nom": "Ensalada de pasta de lentejas con atún",
+      "icon": "🥗",
+      "t": "18 min",
+      "eq": "Olla · Bol",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl"
+      ],
+      "desc": "Pasta de lentejas fría con verduras y atún. Más proteína y fibra que una pasta tradicional.",
+      "nota": "Cuece la pasta de lentejas justo al dente (se pasa antes que la de trigo) y enfríala enseguida.",
+      "comp": [
+        {
+          "f": "pasta_legumbre",
+          "g": 70,
+          "note": "en crudo"
+        },
+        {
+          "f": "atun_al_natural",
+          "g": 80,
+          "note": "escurrido"
+        },
+        {
+          "f": "tomate",
+          "g": 90,
+          "fx": true
+        },
+        {
+          "f": "pepino",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "zanahoria",
+          "g": 40,
+          "fx": true
+        },
+        {
+          "f": "maiz",
+          "g": 40,
+          "fx": true
+        },
+        {
+          "f": "rucula",
+          "g": 30,
+          "fx": true
+        },
+        {
+          "f": "cebolla_morada",
+          "g": 20,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "vinagre",
+          "g": 5,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y orégano"
+        }
+      ]
+    },
+    "CAS_LEG7": {
+      "cat": "com",
+      "short": "Pasta lentejas y pollo",
+      "nom": "Pasta de lentejas con verduras y pollo",
+      "icon": "🍝",
+      "t": "25 min",
+      "eq": "Olla · Sartén",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl"
+      ],
+      "desc": "Pasta de lentejas salteada con verduras y pollo. Muy completa: hidrato, fibra y doble proteína.",
+      "nota": "Saltea las verduras hasta que estén tiernas, añade el pollo y termina con un poco de tomate para que quede jugosa.",
+      "comp": [
+        {
+          "f": "pasta_legumbre",
+          "g": 70,
+          "note": "en crudo"
+        },
+        {
+          "f": "pechuga_de_pollo",
+          "g": 150,
+          "note": "crudo"
+        },
+        {
+          "f": "calabacin",
+          "g": 70,
+          "fx": true
+        },
+        {
+          "f": "pimiento_rojo",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "cebolla",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "champinones",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "tomate_triturado",
+          "g": 80,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y orégano"
+        }
+      ]
+    },
+    "CAS_LEG8": {
+      "cat": "cen",
+      "short": "Pasta lentejas y gambas",
+      "nom": "Pasta de lentejas con espinacas y gambas",
+      "icon": "🍤",
+      "t": "20 min",
+      "eq": "Olla · Sartén",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl"
+      ],
+      "desc": "Pasta de lentejas con gambas al ajillo y espinacas. Ligera, completa y muy alta en proteína.",
+      "nota": "Saltea el ajo, añade las gambas y por último las espinacas: se hacen en un minuto.",
+      "comp": [
+        {
+          "f": "pasta_legumbre",
+          "g": 65,
+          "note": "en crudo"
+        },
+        {
+          "f": "gambas",
+          "g": 150,
+          "note": "peladas"
+        },
+        {
+          "f": "espinaca",
+          "g": 120,
+          "fx": true
+        },
+        {
+          "f": "tomate",
+          "g": 80,
+          "fx": true
+        },
+        {
+          "f": "ajo",
+          "g": 8,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "limon",
+          "g": 8,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y perejil"
+        }
+      ]
+    },
+    "CAS_HUE1": {
+      "cat": "cen",
+      "short": "Tortilla francesa",
+      "nom": "Tortilla francesa con ensalada y pan",
+      "icon": "🍳",
+      "t": "10 min",
+      "eq": "Sartén",
+      "tipo": "completa",
+      "diet": [
+        "sl"
+      ],
+      "desc": "Tortilla francesa de dos huevos con ensalada y pan integral. La cena de recurso, bien acompañada.",
+      "nota": "Fuego medio y poco tiempo: la tortilla francesa debe quedar jugosa por dentro.",
+      "comp": [
+        {
+          "f": "huevo",
+          "g": 110,
+          "note": "2 huevos"
+        },
+        {
+          "f": "pan_integral",
+          "g": 50
+        },
+        {
+          "f": "tomate",
+          "g": 90,
+          "fx": true
+        },
+        {
+          "f": "canonigos",
+          "g": 35,
+          "fx": true
+        },
+        {
+          "f": "pepino",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 10,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal y pimienta"
+        }
+      ]
+    },
+    "CAS_HUE2": {
+      "cat": "cen",
+      "short": "Tortilla de pollo",
+      "nom": "Tortilla de pollo con verduras",
+      "icon": "🍳",
+      "t": "15 min",
+      "eq": "Sartén",
+      "tipo": "completa",
+      "diet": [
+        "sl"
+      ],
+      "desc": "Tortilla de huevo con pollo desmenuzado y verduras, con pan de acompañamiento. Muy alta en proteína.",
+      "nota": "Aprovecha pollo que te haya sobrado: se integra perfecto en la tortilla.",
+      "comp": [
+        {
+          "f": "huevo",
+          "g": 110,
+          "note": "2 huevos"
+        },
+        {
+          "f": "pechuga_de_pollo",
+          "g": 90,
+          "note": "cocinado"
+        },
+        {
+          "f": "pan_integral",
+          "g": 40
+        },
+        {
+          "f": "espinaca",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "champinones",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "cebolla",
+          "g": 30,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 10,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal y pimienta"
+        }
+      ]
+    },
+    "CAS_HUE3": {
+      "cat": "com",
+      "short": "Tortilla de patatas",
+      "nom": "Tortilla de patatas y cebolla con ensalada",
+      "icon": "🥔",
+      "t": "35 min",
+      "eq": "Sartén",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl",
+        "vt"
+      ],
+      "desc": "Tortilla de patatas con cebolla, acompañada de ensalada. Ya lleva proteína e hidrato.",
+      "nota": "Pocha la patata a fuego suave en vez de freírla: queda igual de rica con mucho menos aceite.",
+      "comp": [
+        {
+          "f": "huevo",
+          "g": 165,
+          "note": "3 huevos"
+        },
+        {
+          "f": "patata",
+          "g": 280
+        },
+        {
+          "f": "cebolla",
+          "g": 80,
+          "fx": true
+        },
+        {
+          "f": "tomate",
+          "g": 100,
+          "fx": true
+        },
+        {
+          "f": "lechuga",
+          "g": 40,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 16,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal"
+        }
+      ]
+    },
+    "CAS_HUE4": {
+      "cat": "cen",
+      "short": "Tortilla de calabacín",
+      "nom": "Tortilla de calabacín",
+      "icon": "🥒",
+      "t": "20 min",
+      "eq": "Sartén",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl",
+        "vt"
+      ],
+      "desc": "Tortilla de calabacín y cebolla con pan integral y ensalada. Ligera y muy fácil.",
+      "nota": "Sala el calabacín y déjalo escurrir antes de cuajarlo: si no, la tortilla queda aguada.",
+      "comp": [
+        {
+          "f": "huevo",
+          "g": 110,
+          "note": "2 huevos"
+        },
+        {
+          "f": "pan_integral",
+          "g": 40
+        },
+        {
+          "f": "calabacin",
+          "g": 180,
+          "fx": true
+        },
+        {
+          "f": "cebolla",
+          "g": 40,
+          "fx": true
+        },
+        {
+          "f": "tomate",
+          "g": 80,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal y pimienta"
+        }
+      ]
+    },
+    "CAS_HUE5": {
+      "cat": "cen",
+      "short": "Tortilla calabacín y berenjena",
+      "nom": "Tortilla de calabacín y berenjena",
+      "icon": "🍆",
+      "t": "25 min",
+      "eq": "Sartén",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl",
+        "vt"
+      ],
+      "desc": "Tortilla de calabacín y berenjena en dados, con pan integral. Sabrosa y de aprovechamiento.",
+      "nota": "Corta la verdura en dados pequeños y cocínala hasta que esté bien tierna antes de añadir el huevo.",
+      "comp": [
+        {
+          "f": "huevo",
+          "g": 110,
+          "note": "2 huevos"
+        },
+        {
+          "f": "pan_integral",
+          "g": 40
+        },
+        {
+          "f": "calabacin",
+          "g": 130,
+          "fx": true
+        },
+        {
+          "f": "berenjena",
+          "g": 120,
+          "fx": true
+        },
+        {
+          "f": "cebolla",
+          "g": 40,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y orégano"
+        }
+      ]
+    },
+    "CAS_HUE6": {
+      "cat": "cen",
+      "short": "Tortilla de espinacas",
+      "nom": "Tortilla de espinacas",
+      "icon": "🍳",
+      "t": "15 min",
+      "eq": "Sartén",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl",
+        "vt"
+      ],
+      "desc": "Tortilla de espinacas con ajo, con pan integral. Rápida, ligera y rica en hierro.",
+      "nota": "Si usas espinacas congeladas, escúrrelas muy bien para que la tortilla no quede aguada.",
+      "comp": [
+        {
+          "f": "huevo",
+          "g": 110,
+          "note": "2 huevos"
+        },
+        {
+          "f": "pan_integral",
+          "g": 45
+        },
+        {
+          "f": "espinaca",
+          "g": 150,
+          "fx": true
+        },
+        {
+          "f": "ajo",
+          "g": 6,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y nuez moscada"
+        }
+      ]
+    },
+    "CAS_HUE7": {
+      "cat": "cen",
+      "short": "Huevos cocidos",
+      "nom": "Huevos cocidos con ensalada y patata",
+      "icon": "🥚",
+      "t": "20 min",
+      "eq": "Olla",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl",
+        "vt"
+      ],
+      "desc": "Huevos cocidos con ensalada completa y patata. Cena fría, sencilla y equilibrada.",
+      "nota": "10 minutos de cocción desde que hierve el agua: yema hecha pero no seca.",
+      "comp": [
+        {
+          "f": "huevo",
+          "g": 165,
+          "note": "3 huevos cocidos"
+        },
+        {
+          "f": "patata",
+          "g": 150,
+          "note": "cocida"
+        },
+        {
+          "f": "tomate",
+          "g": 90,
+          "fx": true
+        },
+        {
+          "f": "lechuga",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "pepino",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "zanahoria",
+          "g": 40,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "vinagre",
+          "g": 5,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal y pimienta"
+        }
+      ]
+    },
+    "CAS_HUE8": {
+      "cat": "cen",
+      "short": "Huevo con pisto",
+      "nom": "Huevo a la plancha con verduras y patata",
+      "icon": "🍳",
+      "t": "25 min",
+      "eq": "Sartén",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl",
+        "vt"
+      ],
+      "desc": "Huevo a la plancha sobre pisto o verduras salteadas, con patata. Combinación redonda.",
+      "nota": "Haz el huevo con muy poco aceite y sírvelo encima de la verdura, con la yema líquida.",
+      "comp": [
+        {
+          "f": "huevo",
+          "g": 110,
+          "note": "2 huevos"
+        },
+        {
+          "f": "patata",
+          "g": 160,
+          "note": "cocida"
+        },
+        {
+          "f": "calabacin",
+          "g": 100,
+          "fx": true
+        },
+        {
+          "f": "berenjena",
+          "g": 80,
+          "fx": true
+        },
+        {
+          "f": "pimiento_rojo",
+          "g": 70,
+          "fx": true
+        },
+        {
+          "f": "cebolla",
+          "g": 40,
+          "fx": true
+        },
+        {
+          "f": "tomate_triturado",
+          "g": 90,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y orégano"
+        }
+      ]
+    },
+    "CAS_HUE9": {
+      "cat": "cen",
+      "short": "Ensalada con huevo",
+      "nom": "Ensalada completa con huevo cocido",
+      "icon": "🥗",
+      "t": "15 min",
+      "eq": "Bol",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl",
+        "vt"
+      ],
+      "desc": "Ensalada de verduras con huevo cocido y garbanzos como fuente de hidrato. Cena fría completa.",
+      "nota": "Para que sea plato completo necesita suficiente huevo y un hidrato: garbanzos, patata, arroz o maíz.",
+      "comp": [
+        {
+          "f": "huevo",
+          "g": 110,
+          "note": "2 huevos cocidos"
+        },
+        {
+          "f": "garbanzos",
+          "g": 80,
+          "note": "cocidos"
+        },
+        {
+          "f": "lechuga",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "tomate",
+          "g": 90,
+          "fx": true
+        },
+        {
+          "f": "pepino",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "zanahoria",
+          "g": 40,
+          "fx": true
+        },
+        {
+          "f": "maiz",
+          "g": 40,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "vinagre",
+          "g": 5,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal y pimienta"
+        }
+      ]
+    },
+    "CAS_HUE10": {
+      "cat": "com",
+      "short": "Quiche de verduras",
+      "nom": "Quiche de verduras con base de patata",
+      "icon": "🥧",
+      "t": "50 min",
+      "eq": "Horno",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "vt"
+      ],
+      "desc": "Quiche de verduras con base de patata laminada (más ligera que la masa quebrada) y ensalada.",
+      "nota": "Usa base de patata en vez de masa quebrada y muchas verduras: baja bastante la grasa sin perder gracia.",
+      "comp": [
+        {
+          "f": "huevo",
+          "g": 165,
+          "note": "3 huevos"
+        },
+        {
+          "f": "patata",
+          "g": 200,
+          "note": "laminada, como base"
+        },
+        {
+          "f": "leche_entera",
+          "g": 100
+        },
+        {
+          "f": "queso_fresco",
+          "g": 60
+        },
+        {
+          "f": "calabacin",
+          "g": 90,
+          "fx": true
+        },
+        {
+          "f": "puerro",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "espinaca",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "champinones",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "cebolla",
+          "g": 40,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y nuez moscada"
+        }
+      ]
+    },
+    "CAS_HUE11": {
+      "cat": "cen",
+      "short": "Espinacas, huevo y gambas",
+      "nom": "Espinacas con huevo, jamón y gambas",
+      "icon": "🍤",
+      "t": "20 min",
+      "eq": "Sartén",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl"
+      ],
+      "desc": "Espinacas salteadas al ajo con gambas y jamón serrano, coronadas con huevo. Muy proteica.",
+      "nota": "Añade el jamón al final para que no quede seco. Como comida principal, súmale pan o patata.",
+      "comp": [
+        {
+          "f": "huevo",
+          "g": 110,
+          "note": "2 huevos"
+        },
+        {
+          "f": "gambas",
+          "g": 120,
+          "note": "peladas"
+        },
+        {
+          "f": "jamon_serrano",
+          "g": 40
+        },
+        {
+          "f": "pan_integral",
+          "g": 40
+        },
+        {
+          "f": "espinaca",
+          "g": 150,
+          "fx": true
+        },
+        {
+          "f": "ajo",
+          "g": 8,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal (con moderación) y pimienta"
+        }
+      ]
+    },
+    "CAS_HUE12": {
+      "cat": "cen",
+      "short": "Setas, espárragos y huevo",
+      "nom": "Setas con espárragos, huevo y jamón",
+      "icon": "🍄",
+      "t": "20 min",
+      "eq": "Sartén",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl"
+      ],
+      "desc": "Setas salteadas con espárragos verdes, jamón serrano y huevo. Cena proteica, ligera y con mucho sabor.",
+      "nota": "Saltea las setas hasta que pierdan el agua; solo entonces doran de verdad.",
+      "comp": [
+        {
+          "f": "huevo",
+          "g": 110,
+          "note": "2 huevos"
+        },
+        {
+          "f": "jamon_serrano",
+          "g": 45
+        },
+        {
+          "f": "pan_integral",
+          "g": 40
+        },
+        {
+          "f": "setas_varios_tipos",
+          "g": 150,
+          "fx": true
+        },
+        {
+          "f": "esparragos",
+          "g": 100,
+          "fx": true
+        },
+        {
+          "f": "ajo",
+          "g": 8,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal (con moderación), pimienta y perejil"
+        }
+      ]
+    },
+    "CAS_HUE13": {
+      "cat": "com",
+      "short": "Guisantes con jamón",
+      "nom": "Guisantes con jamón y huevo",
+      "icon": "🫛",
+      "t": "25 min",
+      "eq": "Sartén",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl"
+      ],
+      "desc": "Guisantes salteados con sofrito de ajo y cebolla, jamón serrano, huevo y patata. Clásico completo.",
+      "nota": "Sofríe ajo y cebolla con poco aceite, añade los guisantes y el jamón al final para no resecarlo.",
+      "comp": [
+        {
+          "f": "guisantes",
+          "g": 250
+        },
+        {
+          "f": "jamon_serrano",
+          "g": 60
+        },
+        {
+          "f": "huevo",
+          "g": 55,
+          "note": "1 huevo"
+        },
+        {
+          "f": "patata",
+          "g": 130
+        },
+        {
+          "f": "cebolla",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "ajo",
+          "g": 6,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal (con moderación), pimienta y perejil"
         }
       ]
     }
