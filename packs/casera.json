@@ -6616,6 +6616,434 @@
           "as": "Sal y pimienta"
         }
       ]
+    },
+    "CAS_MER1": {
+      "cat": "mer",
+      "short": "Yogur con fruta",
+      "nom": "Yogur natural con fruta y nueces",
+      "icon": "🥣",
+      "t": "3 min",
+      "eq": "Bol",
+      "tipo": "ligera",
+      "diet": [
+        "sg",
+        "vt"
+      ],
+      "desc": "Yogur natural con plátano en rodajas y unas nueces. La merienda de siempre: rápida, saciante y equilibrada.",
+      "nota": "Añade la fruta y los frutos secos justo al servir para que no se reblandezcan.",
+      "comp": [
+        {
+          "f": "yogur_natural",
+          "g": 200,
+          "note": "1 tarrina grande"
+        },
+        {
+          "f": "nueces",
+          "g": 10
+        },
+        {
+          "f": "platano",
+          "g": 120,
+          "fx": true,
+          "note": "1 pieza"
+        }
+      ]
+    },
+    "CAS_MER2": {
+      "cat": "mer",
+      "short": "Yogur griego y frutos rojos",
+      "nom": "Yogur griego con frutos rojos y miel",
+      "icon": "🍓",
+      "t": "3 min",
+      "eq": "Bol",
+      "tipo": "ligera",
+      "diet": [
+        "sg",
+        "vt"
+      ],
+      "desc": "Yogur griego 0% con frutos rojos, un hilo de miel y almendras. Muy proteica y con poca grasa.",
+      "nota": "El yogur griego 0% aporta el doble de proteína que el natural con las mismas calorías.",
+      "comp": [
+        {
+          "f": "yogur_griego_natural_0_mg",
+          "g": 200
+        },
+        {
+          "f": "almendras",
+          "g": 10
+        },
+        {
+          "f": "frutos_rojos",
+          "g": 100,
+          "fx": true
+        },
+        {
+          "f": "miel",
+          "g": 12,
+          "fx": true
+        }
+      ]
+    },
+    "CAS_MER3": {
+      "cat": "mer",
+      "short": "Bowl de yogur y avena",
+      "nom": "Yogur proteico con avena y plátano",
+      "icon": "🥣",
+      "t": "4 min",
+      "eq": "Bol",
+      "tipo": "completa",
+      "diet": [
+        "vt"
+      ],
+      "desc": "Yogur proteico con copos de avena y plátano. Merienda de bol, muy saciante y perfecta antes o después de entrenar.",
+      "nota": "Si dejas la avena en el yogur unos minutos, se ablanda y queda mucho más cremoso.",
+      "comp": [
+        {
+          "f": "yogur_proteico",
+          "g": 200,
+          "note": "1 tarrina"
+        },
+        {
+          "f": "avena",
+          "g": 25,
+          "note": "copos"
+        },
+        {
+          "f": "platano",
+          "g": 100,
+          "fx": true
+        }
+      ]
+    },
+    "CAS_MER4": {
+      "cat": "mer",
+      "short": "Fruta y frutos secos",
+      "nom": "Fruta variada con frutos secos",
+      "icon": "🍎",
+      "t": "2 min",
+      "eq": "Ninguno",
+      "tipo": "ligera",
+      "diet": [
+        "sg",
+        "sl",
+        "vg",
+        "vt"
+      ],
+      "desc": "Un par de piezas de fruta con un puñado pequeño de almendras. La merienda más simple y de las mejores.",
+      "nota": "El puñado de frutos secos es la clave: aporta grasa buena y hace que la fruta sacie de verdad.",
+      "comp": [
+        {
+          "f": "almendras",
+          "g": 15,
+          "note": "un puñado pequeño"
+        },
+        {
+          "f": "manzana",
+          "g": 180,
+          "fx": true,
+          "note": "1 pieza"
+        },
+        {
+          "f": "platano",
+          "g": 120,
+          "fx": true,
+          "note": "1 pieza"
+        }
+      ]
+    },
+    "CAS_MER5": {
+      "cat": "mer",
+      "short": "Solo fruta",
+      "nom": "Fruta de temporada",
+      "icon": "🍊",
+      "t": "2 min",
+      "eq": "Ninguno",
+      "tipo": "ligera",
+      "diet": [
+        "sg",
+        "sl",
+        "vg",
+        "vt"
+      ],
+      "desc": "Dos o tres piezas de fruta de temporada. Ligera, hidratante y con fibra.",
+      "nota": "Varía los colores a lo largo de la semana: cada uno aporta antioxidantes distintos.",
+      "comp": [
+        {
+          "f": "manzana",
+          "g": 180,
+          "fx": true,
+          "note": "1 pieza"
+        },
+        {
+          "f": "platano",
+          "g": 120,
+          "fx": true,
+          "note": "1 pieza"
+        },
+        {
+          "f": "naranja",
+          "g": 160,
+          "fx": true,
+          "note": "1 pieza"
+        }
+      ]
+    },
+    "CAS_MER6": {
+      "cat": "mer",
+      "short": "Tostada con tomate",
+      "nom": "Tostada de tomate y aceite con fruta",
+      "icon": "🍞",
+      "t": "5 min",
+      "eq": "Tostadora",
+      "tipo": "ligera",
+      "diet": [
+        "sl",
+        "vg",
+        "vt"
+      ],
+      "desc": "Tostada básica de pan integral con tomate rallado y aceite de oliva, con una pieza de fruta.",
+      "nota": "Ralla el tomate: empapa el pan mucho mejor que en rodajas.",
+      "comp": [
+        {
+          "f": "pan_integral",
+          "g": 60,
+          "note": "1-2 rebanadas"
+        },
+        {
+          "f": "tomate",
+          "g": 80,
+          "fx": true,
+          "note": "rallado"
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 10,
+          "fx": true
+        },
+        {
+          "f": "manzana",
+          "g": 100,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal"
+        }
+      ]
+    },
+    "CAS_MER7": {
+      "cat": "mer",
+      "short": "Tostada de jamón",
+      "nom": "Tostada de jamón serrano",
+      "icon": "🥓",
+      "t": "5 min",
+      "eq": "Tostadora",
+      "tipo": "completa",
+      "diet": [
+        "sl"
+      ],
+      "desc": "Tostada de pan integral con tomate, aceite y jamón serrano. Merienda salada y con buena proteína.",
+      "nota": "El jamón, sobre el pan aún caliente: se atempera y gana muchísimo.",
+      "comp": [
+        {
+          "f": "pan_integral",
+          "g": 50,
+          "note": "1 rebanada"
+        },
+        {
+          "f": "jamon_serrano",
+          "g": 35
+        },
+        {
+          "f": "tomate",
+          "g": 60,
+          "fx": true,
+          "note": "rallado"
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 6,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal"
+        }
+      ]
+    },
+    "CAS_MER8": {
+      "cat": "mer",
+      "short": "Tostada de queso fresco",
+      "nom": "Tostada de queso fresco y tomate",
+      "icon": "🧀",
+      "t": "5 min",
+      "eq": "Tostadora",
+      "tipo": "completa",
+      "diet": [
+        "vt"
+      ],
+      "desc": "Tostada con queso fresco, tomate natural y un hilo de aceite. Vegetariana, ligera y proteica.",
+      "nota": "Un poco de orégano sobre el queso la transforma.",
+      "comp": [
+        {
+          "f": "pan_integral",
+          "g": 50,
+          "note": "1 rebanada"
+        },
+        {
+          "f": "queso_fresco",
+          "g": 50
+        },
+        {
+          "f": "tomate",
+          "g": 60,
+          "fx": true,
+          "note": "rallado"
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 5,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y orégano"
+        }
+      ]
+    },
+    "CAS_MER9": {
+      "cat": "mer",
+      "short": "Tostada de aguacate",
+      "nom": "Tostada de aguacate",
+      "icon": "🥑",
+      "t": "6 min",
+      "eq": "Tostadora",
+      "tipo": "ligera",
+      "diet": [
+        "sl",
+        "vg",
+        "vt"
+      ],
+      "desc": "Aguacate machacado con limón sobre pan integral. Grasas saludables y mucha saciedad.",
+      "nota": "Machácalo con un tenedor y un chorrito de limón para que no se oxide.",
+      "comp": [
+        {
+          "f": "pan_integral",
+          "g": 50,
+          "note": "1 rebanada"
+        },
+        {
+          "f": "aguacate",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "limon",
+          "g": 5,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 5,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal y pimienta"
+        }
+      ]
+    },
+    "CAS_MER10": {
+      "cat": "mer",
+      "short": "Tostada de cacahuete",
+      "nom": "Tostada de mantequilla de cacahuete y plátano",
+      "icon": "🥜",
+      "t": "5 min",
+      "eq": "Tostadora",
+      "tipo": "completa",
+      "diet": [
+        "sl",
+        "vg",
+        "vt"
+      ],
+      "desc": "Pan integral con mantequilla de cacahuete y rodajas de plátano. Energética y muy saciante.",
+      "nota": "Elige una mantequilla de cacahuete que sea solo cacahuete, sin azúcar ni aceites añadidos.",
+      "comp": [
+        {
+          "f": "pan_integral",
+          "g": 50,
+          "note": "1 rebanada"
+        },
+        {
+          "f": "mantequilla_de_cacahuete",
+          "g": 20
+        },
+        {
+          "f": "platano",
+          "g": 80,
+          "fx": true
+        }
+      ]
+    },
+    "CAS_MER11": {
+      "cat": "mer",
+      "short": "Queso fresco con fruta",
+      "nom": "Queso fresco con fresas",
+      "icon": "🧀",
+      "t": "3 min",
+      "eq": "Bol",
+      "tipo": "ligera",
+      "diet": [
+        "sg",
+        "vt"
+      ],
+      "desc": "Queso fresco con fresas (o la fruta que tengas). Contraste dulce-salado, muy proteica y ligera.",
+      "nota": "Un poco de canela o unas hojas de menta le dan un giro muy agradable.",
+      "comp": [
+        {
+          "f": "queso_fresco",
+          "g": 100
+        },
+        {
+          "f": "fresa",
+          "g": 80,
+          "fx": true
+        }
+      ]
+    },
+    "CAS_MER12": {
+      "cat": "mer",
+      "short": "Requesón con miel",
+      "nom": "Requesón con miel y almendras",
+      "icon": "🍯",
+      "t": "3 min",
+      "eq": "Bol",
+      "tipo": "ligera",
+      "diet": [
+        "sg",
+        "vt"
+      ],
+      "desc": "Requesón con un hilo de miel y almendras laminadas. Suave, cremosa y con buena proteína.",
+      "nota": "El requesón es de los lácteos con mejor relación proteína/calorías. La miel, con moderación.",
+      "comp": [
+        {
+          "f": "requeson_cottage_cheese",
+          "g": 180
+        },
+        {
+          "f": "almendras",
+          "g": 12
+        },
+        {
+          "f": "miel",
+          "g": 12,
+          "fx": true
+        }
+      ]
     }
   }
 }
