@@ -5,6 +5,48 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Plan Nutricional · Menú semanal</title>
 
+<script>
+/* ── Red de seguridad de arranque ──────────────────────────────
+   Si algo falla al iniciar, en vez de dejar al usuario mirando la
+   pantalla de carga para siempre, se muestra el error EN PANTALLA.
+   Imprescindible en móvil, donde no hay consola a mano. Va inline y
+   lo primero de todo, para cazar también fallos al cargar el bundle. */
+(function(){
+  var shown = false;
+  function show(msg){
+    if(shown) return; shown = true;
+    try{
+      var s = document.getElementById('splash'); if(s && s.remove) s.remove();
+      var d = document.createElement('div');
+      d.setAttribute('style','position:fixed;inset:0;z-index:99999;background:#2C1F0E;color:#F6EDD8;padding:22px;overflow:auto;-webkit-user-select:text;user-select:text');
+      d.innerHTML =
+        '<h2 style="font:700 18px system-ui,sans-serif;margin:0 0 8px">La app no pudo arrancar</h2>'+
+        '<p style="font:13px system-ui,sans-serif;opacity:.75;margin:0 0 14px">Copia o captura este error y pásaselo al desarrollador.</p>'+
+        '<pre style="white-space:pre-wrap;word-break:break-word;background:rgba(255,255,255,.08);padding:12px;border-radius:8px;margin:0;font:12px/1.5 monospace"></pre>';
+      d.querySelector('pre').textContent = msg + '\n\nUA: ' + navigator.userAgent;
+      (document.body || document.documentElement).appendChild(d);
+    }catch(e){}
+  }
+  window.addEventListener('error', function(e){
+    var m = (e && e.message) || 'Error desconocido';
+    if(e && e.filename) m += '\n' + e.filename + ':' + e.lineno + ':' + e.colno;
+    if(e && e.error && e.error.stack) m += '\n\n' + e.error.stack;
+    show(m);
+  });
+  window.addEventListener('unhandledrejection', function(e){
+    var r = e && e.reason;
+    show('Promesa rechazada: ' + ((r && r.stack) ? r.stack : r));
+  });
+  /* Si a los 12 s la pantalla de carga sigue ahí, se atascó sin lanzar error. */
+  setTimeout(function(){
+    var s = document.getElementById('splash');
+    if(s && s.parentNode && !/\bhide\b/.test(s.className)){
+      show('La app se quedó en la pantalla de carga y no se registró ningún error de JavaScript.');
+    }
+  }, 12000);
+})();
+</script>
+
 <!-- Favicon · barra del navegador -->
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="alternate icon" type="image/png" sizes="192x192" href="icon-192.png">
