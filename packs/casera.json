@@ -1,0 +1,2051 @@
+{
+  "kind": "recipe-pack",
+  "cuisine": {
+    "id": "cas",
+    "ico": "🏠",
+    "lbl": "Cocina casera (lista propia)"
+  },
+  "foods": {
+    "canonigos": {
+      "name": "Canónigos",
+      "sec": "verd",
+      "kcal": 21,
+      "p": 2,
+      "f": 0.4,
+      "c": 3.6,
+      "ft": [
+        "v"
+      ]
+    },
+    "queso_feta": {
+      "name": "Queso feta",
+      "sec": "lact",
+      "kcal": 264,
+      "p": 14.2,
+      "f": 21.3,
+      "c": 4.1,
+      "ft": [
+        "qs",
+        "lac"
+      ]
+    },
+    "burrata": {
+      "name": "Burrata",
+      "sec": "lact",
+      "kcal": 280,
+      "p": 17,
+      "f": 23,
+      "c": 2,
+      "ft": [
+        "qs",
+        "lac"
+      ]
+    },
+    "mostaza": {
+      "name": "Mostaza",
+      "sec": "desp",
+      "kcal": 66,
+      "p": 4,
+      "f": 3.5,
+      "c": 5,
+      "ft": []
+    }
+  },
+  "dishes": {
+    "CAS_ENS1": {
+      "cat": "cen",
+      "short": "Ensalada mango y pollo",
+      "nom": "Ensalada de mango, pollo y aguacate",
+      "icon": "🥗",
+      "t": "15 min",
+      "eq": "Sartén · Bol",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl"
+      ],
+      "desc": "Ensalada completa de brotes con pollo a la plancha, mango y aguacate. Fresca, saciante y rica en grasas buenas.",
+      "nota": "Marca el pollo a la plancha y déjalo templar. Corta el mango y el aguacate en dados y alíña al final con aceite y lima.",
+      "comp": [
+        {
+          "f": "pechuga_de_pollo",
+          "g": 135,
+          "note": "crudo"
+        },
+        {
+          "f": "mango",
+          "g": 90,
+          "fx": true
+        },
+        {
+          "f": "aguacate",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "canonigos",
+          "g": 40,
+          "fx": true
+        },
+        {
+          "f": "tomate",
+          "g": 80,
+          "fx": true,
+          "note": "cherry"
+        },
+        {
+          "f": "cebolla_morada",
+          "g": 20,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 10,
+          "fx": true
+        },
+        {
+          "f": "limon",
+          "g": 10,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y cilantro"
+        }
+      ]
+    },
+    "CAS_ENS2": {
+      "cat": "cen",
+      "short": "Tomate y queso fresco",
+      "nom": "Ensalada de tomate, canónigos y queso fresco",
+      "icon": "🍅",
+      "t": "10 min",
+      "eq": "Bol",
+      "tipo": "ligera",
+      "diet": [
+        "sg",
+        "vt"
+      ],
+      "desc": "Ensalada sencilla de tomate natural con canónigos y queso fresco. Cena ligera y rápida.",
+      "nota": "Usa tomate maduro de temporada. Aliña justo antes de servir para que no suelte agua.",
+      "comp": [
+        {
+          "f": "queso_fresco",
+          "g": 110
+        },
+        {
+          "f": "tomate",
+          "g": 180,
+          "fx": true
+        },
+        {
+          "f": "canonigos",
+          "g": 40,
+          "fx": true
+        },
+        {
+          "f": "cebolla_morada",
+          "g": 25,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 10,
+          "fx": true
+        },
+        {
+          "f": "vinagre",
+          "g": 5,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal y orégano"
+        }
+      ]
+    },
+    "CAS_ENS3": {
+      "cat": "cen",
+      "short": "Ensalada pavo y queso",
+      "nom": "Ensalada de tomate, pavo y queso fresco",
+      "icon": "🥗",
+      "t": "10 min",
+      "eq": "Bol",
+      "tipo": "completa",
+      "diet": [
+        "sg"
+      ],
+      "desc": "Ensalada completa con pavo en dados, queso fresco y verdura cruda. Alta en proteína y muy rápida.",
+      "nota": "Elige pavo de buena calidad (alto porcentaje de carne). Ralla la zanahoria para que integre mejor.",
+      "comp": [
+        {
+          "f": "pavo_pechuga",
+          "g": 110
+        },
+        {
+          "f": "queso_fresco",
+          "g": 100
+        },
+        {
+          "f": "tomate",
+          "g": 150,
+          "fx": true
+        },
+        {
+          "f": "lechuga",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "zanahoria",
+          "g": 40,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 10,
+          "fx": true
+        },
+        {
+          "f": "vinagre",
+          "g": 5,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal y pimienta"
+        }
+      ]
+    },
+    "CAS_ENS4": {
+      "cat": "com",
+      "short": "Ensalada de garbanzos",
+      "nom": "Ensalada mediterránea de garbanzos con atún",
+      "icon": "🫘",
+      "t": "12 min",
+      "eq": "Bol",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl"
+      ],
+      "desc": "Garbanzos cocidos con tomate, pimiento, cebolla y atún al natural. Legumbre fría, completa y saciante.",
+      "nota": "Escurre y enjuaga bien los garbanzos de bote. Puedes cambiar el atún por un huevo cocido.",
+      "comp": [
+        {
+          "f": "garbanzos",
+          "g": 200,
+          "note": "cocidos o de bote escurridos"
+        },
+        {
+          "f": "atun_al_natural",
+          "g": 70,
+          "note": "escurrido"
+        },
+        {
+          "f": "tomate",
+          "g": 120,
+          "fx": true
+        },
+        {
+          "f": "pimiento_rojo",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "cebolla_morada",
+          "g": 25,
+          "fx": true
+        },
+        {
+          "f": "aceitunas_verdes",
+          "g": 20,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 10,
+          "fx": true
+        },
+        {
+          "f": "vinagre",
+          "g": 5,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y perejil"
+        }
+      ]
+    },
+    "CAS_ENS5": {
+      "cat": "com",
+      "short": "Ensalada de lentejas",
+      "nom": "Ensalada de lentejas con verduras y huevo",
+      "icon": "🫘",
+      "t": "12 min",
+      "eq": "Bol",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl",
+        "vt"
+      ],
+      "desc": "Lentejas cocidas frías con verdura picada y huevo cocido. Vegetariana, completa y muy saciante.",
+      "nota": "Enfría bien las lentejas antes de mezclar. El comino y la mostaza levantan mucho el aliño.",
+      "comp": [
+        {
+          "f": "lentejas",
+          "g": 200,
+          "note": "cocidas"
+        },
+        {
+          "f": "huevo",
+          "g": 110,
+          "note": "2 huevos cocidos"
+        },
+        {
+          "f": "tomate",
+          "g": 100,
+          "fx": true
+        },
+        {
+          "f": "zanahoria",
+          "g": 40,
+          "fx": true
+        },
+        {
+          "f": "pimiento_rojo",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "cebolla",
+          "g": 30,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 10,
+          "fx": true
+        },
+        {
+          "f": "vinagre",
+          "g": 5,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y comino"
+        }
+      ]
+    },
+    "CAS_ENS6": {
+      "cat": "com",
+      "short": "Ensalada pasta y atún",
+      "nom": "Ensalada de pasta integral con atún y verduras",
+      "icon": "🍝",
+      "t": "18 min",
+      "eq": "Olla · Bol",
+      "tipo": "completa",
+      "diet": [
+        "sl"
+      ],
+      "desc": "Pasta integral fría con atún, tomate cherry, maíz y verduras. Clásico de tupper, equilibrado y fácil.",
+      "nota": "Cuece la pasta al dente y enfríala con agua para cortar la cocción. Aliña en frío.",
+      "comp": [
+        {
+          "f": "pasta_integral_cocida",
+          "g": 180,
+          "note": "unos 65 g en crudo"
+        },
+        {
+          "f": "atun_al_natural",
+          "g": 70,
+          "note": "escurrido"
+        },
+        {
+          "f": "tomate",
+          "g": 100,
+          "fx": true,
+          "note": "cherry"
+        },
+        {
+          "f": "maiz",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "zanahoria",
+          "g": 40,
+          "fx": true
+        },
+        {
+          "f": "aceitunas_verdes",
+          "g": 20,
+          "fx": true
+        },
+        {
+          "f": "rucula",
+          "g": 30,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 10,
+          "fx": true
+        },
+        {
+          "f": "vinagre",
+          "g": 5,
+          "fx": true
+        }
+      ]
+    },
+    "CAS_ENS7": {
+      "cat": "cen",
+      "short": "Ensalada griega y pollo",
+      "nom": "Ensalada griega con pollo y feta",
+      "icon": "🥗",
+      "t": "15 min",
+      "eq": "Sartén · Bol",
+      "tipo": "completa",
+      "diet": [
+        "sg"
+      ],
+      "desc": "Tomate, pimiento, cebolla y aceitunas negras con pollo a la plancha y queso feta. Sabor mediterráneo.",
+      "nota": "Corta la verdura en trozos grandes, al estilo griego. Añade el feta desmenuzado al final.",
+      "comp": [
+        {
+          "f": "pechuga_de_pollo",
+          "g": 135,
+          "note": "crudo"
+        },
+        {
+          "f": "queso_feta",
+          "g": 50
+        },
+        {
+          "f": "tomate",
+          "g": 150,
+          "fx": true
+        },
+        {
+          "f": "cebolla_morada",
+          "g": 25,
+          "fx": true
+        },
+        {
+          "f": "pimiento_verde",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "aceitunas_negras",
+          "g": 25,
+          "fx": true
+        },
+        {
+          "f": "lechuga",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 10,
+          "fx": true
+        },
+        {
+          "f": "limon",
+          "g": 8,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y orégano"
+        }
+      ]
+    },
+    "CAS_ENS8": {
+      "cat": "cen",
+      "short": "Espinacas, manzana, pavo",
+      "nom": "Ensalada de espinacas, manzana y pavo",
+      "icon": "🥗",
+      "t": "10 min",
+      "eq": "Bol",
+      "tipo": "completa",
+      "diet": [
+        "sg"
+      ],
+      "desc": "Espinacas frescas con manzana, pavo y queso fresco. Contraste dulce-salado, ligera y proteica.",
+      "nota": "Corta la manzana en bastones y alíñala con limón para que no se oxide. La mostaza liga muy bien el aliño.",
+      "comp": [
+        {
+          "f": "pavo_pechuga",
+          "g": 110
+        },
+        {
+          "f": "queso_fresco",
+          "g": 60
+        },
+        {
+          "f": "manzana",
+          "g": 130,
+          "fx": true
+        },
+        {
+          "f": "espinaca",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "zanahoria",
+          "g": 40,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 10,
+          "fx": true
+        },
+        {
+          "f": "vinagre",
+          "g": 5,
+          "fx": true
+        },
+        {
+          "f": "mostaza",
+          "g": 5,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal y canela"
+        }
+      ]
+    },
+    "CAS_ENS9": {
+      "cat": "cen",
+      "short": "Burrata y jamón",
+      "nom": "Ensalada de burrata con tomate y jamón serrano",
+      "icon": "🧀",
+      "t": "8 min",
+      "eq": "Bol",
+      "tipo": "completa",
+      "diet": [
+        "sg"
+      ],
+      "desc": "Tomate maduro con burrata cremosa, rúcula y jamón serrano. Cena de capricho sin complicaciones.",
+      "nota": "Saca la burrata de la nevera 10 minutos antes. Un chorrito de aceite bueno y pimienta bastan.",
+      "comp": [
+        {
+          "f": "burrata",
+          "g": 100
+        },
+        {
+          "f": "jamon_serrano",
+          "g": 50
+        },
+        {
+          "f": "tomate",
+          "g": 180,
+          "fx": true
+        },
+        {
+          "f": "rucula",
+          "g": 40,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 10,
+          "fx": true
+        },
+        {
+          "f": "vinagre",
+          "g": 5,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Pimienta y albahaca"
+        }
+      ]
+    },
+    "CAS_ENS10": {
+      "cat": "com",
+      "short": "Cuscús con pollo",
+      "nom": "Ensalada de cuscús integral con verduras y pollo",
+      "icon": "🥗",
+      "t": "18 min",
+      "eq": "Bol · Sartén",
+      "tipo": "completa",
+      "diet": [
+        "sl"
+      ],
+      "desc": "Cuscús integral con pollo, verdura en dados, pasas y almendra. Fresca, con toque norteafricano.",
+      "nota": "Hidrata el cuscús con el mismo volumen de caldo caliente y suéltalo con un tenedor. Alíña con limón y hierbabuena.",
+      "comp": [
+        {
+          "f": "cuscus_integral_cocido",
+          "g": 170,
+          "note": "unos 60 g en crudo"
+        },
+        {
+          "f": "pechuga_de_pollo",
+          "g": 135,
+          "note": "crudo"
+        },
+        {
+          "f": "tomate",
+          "g": 90,
+          "fx": true
+        },
+        {
+          "f": "zanahoria",
+          "g": 40,
+          "fx": true
+        },
+        {
+          "f": "pimiento_rojo",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "uva_pasa",
+          "g": 15,
+          "fx": true
+        },
+        {
+          "f": "almendras",
+          "g": 10,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 10,
+          "fx": true
+        },
+        {
+          "f": "limon",
+          "g": 8,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y hierbabuena"
+        }
+      ]
+    },
+    "CAS_ENS11": {
+      "cat": "cen",
+      "short": "Ensalada César",
+      "nom": "Ensalada César con pollo y salsa de yogur",
+      "icon": "🥗",
+      "t": "18 min",
+      "eq": "Sartén · Bol",
+      "tipo": "completa",
+      "diet": [],
+      "desc": "Lechuga romana con pollo a la plancha, picatostes y parmesano, con salsa César aligerada de yogur.",
+      "nota": "Salsa: yogur natural, mostaza, limón, ajo y pimienta. Tuesta el pan en el horno en vez de freírlo.",
+      "comp": [
+        {
+          "f": "pechuga_de_pollo",
+          "g": 135,
+          "note": "crudo"
+        },
+        {
+          "f": "lechuga",
+          "g": 90,
+          "fx": true,
+          "note": "romana"
+        },
+        {
+          "f": "pan_integral",
+          "g": 45,
+          "fx": true,
+          "note": "tostado, en picatostes"
+        },
+        {
+          "f": "queso_parmesano",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "yogur_natural",
+          "g": 40,
+          "fx": true,
+          "note": "para la salsa"
+        },
+        {
+          "f": "mostaza",
+          "g": 5,
+          "fx": true
+        },
+        {
+          "f": "limon",
+          "g": 5,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Ajo y pimienta"
+        }
+      ]
+    },
+    "CAS_ENS12": {
+      "cat": "cen",
+      "short": "Huevo, patata, judías",
+      "nom": "Ensalada de huevo, patata y judías verdes",
+      "icon": "🥔",
+      "t": "25 min",
+      "eq": "Olla · Bol",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl",
+        "vt"
+      ],
+      "desc": "Patata y judía verde cocidas con huevo, tomate y cebolla. Ensalada templada clásica y muy saciante.",
+      "nota": "Cuece la patata y la judía juntas hasta que estén tiernas. Aliña en templado para que absorban mejor.",
+      "comp": [
+        {
+          "f": "patata",
+          "g": 180,
+          "note": "cocida"
+        },
+        {
+          "f": "huevo",
+          "g": 110,
+          "note": "2 huevos cocidos"
+        },
+        {
+          "f": "judia_verde",
+          "g": 120,
+          "fx": true
+        },
+        {
+          "f": "tomate",
+          "g": 80,
+          "fx": true
+        },
+        {
+          "f": "cebolla",
+          "g": 25,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 10,
+          "fx": true
+        },
+        {
+          "f": "vinagre",
+          "g": 5,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal y pimienta"
+        }
+      ]
+    },
+    "CAS_REV1": {
+      "cat": "cen",
+      "short": "Berenjena, pavo y queso",
+      "nom": "Berenjena al horno con pavo, queso y módena",
+      "icon": "🍆",
+      "t": "30 min",
+      "eq": "Horno",
+      "tipo": "completa",
+      "diet": [
+        "sg"
+      ],
+      "desc": "Berenjena asada con pavo y queso gratinado, con un toque de vinagre de módena. Cena de horno, sabrosa y ligera.",
+      "nota": "Asa la berenjena en rodajas hasta que esté tierna. Añade el pavo y el queso y gratina 5 minutos.",
+      "comp": [
+        {
+          "f": "pavo_pechuga",
+          "g": 95
+        },
+        {
+          "f": "mozzarella",
+          "g": 50
+        },
+        {
+          "f": "berenjena",
+          "g": 250,
+          "fx": true
+        },
+        {
+          "f": "tomate_triturado",
+          "g": 80,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 10,
+          "fx": true
+        },
+        {
+          "f": "vinagre",
+          "g": 8,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y orégano"
+        }
+      ]
+    },
+    "CAS_REV2": {
+      "cat": "cen",
+      "short": "Brócoli, ajos y huevo",
+      "nom": "Brócoli con ajos y huevo",
+      "icon": "🥦",
+      "t": "18 min",
+      "eq": "Olla · Sartén",
+      "tipo": "ligera",
+      "diet": [
+        "sg",
+        "sl",
+        "vt"
+      ],
+      "desc": "Brócoli al vapor salteado con ajos y pimentón, coronado con huevo. Cena vegetariana rápida y muy nutritiva.",
+      "nota": "Cuece el brócoli al dente. Dora los ajos con el pimentón fuera del fuego para que no amargue.",
+      "comp": [
+        {
+          "f": "huevo",
+          "g": 110,
+          "note": "2 huevos"
+        },
+        {
+          "f": "brocoli",
+          "g": 250,
+          "fx": true
+        },
+        {
+          "f": "ajo",
+          "g": 8,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal y pimentón"
+        }
+      ]
+    },
+    "CAS_REV3": {
+      "cat": "cen",
+      "short": "Setas, jamón y huevo",
+      "nom": "Setas con ajos, jamón serrano y huevo",
+      "icon": "🍄",
+      "t": "15 min",
+      "eq": "Sartén",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl"
+      ],
+      "desc": "Setas variadas salteadas con ajo y jamón serrano, con huevo por encima. Muy sabrosa y baja en carbohidratos.",
+      "nota": "Saltea las setas a fuego fuerte sin moverlas para que doren. Añade el jamón al final para que no se reseque.",
+      "comp": [
+        {
+          "f": "huevo",
+          "g": 60,
+          "note": "1 huevo"
+        },
+        {
+          "f": "jamon_serrano",
+          "g": 50
+        },
+        {
+          "f": "setas_varios_tipos",
+          "g": 200,
+          "fx": true
+        },
+        {
+          "f": "ajo",
+          "g": 8,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y perejil"
+        }
+      ]
+    },
+    "CAS_REV4": {
+      "cat": "cen",
+      "short": "Champiñones y queso",
+      "nom": "Champiñones al ajillo con queso fresco",
+      "icon": "🍄",
+      "t": "15 min",
+      "eq": "Sartén",
+      "tipo": "ligera",
+      "diet": [
+        "sg",
+        "vt"
+      ],
+      "desc": "Champiñones al ajillo con perejil y queso fresco desmenuzado. Cena ligera, vegetariana y muy rápida.",
+      "nota": "Saltea los champiñones hasta que suelten y evaporen el agua. Añade el queso fuera del fuego.",
+      "comp": [
+        {
+          "f": "queso_fresco",
+          "g": 100
+        },
+        {
+          "f": "champinones",
+          "g": 250,
+          "fx": true
+        },
+        {
+          "f": "ajo",
+          "g": 8,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "limon",
+          "g": 5,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y perejil"
+        }
+      ]
+    },
+    "CAS_REV5": {
+      "cat": "cen",
+      "short": "Calabacín, pavo y queso",
+      "nom": "Calabacín al horno con pavo y queso",
+      "icon": "🥒",
+      "t": "30 min",
+      "eq": "Horno",
+      "tipo": "completa",
+      "diet": [
+        "sg"
+      ],
+      "desc": "Calabacín asado en rodajas con pavo, tomate y queso fundido. Sencilla, ligera y saciante.",
+      "nota": "Sala el calabacín y déjalo sudar 10 minutos para que suelte agua antes de hornear.",
+      "comp": [
+        {
+          "f": "pavo_pechuga",
+          "g": 100
+        },
+        {
+          "f": "mozzarella",
+          "g": 55
+        },
+        {
+          "f": "calabacin",
+          "g": 250,
+          "fx": true
+        },
+        {
+          "f": "tomate_triturado",
+          "g": 80,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 10,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y orégano"
+        }
+      ]
+    },
+    "CAS_REV6": {
+      "cat": "cen",
+      "short": "Revuelto de pimientos",
+      "nom": "Revuelto de pimientos asados con huevo",
+      "icon": "🌶️",
+      "t": "20 min",
+      "eq": "Sartén",
+      "tipo": "ligera",
+      "diet": [
+        "sg",
+        "sl",
+        "vt"
+      ],
+      "desc": "Pimientos asados salteados con cebolla y cuajados con huevo. Dulce, jugoso y muy fácil.",
+      "nota": "Asa los pimientos hasta que la piel se arrugue, pélalos y córtalos en tiras. Cuaja el huevo a fuego suave.",
+      "comp": [
+        {
+          "f": "huevo",
+          "g": 110,
+          "note": "2 huevos"
+        },
+        {
+          "f": "pimiento_rojo",
+          "g": 180,
+          "fx": true
+        },
+        {
+          "f": "cebolla",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "ajo",
+          "g": 5,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal y pimienta"
+        }
+      ]
+    },
+    "CAS_REV7": {
+      "cat": "cen",
+      "short": "Tomate, atún y huevo",
+      "nom": "Tomate aliñado con atún y huevo cocido",
+      "icon": "🍅",
+      "t": "10 min",
+      "eq": "Bol",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl"
+      ],
+      "desc": "Tomate maduro aliñado con atún, huevo cocido y aceitunas. Cena de verano sin encender el fuego.",
+      "nota": "Elige tomate bien maduro y sálalo unos minutos antes de aliñar para que suelte su jugo.",
+      "comp": [
+        {
+          "f": "atun_al_natural",
+          "g": 80,
+          "note": "escurrido"
+        },
+        {
+          "f": "huevo",
+          "g": 55,
+          "note": "1 huevo cocido"
+        },
+        {
+          "f": "tomate",
+          "g": 200,
+          "fx": true
+        },
+        {
+          "f": "cebolla",
+          "g": 30,
+          "fx": true
+        },
+        {
+          "f": "aceitunas_verdes",
+          "g": 20,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal y orégano"
+        }
+      ]
+    },
+    "CAS_REV8": {
+      "cat": "cen",
+      "short": "Crema de calabacín",
+      "nom": "Crema de calabacín con huevo cocido",
+      "icon": "🥣",
+      "t": "25 min",
+      "eq": "Cazuela · Batidora",
+      "tipo": "ligera",
+      "diet": [
+        "sg",
+        "sl",
+        "vt"
+      ],
+      "desc": "Crema suave de calabacín y puerro con huevo cocido para completarla en proteína.",
+      "nota": "No pases de agua: mejor añadir caldo poco a poco hasta la textura deseada. Tritura muy fino.",
+      "comp": [
+        {
+          "f": "huevo",
+          "g": 55,
+          "note": "1 huevo cocido"
+        },
+        {
+          "f": "queso_fresco",
+          "g": 60,
+          "note": "batido"
+        },
+        {
+          "f": "patata",
+          "g": 130
+        },
+        {
+          "f": "calabacin",
+          "g": 250,
+          "fx": true
+        },
+        {
+          "f": "puerro",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "caldo_vegetal",
+          "g": 250,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 10,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal y pimienta"
+        }
+      ]
+    },
+    "CAS_REV9": {
+      "cat": "cen",
+      "short": "Crema de verduras",
+      "nom": "Crema de verduras completa con pollo",
+      "icon": "🥣",
+      "t": "30 min",
+      "eq": "Cazuela · Batidora",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl"
+      ],
+      "desc": "Crema de verduras variadas enriquecida con pollo desmenuzado. Reconfortante y completa.",
+      "nota": "Cuece las verduras con poco caldo y tritura. Añade el pollo desmenuzado al servir para que no se deshaga.",
+      "comp": [
+        {
+          "f": "pechuga_de_pollo",
+          "g": 100,
+          "note": "crudo"
+        },
+        {
+          "f": "patata",
+          "g": 80
+        },
+        {
+          "f": "calabacin",
+          "g": 150,
+          "fx": true
+        },
+        {
+          "f": "zanahoria",
+          "g": 70,
+          "fx": true
+        },
+        {
+          "f": "puerro",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "cebolla",
+          "g": 40,
+          "fx": true
+        },
+        {
+          "f": "judia_verde",
+          "g": 80,
+          "fx": true
+        },
+        {
+          "f": "caldo_vegetal",
+          "g": 250,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 10,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y cúrcuma"
+        }
+      ]
+    },
+    "CAS_REV10": {
+      "cat": "cen",
+      "short": "Salmorejo con huevo",
+      "nom": "Salmorejo equilibrado con huevo y jamón",
+      "icon": "🍅",
+      "t": "15 min",
+      "eq": "Batidora",
+      "tipo": "completa",
+      "diet": [],
+      "desc": "Salmorejo de tomate y pan integral, con su guarnición de huevo cocido y jamón serrano.",
+      "nota": "Tritura el tomate con el pan y emulsiona añadiendo el aceite en hilo. Sirve muy frío.",
+      "comp": [
+        {
+          "f": "tomate",
+          "g": 300,
+          "fx": true
+        },
+        {
+          "f": "pan_integral",
+          "g": 60
+        },
+        {
+          "f": "huevo",
+          "g": 55,
+          "note": "1 huevo cocido"
+        },
+        {
+          "f": "jamon_serrano",
+          "g": 30
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 15,
+          "fx": true
+        },
+        {
+          "f": "ajo",
+          "g": 4,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal"
+        }
+      ]
+    },
+    "CAS_REV11": {
+      "cat": "cen",
+      "short": "Gazpacho proteico",
+      "nom": "Gazpacho con guarnición proteica",
+      "icon": "🥤",
+      "t": "15 min",
+      "eq": "Batidora",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl"
+      ],
+      "desc": "Gazpacho clásico de tomate, pepino y pimiento, acompañado de huevo y atún para completarlo.",
+      "nota": "Deja reposar el gazpacho en frío al menos una hora: gana muchísimo sabor.",
+      "comp": [
+        {
+          "f": "tomate",
+          "g": 300,
+          "fx": true
+        },
+        {
+          "f": "pepino",
+          "g": 80,
+          "fx": true
+        },
+        {
+          "f": "pimiento_verde",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "cebolla",
+          "g": 30,
+          "fx": true
+        },
+        {
+          "f": "huevo",
+          "g": 55,
+          "note": "1 huevo cocido"
+        },
+        {
+          "f": "atun_al_natural",
+          "g": 60,
+          "note": "escurrido"
+        },
+        {
+          "f": "ajo",
+          "g": 4,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 15,
+          "fx": true
+        },
+        {
+          "f": "vinagre",
+          "g": 5,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal"
+        }
+      ]
+    },
+    "CAS_REV12": {
+      "cat": "cen",
+      "short": "Pisto con huevo",
+      "nom": "Pisto de verduras con huevo",
+      "icon": "🍳",
+      "t": "30 min",
+      "eq": "Sartén",
+      "tipo": "ligera",
+      "diet": [
+        "sg",
+        "sl",
+        "vt"
+      ],
+      "desc": "Pisto de calabacín, berenjena, pimiento y tomate, con huevo cuajado encima. Clásico de aprovechamiento.",
+      "nota": "Pocha las verduras por separado si quieres que cada una mantenga su textura. Cuaja el huevo al final.",
+      "comp": [
+        {
+          "f": "huevo",
+          "g": 110,
+          "note": "2 huevos"
+        },
+        {
+          "f": "calabacin",
+          "g": 150,
+          "fx": true
+        },
+        {
+          "f": "berenjena",
+          "g": 120,
+          "fx": true
+        },
+        {
+          "f": "pimiento_rojo",
+          "g": 80,
+          "fx": true
+        },
+        {
+          "f": "cebolla",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "tomate_triturado",
+          "g": 120,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y orégano"
+        }
+      ]
+    },
+    "CAS_REV13": {
+      "cat": "cen",
+      "short": "Revuelto de verduras",
+      "nom": "Revuelto de verduras con huevo y pavo",
+      "icon": "🍳",
+      "t": "15 min",
+      "eq": "Sartén",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl"
+      ],
+      "desc": "Salteado rápido de verduras (sirve congeladas) con huevo y pavo. Cena de emergencia bien resuelta.",
+      "nota": "Saltea las verduras a fuego fuerte para que no suelten agua. Añade el huevo al final y remueve poco.",
+      "comp": [
+        {
+          "f": "huevo",
+          "g": 110,
+          "note": "2 huevos"
+        },
+        {
+          "f": "pavo_pechuga",
+          "g": 60
+        },
+        {
+          "f": "judia_verde",
+          "g": 80,
+          "fx": true
+        },
+        {
+          "f": "zanahoria",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "guisantes",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "brocoli",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y ajo en polvo"
+        }
+      ]
+    },
+    "CAS_GUA1": {
+      "cat": "cen",
+      "short": "Brócoli con ajos",
+      "nom": "Brócoli salteado con ajos",
+      "icon": "🥦",
+      "t": "15 min",
+      "eq": "Olla · Sartén",
+      "tipo": "ligera",
+      "diet": [
+        "sg",
+        "sl",
+        "vg",
+        "vt"
+      ],
+      "desc": "Guarnición de brócoli al dente salteado con ajos laminados y un toque de pimentón.",
+      "nota": "Cuece el brócoli 4-5 minutos y pásalo por agua fría para fijar el verde. Saltéalo con los ajos.",
+      "comp": [
+        {
+          "f": "brocoli",
+          "g": 250,
+          "fx": true
+        },
+        {
+          "f": "ajo",
+          "g": 10,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "limon",
+          "g": 5,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y pimentón"
+        }
+      ]
+    },
+    "CAS_GUA2": {
+      "cat": "cen",
+      "short": "Setas al ajillo",
+      "nom": "Setas al ajillo",
+      "icon": "🍄",
+      "t": "12 min",
+      "eq": "Sartén",
+      "tipo": "ligera",
+      "diet": [
+        "sg",
+        "sl",
+        "vg",
+        "vt"
+      ],
+      "desc": "Guarnición de setas variadas al ajillo con perejil. Sabrosa y muy baja en calorías.",
+      "nota": "Fuego fuerte y no las muevas al principio: así doran en vez de cocerse en su agua.",
+      "comp": [
+        {
+          "f": "setas_varios_tipos",
+          "g": 250,
+          "fx": true
+        },
+        {
+          "f": "ajo",
+          "g": 10,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 14,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y perejil"
+        }
+      ]
+    },
+    "CAS_GUA3": {
+      "cat": "cen",
+      "short": "Champiñones al ajillo",
+      "nom": "Champiñones al ajillo",
+      "icon": "🍄",
+      "t": "12 min",
+      "eq": "Sartén",
+      "tipo": "ligera",
+      "diet": [
+        "sg",
+        "sl",
+        "vg",
+        "vt"
+      ],
+      "desc": "Guarnición clásica de champiñones al ajillo con perejil y un toque de limón.",
+      "nota": "Lamina los champiñones gruesos para que no se deshagan. Limón al final, fuera del fuego.",
+      "comp": [
+        {
+          "f": "champinones",
+          "g": 250,
+          "fx": true
+        },
+        {
+          "f": "ajo",
+          "g": 10,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 14,
+          "fx": true
+        },
+        {
+          "f": "limon",
+          "g": 5,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y perejil"
+        }
+      ]
+    },
+    "CAS_GUA4": {
+      "cat": "cen",
+      "short": "Calabacín al horno",
+      "nom": "Calabacín al horno con especias",
+      "icon": "🥒",
+      "t": "25 min",
+      "eq": "Horno",
+      "tipo": "ligera",
+      "diet": [
+        "sg",
+        "sl",
+        "vg",
+        "vt"
+      ],
+      "desc": "Guarnición de calabacín asado con orégano, ajo en polvo y hierbas. Muy fácil y versátil.",
+      "nota": "Corta en rodajas de 1 cm y hornea a 200 grados hasta que doren los bordes.",
+      "comp": [
+        {
+          "f": "calabacin",
+          "g": 300,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta, orégano y ajo en polvo"
+        }
+      ]
+    },
+    "CAS_GUA5": {
+      "cat": "cen",
+      "short": "Pimientos asados",
+      "nom": "Pimientos asados aliñados",
+      "icon": "🌶️",
+      "t": "35 min",
+      "eq": "Horno",
+      "tipo": "ligera",
+      "diet": [
+        "sg",
+        "sl",
+        "vg",
+        "vt"
+      ],
+      "desc": "Guarnición de pimientos asados pelados y aliñados con ajo, aceite y vinagre.",
+      "nota": "Asa a 200 grados hasta que la piel se arrugue. Tápalos 10 minutos al salir: se pelan solos.",
+      "comp": [
+        {
+          "f": "pimiento_rojo",
+          "g": 250,
+          "fx": true
+        },
+        {
+          "f": "ajo",
+          "g": 6,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 14,
+          "fx": true
+        },
+        {
+          "f": "vinagre",
+          "g": 5,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal y comino"
+        }
+      ]
+    },
+    "CAS_GUA6": {
+      "cat": "cen",
+      "short": "Espárragos a la plancha",
+      "nom": "Espárragos verdes a la plancha",
+      "icon": "🌿",
+      "t": "10 min",
+      "eq": "Plancha",
+      "tipo": "ligera",
+      "diet": [
+        "sg",
+        "sl",
+        "vg",
+        "vt"
+      ],
+      "desc": "Guarnición de espárragos verdes a la plancha con aceite, sal y limón.",
+      "nota": "Plancha bien caliente y poco tiempo: deben quedar tersos, nunca blandos.",
+      "comp": [
+        {
+          "f": "esparragos",
+          "g": 250,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "limon",
+          "g": 5,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal y pimienta"
+        }
+      ]
+    },
+    "CAS_GUA7": {
+      "cat": "cen",
+      "short": "Tomate aliñado",
+      "nom": "Tomate aliñado",
+      "icon": "🍅",
+      "t": "5 min",
+      "eq": "Bol",
+      "tipo": "ligera",
+      "diet": [
+        "sg",
+        "sl",
+        "vg",
+        "vt"
+      ],
+      "desc": "Guarnición de tomate maduro aliñado con buen aceite, sal y orégano.",
+      "nota": "Sala el tomate unos minutos antes: concentra el sabor y suelta su jugo.",
+      "comp": [
+        {
+          "f": "tomate",
+          "g": 250,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "vinagre",
+          "g": 5,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta, orégano y albahaca"
+        }
+      ]
+    },
+    "CAS_GUA8": {
+      "cat": "cen",
+      "short": "Crema calabacín ligera",
+      "nom": "Crema de calabacín ligera",
+      "icon": "🥣",
+      "t": "25 min",
+      "eq": "Cazuela · Batidora",
+      "tipo": "ligera",
+      "diet": [
+        "sg",
+        "sl",
+        "vg",
+        "vt"
+      ],
+      "desc": "Guarnición o primer plato: crema ligera de calabacín, cebolla y puerro, sin patata.",
+      "nota": "Sin patata queda más ligera; si la quieres más cremosa, tritura muy fino y añade el aceite en crudo.",
+      "comp": [
+        {
+          "f": "calabacin",
+          "g": 300,
+          "fx": true
+        },
+        {
+          "f": "cebolla",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "puerro",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "caldo_vegetal",
+          "g": 250,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 10,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y nuez moscada"
+        }
+      ]
+    },
+    "CAS_GUA9": {
+      "cat": "cen",
+      "short": "Crema de verduras",
+      "nom": "Crema de verduras básica",
+      "icon": "🥣",
+      "t": "30 min",
+      "eq": "Cazuela · Batidora",
+      "tipo": "ligera",
+      "diet": [
+        "sg",
+        "sl",
+        "vg",
+        "vt"
+      ],
+      "desc": "Guarnición o primer plato: crema de calabacín, zanahoria, puerro y judía verde.",
+      "nota": "Cuece con el caldo justo para que la crema quede densa; siempre puedes aligerarla luego.",
+      "comp": [
+        {
+          "f": "calabacin",
+          "g": 150,
+          "fx": true
+        },
+        {
+          "f": "zanahoria",
+          "g": 80,
+          "fx": true
+        },
+        {
+          "f": "puerro",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "cebolla",
+          "g": 40,
+          "fx": true
+        },
+        {
+          "f": "judia_verde",
+          "g": 80,
+          "fx": true
+        },
+        {
+          "f": "caldo_vegetal",
+          "g": 250,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 10,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal y pimienta"
+        }
+      ]
+    },
+    "CAS_GUA10": {
+      "cat": "cen",
+      "short": "Salmorejo ligero",
+      "nom": "Salmorejo vegetal ligero",
+      "icon": "🍅",
+      "t": "10 min",
+      "eq": "Batidora",
+      "tipo": "ligera",
+      "diet": [
+        "sg",
+        "sl",
+        "vg",
+        "vt"
+      ],
+      "desc": "Guarnición o entrante: salmorejo sin pan, solo tomate, ajo y aceite. Muy ligero.",
+      "nota": "Sin pan queda más suelto. Emulsiona el aceite en hilo para que ligue y quede sedoso.",
+      "comp": [
+        {
+          "f": "tomate",
+          "g": 350,
+          "fx": true
+        },
+        {
+          "f": "ajo",
+          "g": 4,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 15,
+          "fx": true
+        },
+        {
+          "f": "vinagre",
+          "g": 5,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal"
+        }
+      ]
+    },
+    "CAS_GUA11": {
+      "cat": "cen",
+      "short": "Gazpacho",
+      "nom": "Gazpacho tradicional",
+      "icon": "🥤",
+      "t": "15 min",
+      "eq": "Batidora",
+      "tipo": "ligera",
+      "diet": [
+        "sg",
+        "sl",
+        "vg",
+        "vt"
+      ],
+      "desc": "Guarnición o entrante: gazpacho clásico de tomate, pepino, pimiento y cebolla.",
+      "nota": "Deja reposar en frío al menos una hora. Cuela si lo quieres muy fino.",
+      "comp": [
+        {
+          "f": "tomate",
+          "g": 300,
+          "fx": true
+        },
+        {
+          "f": "pepino",
+          "g": 80,
+          "fx": true
+        },
+        {
+          "f": "pimiento_verde",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "cebolla",
+          "g": 30,
+          "fx": true
+        },
+        {
+          "f": "ajo",
+          "g": 4,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 15,
+          "fx": true
+        },
+        {
+          "f": "vinagre",
+          "g": 5,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal"
+        }
+      ]
+    },
+    "CAS_GUA12": {
+      "cat": "cen",
+      "short": "Pisto de verduras",
+      "nom": "Pisto de verduras",
+      "icon": "🍆",
+      "t": "30 min",
+      "eq": "Sartén",
+      "tipo": "ligera",
+      "diet": [
+        "sg",
+        "sl",
+        "vg",
+        "vt"
+      ],
+      "desc": "Guarnición de pisto: calabacín, berenjena, pimientos y cebolla con tomate. Aguanta días en la nevera.",
+      "nota": "Pocha despacio y sin prisa: el pisto gana mucho a fuego lento. Mejor de un día para otro.",
+      "comp": [
+        {
+          "f": "calabacin",
+          "g": 150,
+          "fx": true
+        },
+        {
+          "f": "berenjena",
+          "g": 120,
+          "fx": true
+        },
+        {
+          "f": "pimiento_rojo",
+          "g": 70,
+          "fx": true
+        },
+        {
+          "f": "pimiento_verde",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "cebolla",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "tomate_triturado",
+          "g": 120,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 14,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y orégano"
+        }
+      ]
+    },
+    "CAS_GUA13": {
+      "cat": "cen",
+      "short": "Verduras salteadas",
+      "nom": "Verduras salteadas al ajo",
+      "icon": "🥦",
+      "t": "12 min",
+      "eq": "Sartén",
+      "tipo": "ligera",
+      "diet": [
+        "sg",
+        "sl",
+        "vg",
+        "vt"
+      ],
+      "desc": "Guarnición de verduras variadas salteadas con ajo (sirven congeladas). Rápida y de aprovechamiento.",
+      "nota": "Fuego fuerte y sartén amplia para que no se cuezan. Sazona al final.",
+      "comp": [
+        {
+          "f": "judia_verde",
+          "g": 90,
+          "fx": true
+        },
+        {
+          "f": "zanahoria",
+          "g": 70,
+          "fx": true
+        },
+        {
+          "f": "guisantes",
+          "g": 70,
+          "fx": true
+        },
+        {
+          "f": "brocoli",
+          "g": 70,
+          "fx": true
+        },
+        {
+          "f": "ajo",
+          "g": 6,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y hierbas provenzales"
+        }
+      ]
+    }
+  }
+}
