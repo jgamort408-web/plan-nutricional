@@ -49,6 +49,48 @@
       "f": 3.5,
       "c": 5,
       "ft": []
+    },
+    "calamar": {
+      "name": "Calamar",
+      "sec": "pesc",
+      "kcal": 92,
+      "p": 15.6,
+      "f": 1.4,
+      "c": 1.4,
+      "ft": [
+        "pb"
+      ]
+    },
+    "sepia": {
+      "name": "Sepia",
+      "sec": "pesc",
+      "kcal": 79,
+      "p": 16.2,
+      "f": 0.7,
+      "c": 0.8,
+      "ft": [
+        "pb"
+      ]
+    },
+    "lubina": {
+      "name": "Lubina",
+      "sec": "pesc",
+      "kcal": 97,
+      "p": 18.4,
+      "f": 2.5,
+      "c": 0,
+      "ft": [
+        "pb"
+      ]
+    },
+    "caldo_pescado": {
+      "name": "Caldo de pescado",
+      "sec": "desp",
+      "kcal": 12,
+      "p": 1.5,
+      "f": 0.4,
+      "c": 0.6,
+      "ft": []
     }
   },
   "dishes": {
@@ -2044,6 +2086,807 @@
           "f": "especias",
           "cs": true,
           "as": "Sal, pimienta y hierbas provenzales"
+        }
+      ]
+    },
+    "CAS_PES1": {
+      "cat": "com",
+      "short": "Salmón con patata",
+      "nom": "Salmón a la plancha con patata cocida y ensalada",
+      "icon": "🐟",
+      "t": "25 min",
+      "eq": "Plancha · Olla",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl"
+      ],
+      "desc": "Lomo de salmón a la plancha con patata cocida y ensalada fresca. Proteína y grasa saludable con hidrato de calidad.",
+      "nota": "Marca el salmón primero por el lado de la piel para que quede crujiente y jugoso por dentro.",
+      "comp": [
+        {
+          "f": "salmon",
+          "g": 150,
+          "note": "crudo"
+        },
+        {
+          "f": "patata",
+          "g": 200,
+          "note": "cocida"
+        },
+        {
+          "f": "tomate",
+          "g": 80,
+          "fx": true
+        },
+        {
+          "f": "pepino",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "canonigos",
+          "g": 40,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "limon",
+          "g": 8,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y eneldo"
+        }
+      ]
+    },
+    "CAS_PES2": {
+      "cat": "com",
+      "short": "Atún con patata",
+      "nom": "Atún a la plancha con patata y verduras salteadas",
+      "icon": "🐟",
+      "t": "25 min",
+      "eq": "Plancha · Sartén",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl"
+      ],
+      "desc": "Atún fresco vuelta y vuelta con patata y un salteado de calabacín, pimiento, cebolla y champiñones.",
+      "nota": "El atún, vuelta y vuelta: si se pasa queda seco. Debe quedar rosado por dentro.",
+      "comp": [
+        {
+          "f": "atun",
+          "g": 150,
+          "note": "fresco, crudo"
+        },
+        {
+          "f": "patata",
+          "g": 180,
+          "note": "cocida"
+        },
+        {
+          "f": "calabacin",
+          "g": 80,
+          "fx": true
+        },
+        {
+          "f": "pimiento_rojo",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "cebolla",
+          "g": 40,
+          "fx": true
+        },
+        {
+          "f": "champinones",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y limón"
+        }
+      ]
+    },
+    "CAS_PES3": {
+      "cat": "com",
+      "short": "Bacalao al horno",
+      "nom": "Bacalao al horno con patata y pimientos",
+      "icon": "🐟",
+      "t": "40 min",
+      "eq": "Horno",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl"
+      ],
+      "desc": "Bacalao desalado al horno sobre cama de patata panadera y pimientos. Plato completo y muy equilibrado.",
+      "nota": "Hornea antes la patata y los pimientos; añade el bacalao al final para que no se reseque.",
+      "comp": [
+        {
+          "f": "bacalao",
+          "g": 160,
+          "note": "desalado"
+        },
+        {
+          "f": "patata",
+          "g": 200
+        },
+        {
+          "f": "pimiento_rojo",
+          "g": 70,
+          "fx": true
+        },
+        {
+          "f": "pimiento_verde",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "cebolla",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "tomate",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "ajo",
+          "g": 6,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y perejil"
+        }
+      ]
+    },
+    "CAS_PES4": {
+      "cat": "com",
+      "short": "Merluza y boniato",
+      "nom": "Merluza al horno con verduras y boniato",
+      "icon": "🐟",
+      "t": "35 min",
+      "eq": "Horno",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl"
+      ],
+      "desc": "Merluza al horno con boniato en rodajas y verduras. Ligera, saciante y con hidratos de buena calidad.",
+      "nota": "Hornea el boniato primero: tarda más que el pescado. La merluza, al final y poco tiempo.",
+      "comp": [
+        {
+          "f": "merluza",
+          "g": 200,
+          "note": "crudo"
+        },
+        {
+          "f": "boniato",
+          "g": 300
+        },
+        {
+          "f": "calabacin",
+          "g": 80,
+          "fx": true
+        },
+        {
+          "f": "cebolla",
+          "g": 40,
+          "fx": true
+        },
+        {
+          "f": "pimiento_rojo",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "tomate",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "limon",
+          "g": 8,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y perejil"
+        }
+      ]
+    },
+    "CAS_PES5": {
+      "cat": "cen",
+      "short": "Merluza y brócoli",
+      "nom": "Merluza a la plancha con patata y brócoli",
+      "icon": "🐟",
+      "t": "25 min",
+      "eq": "Plancha · Olla",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl"
+      ],
+      "desc": "Merluza a la plancha con brócoli salteado al ajo y patata. Cena digestiva y alta en proteína.",
+      "nota": "Cuece el brócoli al dente y saltéalo con ajo para que gane sabor. Merluza con limón y perejil.",
+      "comp": [
+        {
+          "f": "merluza",
+          "g": 170,
+          "note": "crudo"
+        },
+        {
+          "f": "patata",
+          "g": 150,
+          "note": "cocida"
+        },
+        {
+          "f": "brocoli",
+          "g": 150,
+          "fx": true
+        },
+        {
+          "f": "ajo",
+          "g": 6,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "limon",
+          "g": 8,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y perejil"
+        }
+      ]
+    },
+    "CAS_PES6": {
+      "cat": "cen",
+      "short": "Caldo de pescado",
+      "nom": "Caldo de pescado completo con arroz y verduras",
+      "icon": "🍲",
+      "t": "35 min",
+      "eq": "Cazuela",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl"
+      ],
+      "desc": "Caldo de pescado con arroz, verduras y trozos de pescado blanco. Reconfortante y completo.",
+      "nota": "Añade el pescado en trozos al final, con el fuego bajo, para que se cocine sin deshacerse.",
+      "comp": [
+        {
+          "f": "pescado_blanco",
+          "g": 150,
+          "note": "en trozos"
+        },
+        {
+          "f": "arroz_blanco",
+          "g": 140,
+          "note": "cocido"
+        },
+        {
+          "f": "zanahoria",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "puerro",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "cebolla",
+          "g": 40,
+          "fx": true
+        },
+        {
+          "f": "apio",
+          "g": 30,
+          "fx": true
+        },
+        {
+          "f": "caldo_pescado",
+          "g": 300,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 10,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal y perejil"
+        }
+      ]
+    },
+    "CAS_PES7": {
+      "cat": "com",
+      "short": "Mejillones y patata",
+      "nom": "Carne de mejillón con ajo, patata y ensalada",
+      "icon": "🦪",
+      "t": "25 min",
+      "eq": "Sartén · Olla",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl"
+      ],
+      "desc": "Carne de mejillón salteada con ajo y perejil, con patata cocida y ensalada. Rica en hierro y minerales.",
+      "nota": "Saltea el mejillón muy poco: solo para calentarlo con el ajo, si no se endurece.",
+      "comp": [
+        {
+          "f": "mejillon_sin_cascara",
+          "g": 180
+        },
+        {
+          "f": "patata",
+          "g": 280,
+          "note": "cocida"
+        },
+        {
+          "f": "ajo",
+          "g": 8,
+          "fx": true
+        },
+        {
+          "f": "tomate",
+          "g": 100,
+          "fx": true
+        },
+        {
+          "f": "canonigos",
+          "g": 30,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "limon",
+          "g": 8,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y perejil"
+        }
+      ]
+    },
+    "CAS_PES8": {
+      "cat": "com",
+      "short": "Calamar y patata",
+      "nom": "Calamar a la plancha con patata y verduras",
+      "icon": "🦑",
+      "t": "25 min",
+      "eq": "Plancha · Sartén",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl"
+      ],
+      "desc": "Calamar a la plancha con ajo y perejil, patata y verduras salteadas. Bajo en grasa y fácil de digerir.",
+      "nota": "Plancha muy caliente y poco tiempo: así queda dorado y tierno, nunca gomoso.",
+      "comp": [
+        {
+          "f": "calamar",
+          "g": 200,
+          "note": "limpio"
+        },
+        {
+          "f": "patata",
+          "g": 260,
+          "note": "cocida"
+        },
+        {
+          "f": "calabacin",
+          "g": 80,
+          "fx": true
+        },
+        {
+          "f": "pimiento_rojo",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "cebolla",
+          "g": 40,
+          "fx": true
+        },
+        {
+          "f": "ajo",
+          "g": 6,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "limon",
+          "g": 8,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y perejil"
+        }
+      ]
+    },
+    "CAS_PES9": {
+      "cat": "com",
+      "short": "Pulpo a la gallega",
+      "nom": "Pulpo a la gallega completo",
+      "icon": "🐙",
+      "t": "20 min",
+      "eq": "Olla",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl"
+      ],
+      "desc": "Pulpo cocido sobre patata en rodajas con pimentón y buen aceite, con ensalada de acompañamiento.",
+      "nota": "Corta el pulpo con tijera en rodajas gruesas. Sal gruesa, pimentón y un buen chorro de aceite al final.",
+      "comp": [
+        {
+          "f": "pulpo_cocido",
+          "g": 200
+        },
+        {
+          "f": "patata",
+          "g": 300,
+          "note": "cocida en rodajas"
+        },
+        {
+          "f": "lechuga",
+          "g": 40,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 15,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal gruesa y pimentón"
+        }
+      ]
+    },
+    "CAS_PES10": {
+      "cat": "com",
+      "short": "Ensalada de atún",
+      "nom": "Ensalada de atún completa",
+      "icon": "🥗",
+      "t": "12 min",
+      "eq": "Bol",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl"
+      ],
+      "desc": "Ensalada de atún con verdura, maíz, patata y huevo. Práctica, completa y con su fuente de hidrato.",
+      "nota": "Para que sea completa necesita un hidrato: maíz, patata, garbanzos o pan integral. Aliña al servir.",
+      "comp": [
+        {
+          "f": "atun_al_natural",
+          "g": 110,
+          "note": "escurrido"
+        },
+        {
+          "f": "patata",
+          "g": 150,
+          "note": "cocida"
+        },
+        {
+          "f": "huevo",
+          "g": 55,
+          "note": "1 huevo cocido"
+        },
+        {
+          "f": "lechuga",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "tomate",
+          "g": 100,
+          "fx": true
+        },
+        {
+          "f": "zanahoria",
+          "g": 40,
+          "fx": true
+        },
+        {
+          "f": "maiz",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "aceitunas_verdes",
+          "g": 20,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "vinagre",
+          "g": 5,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal"
+        }
+      ]
+    },
+    "CAS_PES11": {
+      "cat": "com",
+      "short": "Macarrones con atún",
+      "nom": "Macarrones integrales con atún y tomate",
+      "icon": "🍝",
+      "t": "25 min",
+      "eq": "Olla · Sartén",
+      "tipo": "completa",
+      "diet": [
+        "sl"
+      ],
+      "desc": "Macarrones integrales con salsa de tomate casera, verdura y atún. Plato completo y muy sencillo.",
+      "nota": "Haz la salsa con cebolla y calabacín pochados y tomate triturado. Añade el atún fuera del fuego.",
+      "comp": [
+        {
+          "f": "pasta_integral_cocida",
+          "g": 210,
+          "note": "unos 75 g en crudo"
+        },
+        {
+          "f": "atun_al_natural",
+          "g": 110,
+          "note": "escurrido"
+        },
+        {
+          "f": "tomate_triturado",
+          "g": 150,
+          "fx": true
+        },
+        {
+          "f": "cebolla",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "calabacin",
+          "g": 70,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y orégano"
+        }
+      ]
+    },
+    "CAS_PES12": {
+      "cat": "com",
+      "short": "Lubina con patata",
+      "nom": "Lubina a la plancha con patata y verduras",
+      "icon": "🐟",
+      "t": "25 min",
+      "eq": "Plancha",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl"
+      ],
+      "desc": "Lubina a la plancha con ajo, limón y perejil, con patata y judías verdes. Proteína de calidad.",
+      "nota": "Haz la lubina por el lado de la piel hasta que esté crujiente; el otro lado, solo unos segundos.",
+      "comp": [
+        {
+          "f": "lubina",
+          "g": 190,
+          "note": "en filetes"
+        },
+        {
+          "f": "patata",
+          "g": 280,
+          "note": "cocida"
+        },
+        {
+          "f": "judia_verde",
+          "g": 120,
+          "fx": true
+        },
+        {
+          "f": "calabacin",
+          "g": 70,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "limon",
+          "g": 8,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y perejil"
+        }
+      ]
+    },
+    "CAS_PES13": {
+      "cat": "cen",
+      "short": "Tortilla de atún",
+      "nom": "Tortilla de atún con ensalada y pan integral",
+      "icon": "🍳",
+      "t": "15 min",
+      "eq": "Sartén",
+      "tipo": "completa",
+      "diet": [
+        "sl"
+      ],
+      "desc": "Tortilla de atún con espinacas, ensalada y pan integral. Rápida, saciante y muy proteica.",
+      "nota": "Escurre bien el atún antes de mezclarlo con el huevo para que la tortilla no quede aguada.",
+      "comp": [
+        {
+          "f": "huevo",
+          "g": 110,
+          "note": "2 huevos"
+        },
+        {
+          "f": "atun_al_natural",
+          "g": 80,
+          "note": "escurrido"
+        },
+        {
+          "f": "pan_integral",
+          "g": 40
+        },
+        {
+          "f": "espinaca",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "tomate",
+          "g": 100,
+          "fx": true
+        },
+        {
+          "f": "canonigos",
+          "g": 30,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal y pimienta"
+        }
+      ]
+    },
+    "CAS_PES14": {
+      "cat": "com",
+      "short": "Sepia con arroz",
+      "nom": "Sepia a la plancha con arroz y ensalada",
+      "icon": "🦑",
+      "t": "25 min",
+      "eq": "Plancha · Olla",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl"
+      ],
+      "desc": "Sepia a la plancha con ajo y perejil, arroz blanco y ensalada. Baja en grasa y rica en proteína.",
+      "nota": "Seca bien la sepia antes de ponerla en la plancha muy caliente: así dora y no suelta agua.",
+      "comp": [
+        {
+          "f": "sepia",
+          "g": 180,
+          "note": "limpia"
+        },
+        {
+          "f": "arroz_blanco",
+          "g": 170,
+          "note": "cocido"
+        },
+        {
+          "f": "tomate",
+          "g": 80,
+          "fx": true
+        },
+        {
+          "f": "pepino",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "lechuga",
+          "g": 40,
+          "fx": true
+        },
+        {
+          "f": "ajo",
+          "g": 6,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "limon",
+          "g": 8,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y perejil"
         }
       ]
     }
