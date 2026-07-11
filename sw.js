@@ -4,7 +4,11 @@
      · online  → siempre lo más reciente (no rompe el desarrollo)
      · offline → responde desde caché
 ══════════════════════════════════════════════════════════ */
-const CACHE = 'plan-nutri-v68';
+/* La versión la SELLA build.mjs con un hash del bundle: así, cada vez que
+   cambia el código, cambia el sw.js → el navegador instala un SW nuevo,
+   purga la caché vieja y los clientes reciben la versión actual.
+   No editar a mano. */
+const CACHE = 'plan-nutri-ee739943';
 const SHELL = [
   'Menu%20Nutricional.html',
   'app.min.js',                       // núcleo (30 scripts) generado por build.mjs

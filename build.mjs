@@ -16,6 +16,7 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
+import { createHash } from 'node:crypto';
 
 const ROOT = dirname(fileURLToPath(import.meta.url));
 
@@ -85,18 +86,33 @@ async function main(){
     parts.push(`\n;/* ${file} */\n${code}`);
   }
 
-  const banner = `/* app.min.js · GENERADO por build.mjs (${new Date().toISOString()})\n` +
+  // El build es DETERMINISTA (sin marca de tiempo): el mismo código produce
+  // el mismo bundle, y por tanto el mismo hash de caché del service worker.
+  const code = parts.join('\n');
+  const hash = createHash('sha1').update(code).digest('hex').slice(0, 8);
+
+  const banner = `/* app.min.js · GENERADO por build.mjs · ${hash}\n` +
     `   NO editar a mano: edita los archivos fuente y ejecuta \`node build.mjs\`.\n` +
     `   Fuentes (en orden): ${CORE.join(', ')} */\n`;
 
-  const bundle = banner + parts.join('\n');
+  const bundle = banner + code;
   writeFileSync(join(ROOT, OUT), bundle);
+
+  // Sella la versión de caché del SW con el hash del bundle: si cambia el
+  // código, cambia sw.js → el navegador instala un SW nuevo, purga las
+  // cachés viejas y los clientes reciben la versión actual (sin esto, un
+  // cliente con el SW anterior podía seguir sirviendo código antiguo).
+  const swPath = join(ROOT, 'sw.js');
+  const sw = readFileSync(swPath, 'utf8');
+  const swNew = sw.replace(/const CACHE = '[^']*';/, `const CACHE = 'plan-nutri-${hash}';`);
+  if (swNew !== sw) writeFileSync(swPath, swNew);
 
   const outBytes = Buffer.byteLength(bundle);
   const kb = n => (n / 1024).toFixed(0) + ' KB';
   console.log(`✔ ${OUT} generado`);
   console.log(`  archivos: ${CORE.length}  ·  minificado: ${minify ? 'sí (esbuild)' : 'no (instala esbuild: npm i -D esbuild)'}`);
   console.log(`  tamaño: ${kb(rawBytes)} → ${kb(outBytes)}`);
+  console.log(`  caché del service worker: plan-nutri-${hash}`);
 }
 
 main().catch(err => { console.error('✘ build falló:', err.message); process.exit(1); });
