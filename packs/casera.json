@@ -91,6 +91,37 @@
       "f": 0.4,
       "c": 0.6,
       "ft": []
+    },
+    "carne_picada_pollo": {
+      "name": "Carne picada de pollo o pavo",
+      "sec": "carn",
+      "kcal": 143,
+      "p": 20,
+      "f": 7,
+      "c": 0,
+      "ft": [
+        "cb"
+      ]
+    },
+    "alitas_pollo": {
+      "name": "Alitas de pollo",
+      "sec": "carn",
+      "kcal": 203,
+      "p": 18.3,
+      "f": 14.1,
+      "c": 0,
+      "ft": [
+        "cb"
+      ]
+    },
+    "caldo_pollo": {
+      "name": "Caldo de pollo",
+      "sec": "desp",
+      "kcal": 14,
+      "p": 1.8,
+      "f": 0.5,
+      "c": 0.6,
+      "ft": []
     }
   },
   "dishes": {
@@ -2887,6 +2918,969 @@
           "f": "especias",
           "cs": true,
           "as": "Sal, pimienta y perejil"
+        }
+      ]
+    },
+    "CAS_CBL1": {
+      "cat": "com",
+      "short": "Pollo con arroz",
+      "nom": "Pechuga de pollo a la plancha con arroz y ensalada",
+      "icon": "🍗",
+      "t": "25 min",
+      "eq": "Plancha · Olla",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl"
+      ],
+      "desc": "Pechuga a la plancha con arroz y ensalada de tomate, pepino y zanahoria. El clásico equilibrado que nunca falla.",
+      "nota": "Salpimenta el pollo y hazlo a fuego fuerte poco tiempo por cada lado para que no se seque.",
+      "comp": [
+        {
+          "f": "pechuga_de_pollo",
+          "g": 160,
+          "note": "crudo"
+        },
+        {
+          "f": "arroz_blanco",
+          "g": 170,
+          "note": "cocido"
+        },
+        {
+          "f": "lechuga",
+          "g": 40,
+          "fx": true
+        },
+        {
+          "f": "tomate",
+          "g": 80,
+          "fx": true
+        },
+        {
+          "f": "pepino",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "zanahoria",
+          "g": 40,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "limon",
+          "g": 8,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y ajo en polvo"
+        }
+      ]
+    },
+    "CAS_CBL2": {
+      "cat": "com",
+      "short": "Muslo con patata",
+      "nom": "Muslo de pollo a la plancha con patata y verduras",
+      "icon": "🍗",
+      "t": "30 min",
+      "eq": "Plancha",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl"
+      ],
+      "desc": "Muslo de pollo deshuesado a la plancha con patata y verduras. Más jugoso y sabroso que la pechuga.",
+      "nota": "El muslo tiene algo más de grasa: controla el aceite añadido y acompáñalo con bastante verdura.",
+      "comp": [
+        {
+          "f": "muslo_de_pollo",
+          "g": 170,
+          "note": "deshuesado, crudo"
+        },
+        {
+          "f": "patata",
+          "g": 220,
+          "note": "cocida"
+        },
+        {
+          "f": "calabacin",
+          "g": 80,
+          "fx": true
+        },
+        {
+          "f": "pimiento_rojo",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "judia_verde",
+          "g": 80,
+          "fx": true
+        },
+        {
+          "f": "ajo",
+          "g": 6,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "limon",
+          "g": 8,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y romero"
+        }
+      ]
+    },
+    "CAS_CBL3": {
+      "cat": "com",
+      "short": "Pollo asado",
+      "nom": "Pollo asado con patata y ensalada",
+      "icon": "🍗",
+      "t": "60 min",
+      "eq": "Horno",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl"
+      ],
+      "desc": "Pollo asado al horno con patata y ensalada fresca. Para aligerarlo, retira parte de la piel.",
+      "nota": "Riega el pollo con sus jugos a media cocción. Retirar la piel al servir baja bastante la grasa.",
+      "comp": [
+        {
+          "f": "pollo_entero",
+          "g": 180,
+          "note": "crudo, sin exceso de piel"
+        },
+        {
+          "f": "patata",
+          "g": 220,
+          "note": "asada"
+        },
+        {
+          "f": "tomate",
+          "g": 90,
+          "fx": true
+        },
+        {
+          "f": "canonigos",
+          "g": 30,
+          "fx": true
+        },
+        {
+          "f": "pepino",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "limon",
+          "g": 8,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta, romero y tomillo"
+        }
+      ]
+    },
+    "CAS_CBL4": {
+      "cat": "com",
+      "short": "Pollo con cebolla",
+      "nom": "Pollo con cebolla y arroz",
+      "icon": "🧅",
+      "t": "30 min",
+      "eq": "Cazuela",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl"
+      ],
+      "desc": "Pollo guisado con mucha cebolla pochada y champiñones, servido con arroz. Sabor sin salsas pesadas.",
+      "nota": "Pocha la cebolla despacio hasta que esté dorada: ahí está todo el sabor, sin necesidad de nata.",
+      "comp": [
+        {
+          "f": "pechuga_de_pollo",
+          "g": 160,
+          "note": "troceado, crudo"
+        },
+        {
+          "f": "arroz_blanco",
+          "g": 170,
+          "note": "cocido"
+        },
+        {
+          "f": "cebolla",
+          "g": 100,
+          "fx": true
+        },
+        {
+          "f": "champinones",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "caldo_pollo",
+          "g": 100,
+          "fx": true
+        },
+        {
+          "f": "ajo",
+          "g": 6,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y laurel"
+        }
+      ]
+    },
+    "CAS_CBL5": {
+      "cat": "com",
+      "short": "Alitas al horno",
+      "nom": "Alitas de pollo al horno con patatas y ensalada",
+      "icon": "🍗",
+      "t": "45 min",
+      "eq": "Horno",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl"
+      ],
+      "desc": "Alitas al horno especiadas con patata y ensalada. Más grasas que la pechuga: controla la ración.",
+      "nota": "Hornea a 200 grados y dales la vuelta a mitad para que queden doradas por los dos lados.",
+      "comp": [
+        {
+          "f": "alitas_pollo",
+          "g": 200,
+          "note": "crudas"
+        },
+        {
+          "f": "patata",
+          "g": 220,
+          "note": "al horno"
+        },
+        {
+          "f": "lechuga",
+          "g": 40,
+          "fx": true
+        },
+        {
+          "f": "tomate",
+          "g": 80,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 10,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta, pimentón y orégano"
+        }
+      ]
+    },
+    "CAS_CBL6": {
+      "cat": "com",
+      "short": "Fajitas de pollo",
+      "nom": "Fajitas de pollo completas",
+      "icon": "🌯",
+      "t": "25 min",
+      "eq": "Sartén",
+      "tipo": "completa",
+      "diet": [
+        "sl"
+      ],
+      "desc": "Fajitas de pollo con pimientos, cebolla, lechuga, tomate y aguacate, con salsa de yogur.",
+      "nota": "Saltea el pollo y los pimientos a fuego fuerte. Calienta las tortillas antes de montar.",
+      "comp": [
+        {
+          "f": "pechuga_de_pollo",
+          "g": 160,
+          "note": "en tiras, crudo"
+        },
+        {
+          "f": "tortilla_integral",
+          "g": 100,
+          "note": "2 tortillas"
+        },
+        {
+          "f": "pimiento_rojo",
+          "g": 70,
+          "fx": true
+        },
+        {
+          "f": "pimiento_verde",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "cebolla",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "lechuga",
+          "g": 30,
+          "fx": true
+        },
+        {
+          "f": "tomate",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "aguacate",
+          "g": 40,
+          "fx": true
+        },
+        {
+          "f": "yogur_natural",
+          "g": 40,
+          "fx": true,
+          "note": "para la salsa"
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 10,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta, comino y pimentón"
+        }
+      ]
+    },
+    "CAS_CBL7": {
+      "cat": "com",
+      "short": "Pollo con boniato",
+      "nom": "Pollo al horno con boniato y verduras",
+      "icon": "🍠",
+      "t": "45 min",
+      "eq": "Horno",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl"
+      ],
+      "desc": "Bandeja de horno con pollo, boniato y verduras. Se prepara todo junto y sale solo.",
+      "nota": "Corta el boniato y las verduras en trozos parecidos para que se hagan a la vez.",
+      "comp": [
+        {
+          "f": "muslo_de_pollo",
+          "g": 170,
+          "note": "crudo"
+        },
+        {
+          "f": "boniato",
+          "g": 220
+        },
+        {
+          "f": "calabacin",
+          "g": 80,
+          "fx": true
+        },
+        {
+          "f": "cebolla",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "pimiento_rojo",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "zanahoria",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "limon",
+          "g": 8,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta, romero y tomillo"
+        }
+      ]
+    },
+    "CAS_CBL8": {
+      "cat": "cen",
+      "short": "Sopa de pollo",
+      "nom": "Sopa de pollo completa",
+      "icon": "🍲",
+      "t": "35 min",
+      "eq": "Cazuela",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl"
+      ],
+      "desc": "Sopa de pollo con arroz y verduras. Suave, digestiva y completa: ideal para cenar.",
+      "nota": "Para que sea completa necesita suficiente pollo y un hidrato (arroz, fideos o patata).",
+      "comp": [
+        {
+          "f": "pechuga_de_pollo",
+          "g": 130,
+          "note": "desmenuzado"
+        },
+        {
+          "f": "arroz_blanco",
+          "g": 130,
+          "note": "cocido"
+        },
+        {
+          "f": "zanahoria",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "puerro",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "cebolla",
+          "g": 40,
+          "fx": true
+        },
+        {
+          "f": "apio",
+          "g": 30,
+          "fx": true
+        },
+        {
+          "f": "caldo_pollo",
+          "g": 300,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 10,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal y perejil"
+        }
+      ]
+    },
+    "CAS_CBL9": {
+      "cat": "com",
+      "short": "Pinchitos con cuscús",
+      "nom": "Pinchitos de pollo con cuscús y ensalada",
+      "icon": "🍢",
+      "t": "30 min",
+      "eq": "Plancha",
+      "tipo": "completa",
+      "diet": [
+        "sl"
+      ],
+      "desc": "Pollo adobado con especias en brochetas, con cuscús integral y ensalada. Muy completo y sabroso.",
+      "nota": "Adoba el pollo al menos 30 minutos con las especias, el limón y un poco de aceite.",
+      "comp": [
+        {
+          "f": "pechuga_de_pollo",
+          "g": 160,
+          "note": "en dados, crudo"
+        },
+        {
+          "f": "cuscus_integral_cocido",
+          "g": 170,
+          "note": "unos 60 g en crudo"
+        },
+        {
+          "f": "tomate",
+          "g": 80,
+          "fx": true
+        },
+        {
+          "f": "pepino",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "cebolla",
+          "g": 30,
+          "fx": true
+        },
+        {
+          "f": "lechuga",
+          "g": 40,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "limon",
+          "g": 8,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, comino, pimentón y cúrcuma"
+        }
+      ]
+    },
+    "CAS_CBL10": {
+      "cat": "com",
+      "short": "Macarrones con carne",
+      "nom": "Macarrones integrales con carne picada y verduras",
+      "icon": "🍝",
+      "t": "30 min",
+      "eq": "Olla · Sartén",
+      "tipo": "completa",
+      "diet": [
+        "sl"
+      ],
+      "desc": "Macarrones integrales con boloñesa casera de carne picada magra y mucha verdura.",
+      "nota": "Pica la verdura muy fina y sofríela con el tomate: la salsa gana cuerpo sin añadir grasa.",
+      "comp": [
+        {
+          "f": "pasta_integral_cocida",
+          "g": 210,
+          "note": "unos 75 g en crudo"
+        },
+        {
+          "f": "carne_picada_pollo",
+          "g": 140,
+          "note": "magra"
+        },
+        {
+          "f": "tomate_triturado",
+          "g": 150,
+          "fx": true
+        },
+        {
+          "f": "cebolla",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "calabacin",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "zanahoria",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "pimiento_rojo",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y orégano"
+        }
+      ]
+    },
+    "CAS_CBL11": {
+      "cat": "com",
+      "short": "Berenjenas rellenas",
+      "nom": "Berenjenas rellenas de carne picada",
+      "icon": "🍆",
+      "t": "45 min",
+      "eq": "Horno",
+      "tipo": "completa",
+      "diet": [
+        "sg"
+      ],
+      "desc": "Berenjena asada y rellena de carne picada con sofrito de verduras, gratinada, con arroz de guarnición.",
+      "nota": "Vacía la berenjena y mezcla su pulpa con el sofrito: no se desperdicia nada y gana sabor.",
+      "comp": [
+        {
+          "f": "carne_picada_pollo",
+          "g": 140,
+          "note": "magra"
+        },
+        {
+          "f": "arroz_blanco",
+          "g": 140,
+          "note": "cocido"
+        },
+        {
+          "f": "mozzarella",
+          "g": 30
+        },
+        {
+          "f": "berenjena",
+          "g": 250,
+          "fx": true
+        },
+        {
+          "f": "tomate_triturado",
+          "g": 100,
+          "fx": true
+        },
+        {
+          "f": "cebolla",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "pimiento_rojo",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "zanahoria",
+          "g": 40,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y orégano"
+        }
+      ]
+    },
+    "CAS_CBL12": {
+      "cat": "com",
+      "short": "Albóndigas con arroz",
+      "nom": "Albóndigas en salsa de verduras con arroz",
+      "icon": "🍚",
+      "t": "40 min",
+      "eq": "Cazuela",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl"
+      ],
+      "desc": "Albóndigas de carne magra en salsa de verduras trituradas, con arroz. Receta de táper perfecta.",
+      "nota": "La salsa de verduras trituradas sustituye a salsas más grasas y aporta fibra sin que se note.",
+      "comp": [
+        {
+          "f": "carne_picada_pollo",
+          "g": 150,
+          "note": "magra"
+        },
+        {
+          "f": "arroz_blanco",
+          "g": 170,
+          "note": "cocido"
+        },
+        {
+          "f": "tomate_triturado",
+          "g": 120,
+          "fx": true
+        },
+        {
+          "f": "cebolla",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "zanahoria",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "calabacin",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "ajo",
+          "g": 6,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y perejil"
+        }
+      ]
+    },
+    "CAS_CBL13": {
+      "cat": "com",
+      "short": "Salchichas de pollo",
+      "nom": "Salchichas de pollo con patata y pimientos",
+      "icon": "🌭",
+      "t": "35 min",
+      "eq": "Horno",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl"
+      ],
+      "desc": "Salchichas frescas de pollo al horno con patata, pimientos y cebolla. Fácil y de bandeja única.",
+      "nota": "Elige salchichas con alto porcentaje de carne y pocos aditivos. Acompaña siempre con verdura.",
+      "comp": [
+        {
+          "f": "salchicha_de_pollo",
+          "g": 160
+        },
+        {
+          "f": "patata",
+          "g": 220
+        },
+        {
+          "f": "pimiento_rojo",
+          "g": 70,
+          "fx": true
+        },
+        {
+          "f": "pimiento_verde",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "cebolla",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y orégano"
+        }
+      ]
+    },
+    "CAS_CBL14": {
+      "cat": "com",
+      "short": "Hamburguesa con pan",
+      "nom": "Hamburguesa casera con pan integral y ensalada",
+      "icon": "🍔",
+      "t": "20 min",
+      "eq": "Plancha",
+      "tipo": "completa",
+      "diet": [
+        "sl"
+      ],
+      "desc": "Hamburguesa casera de carne magra en pan integral con lechuga, tomate y cebolla.",
+      "nota": "Hazla casera con carne picada magra: controlas la grasa y la sal. Evita las salsas muy grasas.",
+      "comp": [
+        {
+          "f": "carne_picada_pollo",
+          "g": 150,
+          "note": "magra, en hamburguesa"
+        },
+        {
+          "f": "pan_integral",
+          "g": 80
+        },
+        {
+          "f": "lechuga",
+          "g": 30,
+          "fx": true
+        },
+        {
+          "f": "tomate",
+          "g": 70,
+          "fx": true
+        },
+        {
+          "f": "cebolla",
+          "g": 30,
+          "fx": true
+        },
+        {
+          "f": "mostaza",
+          "g": 5,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 10,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal y pimienta"
+        }
+      ]
+    },
+    "CAS_CBL15": {
+      "cat": "com",
+      "short": "Ensalada con pollo",
+      "nom": "Ensalada completa con pollo",
+      "icon": "🥗",
+      "t": "20 min",
+      "eq": "Plancha · Bol",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl"
+      ],
+      "desc": "Ensalada de pollo a la plancha con verdura, patata y aguacate. Completa de verdad: proteína, hidrato y grasa buena.",
+      "nota": "No se queda en pollo y lechuga: necesita un hidrato (patata, maíz o arroz) y una grasa saludable.",
+      "comp": [
+        {
+          "f": "pechuga_de_pollo",
+          "g": 150,
+          "note": "crudo"
+        },
+        {
+          "f": "patata",
+          "g": 130,
+          "note": "cocida"
+        },
+        {
+          "f": "lechuga",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "tomate",
+          "g": 90,
+          "fx": true
+        },
+        {
+          "f": "pepino",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "zanahoria",
+          "g": 40,
+          "fx": true
+        },
+        {
+          "f": "maiz",
+          "g": 40,
+          "fx": true
+        },
+        {
+          "f": "aguacate",
+          "g": 40,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "vinagre",
+          "g": 5,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal y pimienta"
+        }
+      ]
+    },
+    "CAS_CBL16": {
+      "cat": "com",
+      "short": "Pimientos rellenos",
+      "nom": "Pimiento rojo relleno de carne picada",
+      "icon": "🌶️",
+      "t": "50 min",
+      "eq": "Horno",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl"
+      ],
+      "desc": "Pimientos rojos rellenos de carne picada, verduras y arroz. Integra proteína, hidrato y verdura en un plato.",
+      "nota": "Se puede dejar preparado con antelación y hornear al momento. Gana de un día para otro.",
+      "comp": [
+        {
+          "f": "carne_picada_pollo",
+          "g": 140,
+          "note": "magra"
+        },
+        {
+          "f": "arroz_blanco",
+          "g": 150,
+          "note": "cocido"
+        },
+        {
+          "f": "pimiento_rojo",
+          "g": 250,
+          "fx": true
+        },
+        {
+          "f": "cebolla",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "calabacin",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "tomate_triturado",
+          "g": 100,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y orégano"
         }
       ]
     }
