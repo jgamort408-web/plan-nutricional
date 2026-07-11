@@ -122,6 +122,61 @@
       "f": 0.5,
       "c": 0.6,
       "ft": []
+    },
+    "carne_picada_ternera": {
+      "name": "Carne picada de ternera",
+      "sec": "carn",
+      "kcal": 175,
+      "p": 20,
+      "f": 10.5,
+      "c": 0,
+      "ft": [
+        "cr"
+      ]
+    },
+    "costillas_cerdo": {
+      "name": "Costillas de cerdo",
+      "sec": "carn",
+      "kcal": 277,
+      "p": 17,
+      "f": 23,
+      "c": 0,
+      "ft": [
+        "cr"
+      ]
+    },
+    "secreto_cerdo": {
+      "name": "Secreto de cerdo",
+      "sec": "carn",
+      "kcal": 250,
+      "p": 17,
+      "f": 20,
+      "c": 0,
+      "ft": [
+        "cr"
+      ]
+    },
+    "presa_iberica": {
+      "name": "Presa ibérica",
+      "sec": "carn",
+      "kcal": 230,
+      "p": 19,
+      "f": 17,
+      "c": 0,
+      "ft": [
+        "cr"
+      ]
+    },
+    "carrilleras_cerdo": {
+      "name": "Carrilleras de cerdo",
+      "sec": "carn",
+      "kcal": 160,
+      "p": 19,
+      "f": 9,
+      "c": 0,
+      "ft": [
+        "cr"
+      ]
     }
   },
   "dishes": {
@@ -3881,6 +3936,954 @@
           "f": "especias",
           "cs": true,
           "as": "Sal, pimienta y orégano"
+        }
+      ]
+    },
+    "CAS_CRO1": {
+      "cat": "com",
+      "short": "Ternera con patata",
+      "nom": "Filete de ternera a la plancha con patata y ensalada",
+      "icon": "🥩",
+      "t": "25 min",
+      "eq": "Plancha",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl"
+      ],
+      "desc": "Filete de ternera a la plancha con patata y ensalada sencilla. Proteína, hierro e hidratos de calidad.",
+      "nota": "Saca la carne de la nevera 15 minutos antes y sella a fuego fuerte: queda jugosa por dentro.",
+      "comp": [
+        {
+          "f": "ternera",
+          "g": 160,
+          "note": "crudo"
+        },
+        {
+          "f": "patata",
+          "g": 220,
+          "note": "cocida o asada"
+        },
+        {
+          "f": "lechuga",
+          "g": 40,
+          "fx": true
+        },
+        {
+          "f": "tomate",
+          "g": 80,
+          "fx": true
+        },
+        {
+          "f": "pepino",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "cebolla",
+          "g": 30,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "limon",
+          "g": 8,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y ajo en polvo"
+        }
+      ]
+    },
+    "CAS_CRO2": {
+      "cat": "com",
+      "short": "Ternera guisada",
+      "nom": "Ternera guisada con patata y verduras",
+      "icon": "🍲",
+      "t": "75 min",
+      "eq": "Cazuela",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl"
+      ],
+      "desc": "Guiso de ternera con patata, zanahoria y tomate. Contundente, de cuchara y con mucha verdura.",
+      "nota": "Dora bien la carne antes de guisar: es lo que da profundidad al guiso. Poca grasa y mucha verdura.",
+      "comp": [
+        {
+          "f": "ternera",
+          "g": 170,
+          "note": "para guisar, crudo"
+        },
+        {
+          "f": "patata",
+          "g": 220
+        },
+        {
+          "f": "zanahoria",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "cebolla",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "pimiento_rojo",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "tomate_triturado",
+          "g": 120,
+          "fx": true
+        },
+        {
+          "f": "guisantes",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "ajo",
+          "g": 6,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta, laurel y pimentón"
+        }
+      ]
+    },
+    "CAS_CRO3": {
+      "cat": "com",
+      "short": "Ternera salteada",
+      "nom": "Ternera salteada con arroz y verduras",
+      "icon": "🥘",
+      "t": "25 min",
+      "eq": "Wok · Olla",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl"
+      ],
+      "desc": "Salteado tipo wok de ternera en tiras con verduras y arroz. Rápido, completo y muy jugoso.",
+      "nota": "Saltea las verduras primero y añade la ternera al final, a fuego muy fuerte y poco tiempo.",
+      "comp": [
+        {
+          "f": "ternera",
+          "g": 160,
+          "note": "en tiras, crudo"
+        },
+        {
+          "f": "arroz_blanco",
+          "g": 170,
+          "note": "cocido"
+        },
+        {
+          "f": "pimiento_rojo",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "cebolla",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "calabacin",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "champinones",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "zanahoria",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y jengibre"
+        }
+      ]
+    },
+    "CAS_CRO4": {
+      "cat": "com",
+      "short": "Hamburguesa ternera",
+      "nom": "Hamburguesa casera de ternera con pan integral",
+      "icon": "🍔",
+      "t": "20 min",
+      "eq": "Plancha",
+      "tipo": "completa",
+      "diet": [
+        "sl"
+      ],
+      "desc": "Hamburguesa casera de ternera en pan integral con lechuga, tomate y cebolla.",
+      "nota": "Hazla casera o elige una con alto porcentaje de carne. Evita las salsas pesadas.",
+      "comp": [
+        {
+          "f": "hamburguesa_ternera",
+          "g": 150
+        },
+        {
+          "f": "pan_integral",
+          "g": 80
+        },
+        {
+          "f": "lechuga",
+          "g": 30,
+          "fx": true
+        },
+        {
+          "f": "tomate",
+          "g": 70,
+          "fx": true
+        },
+        {
+          "f": "cebolla",
+          "g": 30,
+          "fx": true
+        },
+        {
+          "f": "mostaza",
+          "g": 5,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 10,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal y pimienta"
+        }
+      ]
+    },
+    "CAS_CRO5": {
+      "cat": "com",
+      "short": "Albóndigas de ternera",
+      "nom": "Albóndigas de ternera en salsa de verduras",
+      "icon": "🍚",
+      "t": "40 min",
+      "eq": "Cazuela",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl"
+      ],
+      "desc": "Albóndigas de ternera en salsa de tomate y verduras, con arroz. Receta de táper por excelencia.",
+      "nota": "Usa carne picada magra. La salsa de verduras trituradas aporta fibra y evita salsas más grasas.",
+      "comp": [
+        {
+          "f": "carne_picada_ternera",
+          "g": 150,
+          "note": "magra"
+        },
+        {
+          "f": "arroz_blanco",
+          "g": 170,
+          "note": "cocido"
+        },
+        {
+          "f": "tomate_triturado",
+          "g": 120,
+          "fx": true
+        },
+        {
+          "f": "cebolla",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "zanahoria",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "calabacin",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "ajo",
+          "g": 6,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta, perejil y orégano"
+        }
+      ]
+    },
+    "CAS_CRO6": {
+      "cat": "com",
+      "short": "Macarrones con ternera",
+      "nom": "Macarrones integrales con ternera picada",
+      "icon": "🍝",
+      "t": "30 min",
+      "eq": "Olla · Sartén",
+      "tipo": "completa",
+      "diet": [
+        "sl"
+      ],
+      "desc": "Macarrones integrales con boloñesa de ternera y verduras picadas. Completo y de siempre.",
+      "nota": "Pica la verdura muy fina: se integra en la salsa y aporta fibra sin que se note.",
+      "comp": [
+        {
+          "f": "pasta_integral_cocida",
+          "g": 210,
+          "note": "unos 75 g en crudo"
+        },
+        {
+          "f": "carne_picada_ternera",
+          "g": 140
+        },
+        {
+          "f": "tomate_triturado",
+          "g": 150,
+          "fx": true
+        },
+        {
+          "f": "cebolla",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "zanahoria",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "calabacin",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "pimiento_rojo",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y orégano"
+        }
+      ]
+    },
+    "CAS_CRO7": {
+      "cat": "cen",
+      "short": "Berenjenas de ternera",
+      "nom": "Berenjenas rellenas de ternera",
+      "icon": "🍆",
+      "t": "45 min",
+      "eq": "Horno",
+      "tipo": "completa",
+      "diet": [
+        "sg"
+      ],
+      "desc": "Berenjena asada rellena de ternera picada con sofrito y tomate, gratinada. Cena completa y sabrosa.",
+      "nota": "Para una comida más completa, acompáñala con una ración pequeña de arroz o pan integral.",
+      "comp": [
+        {
+          "f": "carne_picada_ternera",
+          "g": 140,
+          "note": "magra"
+        },
+        {
+          "f": "mozzarella",
+          "g": 30
+        },
+        {
+          "f": "berenjena",
+          "g": 250,
+          "fx": true
+        },
+        {
+          "f": "tomate_triturado",
+          "g": 100,
+          "fx": true
+        },
+        {
+          "f": "cebolla",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "zanahoria",
+          "g": 40,
+          "fx": true
+        },
+        {
+          "f": "pimiento_rojo",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y orégano"
+        }
+      ]
+    },
+    "CAS_CRO8": {
+      "cat": "com",
+      "short": "Pimientos de ternera",
+      "nom": "Pimientos rellenos de ternera y arroz",
+      "icon": "🌶️",
+      "t": "50 min",
+      "eq": "Horno",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl"
+      ],
+      "desc": "Pimientos rojos rellenos de ternera picada, verduras y arroz. Proteína, hidrato y verdura en un plato.",
+      "nota": "Puedes dejarlos preparados y hornear al momento. Ganan de un día para otro.",
+      "comp": [
+        {
+          "f": "carne_picada_ternera",
+          "g": 140,
+          "note": "magra"
+        },
+        {
+          "f": "arroz_blanco",
+          "g": 150,
+          "note": "cocido"
+        },
+        {
+          "f": "pimiento_rojo",
+          "g": 250,
+          "fx": true
+        },
+        {
+          "f": "cebolla",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "calabacin",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "tomate_triturado",
+          "g": 100,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y orégano"
+        }
+      ]
+    },
+    "CAS_CRO9": {
+      "cat": "com",
+      "short": "Lomo de cerdo",
+      "nom": "Lomo de cerdo a la plancha con patata y ensalada",
+      "icon": "🥩",
+      "t": "25 min",
+      "eq": "Plancha",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl"
+      ],
+      "desc": "Lomo de cerdo (una de las partes más magras) a la plancha con patata y ensalada.",
+      "nota": "No lo pases de fuego: el lomo es magro y se seca con facilidad. Ajo y perejil al final.",
+      "comp": [
+        {
+          "f": "cerdo_lomo",
+          "g": 170,
+          "note": "crudo"
+        },
+        {
+          "f": "patata",
+          "g": 220,
+          "note": "cocida o asada"
+        },
+        {
+          "f": "tomate",
+          "g": 80,
+          "fx": true
+        },
+        {
+          "f": "lechuga",
+          "g": 40,
+          "fx": true
+        },
+        {
+          "f": "pepino",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "ajo",
+          "g": 6,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "limon",
+          "g": 8,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y perejil"
+        }
+      ]
+    },
+    "CAS_CRO10": {
+      "cat": "com",
+      "short": "Chuletas al laurel",
+      "nom": "Chuletas de cerdo al laurel con patata y verduras",
+      "icon": "🥩",
+      "t": "30 min",
+      "eq": "Plancha",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl"
+      ],
+      "desc": "Chuletas de cerdo a la plancha con ajo y laurel, con patata y judías verdes.",
+      "nota": "Elige chuletas no demasiado grasas y completa el plato con abundante verdura.",
+      "comp": [
+        {
+          "f": "cerdo_chuleta",
+          "g": 180,
+          "note": "crudo"
+        },
+        {
+          "f": "patata",
+          "g": 220,
+          "note": "cocida o asada"
+        },
+        {
+          "f": "judia_verde",
+          "g": 100,
+          "fx": true
+        },
+        {
+          "f": "pimiento_rojo",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "ajo",
+          "g": 6,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "limon",
+          "g": 8,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y laurel"
+        }
+      ]
+    },
+    "CAS_CRO11": {
+      "cat": "com",
+      "short": "Costillas al horno",
+      "nom": "Costillas de cerdo al horno con patata y ensalada",
+      "icon": "🍖",
+      "t": "60 min",
+      "eq": "Horno",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl"
+      ],
+      "desc": "Costillas de cerdo especiadas al horno con patata y ensalada fresca para equilibrar.",
+      "nota": "Son más grasas: tómalas de forma ocasional y acompáñalas siempre con ensalada o verdura ligera.",
+      "comp": [
+        {
+          "f": "costillas_cerdo",
+          "g": 180,
+          "note": "crudas"
+        },
+        {
+          "f": "patata",
+          "g": 220,
+          "note": "al horno"
+        },
+        {
+          "f": "lechuga",
+          "g": 40,
+          "fx": true
+        },
+        {
+          "f": "tomate",
+          "g": 80,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 10,
+          "fx": true
+        },
+        {
+          "f": "limon",
+          "g": 8,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta, pimentón y romero"
+        }
+      ]
+    },
+    "CAS_CRO12": {
+      "cat": "com",
+      "short": "Estofado de costillas",
+      "nom": "Estofado de costillas con verduras",
+      "icon": "🍲",
+      "t": "75 min",
+      "eq": "Cazuela",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl"
+      ],
+      "desc": "Costillas guisadas con patata, zanahoria y tomate. Plato contundente de cuchara.",
+      "nota": "Para equilibrarlo, usa una ración moderada de costilla y sube la cantidad de verdura.",
+      "comp": [
+        {
+          "f": "costillas_cerdo",
+          "g": 170,
+          "note": "troceadas"
+        },
+        {
+          "f": "patata",
+          "g": 200
+        },
+        {
+          "f": "zanahoria",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "cebolla",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "pimiento_rojo",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "tomate_triturado",
+          "g": 120,
+          "fx": true
+        },
+        {
+          "f": "ajo",
+          "g": 6,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 10,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta, laurel y pimentón"
+        }
+      ]
+    },
+    "CAS_CRO13": {
+      "cat": "com",
+      "short": "Magro con tomate",
+      "nom": "Magro de cerdo con tomate y arroz",
+      "icon": "🍅",
+      "t": "40 min",
+      "eq": "Cazuela",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl"
+      ],
+      "desc": "Magro de cerdo guisado con tomate y verduras, servido con arroz. Receta casera de toda la vida.",
+      "nota": "Cocina a fuego lento hasta que la carne quede muy tierna y la salsa espese sola.",
+      "comp": [
+        {
+          "f": "cerdo",
+          "g": 170,
+          "note": "magro, troceado"
+        },
+        {
+          "f": "arroz_blanco",
+          "g": 170,
+          "note": "cocido"
+        },
+        {
+          "f": "tomate_triturado",
+          "g": 150,
+          "fx": true
+        },
+        {
+          "f": "cebolla",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "pimiento_rojo",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "zanahoria",
+          "g": 40,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta, laurel y orégano"
+        }
+      ]
+    },
+    "CAS_CRO14": {
+      "cat": "com",
+      "short": "Secreto con verduras",
+      "nom": "Secreto de cerdo con verduras asadas",
+      "icon": "🥩",
+      "t": "35 min",
+      "eq": "Plancha · Horno",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl"
+      ],
+      "desc": "Secreto de cerdo a la plancha con verduras asadas y patata. Pieza sabrosa y jugosa.",
+      "nota": "El secreto es graso: hazlo dejando que suelte parte de su grasa y acompáñalo con mucha verdura.",
+      "comp": [
+        {
+          "f": "secreto_cerdo",
+          "g": 150,
+          "note": "crudo"
+        },
+        {
+          "f": "patata",
+          "g": 180,
+          "note": "asada"
+        },
+        {
+          "f": "berenjena",
+          "g": 90,
+          "fx": true
+        },
+        {
+          "f": "calabacin",
+          "g": 80,
+          "fx": true
+        },
+        {
+          "f": "pimiento_rojo",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "cebolla",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 10,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y romero"
+        }
+      ]
+    },
+    "CAS_CRO15": {
+      "cat": "com",
+      "short": "Presa ibérica",
+      "nom": "Presa ibérica con ensalada y patata",
+      "icon": "🥩",
+      "t": "30 min",
+      "eq": "Plancha",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl"
+      ],
+      "desc": "Presa ibérica a la plancha con patata y ensalada de tomate y rúcula. Carne muy sabrosa.",
+      "nota": "Más grasa que el lomo: controla la ración y usa guarniciones ligeras.",
+      "comp": [
+        {
+          "f": "presa_iberica",
+          "g": 160,
+          "note": "crudo"
+        },
+        {
+          "f": "patata",
+          "g": 200,
+          "note": "cocida o asada"
+        },
+        {
+          "f": "tomate",
+          "g": 80,
+          "fx": true
+        },
+        {
+          "f": "rucula",
+          "g": 30,
+          "fx": true
+        },
+        {
+          "f": "cebolla",
+          "g": 30,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 10,
+          "fx": true
+        },
+        {
+          "f": "limon",
+          "g": 8,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal y pimienta"
+        }
+      ]
+    },
+    "CAS_CRO16": {
+      "cat": "com",
+      "short": "Carrilleras guisadas",
+      "nom": "Carrilleras de cerdo guisadas con puré y verduras",
+      "icon": "🍲",
+      "t": "110 min",
+      "eq": "Cazuela",
+      "tipo": "completa",
+      "diet": [
+        "sg",
+        "sl"
+      ],
+      "desc": "Carrilleras guisadas hasta quedar melosas, con puré de patata y verduras. Plato de domingo.",
+      "nota": "Cocción larga y lenta: la carrillera necesita tiempo para deshacerse. Tritura parte de la salsa.",
+      "comp": [
+        {
+          "f": "carrilleras_cerdo",
+          "g": 180,
+          "note": "crudas"
+        },
+        {
+          "f": "patata",
+          "g": 250,
+          "note": "en puré"
+        },
+        {
+          "f": "zanahoria",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "cebolla",
+          "g": 50,
+          "fx": true
+        },
+        {
+          "f": "puerro",
+          "g": 40,
+          "fx": true
+        },
+        {
+          "f": "tomate_triturado",
+          "g": 100,
+          "fx": true
+        },
+        {
+          "f": "ajo",
+          "g": 6,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y laurel"
         }
       ]
     }
