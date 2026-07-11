@@ -6162,6 +6162,460 @@
           "as": "Sal (con moderación), pimienta y perejil"
         }
       ]
+    },
+    "CAS_DES1": {
+      "cat": "des",
+      "short": "Tostadas con tomate",
+      "nom": "Tostadas básicas de tomate y aceite",
+      "icon": "🍞",
+      "t": "6 min",
+      "eq": "Tostadora",
+      "tipo": "ligera",
+      "diet": [
+        "sl",
+        "vg",
+        "vt"
+      ],
+      "desc": "El desayuno de siempre: pan integral tostado con tomate natural, un buen chorro de aceite de oliva y sal. Con fruta, completo.",
+      "nota": "Ralla el tomate en vez de cortarlo: empapa mejor el pan. El aceite, siempre en crudo y al final.",
+      "comp": [
+        {
+          "f": "pan_integral",
+          "g": 90,
+          "note": "2 rebanadas"
+        },
+        {
+          "f": "tomate",
+          "g": 100,
+          "fx": true,
+          "note": "rallado"
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 15,
+          "fx": true
+        },
+        {
+          "f": "naranja",
+          "g": 160,
+          "fx": true,
+          "note": "1 pieza de fruta"
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal"
+        }
+      ]
+    },
+    "CAS_DES2": {
+      "cat": "des",
+      "short": "Tostada de aceite",
+      "nom": "Tostada básica de aceite y sal",
+      "icon": "🍞",
+      "t": "5 min",
+      "eq": "Tostadora",
+      "tipo": "ligera",
+      "diet": [
+        "sl",
+        "vg",
+        "vt"
+      ],
+      "desc": "La más sencilla: pan integral tostado con aceite de oliva virgen extra y sal, acompañado de fruta.",
+      "nota": "Con un pan bueno no hace falta más. Tuesta bien para que el aceite no lo reblandezca.",
+      "comp": [
+        {
+          "f": "pan_integral",
+          "g": 100,
+          "note": "2-3 rebanadas"
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 15,
+          "fx": true
+        },
+        {
+          "f": "naranja",
+          "g": 160,
+          "fx": true,
+          "note": "1 pieza de fruta"
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal"
+        }
+      ]
+    },
+    "CAS_DES3": {
+      "cat": "des",
+      "short": "Tostada de jamón",
+      "nom": "Tostada de jamón serrano con tomate",
+      "icon": "🥓",
+      "t": "7 min",
+      "eq": "Tostadora",
+      "tipo": "completa",
+      "diet": [
+        "sl"
+      ],
+      "desc": "Pan integral con tomate, aceite y jamón serrano. Un clásico que aporta buena proteína desde primera hora.",
+      "nota": "Pon el jamón al final, sobre el pan aún caliente: se atempera y suelta todo su aroma.",
+      "comp": [
+        {
+          "f": "pan_integral",
+          "g": 80,
+          "note": "2 rebanadas"
+        },
+        {
+          "f": "jamon_serrano",
+          "g": 40
+        },
+        {
+          "f": "tomate",
+          "g": 80,
+          "fx": true,
+          "note": "rallado"
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 12,
+          "fx": true
+        },
+        {
+          "f": "naranja",
+          "g": 160,
+          "fx": true,
+          "note": "1 pieza de fruta"
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal"
+        }
+      ]
+    },
+    "CAS_DES4": {
+      "cat": "des",
+      "short": "Tostada de huevo y pavo",
+      "nom": "Tostada de huevo, tomate y pavo",
+      "icon": "🍳",
+      "t": "10 min",
+      "eq": "Sartén · Tostadora",
+      "tipo": "completa",
+      "diet": [
+        "sl"
+      ],
+      "desc": "Tostada con tomate, aceite, huevo a la plancha y pavo. Muy proteica y saciante; también sale bien con pollo.",
+      "nota": "Puedes cambiar el pavo por pollo desmenuzado. El huevo, con la yema jugosa, liga toda la tostada.",
+      "comp": [
+        {
+          "f": "pan_integral",
+          "g": 80,
+          "note": "2 rebanadas"
+        },
+        {
+          "f": "huevo",
+          "g": 60,
+          "note": "1 huevo"
+        },
+        {
+          "f": "pavo_pechuga",
+          "g": 50,
+          "note": "o pollo"
+        },
+        {
+          "f": "tomate",
+          "g": 80,
+          "fx": true,
+          "note": "rallado"
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 10,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal y pimienta"
+        }
+      ]
+    },
+    "CAS_DES5": {
+      "cat": "des",
+      "short": "Tostada de queso fresco",
+      "nom": "Tostada de queso fresco, tomate y aceite",
+      "icon": "🧀",
+      "t": "6 min",
+      "eq": "Tostadora",
+      "tipo": "completa",
+      "diet": [
+        "vt"
+      ],
+      "desc": "Pan integral con queso fresco, tomate natural y aceite de oliva. Vegetariana, suave y con buena proteína.",
+      "nota": "Un toque de orégano o pimienta sobre el queso lo cambia por completo.",
+      "comp": [
+        {
+          "f": "pan_integral",
+          "g": 80,
+          "note": "2 rebanadas"
+        },
+        {
+          "f": "queso_fresco",
+          "g": 70
+        },
+        {
+          "f": "tomate",
+          "g": 80,
+          "fx": true,
+          "note": "rallado"
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 10,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal, pimienta y orégano"
+        }
+      ]
+    },
+    "CAS_DES6": {
+      "cat": "des",
+      "short": "Tostada de aguacate",
+      "nom": "Tostada de aguacate y tomate",
+      "icon": "🥑",
+      "t": "8 min",
+      "eq": "Tostadora",
+      "tipo": "ligera",
+      "diet": [
+        "sl",
+        "vg",
+        "vt"
+      ],
+      "desc": "Aguacate machacado sobre pan integral con tomate y aceite. Grasas saludables y mucha saciedad.",
+      "nota": "Machaca el aguacate con un tenedor y un chorrito de limón: no se oxida y sabe mejor.",
+      "comp": [
+        {
+          "f": "pan_integral",
+          "g": 80,
+          "note": "2 rebanadas"
+        },
+        {
+          "f": "aguacate",
+          "g": 80,
+          "fx": true
+        },
+        {
+          "f": "tomate",
+          "g": 60,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 8,
+          "fx": true
+        },
+        {
+          "f": "limon",
+          "g": 5,
+          "fx": true
+        },
+        {
+          "f": "naranja",
+          "g": 160,
+          "fx": true,
+          "note": "1 pieza de fruta"
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal y pimienta"
+        }
+      ]
+    },
+    "CAS_DES7": {
+      "cat": "des",
+      "short": "Aguacate y huevo",
+      "nom": "Tostada de aguacate y huevo",
+      "icon": "🥑",
+      "t": "10 min",
+      "eq": "Sartén · Tostadora",
+      "tipo": "completa",
+      "diet": [
+        "sl",
+        "vt"
+      ],
+      "desc": "Tostada de aguacate con huevo encima (plancha, poché o revuelto). La combinación más saciante del desayuno.",
+      "nota": "Si lo haces poché, un chorrito de vinagre en el agua ayuda a que la clara cuaje recogida.",
+      "comp": [
+        {
+          "f": "pan_integral",
+          "g": 80,
+          "note": "2 rebanadas"
+        },
+        {
+          "f": "huevo",
+          "g": 60,
+          "note": "1 huevo"
+        },
+        {
+          "f": "aguacate",
+          "g": 70,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 6,
+          "fx": true
+        },
+        {
+          "f": "limon",
+          "g": 5,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal y pimienta"
+        }
+      ]
+    },
+    "CAS_DES8": {
+      "cat": "des",
+      "short": "Aguacate y pavo",
+      "nom": "Tostada de aguacate y pavo",
+      "icon": "🥑",
+      "t": "8 min",
+      "eq": "Tostadora",
+      "tipo": "completa",
+      "diet": [
+        "sl"
+      ],
+      "desc": "Aguacate machacado con pavo en lonchas sobre pan integral. Proteica, rápida y muy fácil de llevar.",
+      "nota": "Elige pavo con alto porcentaje de carne. Un poco de pimienta negra le va perfecto.",
+      "comp": [
+        {
+          "f": "pan_integral",
+          "g": 80,
+          "note": "2 rebanadas"
+        },
+        {
+          "f": "pavo_pechuga",
+          "g": 60
+        },
+        {
+          "f": "aguacate",
+          "g": 70,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 6,
+          "fx": true
+        },
+        {
+          "f": "naranja",
+          "g": 160,
+          "fx": true,
+          "note": "1 pieza de fruta"
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal y pimienta"
+        }
+      ]
+    },
+    "CAS_DES9": {
+      "cat": "des",
+      "short": "Aguacate y salmón",
+      "nom": "Tostada de aguacate y salmón ahumado",
+      "icon": "🐟",
+      "t": "8 min",
+      "eq": "Tostadora",
+      "tipo": "completa",
+      "diet": [
+        "sl"
+      ],
+      "desc": "Aguacate y salmón ahumado sobre pan integral, con limón. Grasas saludables y omega-3 desde el desayuno.",
+      "nota": "Unas alcaparras o un poco de eneldo la elevan mucho. El limón realza el salmón.",
+      "comp": [
+        {
+          "f": "pan_integral",
+          "g": 80,
+          "note": "2 rebanadas"
+        },
+        {
+          "f": "salmon_ahumado",
+          "g": 50
+        },
+        {
+          "f": "aguacate",
+          "g": 70,
+          "fx": true
+        },
+        {
+          "f": "limon",
+          "g": 6,
+          "fx": true
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 5,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Pimienta y eneldo"
+        }
+      ]
+    },
+    "CAS_DES10": {
+      "cat": "des",
+      "short": "Tostada de tortilla",
+      "nom": "Tostada de tortilla francesa",
+      "icon": "🍳",
+      "t": "10 min",
+      "eq": "Sartén · Tostadora",
+      "tipo": "completa",
+      "diet": [
+        "sl",
+        "vt"
+      ],
+      "desc": "Tortilla francesa jugosa sobre pan integral con tomate. Desayuno contundente de toda la vida.",
+      "nota": "Cuaja la tortilla a fuego medio y déjala jugosa: sobre el pan caliente termina de hacerse.",
+      "comp": [
+        {
+          "f": "pan_integral",
+          "g": 80,
+          "note": "2 rebanadas"
+        },
+        {
+          "f": "huevo",
+          "g": 110,
+          "note": "2 huevos"
+        },
+        {
+          "f": "tomate",
+          "g": 60,
+          "fx": true,
+          "note": "rallado"
+        },
+        {
+          "f": "aceite_de_oliva",
+          "g": 10,
+          "fx": true
+        },
+        {
+          "f": "especias",
+          "cs": true,
+          "as": "Sal y pimienta"
+        }
+      ]
     }
   }
 }
