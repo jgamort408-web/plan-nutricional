@@ -2,6 +2,23 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<script>
+/* Tema sincronizado con la app principal: misma localStorage y mismo
+   origen. Se aplica ANTES de pintar (evita parpadeo) y reacciona a que
+   el usuario cambie el tema en Configuración (evento storage). */
+(function(){
+  function apply(){
+    try{
+      var pref = localStorage.getItem('mnut:theme:v1') || 'auto';
+      var dark = pref==='dark' || (pref==='auto' && window.matchMedia && matchMedia('(prefers-color-scheme:dark)').matches);
+      document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    }catch(e){}
+  }
+  apply();
+  try{ window.addEventListener('storage', function(e){ if(!e || e.key==='mnut:theme:v1') apply(); }); }catch(e){}
+  try{ matchMedia('(prefers-color-scheme:dark)').addEventListener('change', apply); }catch(e){}
+})();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0f766e">
 <meta name="mobile-web-app-capable" content="yes">
@@ -419,6 +436,36 @@ textarea:focus,input:focus{border-color:var(--green)}
 .streak{background:var(--green-l);color:var(--green-d)}
 .toast{background:var(--ink);border-radius:14px;font-family:'DM Mono',monospace;font-size:12px}
 .empty{font-family:'Lora',serif;font-style:italic}
+/* Botón de borrar en cada nota */
+.diary-item .dt{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.note-del{border:none;background:rgba(0,0,0,.08);color:var(--muted);width:22px;height:22px;border-radius:50%;font-size:11px;line-height:1;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:.15s}
+.note-del:hover{background:var(--bad);color:#fff}
+/* ── MODO OSCURO · redefine la paleta semántica + superficies claras
+   hardcodeadas. La app usa el mismo esquema; el tema llega por el script
+   del <head> (data-theme). Los acentos verde/azul se aclaran para
+   contrastar sobre fondo oscuro. ── */
+html[data-theme="dark"]{
+  --bg:#141109; --card:#1e1810; --ink:#F0E6CF; --muted:#B7A98A;
+  --line:rgba(236,228,208,.15); --soft:#241d13;
+  --green:#8FB56F; --green-d:#C2DBA4; --green-l:#2C3A20;
+  --blue:#7FB0AA; --blue-d:#AEDAD4; --blue-l:#233230;
+  --shadow:0 6px 22px rgba(0,0,0,.5);
+}
+html[data-theme="dark"] body{color:var(--ink);background:linear-gradient(170deg,#141109,#0f0c07)}
+html[data-theme="dark"] nav{background:rgba(20,17,9,.94);border-top-color:var(--line)}
+html[data-theme="dark"] .card{border-color:var(--line)}
+html[data-theme="dark"] .tip{background:linear-gradient(135deg,#241d13,#1b1610)}
+html[data-theme="dark"] .tip.anx{background:linear-gradient(135deg,#241d13,#16201e)}
+html[data-theme="dark"] .hm-emoji-btn{background:var(--soft)}
+html[data-theme="dark"] .diary-item,
+html[data-theme="dark"] .reminder,
+html[data-theme="dark"] .hm-item,
+html[data-theme="dark"] .stat{background:var(--soft)}
+html[data-theme="dark"] .tut-card p{color:var(--muted)}
+html[data-theme="dark"] .res .body{color:var(--ink)}
+html[data-theme="dark"] .toast{background:#2C1F0E;color:#F0E6CF}
+html[data-theme="dark"] textarea,
+html[data-theme="dark"] input[type=text]{background:var(--card);color:var(--ink)}
 </style>
 </head>
 <body>
@@ -942,8 +989,17 @@ function renderMantraPlayer(){
   box.innerHTML=html||"";
   if(hasAudio){
     blobGet(state.mantraId).then(b=>{
-      const audio=`<audio controls src="${URL.createObjectURL(b)}" style="width:100%;margin:10px 0 0"></audio>`;
+      const audio=`<audio controls src="${URL.createObjectURL(b)}" style="width:100%;margin:10px 0 0"></audio>`+
+        `<button class="btn red sm mantra-del" style="margin-top:8px" aria-label="Eliminar mensaje de motivación">🗑️ Borrar mensaje</button>`;
       box.innerHTML=audio+(box.innerHTML||"");
+      const delBtn=box.querySelector(".mantra-del");
+      if(delBtn) delBtn.onclick=async()=>{
+        if(!await pdConfirm("¿Eliminar tu mensaje de motivación? No se puede deshacer.",{danger:true,ok:"Eliminar"}))return;
+        try{ await blobDel(state.mantraId); }catch(e){}
+        state.mantraId=null; await save();
+        if(typeof renderMantraSetup==="function") renderMantraSetup();
+        renderMantraPlayer(); toast("Motivación eliminada 🗑️");
+      };
     });
   }
 }
@@ -1088,9 +1144,15 @@ function renderNotes(){
   if(!all.length){list.innerHTML='<p class="empty">Sin notas aún</p>';return;}
   all.forEach(n=>{
     const el=document.createElement("div");el.className="diary-item";
-    el.innerHTML=`<div class="dt">${new Date(n.ts).toLocaleString("es-ES",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}</div>${n.text.replace(/</g,"&lt;")}`;
+    el.innerHTML=`<div class="dt"><span>${new Date(n.ts).toLocaleString("es-ES",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}</span><button class="note-del" title="Borrar nota" aria-label="Borrar nota">✕</button></div>${n.text.replace(/</g,"&lt;")}`;
+    el.querySelector(".note-del").addEventListener("click",()=>deleteNote(n.ts));
     list.appendChild(el);
   });
+}
+async function deleteNote(ts){
+  if(!await pdConfirm("¿Borrar esta nota? No se puede deshacer.",{danger:true,ok:"Borrar"}))return;
+  Object.values(state.days).forEach(dv=>{ if(dv.notes) dv.notes=dv.notes.filter(n=>n.ts!==ts); });
+  await save();renderNotes();toast("Nota borrada 🗑");
 }
 
 /* ========== Download helper ========== */

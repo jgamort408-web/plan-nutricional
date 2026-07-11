@@ -210,11 +210,17 @@ function renderA11yGroup(){
   if(typeof AppPrefs === 'undefined') return '';
   const fs = AppPrefs.fontSize(), ct = AppPrefs.contrast(), lang = AppPrefs.lang();
   const fsSeg = AppPrefs.FS_OPTS.map(([v,ic,lbl])=>`<button type="button" data-fs="${v}" class="${fs===v?'on':''}" title="${lbl}">${ic}</button>`).join('');
+  const th = AppPrefs.theme ? AppPrefs.theme() : 'auto';
+  const thSeg = (AppPrefs.THEME_OPTS||[]).map(([v,ic,lbl])=>`<button type="button" data-th="${v}" class="${th===v?'on':''}" title="${lbl}"><span aria-hidden="true">${ic}</span> ${lbl}</button>`).join('');
   const langs = (typeof APP_LANGS!=='undefined') ? APP_LANGS : [['es','Español'],['en','English'],['fr','Français'],['de','Deutsch'],['it','Italiano'],['pt','Português']];
   const langOpts = langs.map(([code,name])=>`<option value="${code}" ${lang===code?'selected':''}>${name}</option>`).join('');
   return `
     <div class="cfg-group">
-      <h3 class="cfg-h">Accesibilidad e idioma</h3>
+      <h3 class="cfg-h">Apariencia, accesibilidad e idioma</h3>
+      ${thSeg?`<div class="cfg-field">
+        <span class="cfg-lbl">Tema</span>
+        <div class="cfg-seg" id="cfgThemeSeg">${thSeg}</div>
+      </div>`:''}
       <div class="cfg-field">
         <span class="cfg-lbl">Tamaño de letra</span>
         <div class="cfg-seg" id="cfgFontSeg">${fsSeg}</div>
@@ -235,6 +241,10 @@ function renderA11yGroup(){
 }
 function wireA11yGroup(){
   const root = formBody(); if(!root || typeof AppPrefs==='undefined') return;
+  root.querySelectorAll('#cfgThemeSeg button').forEach(b=> b.addEventListener('click', ()=>{
+    if(AppPrefs.setTheme) AppPrefs.setTheme(b.dataset.th);
+    root.querySelectorAll('#cfgThemeSeg button').forEach(x=>x.classList.toggle('on', x===b));
+  }));
   root.querySelectorAll('#cfgFontSeg button').forEach(b=> b.addEventListener('click', ()=>{
     AppPrefs.setFontSize(b.dataset.fs);
     root.querySelectorAll('#cfgFontSeg button').forEach(x=>x.classList.toggle('on', x===b));
@@ -565,7 +575,7 @@ function renderPersonasForm(){
     <button type="button" class="btn-sec" id="profEditToggle" style="width:100%;margin-bottom:12px">✏️ Editar perfiles y objetivos</button>
     <div id="profEditor" hidden>
       <p style="font-size:.86rem;color:var(--ink-50);margin-bottom:14px;line-height:1.55">
-        Ajusta los objetivos de cada persona. Puedes <strong>añadir o quitar personas</strong> (mínimo 1). La ración de cada una = ración <strong>base</strong> (la de menor kcal) × su <strong>modificador</strong>. El modo <strong style="color:var(--warm)">Todas</strong> es la suma.
+        Ajusta los objetivos de cada persona. Puedes <strong>añadir o quitar personas</strong> (mínimo 1). La ración de cada una = ración <strong>base</strong> (la de menor kcal) × su <strong>modificador</strong>. El modo <strong style="color:var(--ink)">Todas</strong> es la suma.
       </p>
       <button type="button" class="btn-sec" id="reOnboard" style="width:100%;margin-bottom:12px">🧮 Asistente de cálculo (peso, altura, objetivo…)</button>
       ${PEOPLE.map((id,i)=> personRow(id, (TARGETS[id]||{}).sym || PERSON_SYMS[i] || '🧑', i)).join('')}
@@ -975,7 +985,7 @@ function renderRecipesList(){
       <div class="ur" data-id="${id}">
         <div class="ur-ico">${d.icon||'🍴'}</div>
         <div class="ur-body">
-          <div class="ur-n">${d.nom}</div>
+          <div class="ur-n">${escHtml(d.nom)}</div>
           <div class="ur-m"><span class="cat">${catLbl[d.cat]}</span> · ${d.kcal[0]} / ${d.kcal[1]} kcal</div>
         </div>
         <div class="ur-acts">

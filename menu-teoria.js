@@ -754,50 +754,102 @@
     .teo-scroll{flex:1;overflow:auto;padding:18px 22px 32px}
     .teo-intro{font-size:.9rem;color:var(--ink-50);line-height:1.55;margin-bottom:16px}
     .teo-tema{margin-bottom:20px}
-    .teo-tema-h{display:flex;align-items:baseline;gap:8px;font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--warm);margin:0 0 4px}
+    .teo-tema-h{display:flex;align-items:baseline;gap:8px;font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--ink);margin:0 0 4px}
     .teo-tema-sub{font-size:.76rem;color:var(--ink-50);margin-bottom:10px}
     .teo-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
-    .teo-card{text-align:left;border:1px solid rgba(44,31,14,.12);border-radius:14px;padding:14px;cursor:pointer;background:linear-gradient(160deg,rgba(255,255,255,.8),rgba(245,238,228,.5));transition:.15s}
+    .teo-card{text-align:left;border:1px solid rgba(var(--ink-rgb,44,31,14),.12);border-radius:14px;padding:14px;cursor:pointer;background:linear-gradient(160deg,var(--white),var(--parch));transition:transform .15s,box-shadow .15s,border-color .15s}
+    .teo-card:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(var(--ink-rgb,44,31,14),.12);border-color:var(--accent,#B5603A)}
     .teo-card:hover{border-color:var(--accent,#B5603A);transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.06)}
-    .teo-card-t{font-family:'Lora',serif;font-weight:600;font-size:.96rem;color:var(--warm);line-height:1.3;margin-bottom:5px}
+    .teo-card-t{font-family:'Lora',serif;font-weight:600;font-size:.96rem;color:var(--ink);line-height:1.3;margin-bottom:5px}
     .teo-card-l{font-size:.8rem;color:var(--ink-50);line-height:1.4}
     .teo-card-n{display:inline-block;margin-top:8px;font-size:.62rem;text-transform:uppercase;letter-spacing:.06em;color:var(--accent,#B5603A);font-family:'DM Mono',monospace}
     .teo-article{max-width:680px;margin:0 auto}
     .teo-crumbs{font-size:.74rem;color:var(--ink-50);margin-bottom:10px}
     .teo-crumbs a{color:var(--accent,#B5603A);cursor:pointer}
-    .teo-a-t{font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--warm);line-height:1.2;margin:0 0 8px}
-    .teo-a-lead{font-size:1rem;color:var(--ink-70,rgba(44,31,14,.8));font-style:italic;line-height:1.5;margin-bottom:14px}
-    .teo-a-img{width:100%;border-radius:14px;border:1px solid rgba(44,31,14,.1);background:#fff;margin:0 0 16px;display:block}
-    .teo-a-body{font-family:'Lora',serif;font-size:.98rem;line-height:1.65;color:var(--warm)}
+    .teo-a-t{font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--ink);line-height:1.2;margin:0 0 8px}
+    .teo-a-lead{font-size:1rem;color:var(--ink-70,rgba(var(--ink-rgb,44,31,14),.8));font-style:italic;line-height:1.5;margin-bottom:14px}
+    .teo-a-img{width:100%;border-radius:14px;border:1px solid rgba(var(--ink-rgb,44,31,14),.1);background:var(--white);margin:0 0 16px;display:block}
+    .teo-a-body{font-family:'Lora',serif;font-size:.98rem;line-height:1.65;color:var(--ink)}
     .teo-a-body p{margin:0 0 12px} .teo-a-body ul{margin:0 0 14px;padding-left:22px} .teo-a-body li{margin-bottom:6px}
     .teo-a-body strong{color:var(--warm-2,#3D2C1A)}
-    .teo-sec{margin-top:22px;padding-top:14px;border-top:1px solid rgba(44,31,14,.1)}
+    .teo-sec{margin-top:22px;padding-top:14px;border-top:1px solid rgba(var(--ink-rgb,44,31,14),.1)}
     .teo-sec-h{font-family:'DM Mono',monospace;font-size:.64rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-50);margin-bottom:8px}
     .teo-links{display:flex;flex-wrap:wrap;gap:8px}
-    .teo-link{border:1.5px solid rgba(44,31,14,.14);background:#fff;border-radius:10px;padding:9px 13px;min-height:42px;cursor:pointer;font-size:.84rem;color:var(--warm);text-align:left}
+    .teo-link{border:1.5px solid rgba(var(--ink-rgb,44,31,14),.14);background:var(--white);border-radius:10px;padding:9px 13px;min-height:42px;cursor:pointer;font-size:.84rem;color:var(--ink);text-align:left}
     .teo-link:hover{border-color:var(--accent,#B5603A);color:var(--accent,#B5603A)}
     .teo-link.ref{border-style:dashed}
+    /* Buscador + chips de tema en el índice */
+    .teo-search{width:100%;border:1.5px solid rgba(var(--ink-rgb,44,31,14),.15);background:var(--white);color:var(--ink);border-radius:24px;padding:11px 16px;font-family:'Lora',serif;font-size:.95rem;margin:0 0 12px}
+    .teo-search:focus{outline:none;border-color:var(--accent,#B5603A);box-shadow:0 0 0 3px rgba(181,96,58,.14)}
+    .teo-chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:16px}
+    .teo-chip{border:1.5px solid rgba(var(--ink-rgb,44,31,14),.14);background:var(--white);color:var(--ink);border-radius:20px;padding:6px 12px;font-size:.78rem;cursor:pointer;transition:.14s}
+    .teo-chip:hover{border-color:var(--accent,#B5603A)}
+    .teo-tema[hidden],.teo-card[hidden]{display:none}
+    .teo-noresult{color:var(--ink-50);font-style:italic;padding:14px 2px}
+    /* Navegación Anterior / Siguiente entre artículos */
+    .teo-pager{display:flex;gap:10px;margin-top:26px;padding-top:16px;border-top:1px solid rgba(var(--ink-rgb,44,31,14),.1)}
+    .teo-pg{flex:1;display:flex;flex-direction:column;gap:2px;border:1.5px solid rgba(var(--ink-rgb,44,31,14),.14);background:var(--white);border-radius:12px;padding:10px 13px;cursor:pointer;transition:.15s;min-width:0}
+    .teo-pg:hover{border-color:var(--accent,#B5603A);transform:translateY(-1px)}
+    .teo-pg.next{text-align:right}
+    .teo-pg-dir{font-family:'DM Mono',monospace;font-size:.58rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-50)}
+    .teo-pg-t{font-family:'Lora',serif;font-weight:600;font-size:.86rem;color:var(--ink);line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     `;
     (document.head||document.documentElement).appendChild(s);
+  }
+
+  /* Lista plana de artículos EN EL ORDEN del índice (por tema). Sirve
+     para la navegación Anterior/Siguiente entre artículos. */
+  function orderedArts(){
+    const {TEMAS,ARTICULOS}=window.TeoriaData;
+    const byTema={}; ARTICULOS.forEach(a=>{ (byTema[a.tema]=byTema[a.tema]||[]).push(a); });
+    const out=[]; Object.keys(TEMAS).forEach(t=>{ (byTema[t]||[]).forEach(a=>out.push(a)); });
+    ARTICULOS.forEach(a=>{ if(out.indexOf(a)<0) out.push(a); });
+    return out;
+  }
+
+  /* Filtro en vivo del índice (sin re-render, para no perder el foco). */
+  function filterIndex(q){
+    if(!_root) return;
+    q=(q||'').trim().toLowerCase();
+    let anyVisible=false;
+    _root.querySelectorAll('.teo-tema').forEach(block=>{
+      let vis=0;
+      block.querySelectorAll('.teo-card').forEach(c=>{
+        const m = !q || (c.dataset.search||'').indexOf(q)>=0;
+        c.hidden=!m; if(m) vis++;
+      });
+      block.hidden = vis===0; if(vis) anyVisible=true;
+    });
+    const chips=_root.querySelector('.teo-chips'); if(chips) chips.hidden=!!q;
+    const nr=_root.querySelector('.teo-noresult'); if(nr) nr.hidden=anyVisible;
   }
 
   function indexHtml(){
     const {TEMAS,ARTICULOS,NIVELES}=window.TeoriaData;
     const byTema={}; ARTICULOS.forEach(a=>{ (byTema[a.tema]=byTema[a.tema]||[]).push(a); });
-    const blocks = Object.keys(TEMAS).filter(t=>byTema[t]).map(t=>{
+    const themeKeys = Object.keys(TEMAS).filter(t=>byTema[t]);
+    const chips = themeKeys.map(t=>`<button class="teo-chip" data-goto="teo-tema-${t}">${TEMAS[t].ico} ${esc(TEMAS[t].lbl)}</button>`).join('');
+    const blocks = themeKeys.map(t=>{
       const tm=TEMAS[t];
-      const cards = byTema[t].map(a=>`<button class="teo-card" data-art="${a.id}">
+      const cards = byTema[t].map(a=>{
+        const hay = (a.titulo+' '+(a.lead||'')+' '+(tm.lbl||'')).toLowerCase();
+        return `<button class="teo-card" data-art="${a.id}" data-search="${esc(hay)}">
         <div class="teo-card-t">${esc(a.titulo)}</div>
         <div class="teo-card-l">${esc(a.lead)}</div>
         <span class="teo-card-n">${esc(NIVELES[a.nivel]||a.nivel)}</span>
-      </button>`).join('');
-      return `<div class="teo-tema">
+      </button>`;
+      }).join('');
+      return `<div class="teo-tema" id="teo-tema-${t}">
         <h4 class="teo-tema-h">${tm.ico} ${esc(tm.lbl)}</h4>
         <div class="teo-tema-sub">${esc(tm.sub)}</div>
         <div class="teo-cards">${cards}</div>
       </div>`;
     }).join('');
-    return `<div class="teo-intro">Aprende la teoría de la nutrición paso a paso. Cada artículo enlaza con otros relacionados (para seguir el hilo) y con la <strong>bibliografía</strong> que lo respalda. Empieza por <strong>Fundamentos</strong> si es tu primera vez.</div>${blocks}`;
+    return `<div class="teo-intro">Aprende la teoría de la nutrición paso a paso. Cada artículo enlaza con otros relacionados (para seguir el hilo) y con la <strong>bibliografía</strong> que lo respalda. Empieza por <strong>Fundamentos</strong> si es tu primera vez.</div>
+      <input class="teo-search" type="search" placeholder="🔎 Buscar un artículo por título o tema…" aria-label="Buscar artículo">
+      <div class="teo-chips">${chips}</div>
+      ${blocks}
+      <div class="teo-noresult" hidden>No hay artículos que coincidan con tu búsqueda.</div>`;
   }
 
   function articleHtml(a){
@@ -808,6 +860,14 @@
       return r?`<button class="teo-link ref" data-ref="${rid}">📚 ${esc(r.autores.split(',')[0])}${r.year?(' · '+r.year):''}</button>`:'';
     }).join('');
     const img = a.img ? `<img class="teo-a-img" src="${imgSrc(a.img)}" alt="${esc(a.titulo)}" onerror="this.style.display='none'">` : '';
+    // Anterior / Siguiente en el orden del índice.
+    const ord = orderedArts(); const idx = ord.findIndex(x=>x.id===a.id);
+    const prev = idx>0 ? ord[idx-1] : null;
+    const next = (idx>=0 && idx<ord.length-1) ? ord[idx+1] : null;
+    const pager = (prev||next) ? `<div class="teo-pager">
+        ${prev?`<button class="teo-pg prev" data-art="${prev.id}"><span class="teo-pg-dir">← Anterior</span><span class="teo-pg-t">${esc(prev.titulo)}</span></button>`:'<span style="flex:1"></span>'}
+        ${next?`<button class="teo-pg next" data-art="${next.id}"><span class="teo-pg-dir">Siguiente →</span><span class="teo-pg-t">${esc(next.titulo)}</span></button>`:'<span style="flex:1"></span>'}
+      </div>` : '';
     return `<div class="teo-article">
       <div class="teo-crumbs"><a data-home>Teoría</a> › ${TEMAS[a.tema]?esc(TEMAS[a.tema].lbl):''}</div>
       <h2 class="teo-a-t">${esc(a.titulo)}</h2>
@@ -816,6 +876,7 @@
       <div class="teo-a-body">${a.cuerpo}</div>
       ${verAlso?`<div class="teo-sec"><div class="teo-sec-h">Sigue aprendiendo</div><div class="teo-links">${verAlso}</div></div>`:''}
       ${refs?`<div class="teo-sec"><div class="teo-sec-h">Bibliografía relacionada</div><div class="teo-links">${refs}</div></div>`:''}
+      ${pager}
     </div>`;
   }
 
@@ -842,10 +903,14 @@
       key:'teoria', group:'info', title:'📖 Teoría de la nutrición',
       render(body){
         _root = body; render();
+        body.addEventListener('input', e=>{
+          const s=e.target.closest('.teo-search'); if(s) filterIndex(s.value);
+        });
         body.addEventListener('click', e=>{
+          const g=e.target.closest('[data-goto]'); if(g){ const el=document.getElementById(g.dataset.goto); if(el){ try{ el.scrollIntoView({behavior:'smooth',block:'start'}); }catch(_){ el.scrollIntoView(); } } return; }
           const a=e.target.closest('[data-art]'); if(a){ goArticle(a.dataset.art); return; }
           const home=e.target.closest('[data-home]'); if(home){ goIndex(); return; }
-          const ref=e.target.closest('[data-ref]'); if(ref){ if(typeof openBibliografia==='function') openBibliografia(); return; }
+          const ref=e.target.closest('[data-ref]'); if(ref){ if(typeof openBibliografia==='function') openBibliografia(ref.dataset.ref); return; }
         });
       }
     });
