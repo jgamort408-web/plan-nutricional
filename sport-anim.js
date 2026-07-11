@@ -14,7 +14,7 @@
    joints: shoulder_l/r, elbow_l/r, hip_l/r, knee_l/r, spine
    rootY: desplazamiento vertical de la cadera (sentadilla)
 ══════════════════════════════════════════════════════════ */
-const ANIM_TEMPLATES = {
+var ANIM_TEMPLATES = {
   /* SENTADILLA TRASERA · barra en trapecio · IK de pierna planta los pies */
   sentadilla: {
     body:'standing', camera:'side', equipment:['barbell'], barbell:'back', period:3.0, legIK:true,

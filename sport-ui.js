@@ -10,7 +10,7 @@ const ANIM_ENABLED = false;
 
 /* ── Conmutador Nutrición / Deporte ──────────────────────── */
 let sportMode = false;
-let sportView = lsGet('sport:view', 'ex');
+var sportView = lsGet('sport:view', 'ex');
 const SPORT_VIEWS = ['ex','sess','scal'];
 
 function setSection(sec){

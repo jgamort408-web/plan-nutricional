@@ -290,7 +290,7 @@ function spFmtLong(d){ return `${d.getDate()} ${SP_MONTHS[d.getMonth()]} ${d.get
    days: { 'YYYY-MM-DD': [ {s:sessionId, who:'A'|'B'|'AB'} ] }
    cadence: configuración del último generador (para re-generar)
 ══════════════════════════════════════════════════════════ */
-const SportPlan = {
+var SportPlan = {
   name: 'Mi entrenamiento',
   days: {},
   cadence: null

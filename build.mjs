@@ -39,7 +39,36 @@ async function loadEsbuild(){
   catch(e){ return null; }
 }
 
+/* ── Guardia TDZ ────────────────────────────────────────────
+   Al concatenar, todos los const/let de nivel superior se hoistean SIN
+   inicializar. Un `typeof X` sobre uno declarado en un archivo POSTERIOR
+   lanza ReferenceError (con <script> separados era seguro y devolvía
+   'undefined'). Esas variables deben declararse con `var`. */
+function checkTDZ(){
+  const decl = {};
+  CORE.forEach((f, i) => {
+    const src = readFileSync(join(ROOT, f), 'utf8');
+    for(const m of src.matchAll(/^(?:const|let)\s+([A-Za-z_$][\w$]*)/gm)){
+      if(!(m[1] in decl)) decl[m[1]] = { file:f, idx:i };
+    }
+  });
+  const bad = new Set();
+  CORE.forEach((f, i) => {
+    const src = readFileSync(join(ROOT, f), 'utf8');
+    for(const m of src.matchAll(/typeof\s+([A-Za-z_$][\w$]*)/g)){
+      const d = decl[m[1]];
+      if(d && d.idx > i) bad.add(`${f}: "typeof ${m[1]}" pero ${m[1]} es const/let declarado despues en ${d.file} → decláralo con var`);
+    }
+  });
+  if(bad.size){
+    console.error('✘ build abortado · ' + bad.size + ' problema(s) de TDZ:');
+    bad.forEach(b => console.error('  ' + b));
+    process.exit(1);
+  }
+}
+
 async function main(){
+  checkTDZ();
   const esbuild = await loadEsbuild();
   const minify = !!esbuild;
   const parts = [];

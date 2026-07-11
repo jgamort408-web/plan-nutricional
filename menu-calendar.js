@@ -31,7 +31,7 @@ function normalizeCalData(raw){
   return out;
 }
 
-const CalState = (function(){
+var CalState = (function(){
   const stored = lsGet(LS.CAL, null);
   const base = {
     id: null,
