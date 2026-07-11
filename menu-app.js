@@ -1711,7 +1711,16 @@ document.addEventListener('keydown', e=>{
   }
 });
 
-renderAll();
+/* El primer render se DIFIERE a que TODO el código esté ejecutado.
+   En el bundle (app.min.js) las declaraciones `function` de los demás
+   módulos están hoisted, así que guards como
+   `typeof renderCalendar === 'function'` ya pasan aquí… pero el ESTADO de
+   esos módulos (p. ej. CalState, en menu-calendar.js) aún no se ha
+   inicializado, y renderCalendar reventaba leyendo CalState.data cuando la
+   vista guardada era el calendario. Con <script> sueltos el guard fallaba y
+   no ocurría nada; esperando a DOMContentLoaded es correcto en ambos casos. */
+if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ()=>renderAll(), {once:true});
+else renderAll();
 // el estado activo del selector de personas ya lo fija renderPersonToggle()
 
 // Auto-sincronización con el día actual del calendario:

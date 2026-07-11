@@ -133,6 +133,7 @@ function renderCalendar(){
 function renderRestrictionsBanner(){
   const wrap = document.getElementById('calRestrBanner');
   if(!wrap) return;
+  if(!CalState || !CalState.data) return;   // módulo aún no inicializado
   const all = [...new Set([...(TARGETS.A.restr||[]), ...(TARGETS.B.restr||[])])];
   if(!all.length){ wrap.innerHTML = ''; return; }
 
