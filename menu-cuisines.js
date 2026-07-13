@@ -108,20 +108,39 @@
     if(typeof renderAll==='function') renderAll();
   }
 
-  // Importar paquete desde un File (input type=file)
+  // Importar paquete desde un File (input type=file) → {n, id}
   function importFile(file){
     return new Promise((resolve)=>{
       const r = new FileReader();
-      r.onload = ()=>{ try{ resolve(loadPack(JSON.parse(r.result))); }catch(e){ resolve(0); } };
-      r.onerror = ()=> resolve(0);
+      r.onload = ()=>{
+        try{
+          const p = JSON.parse(r.result);
+          resolve({ n: loadPack(p), id: p && p.cuisine && p.cuisine.id });
+        }catch(e){ resolve({n:0}); }
+      };
+      r.onerror = ()=> resolve({n:0});
       r.readAsText(file);
     });
   }
 
-  // Descargar paquete incluido con la app (carpeta /packs)
+  // Descargar paquete incluido con la app (carpeta /packs) → {n, id}
   async function fetchPack(url){
-    try{ const res = await fetch(url); if(!res.ok) return 0; return loadPack(await res.json()); }
-    catch(e){ return 0; }
+    try{
+      const res = await fetch(url); if(!res.ok) return {n:0};
+      const p = await res.json();
+      return { n: loadPack(p), id: p && p.cuisine && p.cuisine.id };
+    }
+    catch(e){ return {n:0}; }
+  }
+
+  // Recetas por categoría de una cocina ya cargada (para avisar de la
+  // cobertura del paquete: un pack sin cenas no llena una semana él solo).
+  function coverage(cuisineId){
+    const byCat = {des:0, com:0, mer:0, cen:0};
+    if(typeof DISHES !== 'undefined') Object.values(DISHES).forEach(d=>{
+      if(d && d.cuisine === cuisineId && byCat[d.cat] != null) byCat[d.cat]++;
+    });
+    return byCat;
   }
 
   // Lista para la UI: base + cocinas cargadas, con nº de recetas y estado.
@@ -154,5 +173,5 @@
   loadPacksLS().forEach(mergePack);
 
   window.dishHiddenByCuisine = dishHiddenByCuisine;
-  window.Cuisines = { list, isOn, setOn, loadPack, removePack, importFile, fetchPack, bundledAvailable, mergePack };
+  window.Cuisines = { list, isOn, setOn, loadPack, removePack, importFile, fetchPack, bundledAvailable, mergePack, coverage };
 })();

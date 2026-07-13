@@ -455,6 +455,7 @@ function renderPicker(){
   const favOn = !!_picker.fav;
   const dishIds = Object.keys(DISHES)
     .filter(id => DISHES[id].cat === slot && !DISHES[id].loose)
+    .filter(id => !(typeof dishHiddenByCuisine === 'function' && dishHiddenByCuisine(id)))
     .filter(id => !favOn || (typeof isDishFav === 'function' && isDishFav(id)))
     .filter(id => {
       if(!_picker.search) return true;
@@ -574,6 +575,7 @@ function renderPicker(){
     </div>
     <div class="form-actions">
       <button class="btn-sec" id="pickerNew">＋ Nueva receta</button>
+      <button class="btn-sec" id="pickerSuggest" title="Rellena esta franja con una sugerencia del generador, teniendo en cuenta el resto de la semana">🎲 Sugerir</button>
       <button class="btn-prim" id="pickerDone">Listo</button>
     </div>`;
 
@@ -622,6 +624,18 @@ function renderPicker(){
   if(nw) nw.addEventListener('click', ()=>{
     closePicker();
     openRecipeForm(_picker.slot);
+  });
+
+  // 🎲 Sugerencia automática para esta franja (respeta el resto de la semana)
+  const sg = document.getElementById('pickerSuggest');
+  if(sg) sg.addEventListener('click', ()=>{
+    const id = suggestForSlot(_picker.day, _picker.slot);
+    if(!id){ if(typeof pnToast==='function') pnToast('No hay recetas candidatas para esta franja.', 'warn'); return; }
+    CalState.data[_picker.day][_picker.slot] = [id];
+    CalState.modified = true;
+    persistCal();
+    renderPicker();
+    renderCalendar();
   });
 
   // Segmento Recetas/Alimentos
@@ -842,9 +856,28 @@ const AUTO_WEEKLY_QUOTA = {
   com: { leg:2, pb:1, pa:1, cb:1, apq:1, cr:0, lb:1 }
 };
 
-/* Porcentaje acumulado del objetivo kcal/macros que debería cubrirse tras
-   añadir cada franja, en el orden de relleno (com → cen → des → mer). */
-const SLOT_CUM_PCT = {com:0.35, cen:0.60, des:0.85, mer:1.0};
+/* Cuota semanal de "comida real" en CUALQUIER franja (días con ese tipo).
+   Alineada con WEEKLY_GUIDE: 2 raciones/día de verdura y fruta, frutos
+   secos y lácteo la mayoría de días. El generador da un bonus suave a las
+   recetas que aportan estos tipos mientras la cuota no esté cubierta. */
+const AUTO_ALL_QUOTA = { v:14, fr:14, fs:4, lac:7 };
+
+/* Plantillas del generador. La 'pdf' reproduce el plan España (legumbre
+   lunes/jueves, azul martes…); 'balanced' mantiene las cuotas semanales
+   pero sin fijar días; 'none' sólo optimiza macros, variedad y guía. */
+const AUTO_TEMPLATES = {
+  pdf:      { lbl:'España · plantilla PDF', hints: AUTO_SLOT_HINTS, quotaCom: AUTO_WEEKLY_QUOTA.com },
+  balanced: { lbl:'Equilibrada · sin días fijos', hints: {}, quotaCom: { leg:2, pb:1, pa:1, cb:1, apq:1, cr:0 } },
+  none:     { lbl:'Libre · sólo macros y variedad', hints: {}, quotaCom: {} }
+};
+
+/* Tiempo máximo (min) que declara una receta; '—' o sin número = 0 (pasa). */
+function recipeMaxMinutes(d){
+  const nums = String(d && d.t || '').match(/\d+/g);
+  if(!nums) return 0;
+  return Math.max(...nums.map(Number));
+}
+const WEEKDAYS_SET = new Set(['lun','mar','mie','jue','vie']);
 
 /* Helpers · totales diarios para un día específico (A o B) */
 function dayTotalsFor(data, day){
@@ -904,13 +937,16 @@ function scoreCandidate(dishId, ctx){
   // 0b) Sesgo a favoritos (generador "menú con favoritos")
   if(ctx.favSet && ctx.favSet.has(dishId)) score += (ctx.favBoost || 0);
 
-  // 1) Coincide categoría de comida del día (food hints)
-  const hints = AUTO_SLOT_HINTS[ctx.day]?.[ctx.slot] || [];
+  // 1) Coincide categoría de comida del día (hints de la plantilla activa)
+  //    Pesos altos A PROPÓSITO: la variedad semanal (legumbre, pescado…)
+  //    debe imponerse al ajuste fino de macros de una franja — las macros
+  //    se compensan en el resto del día, la variedad no.
+  const hints = (ctx.hints && ctx.hints[ctx.day] && ctx.hints[ctx.day][ctx.slot]) || [];
   const foods = d.food || [];
   if(hints.length){
     const overlap = hints.filter(h => foods.includes(h)).length;
-    if(overlap > 0) score += 300 * overlap;
-    else score -= 60; // no encaja con la sugerencia del día
+    if(overlap > 0) score += 450 * overlap;
+    else score -= 120; // no encaja con la sugerencia del día
   }
 
   // 2) Cumple cuotas semanales pendientes (más puntos si esta receta aporta tipos que aún faltan)
@@ -918,12 +954,24 @@ function scoreCandidate(dishId, ctx){
     foods.forEach(f=>{
       const need = (ctx.quota[f] || 0);
       const got  = (ctx.gotCom[f] || 0);
-      if(need > 0 && got < need) score += 200 * (need - got);
-      if(got >= (AUTO_WEEKLY_QUOTA.com[f] ?? Infinity) && (AUTO_WEEKLY_QUOTA.com[f] ?? 0) > 0){
-        score -= 250; // ya tenemos esa cuota cubierta
-      }
+      if(need > 0 && got < need) score += 320 * (need - got);
+      if(need > 0 && got >= need) score -= 650; // ya tenemos esa cuota cubierta
+      // Cuota 0 (carne roja): tolera 1 día/semana, castiga fuerte el 2º
+      if(need === 0 && (f in ctx.quota) && got >= 1) score -= 900;
     });
   }
+
+  // 2b) Cuota de "comida real" en cualquier franja: bonus suave a recetas
+  //     con verdura/fruta/frutos secos/lácteo mientras la semana vaya corta.
+  if(ctx.quotaAll){
+    foods.forEach(f=>{
+      const need = ctx.quotaAll[f] || 0;
+      if(need > 0 && (ctx.gotAll[f] || 0) < need) score += 50;
+    });
+  }
+
+  // 2c) Modo "recetas rápidas": entre semana penaliza recetas de > 30 min.
+  if(ctx.quick && WEEKDAYS_SET.has(ctx.day) && recipeMaxMinutes(d) > 30) score -= 350;
 
   // 3) Penaliza repetición de receta en la semana
   const reps = ctx.usedCount[dishId] || 0;
@@ -958,8 +1006,16 @@ function scoreCandidate(dishId, ctx){
   //    Tratamos la proteína como SUELO (penaliza quedarse corto) y grasa/
   //    carbohidratos/kcal como TECHO (penaliza pasarse), que es como el propio
   //    panel marca los límites.
-  if(ctx.dayTotals && ctx.dayTotals[ctx.day] && SLOT_CUM_PCT[ctx.slot]){
-    const expectedPct = SLOT_CUM_PCT[ctx.slot];
+  //    El % esperado se calcula DINÁMICAMENTE: MEAL_PCT de las franjas que ya
+  //    están contabilizadas en dayTotals (rellenas antes o preexistentes) más
+  //    la actual. Con el SLOT_CUM_PCT fijo anterior, al "rellenar sólo vacías"
+  //    un día con des+mer ya puestos comparaba contra el 35% y sesgaba todo
+  //    hacia recetas hipocalóricas.
+  if(ctx.dayTotals && ctx.dayTotals[ctx.day] && !d.libre){
+    let expectedPct = MEAL_PCT[ctx.slot] || 0.25;
+    const counted = ctx.countedSlots && ctx.countedSlots[ctx.day];
+    if(counted) counted.forEach(s=>{ if(s !== ctx.slot) expectedPct += MEAL_PCT[s] || 0.25; });
+    expectedPct = Math.min(1, expectedPct);
     const std = (typeof recipeStdKcal === 'function' ? recipeStdKcal(d) : 0) || 1;
     const perPerson = [];
     PEOPLE.forEach((p)=>{
@@ -1014,8 +1070,34 @@ function scoreCandidate(dishId, ctx){
    todos los candidatos válidos, nos quedamos con los que están dentro de un
    margen del mejor (o el top-N), y elegimos uno al azar ponderando por
    calidad. Resultado: variedad real respetando guía, cuotas y restricciones. */
+/* Cocina "efectiva" de una receta para la acotación por paquetes:
+   las recetas propias del usuario cuentan como 'user'. */
+function dishCuisineKey(id){
+  if(typeof id === 'string' && id[0] === 'U') return 'user';
+  const d = DISHES[id];
+  return (d && d.cuisine && d.cuisine !== 'base') ? d.cuisine : 'base';
+}
+
+/* ¿Es candidata esta receta para el generador en esta franja?
+   Mismo criterio para pickBest y para el chequeo previo de categorías:
+   · su categoría coincide y no es un alimento suelto
+   · "Comida libre" sólo si la plantilla del día lo pide (hint 'lb')
+   · su cocina está activada en Configuración
+   · si el usuario acotó a packs concretos, pertenece a uno de ellos */
+function autofillEligible(id, slot, day, ctx){
+  const d = DISHES[id];
+  if(!d || d.cat !== slot || d.loose) return false;
+  if(d.libre){
+    const hints = (day && ctx && ctx.hints && ctx.hints[day] && ctx.hints[day][slot]) || [];
+    if(!hints.includes('lb')) return false;
+  }
+  if(typeof dishHiddenByCuisine === 'function' && dishHiddenByCuisine(id)) return false;
+  if(ctx && ctx.allowedCuisines && !ctx.allowedCuisines.has(dishCuisineKey(id))) return false;
+  return true;
+}
+
 function pickBest(slot, day, ctx, currentDayCom){
-  let candidates = Object.keys(DISHES).filter(id => DISHES[id].cat === slot && !DISHES[id].libre && !DISHES[id].loose);
+  let candidates = Object.keys(DISHES).filter(id => autofillEligible(id, slot, day, ctx));
   // Modo "sólo favoritos": limita los candidatos a los favoritos activos.
   // Si no hay ninguno para esta franja, se deja vacía (no se rellena con otras).
   if(ctx.strictFav && ctx.favSet){ candidates = candidates.filter(id => ctx.favSet.has(id)); }
@@ -1036,12 +1118,14 @@ function pickBest(slot, day, ctx, currentDayCom){
   const best = scored[0].s;
   const worst = scored[scored.length-1].s;
   const range = Math.max(1, best - worst);
-  // Pool = candidatos dentro del 35% superior del rango de puntuación,
-  // con un mínimo de 4 y un máximo de 8 para que siempre haya variedad.
-  const margin = range * 0.35;
+  // Pool = candidatos dentro del 25% superior del rango de puntuación,
+  // con un mínimo de 3 y un máximo de 6. Un pool más estrecho que antes:
+  // el mínimo de 4 metía candidatos muy inferiores y diluía las cuotas
+  // de la plantilla (salía carne blanca 3 días y legumbre 1, p. ej.).
+  const margin = range * 0.25;
   let pool = scored.filter(c => c.s >= best - margin);
-  if(pool.length < 4) pool = scored.slice(0, Math.min(4, scored.length));
-  if(pool.length > 8) pool = pool.slice(0, 8);
+  if(pool.length < 3) pool = scored.slice(0, Math.min(3, scored.length));
+  if(pool.length > 6) pool = pool.slice(0, 6);
 
   // Ponderación suave por calidad: el mejor pesa más, pero todos entran.
   // peso = (rank decreciente)^1.5 para no aplanar del todo.
@@ -1055,79 +1139,112 @@ function pickBest(slot, day, ctx, currentDayCom){
   return pool[pool.length-1].id;
 }
 
-function autofillCalendar(opts){
+/* Construye el contexto de puntuación del generador a partir de las opciones:
+   plantilla, cuotas, restricciones, packs permitidos, favoritos… */
+function buildAutofillCtx(opts){
   opts = opts || {};
-  const respectExisting = opts.respectExisting !== false; // por defecto sí
-
-  // Combina restricciones de TODAS las personas (la receta debe pasarlas todas)
   const restrictions = [...new Set(PEOPLE.flatMap(id => (TARGETS[id]||{}).restr || []))];
-
+  const tpl = AUTO_TEMPLATES[opts.template] || AUTO_TEMPLATES.pdf;
   const ctx = {
     usedCount: {},     // {dishId: count}
     gotCom:    {},     // {foodKey: count} acumulado en comidas
+    gotAll:    {},     // {foodKey: count} acumulado en todas las franjas
     lastBySlot:{},     // {slot: lastDishId}
-    quota:     {...AUTO_WEEKLY_QUOTA.com},
+    quota:     Object.assign({}, tpl.quotaCom),
+    quotaAll:  Object.assign({}, AUTO_ALL_QUOTA),
+    hints:     tpl.hints,
+    tplKey:    AUTO_TEMPLATES[opts.template] ? opts.template : 'pdf',
+    quick:     !!opts.quick,
     restrictions,
+    allowedCuisines: (Array.isArray(opts.cuisines) && opts.cuisines.length) ? new Set(opts.cuisines) : null,
     favSet:    opts.favorites ? new Set(opts.favList || getDishFavs()) : null,
     favBoost:  opts.favorites ? 4000 : 0,
     strictFav: !!opts.favoritesStrict,   // sólo favoritos: no rellenar con otras recetas
-    dayTotals: {}      // {day: {A:{k,p,f,c}, B:{k,p,f,c}}}
+    dayTotals: {},     // {day: {persona:{k,p,f,c}}}
+    countedSlots: {}   // {day: Set(slots ya sumados en dayTotals)}
   };
-  // Init per-day totals (una entrada por persona activa)
   const blankTotals = ()=>{ const o={}; PEOPLE.forEach(id=>{ o[id]={k:0,p:0,f:0,c:0}; }); return o; };
-  WEEK_DAYS.forEach(d=>{ ctx.dayTotals[d.k] = blankTotals(); });
+  WEEK_DAYS.forEach(d=>{ ctx.dayTotals[d.k] = blankTotals(); ctx.countedSlots[d.k] = new Set(); });
+  return ctx;
+}
 
-  // Comprueba si quedará alguna categoría sin candidatos
+/* Suma la contribución REAL (escalada a la franja) de un plato a los totales
+   por persona. Debe coincidir con dayTotalsFor para que el proyectado durante
+   el autocompletado refleje lo que finalmente se muestra. */
+function autofillAddTotals(ctx, day, slot, d, sumStd){
+  const totals = ctx.dayTotals[day];
+  if(!totals || !d) return;
+  const std = sumStd || (typeof recipeStdKcal === 'function' ? recipeStdKcal(d) : 0) || 1;
+  PEOPLE.forEach((id)=>{
+    const t = totals[id]; if(!t) return;
+    const mm = (typeof dishScaledMeal === 'function')
+      ? dishScaledMeal(d, id, slot, std).tot
+      : {k:0,p:0,f:0,c:0};
+    t.k += mm.k; t.p += mm.p; t.f += mm.f; t.c += mm.c;
+  });
+  ctx.countedSlots[day] && ctx.countedSlots[day].add(slot);
+}
+
+/* Registra una elección: contadores de uso, cuotas y totales del día. */
+function autofillRegister(ctx, day, slot, id){
+  const d = DISHES[id];
+  if(!d) return;
+  ctx.usedCount[id] = (ctx.usedCount[id]||0) + 1;
+  ctx.lastBySlot[slot] = id;
+  const foods = d.food || [];
+  if(slot === 'com') foods.forEach(f=>{ ctx.gotCom[f] = (ctx.gotCom[f]||0) + 1; });
+  foods.forEach(f=>{ ctx.gotAll[f] = (ctx.gotAll[f]||0) + 1; });
+  autofillAddTotals(ctx, day, slot, d, recipeStdKcal(d));
+}
+
+/* Precarga en el contexto lo que YA hay en el calendario (contadores,
+   cuotas y totales por día). skipDay/skipSlot excluye una franja (se usa
+   al pedir una sugerencia para esa franja concreta). */
+function autofillPreload(ctx, skipDay, skipSlot){
+  Object.entries(CalState.data).forEach(([day, dayObj])=>{
+    Object.entries(dayObj).forEach(([slot, arr])=>{
+      if(day === skipDay && slot === skipSlot) return;
+      const ids = (arr||[]).filter(id => DISHES[id]);
+      if(!ids.length) return;
+      const sStd = sumCellStd(ids);
+      ids.forEach(id=>{
+        ctx.usedCount[id] = (ctx.usedCount[id]||0) + 1;
+        const foods = DISHES[id].food || [];
+        if(slot === 'com') foods.forEach(f=>{ ctx.gotCom[f] = (ctx.gotCom[f]||0) + 1; });
+        foods.forEach(f=>{ ctx.gotAll[f] = (ctx.gotAll[f]||0) + 1; });
+        autofillAddTotals(ctx, day, slot, DISHES[id], sStd);
+      });
+    });
+  });
+}
+
+/* Modo tupper: estas cenas reutilizan la comida del día anterior. */
+const BATCH_LEFTOVER = { mar:'lun', jue:'mie', sab:'vie' };
+
+function autofillCalendar(opts){
+  opts = opts || {};
+  const respectExisting = opts.respectExisting !== false; // por defecto sí
+  const ctx = buildAutofillCtx(opts);
+
+  // Comprueba si quedará alguna categoría sin candidatos.
+  // Mismo criterio de elegibilidad que usará pickBest (cocinas, packs…).
   const blocked = [];
   CATEGORIES.forEach(c=>{
-    const ok = Object.keys(DISHES).some(id => DISHES[id].cat === c.key && !restrictions.some(k=>{
-      const r = RESTRICTIONS_MAP[k]; return r && r.violates(DISHES[id]);
-    }));
+    const ok = Object.keys(DISHES).some(id => autofillEligible(id, c.key, null, ctx) &&
+      !ctx.restrictions.some(k=>{ const r = RESTRICTIONS_MAP[k]; return r && r.violates(DISHES[id]); }));
     if(!ok) blocked.push(c.label);
   });
   if(blocked.length){
-    alert(`Con las restricciones actuales no hay recetas disponibles para: ${blocked.join(', ')}.\n\nAjusta las restricciones en Ajustes o crea recetas nuevas.`);
+    pnAlert(`Con las restricciones y cocinas actuales no hay recetas disponibles para: ${blocked.join(', ')}.\n\nActiva más cocinas, ajusta las restricciones o crea recetas nuevas.`);
     return;
   }
 
   // Si respetamos lo existente, precarga contadores y totales por día
   if(respectExisting){
-    Object.entries(CalState.data).forEach(([day, dayObj])=>{
-      Object.entries(dayObj).forEach(([slot, arr])=>{
-        arr.forEach(id=>{
-          ctx.usedCount[id] = (ctx.usedCount[id]||0) + 1;
-          if(slot === 'com'){
-            (DISHES[id]?.food||[]).forEach(f=>{ ctx.gotCom[f] = (ctx.gotCom[f]||0) + 1; });
-          }
-          const d = DISHES[id];
-          if(d && ctx.dayTotals[day]) addToTotals(ctx.dayTotals[day], d, slot, sumCellStd(arr));
-        });
-      });
-    });
+    autofillPreload(ctx);
   } else {
     CalState.data = emptyCal();
   }
-
-  // Suma la contribución REAL (escalada a la franja) de un plato a los totales
-  // por persona. Debe coincidir con dayTotalsFor para que el proyectado durante
-  // el autocompletado refleje lo que finalmente se muestra.
-  function addToTotals(totals, d, slot, sumStd){
-    const std = sumStd || (typeof recipeStdKcal === 'function' ? recipeStdKcal(d) : 0) || 1;
-    PEOPLE.forEach((id)=>{
-      const t = totals[id]; if(!t) return;
-      const mm = (typeof dishScaledMeal === 'function')
-        ? dishScaledMeal(d, id, slot, std).tot
-        : {k:0,p:0,f:0,c:0};
-      t.k += mm.k; t.p += mm.p; t.f += mm.f; t.c += mm.c;
-    });
-  }
-  // Helper para registrar el pick y actualizar dayTotals
-  const registerPick = (day, slot, id)=>{
-    ctx.usedCount[id] = (ctx.usedCount[id]||0) + 1;
-    ctx.lastBySlot[slot] = id;
-    const d = DISHES[id];
-    if(d && ctx.dayTotals[day]) addToTotals(ctx.dayTotals[day], d, slot, recipeStdKcal(d));
-  };
 
   // Orden de relleno: COMIDAS primero (más restrictivo por plantilla),
   // luego CENAS (dependen de la comida del mismo día), luego DESAYUNOS y MERIENDAS.
@@ -1136,21 +1253,44 @@ function autofillCalendar(opts){
   // — COMIDAS —
   orderedDays.forEach(day=>{
     if(CalState.data[day].com.length && respectExisting) return;
+    // Día LIBRE de la plantilla (sábado en la del PDF): se coloca directo,
+    // sin puntuar por macros — el sentido del día libre es no contarlos.
+    const hints = (ctx.hints[day] && ctx.hints[day].com) || [];
+    if(hints.includes('lb')){
+      const libreId = 'LIBRE_com';
+      if(autofillEligible(libreId, 'com', day, ctx) && (!ctx.strictFav)){
+        CalState.data[day].com = [libreId];
+        autofillRegister(ctx, day, 'com', libreId);
+        return;
+      }
+    }
     const id = pickBest('com', day, ctx, []);
     if(!id) return;
     CalState.data[day].com = [id];
-    registerPick(day, 'com', id);
-    (DISHES[id].food||[]).forEach(f=>{ ctx.gotCom[f] = (ctx.gotCom[f]||0) + 1; });
+    autofillRegister(ctx, day, 'com', id);
   });
 
-  // — CENAS —
+  // — CENAS — (modo tupper: mar/jue/sáb cenan la comida del día anterior)
+  ctx.batchUsed = [];
   orderedDays.forEach(day=>{
     if(CalState.data[day].cen.length && respectExisting) return;
+    if(opts.batch && BATCH_LEFTOVER[day]){
+      const src = (CalState.data[BATCH_LEFTOVER[day]].com || []).filter(id=>{
+        const d = DISHES[id];
+        return d && !d.libre && !d.loose && !(typeof dishViolations==='function' && dishViolations(id,'AB').length);
+      });
+      if(src.length){
+        CalState.data[day].cen = [src[0]];
+        autofillRegister(ctx, day, 'cen', src[0]);
+        ctx.batchUsed.push(day);
+        return;
+      }
+    }
     const todaysComFoods = (CalState.data[day].com||[]).flatMap(id => DISHES[id]?.food || []);
     const id = pickBest('cen', day, ctx, todaysComFoods);
     if(!id) return;
     CalState.data[day].cen = [id];
-    registerPick(day, 'cen', id);
+    autofillRegister(ctx, day, 'cen', id);
   });
 
   // — DESAYUNOS — (rotar para variedad)
@@ -1159,7 +1299,7 @@ function autofillCalendar(opts){
     const id = pickBest('des', day, ctx, []);
     if(!id) return;
     CalState.data[day].des = [id];
-    registerPick(day, 'des', id);
+    autofillRegister(ctx, day, 'des', id);
   });
 
   // — MERIENDAS —
@@ -1168,7 +1308,7 @@ function autofillCalendar(opts){
     const id = pickBest('mer', day, ctx, []);
     if(!id) return;
     CalState.data[day].mer = [id];
-    registerPick(day, 'mer', id);
+    autofillRegister(ctx, day, 'mer', id);
   });
 
   CalState.modified = true;
@@ -1176,50 +1316,80 @@ function autofillCalendar(opts){
   renderCalendar();
 
   // Resumen al usuario
-  showAutofillReport();
+  showAutofillReport(opts, ctx);
 }
 
-function showAutofillReport(){
+/* ── INFORME de generación (modal persistente, no toast) ─── */
+function showAutofillReport(opts, ctx){
+  opts = opts || {}; ctx = ctx || {};
   const com = weeklyCounts('com');
   const all = weeklyCounts('all');
-  const lines = [];
   const get = (src, k) => src[k] || 0;
-  const restr = [...new Set(PEOPLE.flatMap(id => (TARGETS[id]||{}).restr || []))];
-  if(restr.length){
-    const labels = restr.map(k=> RESTRICTIONS_MAP[k]?.lbl || k).join(', ');
-    lines.push(`🚫 Restricciones aplicadas: ${labels}`);
-    lines.push('');
+  const tpl = AUTO_TEMPLATES[ctx.tplKey] || AUTO_TEMPLATES.pdf;
+
+  // Opciones aplicadas
+  const chips = [`🗓️ ${tpl.lbl}`];
+  if(ctx.allowedCuisines){
+    const names = [...ctx.allowedCuisines].map(id=>{
+      if(id === 'user') return 'Mis recetas';
+      const c = (typeof Cuisines !== 'undefined') ? Cuisines.list().find(x=>x.id===id) : null;
+      return c ? c.lbl : id;
+    });
+    chips.push(`🍱 Sólo: ${names.join(', ')}`);
   }
-  lines.push(`Legumbre · comida: ${get(com,'leg')}/2 días (semana: ${get(all,'leg')})`);
-  lines.push(`Pescado azul · comida: ${get(com,'pa')}/1`);
-  lines.push(`Pescado blanco · comida: ${get(com,'pb')}/1`);
-  lines.push(`Carne blanca · comida: ${get(com,'cb')}/1`);
-  lines.push(`Arroz/Pasta · comida: ${get(com,'apq')}/1`);
-  if(get(com,'cr')) lines.push(`⚠ Carne roja · comida: ${get(com,'cr')} (sólo 1 cada 2ª semana)`);
-  // recetas únicas
+  if(ctx.quick) chips.push('⏱ Rápidas entre semana');
+  if(opts.batch) chips.push(`🥡 Tuppers: ${(ctx.batchUsed||[]).length} cena(s) con sobras de la comida`);
+  if(ctx.strictFav) chips.push('⭐ Sólo favoritos');
+  else if(ctx.favSet) chips.push('⭐ Prioridad a favoritos');
+  if((ctx.restrictions||[]).length) chips.push('🚫 ' + ctx.restrictions.map(k=>RESTRICTIONS_MAP[k]?.lbl||k).join(', '));
+
+  // Cuotas de la plantilla (si las hay)
+  const quotaRows = [];
+  const q = ctx.quota || {};
+  const qRow = (k, lbl)=>{ if(q[k] > 0) quotaRows.push(`${lbl}: <b>${get(com,k)}</b>/${q[k]} días`); };
+  qRow('leg','Legumbre · comida'); qRow('pa','Pescado azul · comida');
+  qRow('pb','Pescado blanco · comida'); qRow('cb','Carne blanca · comida');
+  qRow('apq','Arroz/Pasta · comida'); qRow('lb','Día libre · comida');
+  if(get(com,'cr')) quotaRows.push(`⚠ Carne roja · comida: <b>${get(com,'cr')}</b> (recomendado 2-3/MES)`);
+  quotaRows.push(`Verdura · semana: <b>${get(all,'v')}</b>/${AUTO_ALL_QUOTA.v} · Fruta: <b>${get(all,'fr')}</b>/${AUTO_ALL_QUOTA.fr}`);
+
+  // Franjas que quedaron vacías (p. ej. sólo-favoritos sin recetas de esa categoría)
+  const emptySlots = [];
+  WEEK_DAYS.forEach(d=>{
+    ['des','com','mer','cen'].forEach(s=>{
+      if(!(CalState.data[d.k][s]||[]).length) emptySlots.push(`${d.lbl} ${(CATEGORIES.find(c=>c.key===s)||{}).label||s}`);
+    });
+  });
+
+  // Recetas únicas
   const used = {};
   Object.values(CalState.data).forEach(day=>Object.values(day).forEach(arr=>arr.forEach(id=>{used[id]=(used[id]||0)+1;})));
   const unique = Object.keys(used).length;
   const total  = Object.values(used).reduce((a,b)=>a+b,0);
-  lines.push('');
-  lines.push(`Recetas únicas: ${unique} · usos totales: ${total}`);
-  toastAutofill(lines.join('\n'));
-}
 
-function toastAutofill(msg){
-  let t = document.getElementById('autoToast');
-  if(!t){
-    t = document.createElement('div');
-    t.id = 'autoToast';
-    t.className = 'auto-toast';
-    t.setAttribute('role','status'); t.setAttribute('aria-live','polite');
-    document.body.appendChild(t);
-  }
-  t.innerHTML = `<div class="at-hd">✨ Calendario autocompletado</div><pre>${escAttr(msg)}</pre>`;
-  t.classList.add('show');
-  clearTimeout(window.__autoToastT);
-  window.__autoToastT = setTimeout(()=> t.classList.remove('show'), 6000);
-  t.addEventListener('click', ()=> t.classList.remove('show'), {once:true});
+  const body = document.getElementById('promptBody');
+  if(!body){ if(typeof pnToast==='function') pnToast('Menú generado.'); return; }
+  body.innerHTML = `
+    <div class="form-hd"><h2>✨ Menú generado</h2>
+      <span class="form-sub">Revisa la guía semanal bajo el calendario y ajusta lo que quieras</span></div>
+    <div class="form-body">
+      <div class="fchips" style="margin-bottom:12px">${chips.map(c=>`<span class="fchip on" style="cursor:default">${escAttr(c)}</span>`).join('')}</div>
+      <div class="fgrp"><label class="flbl">Cumplimiento de la semana</label>
+        <ul style="margin:6px 0 0 18px;line-height:1.7;font-size:.88rem">${quotaRows.map(r=>`<li>${r}</li>`).join('')}
+          <li>Recetas únicas: <b>${unique}</b> · usos totales: <b>${total}</b></li>
+        </ul>
+      </div>
+      ${emptySlots.length ? `<div class="fgrp"><label class="flbl">⚠ Franjas sin rellenar (${emptySlots.length})</label>
+        <div style="font-size:.84rem;color:var(--ink-50);line-height:1.6">${emptySlots.map(escAttr).join(' · ')}<br>Complétalas a mano desde el calendario o con 🎲 Sugerir.</div></div>` : ''}
+    </div>
+    <div class="form-actions">
+      <button class="btn-prim" id="afReportOk" style="width:100%">Entendido</button>
+    </div>`;
+  _showPrompt();
+  const ok = document.getElementById('afReportOk');
+  if(ok) ok.addEventListener('click', _closePrompt);
+  const x = document.getElementById('promptClose');
+  if(x) x.onclick = _closePrompt;
 }
 
 function safeAutofill(opts){
@@ -1227,27 +1397,162 @@ function safeAutofill(opts){
   catch(e){ console.error('autofill', e); if(typeof pnAlert==='function') pnAlert('No se pudo autocompletar.\n'+(e&&e.message||e)); }
 }
 
-async function autofillFromMenu(){
-  if(!await pnConfirm('¿Autocompletar?\nSe rellenarán SÓLO las franjas vacías, respetando lo que ya hay. Usa "Vaciar" antes si quieres empezar desde cero.', {okText:'Autocompletar'})) return;
-  safeAutofill({respectExisting:true});
+/* ══════════════════════════════════════════════════════════
+   OPCIONES DE GENERACIÓN · diálogo único
+   Modo (rellenar/desde cero/sólo favoritos) + plantilla + acotación
+   a cocinas/packs + rápidas entre semana + modo tupper. Persistente.
+══════════════════════════════════════════════════════════ */
+const LS_AUTO_OPTS = 'mnut:autofill-opts:v1';
+function loadAutoPrefs(){
+  try{ const o = JSON.parse(localStorage.getItem(LS_AUTO_OPTS)); return (o && typeof o==='object') ? o : {}; }
+  catch(e){ return {}; }
+}
+function saveAutoPrefs(p){ try{ localStorage.setItem(LS_AUTO_OPTS, JSON.stringify(p)); }catch(e){} }
+
+/* Cocinas elegibles para acotar: las ACTIVAS en Configuración con recetas,
+   más "Mis recetas" si el usuario tiene recetas propias. */
+function autofillCuisineChoices(){
+  const out = [];
+  if(typeof Cuisines !== 'undefined'){
+    Cuisines.list().forEach(c=>{ if(c.on && c.count > 0) out.push({id:c.id, ico:c.ico, lbl:c.lbl, count:c.count}); });
+  }
+  const userCount = Object.keys(DISHES).filter(id => id[0]==='U' && !DISHES[id].loose && !DISHES[id].libre).length;
+  if(userCount) out.push({id:'user', ico:'✍️', lbl:'Mis recetas', count:userCount});
+  return out;
 }
 
-async function autofillFromScratch(){
-  if(!await pnConfirm('¿Generar un menú nuevo desde cero?\nSe borrará todo lo actual.', {danger:true, okText:'Generar nuevo'})) return;
-  safeAutofill({respectExisting:false});
+const AUTO_MODES = [
+  {k:'fill', ico:'✨', lbl:'Rellenar vacías', hint:'Completa sólo las franjas vacías; respeta lo que ya hay.'},
+  {k:'new',  ico:'🔄', lbl:'Desde cero',      hint:'Borra el menú actual y genera la semana completa.'},
+  {k:'fav',  ico:'⭐', lbl:'Sólo favoritos',  hint:'Borra el menú y usa únicamente tus recetas ★; sin favoritos de una categoría, esa franja queda vacía.'}
+];
+
+function openAutofillOptions(mode){
+  const body = document.getElementById('promptBody');
+  if(!body){ safeAutofill({respectExisting: mode !== 'new'}); return; }
+  const prefs = loadAutoPrefs();
+  const st = {
+    mode: AUTO_MODES.some(m=>m.k===mode) ? mode : 'fill',
+    template: AUTO_TEMPLATES[prefs.template] ? prefs.template : 'pdf',
+    quick: !!prefs.quick,
+    batch: !!prefs.batch,
+    favBoost: !!prefs.favBoost,
+    cuisines: Array.isArray(prefs.cuisines) ? prefs.cuisines.slice() : null   // null = todas
+  };
+  const choices = autofillCuisineChoices();
+  // limpia selecciones guardadas que ya no existan (pack quitado, etc.)
+  if(st.cuisines){
+    st.cuisines = st.cuisines.filter(id => choices.some(c=>c.id===id));
+    if(!st.cuisines.length) st.cuisines = null;
+  }
+
+  const render = ()=>{
+    const modeHint = (AUTO_MODES.find(m=>m.k===st.mode)||{}).hint || '';
+    body.innerHTML = `
+      <div class="form-hd"><h2>✨ Generar menú</h2>
+        <span class="form-sub">Elige cómo quieres que se rellene el Plan Semanal</span></div>
+      <div class="form-body">
+        <div class="fgrp"><label class="flbl">Modo</label>
+          <div class="fchips" id="afModes">
+            ${AUTO_MODES.map(m=>`<button type="button" class="fchip ${st.mode===m.k?'on':''}" data-mode="${m.k}">${m.ico} ${m.lbl}</button>`).join('')}
+          </div>
+          <div style="font-size:.8rem;color:var(--ink-50);margin-top:6px">${escAttr(modeHint)}</div>
+        </div>
+        <div class="fgrp"><label class="flbl">Plantilla semanal</label>
+          <select class="fsel" id="afTemplate">
+            ${Object.entries(AUTO_TEMPLATES).map(([k,t])=>`<option value="${k}" ${st.template===k?'selected':''}>${t.lbl}</option>`).join('')}
+          </select>
+        </div>
+        ${choices.length > 1 ? `
+        <div class="fgrp"><label class="flbl">Cocinas a usar <span class="flbl-ex">todas marcadas = sin acotar</span></label>
+          <div class="fchips" id="afCuisines">
+            ${choices.map(c=>{
+              const on = !st.cuisines || st.cuisines.includes(c.id);
+              return `<button type="button" class="fchip ${on?'on':''}" data-cuis="${escAttr(c.id)}">${c.ico} ${escAttr(c.lbl)} <small style="opacity:.6">· ${c.count}</small></button>`;
+            }).join('')}
+          </div>
+        </div>` : ''}
+        <div class="fgrp"><label class="flbl">Preferencias</label>
+          <label style="display:flex;gap:8px;align-items:center;font-size:.88rem;margin:6px 0;cursor:pointer">
+            <input type="checkbox" id="afQuick" ${st.quick?'checked':''}> ⏱ Entre semana, sólo recetas rápidas (≤ 30 min)</label>
+          <label style="display:flex;gap:8px;align-items:center;font-size:.88rem;margin:6px 0;cursor:pointer">
+            <input type="checkbox" id="afBatch" ${st.batch?'checked':''}> 🥡 Modo tupper: mar/jue/sáb se cena la comida del día anterior</label>
+          ${st.mode!=='fav' ? `<label style="display:flex;gap:8px;align-items:center;font-size:.88rem;margin:6px 0;cursor:pointer">
+            <input type="checkbox" id="afFavBoost" ${st.favBoost?'checked':''}> ⭐ Dar prioridad a mis favoritos</label>` : ''}
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn-sec" id="afCancel">Cancelar</button>
+        <button class="btn-prim" id="afGo">${st.mode==='fill' ? '✨ Rellenar' : '✨ Generar'}</button>
+      </div>`;
+    wire();
+  };
+
+  const readChecks = ()=>{
+    const g = id => { const el = document.getElementById(id); return !!(el && el.checked); };
+    st.quick = g('afQuick'); st.batch = g('afBatch');
+    if(st.mode !== 'fav') st.favBoost = g('afFavBoost');
+    const sel = document.getElementById('afTemplate');
+    if(sel) st.template = sel.value;
+  };
+
+  function wire(){
+    body.querySelectorAll('#afModes .fchip').forEach(b=> b.addEventListener('click', ()=>{
+      readChecks(); st.mode = b.dataset.mode; render();
+    }));
+    body.querySelectorAll('#afCuisines .fchip').forEach(b=> b.addEventListener('click', ()=>{
+      b.classList.toggle('on');
+    }));
+    const cancel = document.getElementById('afCancel');
+    if(cancel) cancel.addEventListener('click', _closePrompt);
+    const x = document.getElementById('promptClose');
+    if(x) x.onclick = _closePrompt;
+    const go = document.getElementById('afGo');
+    if(go) go.addEventListener('click', onGenerate);
+  }
+
+  function onGenerate(){
+    readChecks();
+    // Cocinas marcadas (si el selector existe)
+    let cuisines = null;
+    const cWrap = document.getElementById('afCuisines');
+    if(cWrap){
+      const onIds = [...cWrap.querySelectorAll('.fchip.on')].map(b=>b.dataset.cuis);
+      if(!onIds.length){ pnAlert('Marca al menos una cocina para generar el menú.'); return; }
+      if(onIds.length < choices.length) cuisines = onIds;   // todas marcadas = sin acotar
+    }
+    saveAutoPrefs({template:st.template, quick:st.quick, batch:st.batch, favBoost:st.favBoost, cuisines});
+
+    const opts = {
+      respectExisting: st.mode === 'fill',
+      template: st.template, quick: st.quick, batch: st.batch,
+      cuisines
+    };
+    if(st.mode === 'fav'){
+      const favs = getDishFavs().filter(id => DISHES[id] && !(typeof dishHiddenByCuisine==='function' && dishHiddenByCuisine(id)));
+      if(!favs.length){ pnAlert('Aún no tienes recetas favoritas activas.\nMarca algunas con la ★ en el catálogo y vuelve a intentarlo.'); return; }
+      opts.favorites = true; opts.favoritesStrict = true; opts.favList = favs;
+    } else if(st.favBoost){
+      opts.favorites = true;
+    }
+    _closePrompt();
+    safeAutofill(opts);
+  }
+
+  render();
+  _showPrompt();
 }
 
-async function autofillFromFavorites(){
-  // SÓLO favoritos ACTIVOS: existentes y no ocultos por una cocina desactivada.
-  const favs = getDishFavs().filter(id => DISHES[id] && !(typeof dishHiddenByCuisine==='function' && dishHiddenByCuisine(id)));
-  if(!favs.length){ pnAlert('Aún no tienes recetas favoritas activas.\nMarca algunas con la ★ en el catálogo (y comprueba que su cocina esté activada) y vuelve a intentarlo.'); return; }
-  // ¿Hay favoritos para cada franja? Avisa de las que quedarán vacías.
-  const byCat = {};
-  favs.forEach(id=>{ const c = DISHES[id].cat; byCat[c] = (byCat[c]||0) + 1; });
-  const missing = CATEGORIES.filter(c=> !byCat[c.key]).map(c=> c.label);
-  const warn = missing.length ? `\n\nNo tienes favoritos para: ${missing.join(', ')}. Esas franjas quedarán vacías (puedes completarlas a mano).` : '';
-  if(!await pnConfirm(`¿Generar un menú SÓLO con tus ${favs.length} recetas favoritas?\nSe usarán únicamente tus favoritos actuales; no se añadirá ninguna otra receta. Se borrará el menú actual.${warn}`, {danger:true, okText:'Generar'})) return;
-  safeAutofill({respectExisting:false, favorites:true, favoritesStrict:true, favList:favs});
+/* Sugerencia automática para UNA franja (botón 🎲 del picker):
+   usa el mismo motor respetando el resto de la semana ya planificada. */
+function suggestForSlot(day, slot){
+  const prefs = loadAutoPrefs();
+  const ctx = buildAutofillCtx({template:prefs.template, quick:prefs.quick, cuisines:prefs.cuisines, favorites:prefs.favBoost});
+  autofillPreload(ctx, day, slot);
+  const todaysComFoods = slot === 'cen'
+    ? (CalState.data[day].com||[]).flatMap(id => DISHES[id]?.food || [])
+    : [];
+  return pickBest(slot, day, ctx, todaysComFoods);
 }
 
 /* ── BIND ──────────────────────────────────────────── */
@@ -1259,13 +1564,13 @@ document.getElementById('calLoadTpl').addEventListener('click', loadTemplate);
 document.getElementById('calClear').addEventListener('click', clearCalendar);
 document.getElementById('calSave').addEventListener('click', openSavePrompt);
 
-// auto-fill buttons (wired after DOM exists)
+// auto-fill buttons (wired after DOM exists) — abren el diálogo de opciones
 const calAutoFillBtn = document.getElementById('calAutoFill');
-if(calAutoFillBtn) calAutoFillBtn.addEventListener('click', autofillFromMenu);
+if(calAutoFillBtn) calAutoFillBtn.addEventListener('click', ()=> openAutofillOptions('fill'));
 const calAutoNewBtn = document.getElementById('calAutoNew');
-if(calAutoNewBtn) calAutoNewBtn.addEventListener('click', autofillFromScratch);
+if(calAutoNewBtn) calAutoNewBtn.addEventListener('click', ()=> openAutofillOptions('new'));
 const calAutoFavBtn = document.getElementById('calAutoFav');
-if(calAutoFavBtn) calAutoFavBtn.addEventListener('click', autofillFromFavorites);
+if(calAutoFavBtn) calAutoFavBtn.addEventListener('click', ()=> openAutofillOptions('fav'));
 
 // "⋯ Más acciones": despliega/oculta las acciones secundarias del calendario
 const calMoreBtn = document.getElementById('calMoreBtn');

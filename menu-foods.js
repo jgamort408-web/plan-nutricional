@@ -422,24 +422,19 @@ function personMealKcal(personaKey, slot){
 function sumCellStd(ids){
   return (ids||[]).reduce((a,id)=> a + (DISHES[id] ? recipeStdKcal(DISHES[id]) : 0), 0) || 1;
 }
-/* Escala TODO el comp por un factor (incluye verduras/fx; cs = al gusto = 0). */
-function scaleAll(comp, factor){
-  const f = (isFinite(factor) && factor > 0) ? factor : 1;
-  const rows = []; const tot = {k:0,p:0,f:0,c:0};
-  comp.forEach(it=>{
-    const g = it.cs ? 0 : itemGrams(it) * f;
-    const m = gramMacros(it.f, g);
-    tot.k+=m.k; tot.p+=m.p; tot.f+=m.f; tot.c+=m.c;
-    rows.push({it, grams:g, units:(it.u!=null && foodOf(it) && foodOf(it).unit) ? g/foodOf(it).unit.g : null});
-  });
-  return {rows, tot, factor:f};
-}
-/* Composición de una receta escalada para una persona en su celda (franja). */
+/* Composición de una receta escalada para una persona en su celda (franja).
+   El objetivo de ESTA receta es su parte proporcional de la franja (si la
+   celda tiene varias recetas, se reparte por tamaño estándar). Se escala con
+   scaleComp: los ingredientes fijos (🔒 verduras, aliños, alimentos sueltos)
+   NO se escalan y el factor queda acotado (0.4–1.8) para que las raciones
+   sigan siendo realistas aunque la receta no encaje del todo en la franja. */
 function dishScaledMeal(d, personaKey, slot, sumStd){
   if(!d) return {rows:[], tot:{k:0,p:0,f:0,c:0}, factor:1};
   if(d.comp && d.comp.length){
-    const std = sumStd || recipeStdKcal(d) || 1;
-    return scaleAll(d.comp, personMealKcal(personaKey, slot) / std);
+    const own = recipeStdKcal(d) || 1;
+    const std = sumStd || own;
+    const targetK = personMealKcal(personaKey, slot) * (own / std);
+    return scaleComp(d.comp, targetK);
   }
   // Sin composición (p. ej. "libre"): usa los kcal/macros precalculados de la persona.
   const idx = Math.max(0, PEOPLE.indexOf(personaKey));

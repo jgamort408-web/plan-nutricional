@@ -280,7 +280,7 @@ const RESTRICTIONS = [
   {k:'sg',     lbl:'Sin gluten',      ico:'🌾',  desc:'Excluye platos con cereales con gluten',
    violates:(d)=> !(d.diet||[]).includes('sg')},
   {k:'sl',     lbl:'Sin lactosa',     ico:'🥛',  desc:'Excluye queso y lácteos',
-   violates:(d)=> (d.food||[]).includes('qs') || (d.food||[]).includes('lac') && !(d.diet||[]).includes('sl')},
+   violates:(d)=> ((d.food||[]).includes('qs') || (d.food||[]).includes('lac')) && !(d.diet||[]).includes('sl')},
   {k:'vt',     lbl:'Vegetariano',     ico:'🥬',  desc:'Sin carne ni pescado',
    violates:(d)=>{
      const f = d.food||[]; const dt = d.diet||[];

@@ -161,18 +161,33 @@ function wireCuisinesGroup(){
   }));
   root.querySelectorAll('.ftpack[data-dl]').forEach(b=> b.addEventListener('click', async ()=>{
     b.disabled = true; b.style.opacity = '.5';
-    const n = await Cuisines.fetchPack(b.dataset.dl);
-    if(n>0){ if(typeof pnToast==='function') pnToast(`Paquete instalado · ${n} recetas`); refresh(); }
+    const r = await Cuisines.fetchPack(b.dataset.dl);
+    if(r.n>0){ packInstalledNotice(r.id, r.n); refresh(); }
     else { if(typeof pnAlert==='function') pnAlert('No se pudo instalar el paquete.'); b.disabled=false; b.style.opacity=''; }
   }));
   const imp = root.querySelector('#cuisImport');
   if(imp) imp.addEventListener('change', async (e)=>{
     const f = e.target.files && e.target.files[0]; if(!f) return;
-    const n = await Cuisines.importFile(f);
-    if(n>0){ if(typeof pnToast==='function') pnToast(`Paquete instalado · ${n} recetas`); refresh(); }
+    const r = await Cuisines.importFile(f);
+    if(r.n>0){ packInstalledNotice(r.id, r.n); refresh(); }
     else if(typeof pnAlert==='function') pnAlert('El archivo no es un paquete de recetas válido.');
     e.target.value='';
   });
+}
+
+/* Aviso tras instalar un pack: recetas por categoría y franjas que NO cubre
+   (importante si luego se acota el generador sólo a ese paquete). */
+function packInstalledNotice(cuisineId, n){
+  const CATL = {des:'Desayuno', com:'Comida', mer:'Merienda', cen:'Cena'};
+  const cov = (cuisineId && typeof Cuisines!=='undefined' && Cuisines.coverage) ? Cuisines.coverage(cuisineId) : null;
+  if(!cov){ if(typeof pnToast==='function') pnToast(`Paquete instalado · ${n} recetas`); return; }
+  const missing = Object.keys(CATL).filter(k=> !cov[k]);
+  const parts = Object.keys(CATL).filter(k=> cov[k]).map(k=> `${cov[k]} ${CATL[k].toLowerCase()}${cov[k]>1?'s':''}`);
+  if(missing.length && typeof pnAlert==='function'){
+    pnAlert(`Paquete instalado · ${n} recetas (${parts.join(', ')}).\n\nNo trae recetas de: ${missing.map(k=>CATL[k]).join(', ')}. Si acotas el generador SÓLO a este paquete, esas franjas quedarán vacías; combínalo con otra cocina activa.`);
+  } else if(typeof pnToast==='function'){
+    pnToast(`Paquete instalado · ${n} recetas (${parts.join(', ')})`);
+  }
 }
 
 function renderConfigForm(){
