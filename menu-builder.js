@@ -846,7 +846,7 @@ const FT_OPTS = [
 ];
 
 function _showPrompt(){ document.getElementById('promptBg').classList.add('show'); document.body.classList.add('no-scroll'); }
-function _closePrompt(){ document.getElementById('promptBg').classList.remove('show'); }
+function _closePrompt(){ document.getElementById('promptBg').classList.remove('show'); document.body.classList.remove('no-scroll'); }
 
 function openFoodEditor(foodId, prefillName, cb){
   const editing = !!foodId;
