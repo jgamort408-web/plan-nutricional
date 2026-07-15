@@ -33,7 +33,10 @@ function renderSpCalSummary(){
   const m = planTotals(SportPlan.days, r.fromKey, r.toKey);   // mes visible
   const all = planTotals(SportPlan.days);                      // plan entero
   if(!all.sessions){
-    el.innerHTML = `<div class="sp-sum empty">Plan vacío · usa <strong>⚙ Cadencia</strong> para generarlo automáticamente (días · semanas · meses, hasta 1 año), o toca un día para añadir una sesión.</div>`;
+    el.innerHTML = `<div class="sp-sum empty"><strong>¿Empezamos?</strong> El Asistente te crea el plan paso a paso (objetivo, días y duración). También puedes generarlo por cadencia desde <strong>⋯ Más acciones</strong>, o tocar un día para añadir una sesión.
+      <div style="margin-top:9px"><button class="cal-btn primary" id="spIntroAsst">🧭 Abrir asistente</button></div></div>`;
+    const b = document.getElementById('spIntroAsst');
+    if(b) b.addEventListener('click', ()=>{ const a=document.getElementById('spCalAssistant'); if(a) a.click(); });
     return;
   }
   const topM = Object.keys(m.muscles).sort((a,b)=>m.muscles[b]-m.muscles[a]).slice(0,7);

@@ -1268,6 +1268,7 @@ function openModal(id){
             </tr>`).join('')}
         </tbody>
       </table>
+      ${typeof window.openFoodMeasures==='function' ? `<button class="m-measures-link" id="ctaMeasures">📏 ¿Cuánto es eso a ojo? Ver medidas caseras →</button>` : ''}
 
       <div class="m-section-hd">Preparación</div>
       ${(()=>{ const steps = (typeof toSteps==='function') ? toSteps(d.nota) : (d.nota||'').split('\n').map(s=>s.trim()).filter(Boolean);
@@ -1300,6 +1301,9 @@ function openModal(id){
     renderCartBar();
     renderDrawer();
   });
+
+  const ctaMeasures = document.getElementById('ctaMeasures');
+  if(ctaMeasures) ctaMeasures.addEventListener('click', ()=>{ closeModal(); window.openFoodMeasures(); });
 
   document.getElementById('ctaFav').addEventListener('click', e=>{
     const k = e.currentTarget.dataset.id;
@@ -1503,7 +1507,7 @@ function renderTabbar(section){
       {ico:'📅', lbl:'Plan Semanal',on:cv==='cal',   fn:()=>switchView('cal')},
       {ico:'💾', lbl:'Guardados',   on:cv==='saved', fn:()=>switchView('saved')},
       {ico:'✚', lbl:'Crear',      fn:()=>openRecipeForm('des')},
-      {ico:'🛒', lbl:'Mi día',     badge:n||null, fn:()=>openDrawer()}
+      {ico:'📋', lbl:'Mi día',     badge:n||null, fn:()=>openDrawer()}
     ];
   } else if(section === 'sport'){
     const sv = (typeof sportView !== 'undefined') ? sportView : 'ex';

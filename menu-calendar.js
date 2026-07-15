@@ -59,7 +59,7 @@ function updateCalSub(){
   const isDefault = (CalState.name === 'Semana sin guardar');
   const base = CalState.id
     ? `Editando «${CalState.name}»`
-    : (isDefault ? 'Menú sin guardar' : `Borrador «${CalState.name}»`);
+    : (isDefault ? 'Plantilla semanal · sin guardar' : `Borrador «${CalState.name}»`);
   const extra = totalDishes > filledSlots ? ` · ${totalDishes} recetas` : '';
   // No repetir "sin guardar" cuando el propio estado ya es "Menú sin guardar"
   const dirty = (CalState.modified && !isDefault) ? ' · sin guardar' : '';
@@ -124,10 +124,34 @@ function renderCalendar(){
   if(!grid) return;
   renderRestrictionsBanner();
   const isMobile = window.matchMedia('(max-width:760px)').matches;
-  grid.innerHTML = isMobile ? renderCalMobile() : renderCalDesktop();
+  grid.innerHTML = calIntroHtml() + (isMobile ? renderCalMobile() : renderCalDesktop());
+  bindCalIntro();
   bindCalCells();
   renderGuide();
   updateCalSub();
+}
+
+/* ── Estado vacío: invita al asistente en vez de dejar la parrilla muda ── */
+function calIsEmpty(){
+  if(!CalState || !CalState.data) return false;
+  return Object.values(CalState.data).every(day => Object.values(day).every(arr => !(arr||[]).length));
+}
+function calIntroHtml(){
+  if(!calIsEmpty()) return '';
+  return `<div class="cal-intro">
+    <div class="ci-ico">🧭</div>
+    <div class="ci-txt"><strong>¿Empezamos?</strong> El Asistente te monta la semana preguntándote qué te apetece. También puedes generarla de golpe, o tocar cualquier franja y elegir a mano.</div>
+    <div class="ci-acts">
+      <button class="cal-btn primary" id="calIntroAsst">🧭 Abrir asistente</button>
+      <button class="cal-btn" id="calIntroGen">✨ Generar menú</button>
+    </div>
+  </div>`;
+}
+function bindCalIntro(){
+  const a = document.getElementById('calIntroAsst');
+  if(a) a.addEventListener('click', ()=>{ if(typeof window.openMenuAssistant==='function') window.openMenuAssistant(); });
+  const g = document.getElementById('calIntroGen');
+  if(g) g.addEventListener('click', ()=> openAutofillOptions('new'));
 }
 
 function renderRestrictionsBanner(){
@@ -573,6 +597,7 @@ function renderPicker(){
         }).join('') : `<div class="picker-empty">Sin recetas para “${escAttr(_picker.search)}”</div>`)}
       </div>
     </div>
+    <div class="picker-tip">💡 🎲 Sugerir propone una receta que encaja con tu semana · la tecla Supr sobre una franja del calendario la vacía</div>
     <div class="form-actions">
       <button class="btn-sec" id="pickerNew">＋ Nueva receta</button>
       <button class="btn-sec" id="pickerSuggest" title="Rellena esta franja con una sugerencia del generador, teniendo en cuenta el resto de la semana">🎲 Sugerir</button>
@@ -733,9 +758,12 @@ function renderGuide(){
         <h3>Guía semanal · cantidades recomendadas</h3>
         <span class="gsub">Legumbre, pescado, carne, verdura, fruta, huevo, frutos secos, lácteos…</span>
         <span class="gpill ${warnings?'warn':'ok'}">${warnings?warnings+' aviso'+(warnings>1?'s':''):'todo en orden'}</span>
+        ${typeof window.openNutriReco==='function' ? `<button class="guide-link" id="guideReco" title="De dónde salen estas cantidades y cómo es un menú ideal">🥗 Ver recomendaciones y menú ideal →</button>` : ''}
       </div>
       <div class="guide-grid">${items}</div>
     </div>`;
+  const gr = document.getElementById('guideReco');
+  if(gr) gr.addEventListener('click', ()=> window.openNutriReco());
 }
 
 function renderMacroAvg(avg){

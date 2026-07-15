@@ -288,16 +288,12 @@
 
   const TUTORIALS = {
     nutri: { sec:'Nutrición', steps:[
-      {ico:'🥗', t:'Tu menú, a tu medida', x:'En Nutrición construyes el menú de cada persona según sus objetivos de kcal y macros. Cada receta se escala automáticamente a quien la coma, así que un mismo plato sirve para todos.'},
-      {ico:'👥', t:'Elige a quién ves', x:'Con los botones de persona (arriba) cambias entre cada comensal o ves a todos juntos. Las cantidades y los totales se recalculan al instante.'},
-      {ico:'📖', t:'Catálogo de recetas', x:'Las recetas están por categoría (desayuno, comida, merienda, cena). Toca el título de una categoría para desplegarla y toca una receta para ver su ficha.'},
-      {ico:'🔎', t:'Busca y filtra', x:'Usa el buscador y el botón ⚙ Filtros para acotar por dieta (sin gluten, vegetariano…) o tipo de alimento. La ★ marca tus favoritas.'},
-      {ico:'🧭', t:'Asistente de menú', x:'En Plan Semanal, el 🧭 Asistente te guía paso a paso: eliges las recetas que te apetecen y él reparte la semana. Te avisa en rojo si te pasas de alguna recomendación, pero nunca te lo impide.'},
-      {ico:'✨', t:'Plan Semanal', x:'Planifica la semana a mano o con ✨ Autocompletar (rellena solo las franjas vacías). En ⋯ Más acciones tienes Generar de cero, Con mis favoritos, Plantilla base, PDF y lista de la compra.'},
+      {ico:'🥗', t:'Tu menú, a tu medida', x:'En Nutrición construyes el menú según los objetivos de kcal y macros de cada persona. Con los botones de arriba cambias de comensal y cada receta se escala sola a quien la coma.'},
+      {ico:'📖', t:'Catálogo de recetas', x:'Las recetas van por categoría (desayuno, comida, merienda, cena). Toca una para ver su ficha, usa el buscador o ⚙ Filtros para acotar, y marca con la ★ tus favoritas.'},
+      {ico:'✨', t:'Plan Semanal', x:'Monta tu semana a mano, con el 🧭 Asistente (eliges lo que te apetece y él la reparte) o con ✨ Autocompletar. En ⋯ Más acciones tienes más formas de generar, el PDF y la lista de la compra.'},
       {ico:'🍽️', t:'Mi día', x:'El botón 📋 flotante abre "Mi día": añade platos o alimentos sueltos y comprueba cómo va tu balance de kcal y macros de hoy.'},
-      {ico:'✚', t:'Crea tus recetas', x:'En Usuarios → Mis recetas añades las tuyas con ingredientes y cantidades, o generas un prompt para pedírselas a una IA y pegar el resultado.'},
-      {ico:'🌍', t:'Cocinas (paquetes)', x:'En Usuarios → Configuración activas paquetes de cocina (italiana, etc.) para que aparezcan más recetas, o instalas los tuyos desde un archivo.'},
-      {ico:'💾', t:'Todo se guarda solo', x:'Tus cambios se guardan en el dispositivo automáticamente (copia cada 5 min). En Usuarios → Copia de datos exportas o restauras todo.'}
+      {ico:'☰', t:'Todo lo demás, en el menú', x:'En el menú ☰ (arriba a la izquierda) está el resto: Recomendaciones, Medidas de alimentos, Teoría, Bibliografía… y también Usuarios (tus recetas y alimentos propios) y Configuración (cocinas, copias de datos).'},
+      {ico:'💾', t:'Todo se guarda solo', x:'Tus cambios se guardan en el dispositivo automáticamente (copia cada 5 min). En ☰ → Configuración → Copia de datos exportas o restauras todo.'}
     ]},
     sport: { sec:'Deporte', steps:[
       {ico:'🏋️', t:'Tu entrenamiento', x:'En Deporte gestionas ejercicios, sesiones y tu plan de Entrenamientos. El gasto calórico se conecta con tu balance de Nutrición en la Agenda.'},
@@ -313,6 +309,20 @@
       {ico:'🔀', t:'Accesos rápidos', x:'La fila "Ir a:" te lleva en un toque a Plan Semanal, Entrenamientos o Mente, sin pasar por el menú. También están en esas páginas para volver.'},
       {ico:'📌', t:'Aplica tu plantilla', x:'Vuelca tu plantilla semanal a 7 fechas concretas. Quedan como copias editables por día, sin tocar la plantilla original.'},
       {ico:'🍽️', t:'Detalle por día', x:'Toca cualquier comida o entreno para ver su ficha completa con ingredientes, macros o ejercicios.'}
+    ]},
+    trucos: { sec:'Trucos y atajos', hd:'Ayuda', steps:[
+      {ico:'⌨️', t:'Atajos del Plan Semanal', x:'Con una franja seleccionada: Enter o Espacio abre el selector de recetas y Supr la vacía. Dentro del selector, 🎲 Sugerir propone una receta que encaja con el resto de tu semana.'},
+      {ico:'🖱️', t:'Cerrar sin buscar la ✕', x:'Casi todos los diálogos se cierran pulsando Esc o tocando fuera del panel.'},
+      {ico:'👆', t:'Desliza en los tutoriales', x:'En estos carruseles puedes pasar de paso deslizando el dedo, o con las flechas ← → del teclado.'},
+      {ico:'📖', t:'Pliega el catálogo', x:'Toca el título de una categoría (Desayuno, Comida…) para plegarla o desplegarla y moverte más rápido.'},
+      {ico:'⭐', t:'Las favoritas mandan', x:'Marca recetas con la ★ y podrás generar menús solo con ellas, o darles prioridad, desde ⋯ Más acciones del Plan Semanal.'},
+      {ico:'✎', t:'Renombra tus planes', x:'El lápiz ✎ junto al título del Plan Semanal o de Entrenamientos edita su nombre antes de guardarlo.'}
+    ]},
+    news: { sec:'Julio 2026', hd:'Novedades', steps:[
+      {ico:'🎛️', t:'Generador de menús con opciones', x:'El diálogo ✨ Generar menú ahora permite acotar a cocinas concretas, priorizar tus favoritos, usar solo recetas rápidas entre semana y activar el modo tupper.'},
+      {ico:'🍳', t:'Más recetas caseras', x:'El pack de cocina casera suma desayunos de tostadas variadas y una docena de meriendas nuevas.'},
+      {ico:'🗓️', t:'Vista mensual', x:'Asigna un menú guardado a cada semana del mes, desde ⋯ Más acciones del Plan Semanal.'},
+      {ico:'❔', t:'Nuevo centro de ayuda', x:'El botón ❔ ahora reúne los tutoriales de todas las secciones, los trucos y estas novedades.'}
     ]},
     mente: { sec:'Mente', steps:[
       {ico:'🧠', t:'Mente en Forma', x:'Esta sección cuida tu bienestar mientras haces la dieta: estado de ánimo, hábitos y herramientas psicológicas. Funciona dentro de la misma app, con su barra de pestañas abajo.'},
@@ -341,7 +351,7 @@
     back.className = 'pn-tut-back';
     back.innerHTML = `<div class="pn-tut" role="dialog" aria-modal="true">
       <div class="pn-tut-head">
-        <span class="pn-tut-sec">Tutorial · ${esc(tut.sec)}</span>
+        <span class="pn-tut-sec">${esc(tut.hd||'Tutorial')} · ${esc(tut.sec)}</span>
         <button class="pn-tut-x" data-act="close" aria-label="Cerrar">✕</button>
       </div>
       <div class="pn-tut-body">
@@ -481,7 +491,7 @@
       (Google Fonts); si estás sin conexión, la app funciona igual con la fuente del
       sistema.</li>
       <li>Puedes <strong>exportar una copia</strong> de todos tus datos y volver a
-      importarla desde <em>Configuración → Copia de datos</em>.</li>
+      importarla desde <em>menú ☰ → Configuración → Copia de datos</em>.</li>
       <li>Puedes <strong>borrar todo</strong> de este dispositivo en cualquier momento
       desde esa misma pantalla; la eliminación es inmediata y no se puede deshacer.</li>
     </ul>
@@ -552,11 +562,51 @@
   window.pnLegalPage = pnLegalPage;
   if(typeof AppPage!=='undefined'){ AppPage.register('infolegal', pnInfoLegal); AppPage.register('descargo', pnDescargo); }
 
-  /* Botón ❔ del header → tutorial de la sección activa.
-     Además, la PRIMERA vez que se entra a una sección, se abre solo. */
+  /* ── Novedades por versión: clave manual, se sube al añadir funciones ── */
+  const NEWS_KEY = '2026-07';
+  function newsSeen(){ try{ return localStorage.getItem('mnut:news-seen')===NEWS_KEY; }catch(e){ return true; } }
+  function markNewsSeen(){ try{ localStorage.setItem('mnut:news-seen', NEWS_KEY); }catch(e){} }
+  function updateHelpDot(){
+    const unseen = !newsSeen();
+    const d = document.getElementById('helpDot'); if(d) d.hidden = !unseen;
+    const m = document.querySelector('#helpMenu [data-news] .mi-dot'); if(m) m.hidden = !unseen;
+  }
+
+  /* Botón ❔ del header → centro de ayuda: tutoriales de todas las
+     secciones, trucos, novedades y páginas de aprendizaje.
+     Además, la PRIMERA vez que se entra a una sección, su tutorial se abre solo. */
+  function wireHelpMenu(){
+    const btn = document.getElementById('helpBtn');
+    const menu = document.getElementById('helpMenu');
+    if(!btn) return;
+    if(!menu){ btn.addEventListener('click', ()=> pnTutorial(currentSection())); return; }
+    const close = ()=>{ menu.hidden = true; btn.setAttribute('aria-expanded','false'); };
+    btn.addEventListener('click', e=>{
+      e.stopPropagation();
+      if(!menu.hidden){ close(); return; }
+      const cur = currentSection();
+      menu.querySelectorAll('[data-tut]').forEach(m=> m.classList.toggle('on', m.dataset.tut===cur));
+      menu.hidden = false; btn.setAttribute('aria-expanded','true');
+    });
+    menu.addEventListener('click', e=>{
+      const it = e.target.closest('.sec-mi'); if(!it) return;
+      close();
+      if(it.dataset.tut){ pnTutorial(it.dataset.tut); return; }
+      if(it.hasAttribute('data-news')){ markNewsSeen(); updateHelpDot(); pnTutorial('news'); return; }
+      const pg = it.dataset.page;
+      if(pg==='reco' && typeof window.openNutriReco==='function') return void window.openNutriReco();
+      if(pg==='measures' && typeof window.openFoodMeasures==='function') return void window.openFoodMeasures();
+      if(pg==='teoria' && typeof window.openTeoria==='function') return void window.openTeoria();
+      if(pg==='biblio' && typeof window.openBibliografia==='function') return void window.openBibliografia();
+    });
+    document.addEventListener('click', e=>{ if(!menu.hidden && !menu.contains(e.target) && e.target!==btn) close(); });
+    // Primer uso de la app: las novedades pasadas no son noticia
+    if(!newsSeen() && window.pnOnboarding && !window.pnOnboarding.seen()) markNewsSeen();
+    updateHelpDot();
+  }
+
   document.addEventListener('DOMContentLoaded', ()=>{
-    const help = document.getElementById('helpBtn');
-    if(help) help.addEventListener('click', ()=> pnTutorial(currentSection()));
+    wireHelpMenu();
     const info = document.getElementById('infoLegalBtn');
     if(info) info.addEventListener('click', pnInfoLegal);
     // Tutorial de Nutrición la primera vez — pero NO si aún está el onboarding

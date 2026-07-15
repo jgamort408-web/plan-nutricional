@@ -221,6 +221,20 @@ body.sec-sport.spv-sess .hdr-gen{display:flex}
 .sec-mi:hover{background:rgba(var(--ink-rgb,44,31,14),.06)}
 .sec-mi.on{background:color-mix(in srgb,var(--accent) 15%,transparent);color:var(--accent);font-weight:600}
 .sec-menu-div{height:1px;background:rgba(var(--ink-rgb,44,31,14),.1);margin:5px 6px}
+.help-wrap .sec-menu{left:auto;right:0}
+.cal-intro{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--white);border:1.5px dashed rgba(var(--ink-rgb,44,31,14),.18);border-radius:var(--r);padding:14px 16px;margin-bottom:12px}
+.cal-intro .ci-ico{font-size:1.7rem;line-height:1}
+.cal-intro .ci-txt{flex:1 1 240px;font-family:'Lora',serif;font-size:.9rem;line-height:1.5;color:var(--ink-70,rgba(var(--ink-rgb,44,31,14),.78))}
+.cal-intro .ci-acts{display:flex;gap:7px;flex-wrap:wrap}
+.m-measures-link{display:block;border:none;background:none;color:var(--terra,#B5603A);font-family:'Lora',serif;font-size:.84rem;padding:6px 0 0;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.m-measures-link:hover{color:var(--terra-d,#8f4526)}
+.guide-link{border:none;background:none;color:var(--terra,#B5603A);font-family:'Lora',serif;font-size:.82rem;padding:0;cursor:pointer;text-decoration:underline;text-underline-offset:3px;margin-left:auto}
+.guide-link:hover{color:var(--terra-d,#8f4526)}
+.picker-tip{font-family:'Lora',serif;font-size:.76rem;color:var(--ink-50);padding:6px 18px 0;line-height:1.4}
+#helpBtn{position:relative}
+.help-dot{position:absolute;top:3px;right:3px;width:9px;height:9px;border-radius:50%;background:var(--rose,#C0584A);border:2px solid var(--white,#FFFDF7)}
+.sec-mi .mi-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--rose,#C0584A);margin-left:auto}
+.sec-menu-lbl{font-family:'DM Mono',monospace;font-size:.56rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-50);padding:7px 13px 3px}
 /* Botón único que cicla entre persona(s) */
 .ptoggle{margin-left:auto;display:flex;align-items:center;background:none;padding:0;border-radius:0;overflow:visible;max-width:none}
 .ptoggle .pcycle{flex:0 0 auto;width:36px;height:36px;padding:0;display:inline-flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,.25);background:var(--gold);color:var(--ink);font-family:'DM Mono',monospace;font-size:.82rem;font-weight:700;border-radius:50%;cursor:pointer;letter-spacing:0;line-height:1;transition:.18s}
@@ -726,8 +740,13 @@ main[data-vm="small"] .dish.add-card{min-height:62px;flex-direction:row}
 .cal-title-edit:hover{background:var(--cream);color:var(--terra)}
 .cal-title small{display:block;font-family:'DM Mono',monospace;font-size:.6rem;color:var(--ink-50);letter-spacing:.08em;text-transform:uppercase;margin-top:2px;font-weight:400}
 .cal-tools{display:flex;gap:7px;flex-wrap:wrap}
-.cal-more{display:flex;gap:7px;flex-wrap:wrap;flex-basis:100%;margin-top:2px}
+.cal-more{display:flex;flex-direction:column;gap:4px;flex-basis:100%;margin-top:4px;background:var(--white);border:1px solid rgba(var(--ink-rgb,44,31,14),.1);border-radius:var(--r-sm);padding:10px 12px;box-shadow:0 10px 30px rgba(var(--ink-rgb,44,31,14),.08)}
 .cal-more.hidden{display:none}
+.cal-more .cm-lbl{font-family:'DM Mono',monospace;font-size:.56rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-50);margin:7px 0 2px}
+.cal-more .cm-lbl:first-child{margin-top:0}
+.cal-more .cm-row{display:flex;align-items:center;gap:10px;min-width:0}
+.cal-more .cm-row .cal-btn{flex:0 0 auto;min-width:176px;justify-content:flex-start}
+.cal-more .cm-hint{font-family:'Lora',serif;font-size:.78rem;color:var(--ink-50);line-height:1.3;min-width:0}
 #calMoreBtn[aria-expanded="true"]{border-color:var(--terra);color:var(--terra);background:var(--cream)}
 .cal-btn{border:1.5px solid rgba(var(--ink-rgb,44,31,14),.15);background:var(--white);color:var(--ink);font-family:'DM Mono',monospace;font-size:.66rem;text-transform:uppercase;letter-spacing:.06em;padding:8px 12px;border-radius:var(--r-sm);cursor:pointer;transition:.18s;font-weight:500;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
 .cal-btn:hover{border-color:var(--terra);color:var(--terra)}
@@ -1415,8 +1434,10 @@ main[data-vm="small"] .dish.add-card{min-height:62px;flex-direction:row}
   .cal-tools{order:2;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:5px}
   .cal-tools .cal-btn{padding:8px 9px;font-size:.6rem;letter-spacing:.04em;min-height:38px;gap:4px;line-height:1.2;text-align:center;justify-content:center}
   .cal-tools .cal-btn.primary{grid-column:span 2}
-  .cal-tools .cal-more{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:0}
+  .cal-tools .cal-more{grid-column:1/-1;display:flex;flex-direction:column;gap:4px;margin-top:0}
   .cal-tools .cal-more.hidden{display:none}
+  .cal-tools .cal-more .cm-row .cal-btn{min-width:148px;justify-content:flex-start;text-align:left}
+  .cal-tools .cal-more .cm-hint{font-size:.72rem}
 
   /* RESTRICTIONS BANNER */
   .restr-banner{flex-direction:column;gap:8px;padding:11px 12px}
@@ -2340,7 +2361,25 @@ main[data-vm="small"] .dish-incart{font-size:.5rem;padding:3px 8px}
     </div>
     <button class="icon-btn hdr-ctx hdr-gen" id="hdrSportGen" title="Generar sesión a medida" aria-label="Generar sesión">🎲</button>
     <button class="icon-btn hdr-ctx hdr-add" id="hdrSportAdd" title="Añadir" aria-label="Añadir">✚</button>
-    <button class="icon-btn" id="helpBtn" title="Tutorial de esta sección" aria-label="Tutorial">❔</button>
+    <div class="sec-menu-wrap help-wrap">
+      <button class="icon-btn" id="helpBtn" title="Ayuda: tutoriales, trucos y novedades" aria-label="Ayuda" aria-haspopup="true" aria-expanded="false">❔<span class="help-dot" id="helpDot" hidden></span></button>
+      <div class="sec-menu" id="helpMenu" role="menu" hidden>
+        <div class="sec-menu-lbl">Tutoriales</div>
+        <button class="sec-mi" data-tut="nutri" role="menuitem">🥗 Nutrición</button>
+        <button class="sec-mi" data-tut="sport" role="menuitem">🏋️ Deporte</button>
+        <button class="sec-mi" data-tut="week" role="menuitem">📆 Agenda</button>
+        <button class="sec-mi" data-tut="mente" role="menuitem">🧠 Mente</button>
+        <div class="sec-menu-div"></div>
+        <button class="sec-mi" data-tut="trucos" role="menuitem">💡 Trucos y atajos</button>
+        <button class="sec-mi" data-news role="menuitem">✨ Novedades <span class="mi-dot" hidden></span></button>
+        <div class="sec-menu-div"></div>
+        <div class="sec-menu-lbl">Aprender</div>
+        <button class="sec-mi" data-page="reco" role="menuitem">🥗 Recomendaciones</button>
+        <button class="sec-mi" data-page="measures" role="menuitem">📏 Medidas de alimentos</button>
+        <button class="sec-mi" data-page="teoria" role="menuitem">📖 Teoría</button>
+        <button class="sec-mi" data-page="biblio" role="menuitem">📚 Bibliografía</button>
+      </div>
+    </div>
   </div>
   <div class="sec-switch" role="tablist" aria-label="Sección">
     <button class="sec-btn on" data-sec="nutri" role="tab">🥗 Nutrición</button>
@@ -2372,19 +2411,22 @@ main[data-vm="small"] .dish-incart{font-size:.5rem;padding:3px 8px}
 <div id="view-cal" class="hidden">
   <div class="cal-wrap">
     <div class="cal-toolbar">
-      <div class="cal-title" id="calTitle">Plan Semanal<small id="calSub">Semana sin guardar</small><button class="cal-title-edit" id="calRename" title="Editar nombre del menú" aria-label="Editar nombre del menú">✎</button></div>
+      <div class="cal-title" id="calTitle">Plan Semanal<small id="calSub">Plantilla semanal · sin guardar</small><button class="cal-title-edit" id="calRename" title="Editar nombre del menú" aria-label="Editar nombre del menú">✎</button></div>
       <div class="cal-tools">
         <button class="cal-btn primary" id="calAssistant" title="Crea tu menú paso a paso eligiendo lo que te apetece">🧭 Asistente de menú</button>
         <button class="cal-btn" id="calAutoFill" title="Autocompletar las franjas vacías">✨ Autocompletar</button>
         <button class="cal-btn" id="calMoreBtn" title="Más acciones" aria-expanded="false" aria-controls="calMore">⋯ Más acciones</button>
         <div class="cal-more hidden" id="calMore">
-          <button class="cal-btn" id="calMonthly" title="Vista mensual: asigna un menú guardado a cada semana">🗓️ Vista mensual</button>
-          <button class="cal-btn" id="calAutoNew" title="Generar un menú nuevo desde cero">🔄 Generar de cero</button>
-          <button class="cal-btn" id="calAutoFav" title="Generar un menú centrado en tus recetas favoritas">⭐ Con mis favoritos</button>
-          <button class="cal-btn" id="calLoadTpl" title="Aplicar la plantilla semanal base (la del PDF original)">📋 Plantilla base</button>
-          <button class="cal-btn ghost" id="calClear">🧹 Vaciar</button>
-          <button class="cal-btn" id="calExportPdf" title="Exportar el menú como PDF">📄 PDF del menú</button>
-          <button class="cal-btn" id="calShopList" title="Lista de la compra de la semana">🛒 Lista compra</button>
+          <span class="cm-lbl">Generar</span>
+          <div class="cm-row"><button class="cal-btn" id="calAutoNew" title="Generar un menú nuevo desde cero">🔄 Generar de cero</button><span class="cm-hint">Borra el menú actual y genera la semana completa</span></div>
+          <div class="cm-row"><button class="cal-btn" id="calAutoFav" title="Generar un menú centrado en tus recetas favoritas">⭐ Con mis favoritos</button><span class="cm-hint">Genera usando solo tus recetas marcadas con ★</span></div>
+          <div class="cm-row"><button class="cal-btn" id="calLoadTpl" title="Aplicar la plantilla semanal base (la del PDF original)">📋 Plantilla base</button><span class="cm-hint">Aplica la plantilla semanal original (la del PDF)</span></div>
+          <span class="cm-lbl">Vistas y exportar</span>
+          <div class="cm-row"><button class="cal-btn" id="calMonthly" title="Vista mensual: asigna un menú guardado a cada semana">🗓️ Vista mensual</button><span class="cm-hint">Asigna un menú guardado a cada semana del mes</span></div>
+          <div class="cm-row"><button class="cal-btn" id="calExportPdf" title="Exportar el menú como PDF">📄 PDF del menú</button><span class="cm-hint">Descarga esta semana como documento</span></div>
+          <div class="cm-row"><button class="cal-btn" id="calShopList" title="Lista de la compra de la semana">🛒 Lista compra</button><span class="cm-hint">La compra de la semana, agrupada por secciones del súper</span></div>
+          <span class="cm-lbl">Limpiar</span>
+          <div class="cm-row"><button class="cal-btn ghost" id="calClear">🧹 Vaciar</button><span class="cm-hint">Deja toda la semana en blanco</span></div>
           <button class="cal-btn" id="calExportJson" title="Exportar menú como JSON" style="display:none" hidden>↧ JSON</button>
         </div>
         <button class="cal-btn primary" id="calSave">💾 Guardar menú</button>
@@ -2441,12 +2483,15 @@ main[data-vm="small"] .dish-incart{font-size:.5rem;padding:3px 8px}
         <button class="cal-btn" id="spCalLib" title="Biblioteca de planes guardados">📂 Guardados</button>
         <button class="cal-btn" id="spCalMoreBtn" title="Más acciones" aria-expanded="false" aria-controls="spCalMore">⋯ Más acciones</button>
         <div class="cal-more hidden" id="spCalMore">
-          <button class="cal-btn" id="spCalAuto" title="Plan automático: genera sesiones distintas por día">🧠 Plan automático</button>
-          <button class="cal-btn" id="spCalCadence" title="Generar el plan por cadencia (días · semanas · meses)">⚙ Por cadencia</button>
-          <button class="cal-btn" id="spCalGen" title="Regenerar con la última cadencia">🔄 Regenerar</button>
-          <button class="cal-btn ghost" id="spCalClear">🧹 Vaciar</button>
-          <button class="cal-btn" id="spCalPdf" title="Exportar a PDF detallado">📄 PDF</button>
-          <button class="cal-btn" id="spCalJson" title="Exportar el plan como JSON">↧ JSON</button>
+          <span class="cm-lbl">Generar</span>
+          <div class="cm-row"><button class="cal-btn" id="spCalAuto" title="Plan automático: genera sesiones distintas por día">🧠 Plan automático</button><span class="cm-hint">Genera sesiones distintas para cada día</span></div>
+          <div class="cm-row"><button class="cal-btn" id="spCalCadence" title="Generar el plan por cadencia (días · semanas · meses)">⚙ Por cadencia</button><span class="cm-hint">Repite sesiones según un patrón de días o semanas</span></div>
+          <div class="cm-row"><button class="cal-btn" id="spCalGen" title="Regenerar con la última cadencia">🔄 Regenerar</button><span class="cm-hint">Vuelve a generar con la última cadencia usada</span></div>
+          <span class="cm-lbl">Exportar</span>
+          <div class="cm-row"><button class="cal-btn" id="spCalPdf" title="Exportar a PDF detallado">📄 PDF</button><span class="cm-hint">Descarga el plan detallado como documento</span></div>
+          <div class="cm-row"><button class="cal-btn" id="spCalJson" title="Exportar el plan como JSON">↧ JSON</button><span class="cm-hint">Exporta el plan como archivo para importarlo después</span></div>
+          <span class="cm-lbl">Limpiar</span>
+          <div class="cm-row"><button class="cal-btn ghost" id="spCalClear">🧹 Vaciar</button><span class="cm-hint">Borra todas las fechas del plan</span></div>
         </div>
       </div>
     </div>
@@ -2577,7 +2622,7 @@ main[data-vm="small"] .dish-incart{font-size:.5rem;padding:3px 8px}
 <!-- Núcleo de la app: bundle generado por build.mjs (30 scripts en 1).
      Para volver a los scripts sueltos en desarrollo, sustituye esta línea
      por los <script src> individuales. Regenera con: node build.mjs -->
-<script src="app.min.js?v=8c966b35"></script>
+<script src="app.min.js?v=fd0a40ba"></script>
 <script>
 /* ── Carga diferida del "pack de contenido" · Teoría + Bibliografía ──
    Son ~364 KB de texto que la mayoría de sesiones no abren. No se

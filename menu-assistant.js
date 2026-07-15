@@ -181,7 +181,7 @@
         <span class="masst-card-warn">⚠</span>
         <span class="masst-card-chk">${on?'✓':'＋'}</span>
       </button>`;
-    }).join('') : `<div class="masst-empty">No hay recetas disponibles aquí con las restricciones actuales. Crea recetas o ajusta restricciones en Usuarios.</div>`;
+    }).join('') : `<div class="masst-empty">No hay recetas disponibles aquí con las restricciones actuales. Crea recetas o ajusta restricciones en ☰ → Usuarios.</div>`;
 
     const nSel = selSet.size;
     const isLast = _i === _steps.length-1;
