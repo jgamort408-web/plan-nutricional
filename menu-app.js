@@ -1514,7 +1514,8 @@ function renderTabbar(section){
     tabs = [
       {ico:'💪', lbl:'Ejercicios',    on:sv==='ex',   fn:()=>showSportView('ex')},
       {ico:'📋', lbl:'Sesiones',      on:sv==='sess', fn:()=>showSportView('sess')},
-      {ico:'🗓️', lbl:'Entrenamientos',on:sv==='scal', fn:()=>showSportView('scal')}
+      {ico:'🗓️', lbl:'Entrenos',     on:sv==='scal', fn:()=>showSportView('scal')},
+      {ico:'📈', lbl:'Progreso',      on:sv==='prog', fn:()=>showSportView('prog')}
     ];
   } // week y mente: sin tabbar (se oculta por CSS / tabs vacíos)
   if(!tabs.length){ tb.style.display = 'none'; tb.innerHTML = ''; document.body.classList.add('no-tabbar'); return; }
