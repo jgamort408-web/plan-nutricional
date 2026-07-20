@@ -1322,24 +1322,6 @@ window.EXTRA_EXERCISES = {
   "cues": "Escápulas estables, pecho alto, muñecas firmes y controla la bajada antes de empujar.",
   "pat": "empuje_h"
  },
- "sf_flexiones": {
-  "name": "Flexiones",
-  "type": "fuerza",
-  "muscles": [
-   "pecho",
-   "triceps",
-   "hombro"
-  ],
-  "met": 8,
-  "equip": "Peso corporal",
-  "mode": "reps",
-  "sets": 3,
-  "reps": 12,
-  "dur": 0,
-  "rest": 75,
-  "cues": "Escápulas estables, pecho alto, muñecas firmes y controla la bajada antes de empujar.",
-  "pat": "empuje_h"
- },
  "sf_extension_de_triceps_tumbado": {
   "name": "Extensión de tríceps tumbado",
   "type": "fuerza",
@@ -1590,22 +1572,6 @@ window.EXTRA_EXERCISES = {
   "cues": "Sube completo, pausa arriba, baja lento y mantén el tobillo alineado.",
   "pat": "accesorio"
  },
- "sf_elevacion_de_gemelos_de_pie": {
-  "name": "Elevación de gemelos de pie",
-  "type": "fuerza",
-  "muscles": [
-   "gemelo"
-  ],
-  "met": 4,
-  "equip": "Peso corporal",
-  "mode": "reps",
-  "sets": 3,
-  "reps": 15,
-  "dur": 0,
-  "rest": 45,
-  "cues": "Sube completo, pausa arriba, baja lento y mantén el tobillo alineado.",
-  "pat": "accesorio"
- },
  "sf_remo_con_mancuerna_a_una_mano": {
   "name": "Remo con mancuerna a una mano",
   "type": "fuerza",
@@ -1677,24 +1643,6 @@ window.EXTRA_EXERCISES = {
   "rest": 75,
   "cues": "Inicia con escápulas, tira con codos, pecho estable y evita encoger hombros.",
   "pat": "traccion_v"
- },
- "sf_remo_con_barra": {
-  "name": "Remo con barra",
-  "type": "fuerza",
-  "muscles": [
-   "espalda",
-   "biceps",
-   "core"
-  ],
-  "met": 5.5,
-  "equip": "Barra",
-  "mode": "reps",
-  "sets": 3,
-  "reps": 12,
-  "dur": 0,
-  "rest": 75,
-  "cues": "Inicia con escápulas, tira con codos, pecho estable y evita encoger hombros.",
-  "pat": "traccion_h"
  },
  "sf_jalon_tras_nuca": {
   "name": "Jalón tras nuca",
@@ -2552,24 +2500,6 @@ window.EXTRA_EXERCISES = {
   "cues": "Costillas abajo, abdomen firme, controla la carga y evita elevar los hombros hacia las orejas.",
   "pat": "empuje_v"
  },
- "sf_press_militar": {
-  "name": "Press Militar",
-  "type": "fuerza",
-  "muscles": [
-   "hombro",
-   "triceps",
-   "core"
-  ],
-  "met": 5,
-  "equip": "Barra",
-  "mode": "reps",
-  "sets": 3,
-  "reps": 12,
-  "dur": 0,
-  "rest": 75,
-  "cues": "Costillas abajo, abdomen firme, controla la carga y evita elevar los hombros hacia las orejas.",
-  "pat": "empuje_v"
- },
  "sf_elevaciones_frontales_con_cable_a_una_mano": {
   "name": "Elevaciones frontales con cable a una mano",
   "type": "fuerza",
@@ -2874,25 +2804,6 @@ window.EXTRA_EXERCISES = {
   "cues": "Mantén rodillas alineadas, abdomen activo, controla la bajada y empuja el suelo con estabilidad.",
   "pat": "sentadilla"
  },
- "sf_sentadilla_frontal": {
-  "name": "Sentadilla frontal",
-  "type": "fuerza",
-  "muscles": [
-   "cuadriceps",
-   "gluteo",
-   "isquios",
-   "core"
-  ],
-  "met": 5.5,
-  "equip": "Barra",
-  "mode": "reps",
-  "sets": 3,
-  "reps": 12,
-  "dur": 0,
-  "rest": 75,
-  "cues": "Mantén rodillas alineadas, abdomen activo, controla la bajada y empuja el suelo con estabilidad.",
-  "pat": "sentadilla"
- },
  "sf_peso_muerto_rumano_piernas_rectas_con_mancuernas": {
   "name": "Peso muerto rumano (piernas rectas) con mancuernas",
   "type": "fuerza",
@@ -2969,27 +2880,6 @@ window.EXTRA_EXERCISES = {
   "cues": "Mantén rodillas alineadas, abdomen activo, controla la bajada y empuja el suelo con estabilidad.",
   "pat": "sentadilla"
  },
- "sf_burpees": {
-  "name": "Burpees",
-  "type": "fuerza",
-  "muscles": [
-   "fullbody",
-   "cardio",
-   "pecho",
-   "cuadriceps",
-   "gluteo",
-   "core"
-  ],
-  "met": 8,
-  "equip": "Peso corporal",
-  "mode": "reps",
-  "sets": 3,
-  "reps": 12,
-  "dur": 0,
-  "rest": 75,
-  "cues": "Mantén rodillas alineadas, abdomen activo, controla la bajada y empuja el suelo con estabilidad.",
-  "pat": "condicionamiento"
- },
  "sf_sentadillas_con_propio_peso": {
   "name": "Sentadillas con propio peso",
   "type": "fuerza",
@@ -3000,7 +2890,7 @@ window.EXTRA_EXERCISES = {
    "core"
   ],
   "met": 5.5,
-  "equip": "Barra",
+  "equip": "Peso corporal",
   "mode": "reps",
   "sets": 3,
   "reps": 12,
@@ -3019,7 +2909,7 @@ window.EXTRA_EXERCISES = {
    "core"
   ],
   "met": 5.5,
-  "equip": "Barra",
+  "equip": "Peso corporal",
   "mode": "reps",
   "sets": 3,
   "reps": 12,
@@ -3076,7 +2966,7 @@ window.EXTRA_EXERCISES = {
    "core"
   ],
   "met": 5.5,
-  "equip": "Barra",
+  "equip": "Peso corporal",
   "mode": "reps",
   "sets": 3,
   "reps": 12,
@@ -5459,24 +5349,6 @@ window.EXTRA_EXERCISES = {
   "dur": 45,
   "rest": 60,
   "cues": "Disco en la zona lumbar alta. Glúteo y abdomen apretados; cadera ni alta ni hundida.",
-  "pat": "core"
- },
- "gim_plancha_lateral": {
-  "name": "Plancha lateral",
-  "type": "core",
-  "muscles": [
-   "core",
-   "gluteo",
-   "hombro"
-  ],
-  "met": 4,
-  "equip": "Esterilla",
-  "mode": "time",
-  "sets": 3,
-  "reps": 0,
-  "dur": 40,
-  "rest": 45,
-  "cues": "Cadera alta y alineada. Trabaja el cuadrado lumbar, clave para la estabilidad lateral.",
   "pat": "core"
  },
  "gim_hollow_hold": {

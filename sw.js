@@ -8,10 +8,10 @@
    cambia el código, cambia el sw.js → el navegador instala un SW nuevo,
    purga la caché vieja y los clientes reciben la versión actual.
    No editar a mano. */
-const CACHE = 'plan-nutri-5f5e3304';
+const CACHE = 'plan-nutri-ebd71ce3';
 const SHELL = [
   'Menu%20Nutricional.html',
-  'app.min.js?v=5f5e3304',                       // núcleo (30 scripts) generado por build.mjs
+  'app.min.js?v=ebd71ce3',                       // núcleo (30 scripts) generado por build.mjs
   'menu-biblio.js','menu-teoria.js',  // carga diferida (se piden bajo demanda; en caché para offline)
   'psicodiet.html',
   'manifest.webmanifest','favicon.svg','icon-192.png','icon-512.png','icon-180.png'

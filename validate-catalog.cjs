@@ -33,9 +33,23 @@ Object.keys(E).forEach(id=>{
   const sinMat=/^(peso corporal|sin material|ninguno|esterilla|suelo|)$/.test(eq.trim());
   if(sinMat && /jal[oó]n|polea|mancuern|m[aá]quina|kettlebell|remoerg|skierg|saco|piscina/.test(nm))
     errs.push(n+': equip="'+x.equip+'" pero el nombre exige material');
+  // caso inverso: el nombre dice peso corporal pero declara material pesado.
+  // Excluye esos ejercicios a quien entrena en casa sin nada, que es justo
+  // para quien están pensados.
+  if(/propio peso|peso corporal|sin material/.test(nm) && /barra|mancuern|m[aá]quina|polea/.test(eq))
+    errs.push(n+': es de peso corporal pero equip="'+x.equip+'"');
   // duración de una serie razonable
   if(x.mode==='time' && x.dur>3600) warns.push(n+': serie de '+x.dur+'s (>1 h)');
   if(x.rest>300) warns.push(n+': descanso de '+x.rest+'s');
+});
+
+/* Nombres duplicados: el usuario los ve dos veces en catálogo y selector,
+   y el generador puede meter los dos en la misma sesión. */
+const norm = s=> (s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9 ]/g,'').trim();
+const byName = {};
+Object.keys(E).forEach(k=>{ const n=norm(E[k].name); (byName[n]=byName[n]||[]).push(k); });
+Object.entries(byName).filter(([,ks])=> ks.length>1).forEach(([n,ks])=>{
+  errs.push('nombre duplicado "'+n+'": '+ks.join(' / '));
 });
 
 console.log('TOTAL: '+Object.keys(E).length+' ejercicios');

@@ -16,6 +16,7 @@
 | `sport-calendar.js` | 638 | Calendario de entrenamientos, `generateSportPlan()` |
 | `sport-assistant.js` | 226 | Asistente de 8 pasos para crear plan |
 | `sport-anim.js` | 606 | Visor 3D (en standby, `ANIM_ENABLED = false`) |
+| `sport-gear.js` | — | **NUEVO** · material por ejercicio (ítems normalizados) y lugares |
 | `sport-log.js` | — | **NUEVO** · registro de entrenamientos, PRs, 1RM, volumen |
 | `sport-train.js` | — | **NUEVO** · modo entrenamiento serie a serie |
 | `sport-progress.js` | — | **NUEVO** · pantalla de progreso |
@@ -27,11 +28,11 @@ con `build.mjs` → `app.min.js`. Ver §7 para las trampas de este modelo.
 
 ## 2. Auditoría · estado inicial
 
-### Catálogo: 242 → 341 ejercicios
+### Catálogo: 242 → 334 ejercicios
 
 Una primera versión de esta auditoría dijo «43 ejercicios». **Era incorrecta**: no se
 contabilizó `sport-catalog.js`, que aportaba 199 más. El total de partida era **242**.
-Tras la ampliación son **341**.
+Tras la ampliación y quitar 7 duplicados son **334**.
 
 | Disciplina | Antes | Ahora | |
 |---|---|---|---|
@@ -52,7 +53,7 @@ Tras la ampliación son **341**.
 
 Patrones dentro de Gimnasio: tracción vertical **2 → 15**, core **3 → 7**.
 Siguen flojos **unilateral (6)** y **acarreo (2)**.
-Solo **10 de 341** ejercicios tienen `visual` (animación 3D, hoy desactivada).
+Solo **10 de 334** ejercicios tienen `visual` (animación 3D, hoy desactivada).
 
 #### Bug de datos encontrado al ampliar
 
@@ -81,6 +82,14 @@ obligatorios. Conviene pasarlo al añadir ejercicios.
 | A9 | No propone **cargas en kg** | 🟠 | ✅ resuelto |
 | A10 | Disciplinas pobres (natación 6, ciclismo 4, baile 2) | 🟠 | ✅ resuelto (+99 ej.) |
 | A15 | 6 ejercicios con `equip: "Peso corporal"` que exigen polea o barra | 🟠 | ✅ resuelto |
+| A16 | **`.train-ov` con `z-index:9000`**: los diálogos (300 y 4000) se abrían detrás. Terminar, Cambiar, Saltar y Abandonar parecían botones muertos | 🔴 | ✅ resuelto |
+| A17 | Sin forma rápida de entrenar: Entrenamientos → abrir día → ▶ (3 pasos) | 🟠 | ✅ barra «Entrenar hoy» |
+| A18 | No se podía añadir un ejercicio no previsto durante la sesión | 🟠 | ✅ resuelto |
+| A19 | Deshacer solo aparecía al completar el ejercicio entero | 🟠 | ✅ resuelto |
+| A20 | `spGearOk` comparaba subcadenas: «Barra + banco» pasaba teniendo solo barra | 🟠 | ✅ `sport-gear.js` |
+| A21 | 3 ejercicios «con propio peso» etiquetados `equip:"Barra"` → excluidos justo para quien entrena sin material | 🟠 | ✅ resuelto |
+| A22 | 7 ejercicios duplicados entre `EXERCISES_BASE` y `EXTRA_EXERCISES` | 🟡 | ✅ resuelto |
+| A23 | El guardián de arranque mostraba «La app no pudo arrancar» ante cualquier error **posterior** al arranque (p. ej. fallo puntual del service worker) | 🟠 | ✅ resuelto |
 | A11 | **Fallback silencioso**: si no hay ejercicios de la disciplina, `sport-calendar.js:412` cae a `'all'` y genera gimnasio llamándolo natación | 🟠 | ✅ resuelto |
 | A12 | Calentamiento no suma a la duración estimada | 🟡 | ✅ resuelto |
 | A13 | `alert()` nativo en `sport-calendar.js:391,420` y `sport-ui.js:607,608,726,732` | 🟡 | ✅ resuelto |
@@ -184,9 +193,31 @@ Nueva pestaña 📈 **Progreso** en la barra de Deporte:
 - [x] Nueva pestaña 📈 Progreso + botón ▶ Entrenar
 - [x] Estilos claro y oscuro
 - [x] `build.mjs` actualizado con los 3 archivos nuevos
-- [x] Catálogo 242 → **341** ejercicios (natación, ciclismo, raqueta, combate, remo,
+- [x] Catálogo 242 → **334** ejercicios (natación, ciclismo, raqueta, combate, remo,
       baile, tracción vertical y core de gimnasio)
 - [x] Corregidos 6 `equip` erróneos que rompían el filtro de material
+- [x] **Arreglados los botones muertos** del modo entrenamiento (z-index, A16)
+- [x] Barra fija **«Entrenar hoy»** con ▶ en toda la sección de Deporte
+- [x] Añadir ejercicio extra en mitad de la sesión (buscador + filtros)
+- [x] Cambiar ejercicio con los **más parecidos primero**, agrupados y resaltados
+- [x] Deshacer la última serie disponible en todo momento
+- [x] `sport-gear.js`: material normalizado por ejercicio y perfiles de lugar
+- [x] Asistente: paso **«¿dónde entrenas?»** + confirmación de material con
+      contador en vivo de ejercicios disponibles
+- [x] Guardián de arranque acotado a fallos reales de arranque (A23)
+
+### Sistema de material (`sport-gear.js`)
+
+El campo `equip` es texto libre («Barra + rack», «Piscina, gafas»): sirve para leer,
+no para comprobar. `gearItemsOf(id)` lo traduce a ítems normalizados
+(`['barra','rack']`) mediante reglas, y `gearCanDo(id, tengo)` exige **todos**.
+La versión anterior comparaba subcadenas y bastaba con una coincidencia: «Barra +
+banco» pasaba el filtro teniendo solo barra.
+
+`GEAR_PLACES` define qué hay normalmente en cada sitio — casa sin material, casa
+con lo básico, casa equipada, gimnasio, parque, hotel — y el asistente lo usa para
+precargar el material. Cobertura actual: **71 ejercicios sin nada**, 247 en gimnasio
+completo, de 334.
 
 ### Pendiente
 - [ ] Deporte de equipo (9) y aventura (7) → mínimo 15 cada uno.
@@ -194,7 +225,7 @@ Nueva pestaña 📈 **Progreso** en la barra de Deporte:
       `name, type, muscles, met, equip, mode, sets, reps|dur, rest, cues, pat`
       y `disc` explícito si el nombre no permite inferir la disciplina.
 - [ ] Unilateral (6) y acarreo (2) en gimnasio → mínimo 10 cada uno
-- [ ] `visual` para los ejercicios principales (hoy 10/341) y reactivar `ANIM_ENABLED`
+- [ ] `visual` para los ejercicios principales (hoy 10/334) y reactivar `ANIM_ENABLED`
 - [ ] Exportar el historial de entrenamientos a CSV
 - [ ] Integrar kcal de entrenamiento registradas con el balance de Nutrición
 - [ ] Gráfica de peso corporal en Progreso (hoy solo fuerza)
@@ -277,12 +308,12 @@ aparecían con una vista guardada concreta.
 node validate-catalog.cjs   # valida los datos del catálogo (rápido, sin navegador)
 node build.mjs              # regenera app.min.js + sella sw.js y el HTML
 
-# smoke test en Chrome headless (35 comprobaciones)
+# smoke test en Chrome headless (55 comprobaciones)
 python -m http.server 8000  # en otra terminal
 node smoke-sport.cjs
 ```
 
-`validate-catalog.cjs` comprueba, para los 341 ejercicios: campos obligatorios,
+`validate-catalog.cjs` comprueba, para los 334 ejercicios: campos obligatorios,
 taxonomías válidas (`type`/`pat`/`muscles`/`disc`), MET en rango 0-16, coherencia
 entre `equip` y el material que implica el nombre, y `cues` presentes. Sale con
 código 1 si hay errores. **Pásalo siempre que toques el catálogo.**
@@ -298,13 +329,15 @@ código 1 si hay errores. **Pásalo siempre que toques el catálogo.**
 | 5 | Progresión de cargas al alza y a la baja, tonelaje, 1RM, volumen, CSV |
 | 6 | Modo entrenamiento: apertura, cierre de serie, persistencia, guardado y limpieza |
 | 7 | Pantalla de progreso: KPIs, barras, historial, desplegable y estado vacío |
+| 6b | **Material y accesos**: `gearItemsOf`, exigir todo el material, sesión en casa sin nada, selector con buscador/filtros/parecidos, ejercicio extra, deshacer, barra «Entrenar hoy» y su ▶ |
+| 7b | **Guardián de arranque**: ignora fallos de SW y errores posteriores al arranque |
 | 8 | Modo oscuro (luminancia real de las superficies) |
 
 El bloque 3 incluye **cobertura por disciplina**: verifica que cada deporte genere
 una sesión propia sin colar ejercicios de otras disciplinas (el fallo original de
 natación).
 
-Debe salir **35 OK · 0 fallos**. Las capturas quedan en `.shots/`.
+Debe salir **55 OK · 0 fallos**. Las capturas quedan en `.shots/`.
 Si tocas el generador o el registro, ejecútalo antes de mergear.
 
 > ⚠️ El archivo es `.cjs` a propósito: `package.json` tiene `"type":"module"`
