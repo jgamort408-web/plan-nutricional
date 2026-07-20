@@ -721,14 +721,15 @@ function trStartEntry(ent){
   }
 }
 
-/* Pinta / actualiza la barra. La llama showSportView en cada vista. */
+/* Pinta / actualiza la barra. La llama showSportView en cada vista.
+   Siempre visible en Deporte: entrena hoy, reanuda, o elige/genera. */
 function renderTrainBar(){
   let bar = document.getElementById('trTodayBar');
   const inSport = document.body.classList.contains('sec-sport');
   const training = document.body.classList.contains('train-mode');
   const pend = trLoadState();
   const list = trTodayEntries();
-  const show = inSport && !training && (pend || list.length);
+  const show = inSport && !training;
 
   if(!show){ if(bar) bar.remove(); document.body.classList.remove('has-trainbar'); return; }
   if(!bar){
@@ -747,8 +748,9 @@ function renderTrainBar(){
         <b>Entrenamiento a medias</b>
         <span>${spEsc(pend.sessName||'')} · ${done}/${tot} series</span>
       </span>
+      <button class="tr-bar-alt" id="trBarPick" title="Elegir otro">☰</button>
       <button class="tr-bar-go" id="trBarGo">▶ Reanudar</button>`;
-  } else {
+  } else if(list.length){
     const s = SESSIONS[list[0].s];
     const t = sessionTotals(s, 'A');
     const ph = list[0].phase ? SP_PHASES[list[0].phase] : null;
@@ -757,10 +759,23 @@ function renderTrainBar(){
         <b>Hoy: ${spEsc(s.name)}${list.length>1?` <i>+${list.length-1}</i>`:''}</b>
         <span>${t.min} min · ${(s.items||[]).length} ejercicios${ph?` · ${ph.ico} ${spEsc(ph.lbl)}`:''}</span>
       </span>
+      <button class="tr-bar-alt" id="trBarPick" title="Elegir otro">☰</button>
       <button class="tr-bar-go" id="trBarGo">▶ Entrenar</button>`;
+  } else {
+    // sin nada programado: el botón principal abre el selector
+    bar.innerHTML = `
+      <span class="tr-bar-b">
+        <b>¿Entrenamos?</b>
+        <span>Elige una sesión, por músculo o genérala a medida</span>
+      </span>
+      <button class="tr-bar-go" id="trBarPick2">▶ Elegir entrenamiento</button>`;
   }
   const g = document.getElementById('trBarGo');
   if(g) g.addEventListener('click', trStartToday);
+  const p1 = document.getElementById('trBarPick');
+  if(p1) p1.addEventListener('click', trChooseWorkout);
+  const p2 = document.getElementById('trBarPick2');
+  if(p2) p2.addEventListener('click', trChooseWorkout);
 
   // La barra va JUSTO encima de la tabbar. Se mide en vez de asumir 84px:
   // la altura real depende de la fuente, del safe-area del móvil y de si
@@ -769,6 +784,145 @@ function renderTrainBar(){
   const th  = (tab && getComputedStyle(tab).display !== 'none') ? tab.getBoundingClientRect().height : 0;
   bar.style.bottom = th + 'px';
   document.body.style.setProperty('--trbar-h', bar.getBoundingClientRect().height + 'px');
+}
+
+/* ── Selector de entrenamiento ────────────────────────────────
+   Una sola ventana para decidir qué entrenar hoy:
+     · reanudar el que está a medias
+     · el/los programados para hoy
+     · una sesión preparada (filtrable por nivel y músculo)
+     · generar una a medida por grupo muscular + duración + nivel
+══════════════════════════════════════════════════════════ */
+var _trChoose = {q:'', level:'all', muscles:[], dur:60};
+
+/* Arranca una sesión ad-hoc (generada al vuelo): la registra con un id
+   temporal y entra al modo entrenamiento. */
+function trStartAdHoc(sess, who){
+  if(!sess){ pnToast('No se pudo generar la sesión', 'err'); return; }
+  const id = '_adhoc_' + Date.now().toString(36);
+  SESSIONS[id] = sess;
+  startTraining(id, who || 'A');
+}
+
+function trChooseWorkout(){
+  const pend  = trLoadState();
+  const today = trTodayEntries();
+  _trChoose.q = '';
+
+  const render = ()=>{
+    const host = document.getElementById('trChooseList');
+    if(!host) return;
+    const q = (_trChoose.q||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+    // sesiones preparadas: base primero (no user), luego las del usuario
+    let ids = Object.keys(SESSIONS).filter(id=>{
+      if(/^_(adhoc|live)_/.test(id)) return false;
+      const s = SESSIONS[id];
+      if(_trChoose.level!=='all' && (s.level||'').toLowerCase().indexOf(_trChoose.level)<0) return false;
+      if(_trChoose.muscles.length){
+        const mus = sessionMuscles(s);
+        if(!_trChoose.muscles.every(m=> mus.includes(m))) return false;
+      }
+      if(q){
+        const n=(s.name||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+        const f=(s.focus||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+        if(!n.includes(q) && !f.includes(q)) return false;
+      }
+      return true;
+    });
+    ids.sort((a,b)=> (SESSIONS[a].user?1:0)-(SESSIONS[b].user?1:0));
+
+    const cnt = document.getElementById('trChooseCount');
+    if(cnt) cnt.textContent = ids.length + (ids.length===1?' sesión':' sesiones');
+
+    host.innerHTML = ids.map(id=>{
+      const s = SESSIONS[id], t = sessionTotals(s,'A');
+      const lvl = s.level ? `<span class="trc-lvl">${spEsc(s.level)}</span>` : '';
+      return `<button class="trc-sess" data-start="${id}">
+        <span class="trc-ico">${(EX_TYPES[s.type]||{ico:'•'}).ico}</span>
+        <span class="trc-b"><b>${spEsc(s.name)}</b><span>${t.min} min · ${(s.items||[]).length} ej${s.focus?' · '+spEsc(s.focus):''}</span></span>
+        ${lvl}<span class="trc-play">▶</span>
+      </button>`;
+    }).join('') || `<div class="trc-empty">Ninguna sesión coincide. Prueba a generar una a medida abajo.</div>`;
+
+    host.querySelectorAll('[data-start]').forEach(b=> b.addEventListener('click', ()=>{
+      closeForm(); startTraining(b.dataset.start, 'A');
+    }));
+
+    // botón de generar según los músculos elegidos
+    const gen = document.getElementById('trChooseGen');
+    if(gen){
+      const ms = _trChoose.muscles;
+      gen.disabled = !ms.length;
+      gen.textContent = ms.length
+        ? `🎲 Generar ${_trChoose.dur} min con: ${ms.map(m=>(EX_MUSCLES[m]||{}).lbl||m).join(', ')}`
+        : '🎲 Elige músculos para generar a medida';
+    }
+  };
+
+  openForm(`
+    <div class="form-hd"><h2>▶ Elegir entrenamiento</h2><span class="form-sub">El de hoy, uno preparado, por músculo o a tu medida</span></div>
+    <div class="form-body tr-choose">
+      ${pend ? `<button class="trc-resume" id="trcResume">⏱️ Reanudar «${spEsc(pend.sessName||'')}»</button>` : ''}
+      ${today.length ? `<div class="trc-today">
+        <div class="trc-lbl">Programado para hoy</div>
+        ${today.map((e,i)=>{ const s=SESSIONS[e.s]; if(!s) return ''; const t=sessionTotals(s,'A');
+          return `<button class="trc-sess hoy" data-today="${i}">
+            <span class="trc-ico">${(EX_TYPES[s.type]||{ico:'•'}).ico}</span>
+            <span class="trc-b"><b>${spEsc(s.name)}</b><span>${t.min} min · ${(s.items||[]).length} ej</span></span>
+            <span class="trc-play">▶</span></button>`;}).join('')}
+      </div>` : ''}
+
+      <div class="trc-lbl">Filtrar</div>
+      <input class="finp trc-q" id="trChooseQ" type="search" placeholder="Buscar sesión…" autocomplete="off">
+      <div class="trc-filters">
+        <select class="fsel" id="trChooseLevel">
+          <option value="all">Cualquier nivel</option>
+          <option value="principiante">Principiante</option>
+          <option value="intermedio">Intermedio</option>
+          <option value="avanzado">Avanzado</option>
+        </select>
+      </div>
+      <div class="trc-lbl2">Por grupo muscular <small>(también genera a medida)</small></div>
+      <div class="trc-muscles" id="trChooseMus">${Object.entries(EX_MUSCLES).filter(([k])=>!['fullbody','cardio','movilidad'].includes(k)).map(([k,v])=>
+        `<button type="button" class="trc-mchip ${_trChoose.muscles.includes(k)?'on':''}" data-m="${k}">${v.lbl}</button>`).join('')}</div>
+
+      <div class="trc-lbl">Sesiones preparadas <span class="trc-count" id="trChooseCount"></span></div>
+      <div class="trc-list" id="trChooseList"></div>
+    </div>
+    <div class="form-actions trc-actions">
+      <div class="trc-gen-row">
+        <select class="fsel trc-dur" id="trChooseDur">
+          ${[30,40,45,60,75].map(d=>`<option value="${d}" ${_trChoose.dur===d?'selected':''}>${d} min</option>`).join('')}
+        </select>
+        <button class="btn-prim trc-gen" id="trChooseGen" disabled>🎲 Elige músculos para generar a medida</button>
+      </div>
+      <button class="btn-sec" id="trChooseCancel">Cerrar</button>
+    </div>`);
+
+  // wiring
+  const qi=document.getElementById('trChooseQ'); if(qi) qi.addEventListener('input',()=>{ _trChoose.q=qi.value; render(); });
+  const lv=document.getElementById('trChooseLevel'); if(lv){ lv.value=_trChoose.level; lv.addEventListener('change',()=>{ _trChoose.level=lv.value; render(); }); }
+  const du=document.getElementById('trChooseDur'); if(du) du.addEventListener('change',()=>{ _trChoose.dur=+du.value; render(); });
+  formBody().querySelectorAll('#trChooseMus .trc-mchip').forEach(b=> b.addEventListener('click',()=>{
+    const m=b.dataset.m, i=_trChoose.muscles.indexOf(m);
+    if(i>=0) _trChoose.muscles.splice(i,1); else _trChoose.muscles.push(m);
+    b.classList.toggle('on'); render();
+  }));
+  if(pend){ const r=document.getElementById('trcResume'); if(r) r.addEventListener('click',()=>{ closeForm(); resumeTraining(); }); }
+  today.forEach(()=>{});
+  formBody().querySelectorAll('[data-today]').forEach(b=> b.addEventListener('click',()=>{
+    closeForm(); trStartEntry(today[+b.dataset.today]);
+  }));
+  const gen=document.getElementById('trChooseGen');
+  if(gen) gen.addEventListener('click',()=>{
+    const ms=_trChoose.muscles; if(!ms.length) return;
+    const prof=spProfile();
+    const sess=buildSessionByCriteria(ms, _trChoose.dur, 'media', 'all', {profile:prof});
+    if(!sess){ pnToast('No hay ejercicios para esos músculos con tu material', 'warn'); return; }
+    closeForm(); trStartAdHoc(sess, 'A');
+  });
+  document.getElementById('trChooseCancel').addEventListener('click', closeForm);
+  render();
 }
 
 window.startTraining = startTraining;
@@ -781,4 +935,6 @@ window.trStartEntry = trStartEntry;
 window.trOpenPicker = trOpenPicker;
 window.trAddExtraEx = trAddExtraEx;
 window.trRemoveSet = trRemoveSet;
+window.trChooseWorkout = trChooseWorkout;
+window.trStartAdHoc = trStartAdHoc;
 window.trFmtClock = trFmtClock;

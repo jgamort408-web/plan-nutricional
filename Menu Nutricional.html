@@ -231,7 +231,10 @@ body.sec-sport.spv-sess .hdr-gen{display:flex}
 .sec-menu-wrap{position:relative;flex-shrink:0;order:0}
 .sec-menu-btn{font-size:1.2rem}
 .sec-menu-btn:hover{transform:none}
-.sec-menu{position:absolute;top:calc(100% + 7px);left:0;background:var(--cream);border-radius:13px;box-shadow:0 14px 38px rgba(0,0,0,.34);padding:6px;display:flex;flex-direction:column;gap:2px;z-index:260;min-width:194px;border:1px solid rgba(var(--ink-rgb,44,31,14),.08)}
+.sec-menu{position:absolute;top:calc(100% + 7px);left:0;background:var(--cream);border-radius:13px;box-shadow:0 14px 38px rgba(0,0,0,.34);padding:6px;display:flex;flex-direction:column;gap:2px;z-index:260;min-width:194px;border:1px solid rgba(var(--ink-rgb,44,31,14),.08);
+  /* Tope de altura + scroll: estos menús tienen ~14 opciones y en pantallas
+     bajas se salían por abajo sin poder llegar a las últimas. */
+  max-height:calc(100vh - var(--hdr-h,64px) - 16px);overflow-y:auto;overscroll-behavior:contain}
 .sec-menu[hidden]{display:none}
 .sec-mi{display:flex;align-items:center;gap:9px;border:none;background:transparent;color:var(--ink);font-family:'Lora',serif;font-size:.96rem;font-weight:500;text-align:left;padding:10px 13px;border-radius:9px;cursor:pointer;transition:.14s;white-space:nowrap}
 .sec-mi:hover{background:rgba(var(--ink-rgb,44,31,14),.06)}
@@ -1254,6 +1257,11 @@ main[data-vm="small"] .dish.add-card{min-height:62px;flex-direction:row}
   .cal-day-macs{display:flex;gap:8px;padding:4px 12px 2px;flex-wrap:wrap}
   .cal-day-macs span{font-family:'DM Mono',monospace;font-size:.6rem;color:var(--ink);background:var(--cream);border-radius:6px;padding:2px 7px;letter-spacing:.02em}
   .cal-day-macs span i{font-style:normal;color:var(--ink-50);font-weight:700;margin-right:2px}
+  /* Menús del header (☰ y ❔) como hoja anclada bajo el header: en móvil el
+     botón ❔ se reordena a la izquierda y el menú (right:0) se salía por el
+     lado. Fijos y a lo ancho, nunca se salen y hacen scroll si no caben. */
+  .sec-menu, .help-wrap .sec-menu{position:fixed;top:calc(var(--hdr-h,58px) + 6px);left:10px;right:10px;
+    width:auto;min-width:0;max-width:none;max-height:calc(100vh - var(--hdr-h,58px) - 22px)}
 }
 
 /* ════════════════════════════════════════════════════════
@@ -2464,6 +2472,40 @@ body.train-mode{overflow:hidden}
   font-size:.88rem;font-weight:800;cursor:pointer;transition:.16s;letter-spacing:.2px}
 .tr-bar-go:hover{background:var(--gold-l)}
 .tr-bar-go:active{transform:scale(.96)}
+.tr-bar-alt{flex-shrink:0;border:1.5px solid rgba(255,255,255,.5);border-radius:999px;width:40px;height:40px;background:transparent;color:#fff;font-size:1rem;cursor:pointer;transition:.16s}
+.tr-bar-alt:hover{background:rgba(255,255,255,.18)}
+/* Panel «Elegir entrenamiento» */
+.tr-choose{display:flex;flex-direction:column;gap:9px}
+.trc-lbl{font-size:.67rem;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:var(--ink-50);margin-top:4px}
+.trc-lbl2{font-size:.67rem;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:var(--ink-50);margin-top:4px}
+.trc-lbl2 small{font-weight:600;letter-spacing:0;text-transform:none;opacity:.8}
+.trc-count{font-weight:700;color:var(--ink-50);letter-spacing:0}
+.trc-resume{width:100%;padding:12px;border:none;border-radius:var(--r-sm);background:rgba(200,147,40,.18);border-left:3px solid var(--gold);color:var(--ink);font-size:.86rem;font-weight:700;cursor:pointer;text-align:left}
+.trc-resume:hover{background:rgba(200,147,40,.26)}
+.trc-today{display:flex;flex-direction:column;gap:6px}
+.trc-q{width:100%}
+.trc-filters{display:flex;gap:7px}
+.trc-filters .fsel{flex:1}
+.trc-muscles{display:flex;flex-wrap:wrap;gap:6px}
+.trc-mchip{padding:7px 12px;border-radius:999px;border:1.5px solid rgba(var(--ink-rgb),.16);background:var(--white);color:var(--ink-50);font-size:.77rem;font-weight:600;cursor:pointer;transition:.15s}
+.trc-mchip:hover{border-color:var(--sport)}
+.trc-mchip.on{background:var(--sport);border-color:var(--sport);color:#fff}
+.trc-list{display:flex;flex-direction:column;gap:6px;max-height:38vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.trc-sess{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--r-sm);border:1.5px solid rgba(var(--ink-rgb),.1);background:var(--white);cursor:pointer;text-align:left;transition:.15s;width:100%}
+.trc-sess:hover{border-color:var(--sport);background:rgba(94,138,62,.06)}
+.trc-sess.hoy{border-color:var(--sport);background:rgba(94,138,62,.08)}
+.trc-ico{font-size:1.15rem;flex-shrink:0}
+.trc-b{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.trc-b b{font-size:.85rem;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.trc-b span{font-size:.71rem;color:var(--ink-50);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.trc-lvl{font-size:.62rem;font-weight:700;padding:2px 7px;border-radius:999px;background:rgba(var(--ink-rgb),.08);color:var(--ink-50);flex-shrink:0}
+.trc-play{color:var(--sport);font-weight:800;flex-shrink:0}
+.trc-empty{padding:20px 14px;text-align:center;font-size:.82rem;color:var(--ink-50)}
+.trc-actions{flex-direction:column;gap:8px;align-items:stretch}
+.trc-gen-row{display:flex;gap:7px}
+.trc-dur{flex-shrink:0;width:92px}
+.trc-gen{flex:1;font-size:.82rem}
+.trc-gen:disabled{opacity:.5;cursor:default}
 /* hueco extra para que la barra no tape el contenido (--trbar-h la mide el JS) */
 body.has-trainbar{padding-bottom:calc(84px + var(--trbar-h,58px) + env(safe-area-inset-bottom,0px))}
 @media(max-width:760px){
@@ -2921,7 +2963,7 @@ html[data-theme="dark"] .pg-dot{stroke:var(--parch)}
 <!-- Núcleo de la app: bundle generado por build.mjs (30 scripts en 1).
      Para volver a los scripts sueltos en desarrollo, sustituye esta línea
      por los <script src> individuales. Regenera con: node build.mjs -->
-<script src="app.min.js?v=ebd71ce3"></script>
+<script src="app.min.js?v=79d5344a"></script>
 <script>
 /* ── Carga diferida del "pack de contenido" · Teoría + Bibliografía ──
    Son ~364 KB de texto que la mayoría de sesiones no abren. No se

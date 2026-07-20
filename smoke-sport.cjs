@@ -123,6 +123,19 @@ async function run(){
   (nEx > 200) ? ok('catálogo cargado', nEx + ' ejercicios') : bad('catálogo', 'solo ' + nEx);
   const prof = await evalJS(`return JSON.stringify(spProfile());`);
   prof && prof.indexOf('level') >= 0 ? ok('perfil por defecto', prof) : bad('perfil');
+  // sesiones de gimnasio con máquinas · 60 min · verificación de duración
+  const gymS = await evalJS(`
+    var ids=['gym_maquinas_fullbody_princ','gym_maquinas_torso','gym_maquinas_pierna','gym_maquinas_fullbody_avz'];
+    var r=ids.map(function(id){ var s=SESSIONS[id]; if(!s) return {id:id,falta:1};
+      var t=sessionTotals(s,'A');
+      var todasMaq=(s.items||[]).every(function(it){ var e=EXERCISES[it.e];
+        return e && /maquina|máquina|polea|prensa|smith|contractora|peck|elíptica/i.test((e.equip||'')+' '+e.name); });
+      return {id:id, min:t.min, ok60:t.min>=50&&t.min<=66, maq:todasMaq, niv:s.level}; });
+    return JSON.stringify(r);`);
+  const GY = JSON.parse(gymS||'[]');
+  const gyOk = GY.length===4 && GY.every(x=>x.ok60 && x.maq && !x.falta);
+  gyOk ? ok('4 sesiones de gimnasio máquinas 60 min', GY.map(x=>x.niv+' '+x.min+'min').join(' · '))
+       : bad('sesiones gimnasio', gymS);
 
   /* ── 3. Generador · ninguna combinación debe fallar ─────── */
   console.log('\n\x1b[1m3 · Generador (robustez)\x1b[0m');
@@ -329,6 +342,25 @@ async function run(){
   (CM.despues === CM.antes + 1) ? ok('guarda el entrenamiento en el historial') : bad('guardar entreno', commit);
   (CM.limpio === 1 && CM.ov === 0) ? ok('limpia el estado y cierra el overlay') : bad('limpieza post-entreno', commit);
 
+  /* ── 6a. Menú de ayuda en móvil (no se sale de pantalla) ── */
+  console.log('\n\x1b[1m6a · Menú de ayuda (móvil)\x1b[0m');
+  const help = await evalJS(`
+    var b=document.getElementById('helpBtn'); if(!b) return 'NOBTN';
+    b.click();
+    return new Promise(function(res){ setTimeout(function(){
+      var m=document.getElementById('helpMenu'); var r=m.getBoundingClientRect();
+      res(JSON.stringify({
+        dentroX: r.left>=-1 && r.right<=window.innerWidth+1,
+        dentroY: r.top>=0 && r.bottom<=window.innerHeight+1,
+        scroll: getComputedStyle(m).overflowY,
+        left:Math.round(r.left), right:Math.round(r.right), bottom:Math.round(r.bottom), winW:window.innerWidth, winH:window.innerHeight}));
+    },350); });`);
+  const H = JSON.parse(help||'{}');
+  (H.dentroX) ? ok('menú de ayuda no se sale por los lados', `${H.left}–${H.right} en ${H.winW}`) : bad('menú ayuda horizontal', help);
+  (H.dentroY && /auto|scroll/.test(H.scroll)) ? ok('menú de ayuda entra en alto (con scroll)', `bottom ${H.bottom} de ${H.winH}`) : bad('menú ayuda vertical', help);
+  await evalJS(`document.getElementById('helpBtn').click(); return '1';`);
+  await sleep(150);
+
   /* ── 6b. Material, selector y barra de acceso ───────────── */
   console.log('\n\x1b[1m6b · Material y accesos\x1b[0m');
   const gearT = await evalJS(`
@@ -474,6 +506,41 @@ async function run(){
     }, 350); });`);
   const PY = JSON.parse(play||'{}');
   (PY.overlay && PY.barraOculta) ? ok('▶ arranca el entreno de hoy') : bad('botón ▶ de la barra', play);
+  await evalJS(`trClearState(); trExit();`);
+  await sleep(200);
+
+  // panel «Elegir entrenamiento»: sesiones, filtro por músculo, generar a medida
+  const chooser = await evalJS(`
+    // sin nada programado: la barra debe ofrecer "Elegir entrenamiento"
+    delete SportPlan.days[spKey(new Date())]; persistSportPlan(); trClearState();
+    setSection('sport'); showSportView('scal');
+    var barBtn = document.getElementById('trBarPick2');
+    if(!barBtn) return 'SIN-BOTON-ELEGIR';
+    trChooseWorkout();
+    var nSess = document.querySelectorAll('#trChooseList [data-start]').length;
+    var hayMusculos = document.querySelectorAll('#trChooseMus .trc-mchip').length;
+    var genDisabled = document.getElementById('trChooseGen').disabled;
+    // elige pecho → debe habilitar generar y filtrar la lista
+    var pecho=[].slice.call(document.querySelectorAll('#trChooseMus .trc-mchip')).find(function(b){return b.dataset.m==='pecho';});
+    pecho.click();
+    var genTrasMus = document.getElementById('trChooseGen').disabled;
+    var nTrasFiltro = document.querySelectorAll('#trChooseList [data-start]').length;
+    return JSON.stringify({nSess:nSess, hayMusculos:hayMusculos, genDisabledIni:genDisabled, genHabilitado:!genTrasMus, nTrasFiltro:nTrasFiltro});`);
+  const CH = JSON.parse(chooser||'{}');
+  (CH.nSess >= 10) ? ok('panel · lista de sesiones preparadas', CH.nSess + ' sesiones') : bad('panel sesiones', chooser);
+  (CH.hayMusculos > 8 && CH.genDisabledIni && CH.genHabilitado) ? ok('panel · filtro por grupo muscular habilita generar') : bad('panel músculos', chooser);
+  await shot('smoke-chooser');
+  const genTrain = await evalJS(`
+    document.getElementById('trChooseGen').click();
+    return new Promise(function(res){ setTimeout(function(){
+      res(JSON.stringify({overlay:!!document.getElementById('trainOverlay'),
+        adhoc: TrainState && /_adhoc_/.test(TrainState.sessId),
+        ejercicios: TrainState?TrainState.ex.length:0}));
+    },350); });`);
+  const GT = JSON.parse(genTrain||'{}');
+  (GT.overlay && GT.adhoc && GT.ejercicios>0) ? ok('panel · generar a medida entra a entrenar', GT.ejercicios+' ejercicios') : bad('generar a medida', genTrain);
+  await evalJS(`trClearState(); trExit();`);
+  await sleep(200);
   await shot('smoke-train2');
   await evalJS(`trAddExtraEx();`); await sleep(400); await shot('smoke-picker');
   await evalJS(`if(typeof closeForm==='function') closeForm();`); await sleep(250);

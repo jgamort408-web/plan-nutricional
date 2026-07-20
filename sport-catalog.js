@@ -5454,4 +5454,122 @@ window.EXTRA_EXERCISES = {
   "cues": "Brazo y pierna contrarios. Cadera cuadrada: imagina un vaso de agua en la espalda baja.",
   "pat": "core"
  }
+,
+ "gim_extension_cuadriceps": {
+  "name": "Extensión de cuádriceps en máquina",
+  "type": "fuerza",
+  "muscles": [
+   "cuadriceps"
+  ],
+  "met": 5,
+  "equip": "Máquina de extensión",
+  "mode": "reps",
+  "sets": 3,
+  "reps": 12,
+  "dur": 0,
+  "rest": 60,
+  "cues": "Ajusta el respaldo para que la rodilla quede alineada con el eje. Sube controlado y no bloquees de golpe.",
+  "pat": "accesorio"
+ },
+ "gim_curl_femoral_sentado": {
+  "name": "Curl femoral sentado en máquina",
+  "type": "fuerza",
+  "muscles": [
+   "isquios"
+  ],
+  "met": 5,
+  "equip": "Máquina de femoral",
+  "mode": "reps",
+  "sets": 3,
+  "reps": 12,
+  "dur": 0,
+  "rest": 60,
+  "cues": "Empuja el rodillo con los talones y baja despacio. No dejes que la cadera se levante del asiento.",
+  "pat": "accesorio"
+ },
+ "gim_remo_sentado_polea": {
+  "name": "Remo sentado en polea",
+  "type": "fuerza",
+  "muscles": [
+   "espalda",
+   "biceps",
+   "core"
+  ],
+  "met": 5.5,
+  "equip": "Polea baja, agarre triángulo",
+  "mode": "reps",
+  "sets": 4,
+  "reps": 12,
+  "dur": 0,
+  "rest": 75,
+  "cues": "Pecho arriba, tira del agarre al abdomen llevando los codos atrás. No balancees el tronco.",
+  "pat": "traccion_h"
+ },
+ "gim_face_pull": {
+  "name": "Face pull en polea",
+  "type": "fuerza",
+  "muscles": [
+   "hombro",
+   "espalda"
+  ],
+  "met": 4.5,
+  "equip": "Polea alta, cuerda",
+  "mode": "reps",
+  "sets": 3,
+  "reps": 15,
+  "dur": 0,
+  "rest": 60,
+  "cues": "Cuerda a la altura de la cara, codos altos y separa las manos al final. Clave para la salud del hombro.",
+  "pat": "traccion_h"
+ },
+ "gim_gemelo_prensa": {
+  "name": "Gemelo en prensa de piernas",
+  "type": "fuerza",
+  "muscles": [
+   "gemelo"
+  ],
+  "met": 4.5,
+  "equip": "Prensa de piernas",
+  "mode": "reps",
+  "sets": 4,
+  "reps": 15,
+  "dur": 0,
+  "rest": 45,
+  "cues": "Apoya solo el metatarso en la plataforma y haz recorrido completo: estiramiento abajo, punta arriba.",
+  "pat": "accesorio"
+ },
+ "gim_press_hombro_maquina": {
+  "name": "Press de hombro en máquina",
+  "type": "fuerza",
+  "muscles": [
+   "hombro",
+   "triceps"
+  ],
+  "met": 5,
+  "equip": "Máquina de press de hombro",
+  "mode": "reps",
+  "sets": 3,
+  "reps": 10,
+  "dur": 0,
+  "rest": 75,
+  "cues": "Ajusta el asiento para que las asas queden a la altura de los hombros. Empuja sin encoger el cuello.",
+  "pat": "empuje_v"
+ },
+ "gim_extension_triceps_maquina": {
+  "name": "Fondos de tríceps en máquina",
+  "type": "fuerza",
+  "muscles": [
+   "triceps",
+   "pecho"
+  ],
+  "met": 5,
+  "equip": "Máquina de fondos asistidos",
+  "mode": "reps",
+  "sets": 3,
+  "reps": 12,
+  "dur": 0,
+  "rest": 60,
+  "cues": "Cuerpo recto, baja hasta 90° en el codo y empuja sin bloquear de golpe.",
+  "pat": "accesorio"
+ }
 };

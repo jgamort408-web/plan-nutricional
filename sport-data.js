@@ -244,7 +244,31 @@ const SESSIONS_BASE = {
     items:[{e:'bici_estatica',sets:1,dur:1800,rest:0},{e:'remoergometro_intervalos',sets:5,dur:90,rest:90},{e:'cat_cow',sets:2,reps:10,rest:15},{e:'estiramiento_flexor_cadera',sets:2,dur:40,rest:15}]},
   movilidad_recuperacion:{name:'Movilidad y recuperación', type:'movilidad', level:'Todos', focus:'Tobillo, cadera, columna torácica y descarga general',
     warmup:'Respiración nasal suave durante 2 min.', notes:'No fuerces rangos dolorosos. Busca sensación de tensión suave y control.',
-    items:[{e:'cat_cow',sets:2,reps:10,rest:15},{e:'movilidad_tobillo',sets:3,dur:40,rest:15},{e:'estiramiento_flexor_cadera',sets:3,dur:40,rest:15},{e:'rotacion_toracica',sets:3,reps:8,rest:15},{e:'dead_bug',sets:2,reps:8,rest:20}]}
+    items:[{e:'cat_cow',sets:2,reps:10,rest:15},{e:'movilidad_tobillo',sets:3,dur:40,rest:15},{e:'estiramiento_flexor_cadera',sets:3,dur:40,rest:15},{e:'rotacion_toracica',sets:3,reps:8,rest:15},{e:'dead_bug',sets:2,reps:8,rest:20}]},
+
+  /* ── Sesiones de gimnasio con máquinas · 60 min · por niveles ──
+     Todo en máquinas guiadas y poleas (bajo riesgo técnico). Duración
+     verificada con el motor (~55 min + calentamiento ≈ 60 real). */
+  gym_maquinas_fullbody_princ:{name:'Gimnasio máquinas · Full-body (principiante)', type:'fuerza', level:'Principiante', disc:'gimnasio',
+    focus:'Circuito completo en máquinas guiadas: seguro y fácil de aprender',
+    warmup:'8 min: 5 en bici o elíptica suave + movilidad de hombro y cadera. Haz 1 serie de aproximación ligera en la primera máquina de cada patrón.',
+    notes:'Todo en máquinas guiadas para controlar la técnica. Deja 2-3 repeticiones en reserva y sube peso solo cuando completes todas las series con holgura.',
+    items:[{e:'sf_prensa_de_piernas',sets:4,reps:12,rest:120},{e:'gim_curl_femoral_sentado',sets:4,reps:12,rest:90},{e:'sf_press_de_banca_en_maquina_sentado',sets:4,reps:12,rest:105},{e:'sf_jalon_al_pecho_con_agarre_cerrado',sets:4,reps:12,rest:105},{e:'gim_press_hombro_maquina',sets:4,reps:12,rest:90},{e:'gim_extension_cuadriceps',sets:4,reps:15,rest:90},{e:'gim_gemelo_prensa',sets:4,reps:15,rest:75},{e:'sf_abdominales_en_maquina',sets:3,reps:15,rest:75}]},
+  gym_maquinas_torso:{name:'Gimnasio máquinas · Torso (intermedio)', type:'fuerza', level:'Intermedio', disc:'gimnasio',
+    focus:'Empuje y tracción en máquinas y poleas, con equilibrio pecho-espalda y hombro',
+    warmup:'8 min: movilidad torácica y escapular + 1-2 series ligeras de press y de jalón.',
+    notes:'Equilibra empuje y tracción. Controla la fase excéntrica (2 s bajando) en poleas y máquinas.',
+    items:[{e:'sf_press_de_banca_en_maquina_sentado',sets:4,reps:10,rest:120},{e:'gim_remo_sentado_polea',sets:4,reps:10,rest:120},{e:'gim_press_hombro_maquina',sets:4,reps:12,rest:105},{e:'sf_jalon_con_agarre_ancho',sets:4,reps:12,rest:105},{e:'sf_aperturas_en_maquina_peck_deck_o_contractora',sets:4,reps:14,rest:90},{e:'gim_face_pull',sets:4,reps:15,rest:75},{e:'sf_extension_de_triceps_en_polea_con_cuerda',sets:4,reps:14,rest:75},{e:'sf_curl_con_cuerda_en_polea',sets:3,reps:14,rest:60}]},
+  gym_maquinas_pierna:{name:'Gimnasio máquinas · Pierna (intermedio)', type:'fuerza', level:'Intermedio', disc:'gimnasio',
+    focus:'Cuádriceps, femoral, glúteo y gemelo en máquinas, con poco riesgo técnico',
+    warmup:'8 min: bici suave + movilidad de cadera y tobillo + 1 serie ligera de prensa.',
+    notes:'Prioriza recorrido completo y control. En prensa no bloquees la rodilla ni despegues la zona lumbar del respaldo.',
+    items:[{e:'sf_prensa_de_piernas',sets:4,reps:10,rest:150},{e:'sf_sentadilla_hack',sets:4,reps:10,rest:135},{e:'sf_elevaciones_de_cadera_con_maquina_smith',sets:4,reps:12,rest:105},{e:'gim_curl_femoral_sentado',sets:4,reps:12,rest:90},{e:'gim_extension_cuadriceps',sets:4,reps:14,rest:75},{e:'sf_abduccion_de_cadera_con_maquina_de_abduccion_de_cadera',sets:3,reps:15,rest:60},{e:'gim_gemelo_prensa',sets:4,reps:15,rest:60},{e:'sf_abdominales_con_cuerda_en_polea_alta',sets:3,reps:15,rest:60}]},
+  gym_maquinas_fullbody_avz:{name:'Gimnasio máquinas · Full-body (avanzado)', type:'fuerza', level:'Avanzado', disc:'gimnasio',
+    focus:'Volumen alto en máquinas y poleas, cuerpo completo, con trabajo unilateral',
+    warmup:'10 min: cardio suave + movilidad completa + series de aproximación en prensa y jalón.',
+    notes:'Sesión de volumen: acércate al fallo (1-2 reps en reserva) en las últimas series. Cuida la técnica cuando llegue la fatiga.',
+    items:[{e:'sf_prensa_de_piernas',sets:4,reps:10,rest:135},{e:'gim_remo_sentado_polea',sets:4,reps:10,rest:120},{e:'sf_press_de_banca_en_maquina_sentado',sets:4,reps:10,rest:120},{e:'sf_sentadilla_hack',sets:4,reps:12,rest:105},{e:'gim_jalon_unilateral',sets:3,reps:12,rest:75},{e:'sf_elevacion_lateral_con_cable_a_una_mano',sets:3,reps:15,rest:60},{e:'gim_curl_femoral_sentado',sets:3,reps:12,rest:75},{e:'sf_cruce_de_poleas',sets:3,reps:14,rest:60},{e:'sf_abdominales_con_cuerda_en_polea_alta',sets:3,reps:15,rest:60}]}
 };
 
 /* Catálogo importado (deportesvarios + SimplyFitness) → datos base */
