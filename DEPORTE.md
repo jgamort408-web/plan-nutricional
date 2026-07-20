@@ -27,31 +27,44 @@ con `build.mjs` → `app.min.js`. Ver §7 para las trampas de este modelo.
 
 ## 2. Auditoría · estado inicial
 
-### Catálogo: 242 ejercicios (no 43)
+### Catálogo: 242 → 341 ejercicios
 
 Una primera versión de esta auditoría dijo «43 ejercicios». **Era incorrecta**: no se
-contabilizó `sport-catalog.js`, que aporta 199 más. El total real es **242**.
+contabilizó `sport-catalog.js`, que aportaba 199 más. El total de partida era **242**.
+Tras la ampliación son **341**.
 
-Reparto por disciplina:
+| Disciplina | Antes | Ahora | |
+|---|---|---|---|
+| Gimnasio | 118 | 137 | ✅ |
+| En casa | 46 | 41 | ✅ |
+| **Natación** | **6** | **30** | ✅ |
+| **Ciclismo** | **4** | **20** | ✅ |
+| **Raqueta** | **4** | **17** | ✅ |
+| **Combate** | **4** | **15** | ✅ |
+| **Remo/palas** | **6** | **15** | ✅ |
+| Carrera/marcha | 14 | 14 | ✅ |
+| Yoga/movilidad | 10 | 14 | ✅ |
+| Funcional | 11 | 11 | ✅ |
+| **Baile** | **2** | **10** | ✅ |
+| Deporte de equipo | 9 | 9 | ⚠️ |
+| Aventura | 7 | 7 | ⚠️ |
+| Otros | 1 | 1 | — |
 
-| Disciplina | Ejercicios | |
-|---|---|---|
-| Gimnasio | 118 | ✅ |
-| En casa | 46 | ✅ |
-| Carrera/marcha | 14 | ✅ |
-| Funcional | 11 | ✅ |
-| Yoga/movilidad | 10 | ✅ |
-| Deporte de equipo | 9 | ⚠️ |
-| Aventura | 7 | ⚠️ |
-| **Natación** | **6** | 🔴 |
-| **Remo/palas** | **6** | 🔴 |
-| **Ciclismo** | **4** | 🔴 |
-| **Raqueta** | **4** | 🔴 |
-| **Combate** | **4** | 🔴 |
-| **Baile** | **2** | 🔴 |
+Patrones dentro de Gimnasio: tracción vertical **2 → 15**, core **3 → 7**.
+Siguen flojos **unilateral (6)** y **acarreo (2)**.
+Solo **10 de 341** ejercicios tienen `visual` (animación 3D, hoy desactivada).
 
-Huecos por patrón dentro de Gimnasio: **tracción vertical 2**, **core 3**, acarreo 1.
-Solo **10 de 242** ejercicios tienen `visual` (animación 3D, hoy desactivada).
+#### Bug de datos encontrado al ampliar
+
+Seis ejercicios importados tenían `equip: "Peso corporal"` cuando su nombre exige
+material: los cinco jalones (`sf_jalon_*`, necesitan polea alta) y
+`sf_press_banca_con_agarre_cerrado` (barra). Con `exDisc` inferiendo la disciplina
+del equipo, aparecían como «En casa»; y **con el filtro de material nuevo se los
+habría ofrecido a alguien que marcara «solo peso corporal»**. Corregidos.
+
+El validador de `validate-catalog.cjs` comprueba esta coherencia
+(`equip` vs. material que implica el nombre) además de taxonomías, MET y campos
+obligatorios. Conviene pasarlo al añadir ejercicios.
 
 ### Hallazgos
 
@@ -66,7 +79,8 @@ Solo **10 de 242** ejercicios tienen `visual` (animación 3D, hoy desactivada).
 | A7 | Sin ratio **empuje:tracción** (debe ser ≈1:1, salud del hombro) | 🟠 | ✅ resuelto |
 | A8 | El asistente **no pregunta experiencia, lesiones ni material** | 🟠 | ✅ resuelto |
 | A9 | No propone **cargas en kg** | 🟠 | ✅ resuelto |
-| A10 | Disciplinas pobres (natación 6, ciclismo 4, baile 2) | 🟠 | 🔲 pendiente |
+| A10 | Disciplinas pobres (natación 6, ciclismo 4, baile 2) | 🟠 | ✅ resuelto (+99 ej.) |
+| A15 | 6 ejercicios con `equip: "Peso corporal"` que exigen polea o barra | 🟠 | ✅ resuelto |
 | A11 | **Fallback silencioso**: si no hay ejercicios de la disciplina, `sport-calendar.js:412` cae a `'all'` y genera gimnasio llamándolo natación | 🟠 | ✅ resuelto |
 | A12 | Calentamiento no suma a la duración estimada | 🟡 | ✅ resuelto |
 | A13 | `alert()` nativo en `sport-calendar.js:391,420` y `sport-ui.js:607,608,726,732` | 🟡 | ✅ resuelto |
@@ -170,14 +184,17 @@ Nueva pestaña 📈 **Progreso** en la barra de Deporte:
 - [x] Nueva pestaña 📈 Progreso + botón ▶ Entrenar
 - [x] Estilos claro y oscuro
 - [x] `build.mjs` actualizado con los 3 archivos nuevos
+- [x] Catálogo 242 → **341** ejercicios (natación, ciclismo, raqueta, combate, remo,
+      baile, tracción vertical y core de gimnasio)
+- [x] Corregidos 6 `equip` erróneos que rompían el filtro de material
 
 ### Pendiente
-- [ ] **Ampliar catálogo de disciplinas pobres** (A10): natación 6→30, ciclismo 4→20,
-      raqueta 4→15, combate 4→15, baile 2→10, remo 6→15.
+- [ ] Deporte de equipo (9) y aventura (7) → mínimo 15 cada uno.
       Formato: añadir a `EXTRA_EXERCISES` en `sport-catalog.js` con los campos
-      `name, type, muscles, met, equip, mode, sets, reps|dur, rest, cues, pat`.
-- [ ] Tracción vertical y core en gimnasio (hoy 2 y 3) → mínimo 8 cada uno
-- [ ] `visual` para los ejercicios principales (hoy 10/242) y reactivar `ANIM_ENABLED`
+      `name, type, muscles, met, equip, mode, sets, reps|dur, rest, cues, pat`
+      y `disc` explícito si el nombre no permite inferir la disciplina.
+- [ ] Unilateral (6) y acarreo (2) en gimnasio → mínimo 10 cada uno
+- [ ] `visual` para los ejercicios principales (hoy 10/341) y reactivar `ANIM_ENABLED`
 - [ ] Exportar el historial de entrenamientos a CSV
 - [ ] Integrar kcal de entrenamiento registradas con el balance de Nutrición
 - [ ] Gráfica de peso corporal en Progreso (hoy solo fuerza)
@@ -188,33 +205,28 @@ Nueva pestaña 📈 **Progreso** en la barra de Deporte:
 
 ## 5. Lista de ejercicios a añadir
 
-Formato de trabajo: lista plana, se completan los campos al implementarlos.
+Las disciplinas de la lista original (natación, ciclismo, raqueta, combate, remo,
+baile) y los huecos de gimnasio **ya están hechos** (+99 ejercicios). Queda:
 
-**Natación** — Crol continuo · Series 50/100/200/400 · Pies con tabla (crol/espalda) ·
-Brazos con pull-buoy · Técnica de respiración bilateral · Hipoxia · Palas · Aletas ·
-Viraje · Salida de bloque · Aguas abiertas · Estilos (IM) · Nado de recuperación
+**Deporte de equipo (9 → 15)** — Fútbol: pase y control · Fútbol: finalización ·
+Baloncesto: entrada a canasta · Baloncesto: rebote · Balonmano: lanzamiento en
+suspensión · Voleibol: saque en salto · Rugby: placaje técnico (con protecciones) ·
+Hockey: conducción de stick
 
-**Ciclismo** — Rodaje base Z2 · Intervalos 4×4 min · Cuestas de pie/sentado · Cadencia
-alta (100+ rpm) · Sprints 30 s · Sweet spot · Contrarreloj 20 min · Rodillo · Spinning
+**Aventura / aire libre (7 → 15)** — Escalada: bloque · Escalada: vías de resistencia ·
+Trail running: bajadas técnicas · Esquí de fondo · Vía ferrata · Barranquismo:
+desplazamiento · Orientación · Slackline
 
-**Raqueta** — Derecha/revés cruzado · Voleas · Smash · Servicio plano/liftado · Dejada ·
-Desplazamiento en escalera · Multibola · Pared · Bandeja (pádel) · Víbora (pádel)
+**Unilateral en gimnasio (6 → 10)** — Zancada caminando con mancuernas · Sentadilla
+búlgara con barra · Peso muerto rumano a una pierna · Step-up al cajón con carga ·
+Sentadilla a una pierna (pistol) asistida
 
-**Combate** — Sombra por rounds · Saco pesado · Manoplas · Comba de boxeo · Esquivas ·
-Rodillas en clinch · Patadas circulares/frontales · Trabajo de guardia · Sparring técnico
+**Acarreo en gimnasio (2 → 10)** — Farmer's walk con mancuernas · Farmer's walk con
+barra hexagonal · Acarreo frontal (front rack) · Acarreo overhead · Yoke walk ·
+Acarreo en zigzag
 
-**Remo/palas** — Remo 500 m · Remo 2 km · Intervalos 250 m · SkiErg · Técnica de pasada ·
-Kayak plano · Piragüismo · Remada con palas cortas
-
-**Baile** — Zumba · Salsa cardio · Hip-hop · Bachata · Danza contemporánea · Ballet fit ·
-Batuka · Coreografía HIIT
-
-**Tracción vertical (gimnasio)** — Dominada supina/prona/neutra · Dominada lastrada ·
-Dominada asistida con banda/máquina · Jalón al pecho abierto/neutro/tras nuca · Pullover en polea
-
-**Core (gimnasio)** — Rueda abdominal · Elevación de piernas colgado · Pallof press ·
-Rotación en polea · Plancha con lastre · Hollow hold · Copenhagen · Suitcase carry ·
-Dead bug con carga · Bird dog
+> Al añadirlos, pasar `validate-catalog.cjs` (coherencia de `equip`, taxonomías,
+> MET) y después `node build.mjs && node smoke-sport.cjs`.
 
 ---
 
@@ -262,12 +274,18 @@ aparecían con una vista guardada concreta.
 ## 8. Cómo compilar y probar
 
 ```bash
-node build.mjs        # regenera app.min.js + sella sw.js y el HTML
+node validate-catalog.cjs   # valida los datos del catálogo (rápido, sin navegador)
+node build.mjs              # regenera app.min.js + sella sw.js y el HTML
 
-# smoke test en Chrome headless (32 comprobaciones)
-python -m http.server 8000    # en otra terminal
+# smoke test en Chrome headless (35 comprobaciones)
+python -m http.server 8000  # en otra terminal
 node smoke-sport.cjs
 ```
+
+`validate-catalog.cjs` comprueba, para los 341 ejercicios: campos obligatorios,
+taxonomías válidas (`type`/`pat`/`muscles`/`disc`), MET en rango 0-16, coherencia
+entre `equip` y el material que implica el nombre, y `cues` presentes. Sale con
+código 1 si hay errores. **Pásalo siempre que toques el catálogo.**
 
 `smoke-sport.cjs` es la red de seguridad contra los fallos de §7. Cubre:
 
@@ -282,7 +300,11 @@ node smoke-sport.cjs
 | 7 | Pantalla de progreso: KPIs, barras, historial, desplegable y estado vacío |
 | 8 | Modo oscuro (luminancia real de las superficies) |
 
-Debe salir **32 OK · 0 fallos**. Las capturas quedan en `.shots/`.
+El bloque 3 incluye **cobertura por disciplina**: verifica que cada deporte genere
+una sesión propia sin colar ejercicios de otras disciplinas (el fallo original de
+natación).
+
+Debe salir **35 OK · 0 fallos**. Las capturas quedan en `.shots/`.
 Si tocas el generador o el registro, ejecútalo antes de mergear.
 
 > ⚠️ El archivo es `.cjs` a propósito: `package.json` tiene `"type":"module"`
