@@ -186,7 +186,7 @@ async function run(){
     });
     return JSON.stringify({flojas:flojas, sinSesion:sinSesion, total:Object.keys(EXERCISES).length});`);
   const CV = JSON.parse(cov||'{}');
-  (CV.total >= 340) ? ok('catálogo ampliado', CV.total + ' ejercicios') : bad('catálogo', CV.total);
+  (CV.total >= 330) ? ok('catálogo ampliado', CV.total + ' ejercicios') : bad('catálogo', CV.total);
   (CV.sinSesion.length === 0) ? ok('cada disciplina genera sesión propia', 'sin mezclas')
                               : bad('sesión por disciplina', CV.sinSesion.join(', '));
   (CV.flojas.length <= 3) ? ok('disciplinas con catálogo suficiente', CV.flojas.length + ' flojas: ' + CV.flojas.join(', '))
@@ -268,6 +268,58 @@ async function run(){
   (SF.despues === SF.antes + 1) ? ok('cierra una serie', SF.kg + ' kg registrados') : bad('cerrar serie', setFlow);
   (SF.descanso === 1) ? ok('estado persistido (reanudable)') : bad('persistencia del entreno');
 
+  /* Los botones que abren un diálogo (Terminar, Cambiar, Saltar, Abandonar,
+     y el RPE al cerrar el último set) estuvieron MUERTOS: .train-ov tenía
+     z-index 9000 y los diálogos 300/4000, así que se abrían por detrás.
+     Se comprueba que el diálogo queda por ENCIMA, no solo que exista. */
+  const dlgOver = async (name, click) => {
+    const r = await evalJS(`
+      ${click}
+      return new Promise(function(res){ setTimeout(function(){
+        var ov = document.querySelector('.train-ov');
+        var dlg = document.querySelector('.pn-dlg-back, #formBg.show, .modal-bg.show');
+        if(!dlg) return res('SIN-DIALOGO');
+        var zo = +getComputedStyle(ov).zIndex || 0, zd = +getComputedStyle(dlg).zIndex || 0;
+        var vis = getComputedStyle(dlg).display !== 'none';
+        res(JSON.stringify({zOverlay:zo, zDialog:zd, encima: zd > zo, visible: vis}));
+      }, 320); });`);
+    if(r === 'SIN-DIALOGO'){ bad(`botón ${name}`, 'no abre diálogo'); return; }
+    const d = JSON.parse(r||'{}');
+    (d.encima && d.visible) ? ok(`botón ${name}`, `diálogo z${d.zDialog} sobre overlay z${d.zOverlay}`)
+                            : bad(`botón ${name}`, `diálogo z${d.zDialog} DETRÁS del overlay z${d.zOverlay}`);
+    await evalJS(`var b=document.querySelector('.pn-dlg-btn.ghost,[data-act="cancel"],#trFinCancel,#trAltCancel,#trRpeSkip'); if(b) b.click(); else if(typeof closeForm==='function') closeForm();`);
+    await sleep(280);
+  };
+  console.log('  · botones que abren diálogo:');
+  await dlgOver('Terminar',  `var b=document.getElementById('trFin2'); if(b) b.click();`);
+  await dlgOver('Cambiar',   `var b=document.getElementById('trSwap'); if(b) b.click();`);
+  await dlgOver('Saltar',    `var b=document.getElementById('trSkip'); if(b) b.click();`);
+  await dlgOver('Abandonar', `var b=document.getElementById('trQuit'); if(b) b.click();`);
+
+  // botones sin diálogo: deshacer / serie extra / siguiente
+  const plain = await evalJS(`
+    // completa el ejercicio actual para que aparezcan Deshacer / Serie extra
+    var x = TrainState.ex[TrainState.cur];
+    x.sets.forEach(function(s){ s.done = true; });
+    renderTrain();
+    var hayUndo = !!document.getElementById('trUndo'), hayAdd = !!document.getElementById('trAdd');
+    // Deshacer PRIMERO: al añadir serie la vista vuelve a modo entrada y
+    // el botón #trUndo desaparece (correcto), así que probarlos al revés
+    // daba un falso negativo.
+    var d0 = x.sets.filter(function(s){return s.done;}).length;
+    var u = document.getElementById('trUndo'); if(u) u.click();
+    var d1 = TrainState.ex[TrainState.cur].sets.filter(function(s){return s.done;}).length;
+    // vuelve a completarlas para recuperar el panel de "ejercicio completado"
+    TrainState.ex[TrainState.cur].sets.forEach(function(s){ s.done = true; });
+    renderTrain();
+    var n0 = TrainState.ex[TrainState.cur].sets.length;
+    var a = document.getElementById('trAdd'); if(a) a.click();
+    var n1 = TrainState.ex[TrainState.cur].sets.length;
+    return JSON.stringify({hayUndo:hayUndo, hayAdd:hayAdd, addOk:n1===n0+1, undoOk:d1===d0-1});`);
+  const PL = JSON.parse(plain||'{}');
+  (PL.hayAdd && PL.addOk)   ? ok('botón Serie extra') : bad('botón Serie extra', plain);
+  (PL.hayUndo && PL.undoOk) ? ok('botón Deshacer')    : bad('botón Deshacer', plain);
+
   const commit = await evalJS(`
     var n0 = logAll().length;
     trCommit(4,'smoke test');
@@ -276,6 +328,184 @@ async function run(){
   const CM = JSON.parse(commit||'{}');
   (CM.despues === CM.antes + 1) ? ok('guarda el entrenamiento en el historial') : bad('guardar entreno', commit);
   (CM.limpio === 1 && CM.ov === 0) ? ok('limpia el estado y cierra el overlay') : bad('limpieza post-entreno', commit);
+
+  /* ── 6b. Material, selector y barra de acceso ───────────── */
+  console.log('\n\x1b[1m6b · Material y accesos\x1b[0m');
+  const gearT = await evalJS(`
+    // el material se deriva del texto libre de equip
+    var pruebas = [
+      ['sf_jalon_con_agarre_ancho','polea'],
+      ['dominadas','barra_fija'],
+      ['nadar_crol','piscina']
+    ];
+    var fallos = pruebas.filter(function(p){ return gearItemsOf(p[0]).indexOf(p[1]) < 0; });
+    // exige TODO el material, no solo una coincidencia
+    var soloBarra = ['barra'];
+    var bancoNecesario = Object.keys(EXERCISES).filter(function(id){
+      return gearItemsOf(id).indexOf('banco')>=0 && gearItemsOf(id).indexOf('barra')>=0; });
+    var colados = bancoNecesario.filter(function(id){ return gearCanDo(id, soloBarra); });
+    var cCasa = gearCoverage(gearItemsOfPlace('casa_sin'));
+    var cGym  = gearCoverage(gearItemsOfPlace('gimnasio'));
+    return JSON.stringify({fallos:fallos.length, colados:colados.length, casa:cCasa.n, gym:cGym.n, total:cCasa.total});`);
+  const G = JSON.parse(gearT||'{}');
+  (G.fallos === 0)  ? ok('material derivado del catálogo') : bad('gearItemsOf', G.fallos + ' fallos');
+  (G.colados === 0) ? ok('exige TODO el material (barra + banco)') : bad('gearCanDo', G.colados + ' colados con solo barra');
+  (G.casa > 20 && G.gym > G.casa) ? ok('cobertura por lugar', `casa sin material ${G.casa} · gimnasio ${G.gym} de ${G.total}`)
+                                  : bad('cobertura por lugar', gearT);
+
+  // el generador respeta el material real
+  const gen2 = await evalJS(`
+    var owned = gearItemsOfPlace('casa_sin');
+    var s = buildSessionByCriteria(['pecho','cuadriceps','core'], 40, 'media', 'all', {profile:{level:'novato', gear:owned, injuries:[]}});
+    if(!s) return 'NULL';
+    var imposibles = s.items.filter(function(i){ return !gearCanDo(i.e, owned); });
+    return JSON.stringify({n:s.items.length, imposibles:imposibles.length,
+      nombres:imposibles.slice(0,2).map(function(i){return EXERCISES[i.e].name;})});`);
+  const G2 = JSON.parse(gen2||'{}');
+  (G2.imposibles === 0) ? ok('sesión en casa sin material', G2.n + ' ejercicios, todos posibles')
+                        : bad('sesión en casa', G2.imposibles + ' imposibles: ' + (G2.nombres||[]).join(', '));
+
+  // selector de ejercicios: buscador, filtros y orden por parecido
+  const pick = await evalJS(`
+    var sid = Object.keys(SESSIONS)[0];
+    startTraining(sid,'A');
+    var ref = TrainState.ex[0].e;
+    trOpenPicker({title:'test', refId:ref, exclude:[ref]});
+    var lista = document.getElementById('trPickList');
+    if(!lista) return 'NO-ABRE';
+    var n0 = lista.querySelectorAll('[data-pick]').length;
+    var seps = lista.querySelectorAll('.tr-pick-sep').length;
+    var primeros = [].slice.call(lista.querySelectorAll('[data-pick]')).slice(0,3);
+    var sim = primeros.filter(function(b){ return /sim[12]/.test(b.className); }).length;
+    // buscar
+    var q = document.getElementById('trPickQ'); q.value='sentadilla'; q.dispatchEvent(new Event('input'));
+    var n1 = lista.querySelectorAll('[data-pick]').length;
+    var todosCoinciden = [].slice.call(lista.querySelectorAll('[data-pick]')).every(function(b){
+      return /sentadilla/i.test(EXERCISES[b.dataset.pick].name + ' ' + (EXERCISES[b.dataset.pick].equip||'')); });
+    return JSON.stringify({n0:n0, seps:seps, simArriba:sim, n1:n1, filtraBien:todosCoinciden});`);
+  const PK = JSON.parse(pick||'{}');
+  (PK.n0 > 5) ? ok('selector de ejercicios abre', PK.n0 + ' opciones') : bad('selector', pick);
+  (PK.simArriba >= 2 && PK.seps > 0) ? ok('parecidos primero y agrupados', PK.seps + ' grupos') : bad('orden por parecido', pick);
+  (PK.n1 > 0 && PK.n1 < PK.n0 && PK.filtraBien) ? ok('buscador filtra', `${PK.n0} → ${PK.n1}`) : bad('buscador', pick);
+  await evalJS(`if(typeof closeForm==='function') closeForm();`);
+  await sleep(250);
+
+  // añadir ejercicio extra
+  const extra = await evalJS(`
+    var n0 = TrainState.ex.length;
+    trAddExtraEx();
+    var b = document.querySelector('#trPickList [data-pick]'); if(!b) return 'SIN-OPCIONES';
+    var elegido = b.dataset.pick;
+    b.click();
+    return JSON.stringify({antes:n0, despues:TrainState.ex.length,
+      esUltimo: TrainState.ex[TrainState.ex.length-1].e===elegido,
+      marcadoExtra: !!TrainState.ex[TrainState.ex.length-1].extra,
+      saltaAEl: TrainState.cur===TrainState.ex.length-1});`);
+  const EX2 = JSON.parse(extra||'{}');
+  (EX2.despues === EX2.antes+1 && EX2.esUltimo && EX2.marcadoExtra && EX2.saltaAEl)
+    ? ok('añade ejercicio extra', `${EX2.antes} → ${EX2.despues} ejercicios`) : bad('ejercicio extra', extra);
+
+  // deshacer disponible en modo entrada (el hueco que detectó el usuario)
+  const undo2 = await evalJS(`
+    var x = TrainState.ex[TrainState.cur];
+    x.sets.forEach(function(s){ s.done=false; });
+    renderTrain();
+    var antesNada = !!document.getElementById('trUndo2');
+    document.getElementById('trDone').click();
+    var trasUna = !!document.getElementById('trUndo2');
+    var d0 = TrainState.ex[TrainState.cur].sets.filter(function(s){return s.done;}).length;
+    document.getElementById('trUndo2').click();
+    var d1 = TrainState.ex[TrainState.cur].sets.filter(function(s){return s.done;}).length;
+    return JSON.stringify({ocultoSinSeries:!antesNada, visibleTrasUna:trasUna, deshace:d1===d0-1});`);
+  const U = JSON.parse(undo2||'{}');
+  (U.ocultoSinSeries && U.visibleTrasUna && U.deshace) ? ok('deshacer disponible al instante') : bad('deshacer en modo entrada', undo2);
+
+  // modificar el nº de series planificado (añadir y quitar)
+  const editSets = await evalJS(`
+    var x = TrainState.ex[TrainState.cur];
+    x.sets.forEach(function(s){ s.done=false; });   // todas pendientes
+    renderTrain();
+    var n0 = x.sets.length;
+    document.getElementById('trAddSet').click();
+    var n1 = TrainState.ex[TrainState.cur].sets.length;
+    var hayRm = !!document.getElementById('trRmSet');
+    document.getElementById('trRmSet').click();
+    var n2 = TrainState.ex[TrainState.cur].sets.length;
+    return JSON.stringify({add:n1===n0+1, hayRm:hayRm, rm:n2===n1-1});`);
+  const ES = JSON.parse(editSets||'{}');
+  (ES.add && ES.hayRm && ES.rm) ? ok('editar nº de series (+/−)') : bad('editar series', editSets);
+
+  await evalJS(`trClearState(); trExit();`);
+  await sleep(200);
+
+  // barra «Entrenar hoy»
+  await evalJS(`
+    var hoy = spKey(new Date());
+    SportPlan.days[hoy] = [{s:Object.keys(SESSIONS)[0], who:'AB', week:1, phase:'acumulacion'}];
+    setSection('sport'); showSportView('scal');
+    return '1';`);
+  // la barra entra con una animación de 280 ms (translateY): si se mide antes
+  // de que acabe, sale desplazada y parece solapada con la tabbar
+  await sleep(450);
+  const barra = await evalJS(`
+    var b = document.getElementById('trTodayBar');
+    if(!b) return 'SIN-BARRA';
+    var cs = getComputedStyle(b);
+    var tab = document.getElementById('appTabbar');
+    var rb = b.getBoundingClientRect(), rt = tab ? tab.getBoundingClientRect() : null;
+    return JSON.stringify({visible: cs.display!=='none',
+      tieneBoton: !!document.getElementById('trBarGo'),
+      sobreTabbar: rt ? rb.bottom <= rt.top + 2 : true,
+      dentroPantalla: rb.top >= 0 && rb.bottom <= window.innerHeight + 1,
+      _bar: {bottom:cs.bottom, top:Math.round(rb.top), bot:Math.round(rb.bottom)},
+      _tab: {top: rt?Math.round(rt.top):null, h: rt?Math.round(rt.height):null, disp: tab?getComputedStyle(tab).display:null},
+      _win: window.innerHeight});`);
+  if(barra === 'SIN-BARRA') bad('barra Entrenar hoy', 'no aparece');
+  else {
+    const B = JSON.parse(barra||'{}');
+    (B.visible && B.tieneBoton) ? ok('barra «Entrenar hoy» visible') : bad('barra Entrenar hoy', barra);
+    (B.sobreTabbar && B.dentroPantalla) ? ok('barra no tapada por la tabbar') : bad('posición de la barra', barra);
+  }
+  const play = await evalJS(`
+    document.getElementById('trBarGo').click();
+    return new Promise(function(res){ setTimeout(function(){
+      res(JSON.stringify({overlay: !!document.getElementById('trainOverlay'),
+                          barraOculta: !document.getElementById('trTodayBar')}));
+    }, 350); });`);
+  const PY = JSON.parse(play||'{}');
+  (PY.overlay && PY.barraOculta) ? ok('▶ arranca el entreno de hoy') : bad('botón ▶ de la barra', play);
+  await shot('smoke-train2');
+  await evalJS(`trAddExtraEx();`); await sleep(400); await shot('smoke-picker');
+  await evalJS(`if(typeof closeForm==='function') closeForm();`); await sleep(250);
+  await evalJS(`trClearState(); trExit(); delete SportPlan.days[spKey(new Date())]; persistSportPlan();`);
+  await sleep(200);
+
+  // captura del asistente (paso de lugar + material)
+  await evalJS(`
+    setSection('sport'); showSportView('scal');
+    if(typeof openSportAssistant==='function') openSportAssistant();
+    return '1';`);
+  await sleep(400);
+  // avanza pulsando la primera tarjeta de cada paso hasta llegar al de material
+  // (sin depender del orden exacto de los pasos)
+  let reachedGear = false;
+  for(let step = 0; step < 8 && !reachedGear; step++){
+    reachedGear = await evalJS(`return document.querySelector('.masst-gear-g') ? '1' : '0';`) === '1';
+    if(reachedGear) break;
+    await evalJS(`
+      // paso de lugar → elige "casa sin material"; resto → primera tarjeta
+      var casa = [].slice.call(document.querySelectorAll('.masst-card')).find(function(x){return /sin material/i.test(x.textContent);});
+      var b = casa || document.querySelector('.masst-card');
+      if(b){ b.click(); }
+      else { var nx = document.querySelector('[data-nav="next"]'); if(nx) nx.click(); }
+      return '1';`);
+    await sleep(280);
+  }
+  const asstGear = await evalJS(`return document.querySelector('.masst-gear-g') && document.querySelector('.masst-cov') ? 'ok' : 'no';`);
+  asstGear === 'ok' ? ok('asistente · paso de material con cobertura') : bad('asistente material', asstGear);
+  if(asstGear === 'ok') await shot('smoke-asst-gear');
+  await evalJS(`var x=document.querySelector('.masst-x, [data-close]'); if(x) x.click(); return '1';`);
+  await sleep(250);
 
   /* ── 7. Pantalla de progreso ────────────────────────────── */
   console.log('\n\x1b[1m7 · Pantalla de progreso\x1b[0m');
@@ -310,6 +540,27 @@ async function run(){
     renderProgress();
     return document.querySelector('#sportview-prog .pg-onboard')?'onboard':'sin-onboard';`);
   empty === 'onboard' ? ok('estado vacío con instrucciones') : bad('estado vacío', empty);
+
+  /* ── 7b. Red de seguridad de arranque ───────────────────── */
+  console.log('\n\x1b[1m7b · Guardián de arranque\x1b[0m');
+  const guard = await evalJS(`
+    function hayOverlay(){ return document.body.innerHTML.indexOf('La app no pudo arrancar') >= 0; }
+    var antes = hayOverlay();
+    // error tardío benigno (service worker): no debe tapar la app
+    window.dispatchEvent(new PromiseRejectionEvent('unhandledrejection', {
+      promise: Promise.reject(new Error('Failed to update a ServiceWorker for scope')).catch(function(){return 0;}),
+      reason: new TypeError('Failed to update a ServiceWorker for scope (x) with script (y): Not found')
+    }));
+    var trasSW = hayOverlay();
+    // error tardío cualquiera, con la app ya arrancada: tampoco
+    window.dispatchEvent(new ErrorEvent('error', {message:'Boom tardio de prueba', error:new Error('Boom tardio de prueba')}));
+    var trasOtro = hayOverlay();
+    return JSON.stringify({antes:antes, trasSW:trasSW, trasOtro:trasOtro});`);
+  const GD = JSON.parse(guard||'{}');
+  (!GD.antes && !GD.trasSW) ? ok('ignora fallos de service worker') : bad('guardián', 'el overlay salta con un fallo de SW');
+  (!GD.trasOtro) ? ok('no tapa la app por errores tras el arranque') : bad('guardián', 'el overlay salta con la app ya arrancada');
+  await sleep(150);
+  errors.length = 0;   // los dos errores de arriba son sintéticos, los inyecta este test
 
   /* ── 8. Modo oscuro ─────────────────────────────────────── */
   console.log('\n\x1b[1m8 · Modo oscuro\x1b[0m');

@@ -82,9 +82,10 @@
       {key:'objetivo', type:'single', ico:'🎯', title:'¿Cuál es tu objetivo?', hint:'Ajusto intensidad y cómo repartir el trabajo.', options:OBJETIVOS},
       {key:'level',    type:'single', ico:'📊', title:'¿Cuánto llevas entrenando?', hint:'Determina cuántas series aguantas y si conviene peso libre o máquinas guiadas.',
         options:Object.entries(typeof SP_LEVELS!=='undefined'?SP_LEVELS:{}).map(([k,v])=>({v:k, ico:'📊', lbl:v.lbl, sub:v.ex}))},
-      {key:'disc',     type:'single', ico:'🏟️', title:'¿Dónde entrenas (por defecto)?', hint:'Filtra los ejercicios por contexto. Luego podrás poner un deporte distinto cada día.', options:sportsList()},
-      {key:'gear',     type:'multi',  ico:'🏋️', title:'¿Qué material tienes?', hint:'Solo propondré ejercicios que puedas hacer de verdad.',
-        options:Object.entries(typeof SP_GEAR!=='undefined'?SP_GEAR:{}).map(([k,v])=>({v:k, ico:v.ico, lbl:v.lbl}))},
+      {key:'place',    type:'single', ico:'📍', title:'¿Dónde vas a entrenar?', hint:'Marco el material típico de ese sitio. En el paso siguiente lo puedes afinar.',
+        options:Object.entries(typeof GEAR_PLACES!=='undefined'?GEAR_PLACES:{}).map(([k,v])=>({v:k, ico:v.ico, lbl:v.lbl, sub:v.sub}))},
+      {key:'gear',     type:'gear',   ico:'🏋️', title:'Confirma tu material', hint:'Quita o añade lo que haga falta. Solo propondré ejercicios que puedas hacer de verdad.', options:[]},
+      {key:'disc',     type:'single', ico:'🏟️', title:'¿Qué deporte o tipo de entreno?', hint:'El foco principal. Luego podrás poner un deporte distinto cada día.', options:sportsList()},
       {key:'injuries', type:'multi',  ico:'🩹', title:'¿Alguna zona que cuidar?', hint:'Opcional. Evitaré los ejercicios que carguen esas zonas. Si no tienes molestias, pasa al siguiente paso.',
         options:Object.entries(typeof SP_INJURIES!=='undefined'?SP_INJURIES:{}).map(([k,v])=>({v:k, ico:'🩹', lbl:v.lbl}))},
       {key:'days',     type:'multi',  ico:'📅', title:'¿Qué días entrenas?', hint:'Elige los días concretos de la semana (p. ej. lunes y viernes).', options:WD.map((d,i)=>({v:i, lbl:d}))},
@@ -106,8 +107,13 @@
     // Defaults COMPLETOS: el usuario puede pulsar "⚡ Valores por defecto" en cualquier
     // paso y generar sin rellenar nada (objetivo "estar en forma" 3 días/sem, 45 min, 8 sem).
     // arranca con lo que ya sepamos del perfil guardado
-    const prof = (typeof spProfile==='function') ? spProfile() : {level:'intermedio', gear:['barra','mancuernas','maquinas','barrafija'], injuries:[]};
-    _i = 0; _A = {objetivo:'forma', level:prof.level, gear:prof.gear.slice(), injuries:prof.injuries.slice(),
+    const prof = (typeof spProfile==='function') ? spProfile() : {level:'intermedio', gear:[], injuries:[]};
+    // gear puede venir con las claves antiguas (SP_GEAR) o ya con ítems
+    // normalizados (GEAR_ITEMS): si no reconozco ninguna, uso el gimnasio.
+    let gear = (prof.gear||[]).filter(k=> typeof GEAR_ITEMS!=='undefined' && GEAR_ITEMS[k]);
+    if(!gear.length && typeof gearItemsOfPlace==='function') gear = gearItemsOfPlace('gimnasio');
+    const place = (typeof gearGuessPlace==='function') ? gearGuessPlace(gear) : 'gimnasio';
+    _i = 0; _A = {objetivo:'forma', level:prof.level, place:place, gear:gear, injuries:(prof.injuries||[]).slice(),
                   disc:'gimnasio', days:[0,2,4], measure:'time', amount:45, weeks:8, daySport:{}};
     if(!_root){ _root = document.createElement('div'); _root.id='sportAsst'; _root.className='masst'; document.body.appendChild(_root); _root.addEventListener('click', onClick);
       // Swipe móvil: izquierda = siguiente, derecha = atrás (reutiliza los botones de navegación).
@@ -134,12 +140,15 @@
         return WD[i]+ds;
       }).join(', ') || '—';
       const lvlLbl = ((typeof SP_LEVELS!=='undefined' && SP_LEVELS[_A.level])||{}).lbl || '—';
-      const gearLbl = (_A.gear||[]).map(g=>((typeof SP_GEAR!=='undefined'&&SP_GEAR[g])||{}).lbl||g).join(', ') || 'Solo peso corporal';
+      const placeLbl = ((typeof GEAR_PLACES!=='undefined' && GEAR_PLACES[_A.place])||{}).lbl || '—';
+      const covR = (typeof gearCoverage==='function') ? gearCoverage(_A.gear||[]) : null;
+      const gearLbl = covR ? `${covR.n} ejercicios disponibles` : ((_A.gear||[]).length+' tipos');
       const injLbl = (_A.injuries||[]).map(g=>((typeof SP_INJURIES!=='undefined'&&SP_INJURIES[g])||{}).lbl||g).join(', ');
       bodyHtml = `<ul class="masst-sum">
         <li><span>🎯 Objetivo</span><b>${esc(objLbl)}</b></li>
         <li><span>📊 Nivel</span><b>${esc(lvlLbl)}</b></li>
         <li><span>🏟️ Deporte base</span><b>${esc(discLbl)}</b></li>
+        <li><span>📍 Lugar</span><b>${esc(placeLbl)}</b></li>
         <li><span>🏋️ Material</span><b>${esc(gearLbl)}</b></li>
         ${injLbl?`<li><span>🩹 A cuidar</span><b>${esc(injLbl)}</b></li>`:''}
         <li><span>📅 Días</span><b>${esc(daysLbl)}</b></li>
@@ -155,6 +164,29 @@
           <span class="masst-card-n">${esc(o.lbl)}</span>
           <span class="masst-card-chk">${sel.indexOf(o.v)>=0?'✓':'＋'}</span>
         </button>`).join('')}</div>`;
+    } else if(st.type==='gear'){
+      // Material agrupado, con el recuento real de ejercicios disponibles:
+      // así se ve al momento lo que abre o cierra cada ítem.
+      const owned = _A.gear||[];
+      const cov = (typeof gearCoverage==='function') ? gearCoverage(owned) : {n:0,total:0,pct:0};
+      const GRUPOS = [
+        ['Básico',      ['ninguno','esterilla','banda','comba','cajon']],
+        ['Peso libre',  ['mancuernas','kettlebell','barra','barra_ez','banco','rack','smith','balon_med']],
+        ['Gimnasio',    ['polea','maquina','barra_fija','paralelas','trx','rueda_ab','trineo']],
+        ['Cardio',      ['cinta','bici','eliptica','remo_erg','skierg']],
+        ['Específico',  ['piscina','nat_acces','saco','guantes','raqueta','pista','balon','zapatillas','exterior','escalera_ag','kayak']]
+      ];
+      bodyHtml = `
+        <div class="masst-cov"><b>${cov.n}</b> de ${cov.total} ejercicios disponibles <span>(${cov.pct} %)</span></div>
+        ${GRUPOS.map(([g, items])=>`
+          <div class="masst-gear-g">
+            <span class="masst-gear-h">${esc(g)}</span>
+            <div class="masst-gear-row">${items.filter(k=> GEAR_ITEMS[k]).map(k=>{
+              const it = GEAR_ITEMS[k], on = owned.indexOf(k)>=0;
+              return `<button class="masst-gear-b ${on?'on':''}" data-multi="gear" data-val="${k}">
+                <span>${it.ico}</span>${esc(it.lbl)}</button>`;
+            }).join('')}</div>
+          </div>`).join('')}`;
     } else if(st.type==='perday'){
       const days = (_A.days||[]).slice().sort((a,b)=>a-b);
       if(!days.length){ bodyHtml = `<p class="masst-hint">Primero elige días en el paso anterior.</p>`; }
@@ -211,7 +243,15 @@
   function onClick(e){
     if(e.target.closest('[data-close]')){ close(); return; }
     const single = e.target.closest('[data-set]');
-    if(single){ let v=single.dataset.val; const k=single.dataset.set; if(k==='amount'||k==='weeks') v=+v; _A[k]=v; if(_i<steps().length-1) _i++; render(); return; }
+    if(single){
+      let v=single.dataset.val; const k=single.dataset.set;
+      if(k==='amount'||k==='weeks') v=+v;
+      _A[k]=v;
+      // elegir lugar precarga su material típico (el paso siguiente lo afina)
+      if(k==='place' && typeof gearItemsOfPlace==='function') _A.gear = gearItemsOfPlace(v);
+      if(_i<steps().length-1) _i++;
+      render(); return;
+    }
     const multi = e.target.closest('[data-multi]');
     if(multi){
       const k=multi.dataset.multi;

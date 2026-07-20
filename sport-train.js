@@ -198,6 +198,19 @@ function trAddSet(){
   x.sets.push({kg:last.kg, reps:x.mode==='time'?0:last.reps, rpe:0, done:false, dur:x.goalDur||0});
   trSaveState(); renderTrain();
 }
+/* ¿hay alguna serie cerrada que se pueda deshacer? */
+function trCanUndo(){ const x = trCurEx(); return !!(x && (x.sets||[]).some(s=>s.done)); }
+/* Quita la última serie SIN completar (para ajustar el nº de series
+   planificado a la baja). No borra las ya registradas. */
+function trRemoveSet(){
+  const x = trCurEx(); if(!x) return;
+  const pend = (x.sets||[]).filter(s=>!s.done).length;
+  if(pend <= 1){ pnToast('Debe quedar al menos una serie', 'warn'); return; }
+  for(let i = x.sets.length-1; i >= 0; i--){ if(!x.sets[i].done){ x.sets.splice(i,1); break; } }
+  trSaveState(); renderTrain();
+}
+/* ¿se puede quitar alguna serie pendiente? */
+function trCanRemove(){ const x = trCurEx(); return !!(x && (x.sets||[]).filter(s=>!s.done).length > 1); }
 function trSetRpe(v){
   const x = trCurEx(); if(!x) return;
   for(let i = x.sets.length-1; i >= 0; i--) if(x.sets[i].done){ x.sets[i].rpe = v; break; }
@@ -235,33 +248,174 @@ async function trSkipEx(){
   x.skipped = true;
   if(TrainState.cur < TrainState.ex.length-1) trGoEx(TrainState.cur+1); else trSaveState(), renderTrain();
 }
-/* Sustituir el ejercicio actual por otro que trabaje lo mismo
+/* ── Selector de ejercicios ───────────────────────────────────
+   Compartido por «Cambiar ejercicio» y «Añadir ejercicio extra».
+   Ordena por PARECIDO al ejercicio de referencia (mismo patrón y
+   mismos músculos primero) y permite buscar y filtrar, porque con
+   341 ejercicios una lista plana no sirve de nada.
+══════════════════════════════════════════════════════════ */
+var _trPick = {q:'', mus:'all', disc:'all', soloMat:true};
+
+/* Puntúa cuánto se parece `id` al ejercicio de referencia `ref` */
+function trSimScore(id, ref){
+  const c = EXERCISES[id]; if(!c) return -1;
+  if(!ref) return 0;
+  let s = 0;
+  if(c.pat === ref.pat) s += 100;                                   // mismo patrón: lo que más importa
+  const shared = (c.muscles||[]).filter(m=> (ref.muscles||[]).includes(m));
+  s += shared.length * 20;
+  if((c.muscles||[])[0] === (ref.muscles||[])[0]) s += 30;          // mismo músculo principal
+  if(c.type === ref.type) s += 10;
+  if(exDisc(c) === exDisc(ref)) s += 5;
+  return s;
+}
+/* Nivel de parecido para pintarlo: 2 = muy parecido, 1 = parecido, 0 = otro */
+function trSimTier(score){ return score >= 130 ? 2 : score >= 100 ? 1 : 0; }
+
+function trOpenPicker(opts){
+  opts = opts || {};
+  const ref     = opts.refId ? EXERCISES[opts.refId] : null;
+  const prof    = spProfile();
+  const title   = opts.title || 'Elegir ejercicio';
+  const sub     = opts.sub || '';
+  const onPick  = opts.onPick || function(){};
+  _trPick.q = '';
+
+  const render = ()=>{
+    const q = (_trPick.q||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+    let list = Object.keys(EXERCISES).filter(id=>{
+      if(opts.exclude && opts.exclude.includes(id)) return false;
+      const c = EXERCISES[id];
+      if(_trPick.mus !== 'all' && !(c.muscles||[]).includes(_trPick.mus)) return false;
+      if(_trPick.disc !== 'all' && exDisc(c) !== _trPick.disc) return false;
+      if(_trPick.soloMat && !spGearOk(c, prof.gear, id)) return false;
+      if(q){
+        const n = (c.name||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+        const e = (c.equip||'').toLowerCase();
+        if(!n.includes(q) && !e.includes(q)) return false;
+      }
+      return true;
+    });
+    // parecidos primero; sin referencia, alfabético
+    if(ref) list.sort((a,b)=> trSimScore(b,ref)-trSimScore(a,ref) || EXERCISES[a].name.localeCompare(EXERCISES[b].name));
+    else    list.sort((a,b)=> EXERCISES[a].name.localeCompare(EXERCISES[b].name));
+
+    const body = document.getElementById('trPickList');
+    if(!body) return;
+    const total = list.length;
+    list = list.slice(0, 80);
+    const cnt = document.getElementById('trPickCount');
+    if(cnt) cnt.textContent = total + (total===1?' ejercicio':' ejercicios') + (total>80?' · mostrando 80':'');
+
+    if(!list.length){
+      body.innerHTML = `<div class="tr-pick-empty">Sin resultados.${_trPick.soloMat?' Prueba a desactivar «solo con mi material».':''}</div>`;
+      return;
+    }
+    let lastTier = -1;
+    body.innerHTML = list.map(id=>{
+      const c = EXERCISES[id];
+      const tier = ref ? trSimTier(trSimScore(id, ref)) : -1;
+      let head = '';
+      if(ref && tier !== lastTier){
+        lastTier = tier;
+        head = `<div class="tr-pick-sep">${tier===2?'✅ Muy parecidos':tier===1?'↔ Parecidos':'· Otros ejercicios'}</div>`;
+      }
+      const mus = (c.muscles||[]).slice(0,3).map(m=>(EX_MUSCLES[m]||{}).lbl||m).join(' · ');
+      const dd  = EX_SPORTS[exDisc(c)] || {ico:''};
+      return `${head}<button class="tr-pick-it ${tier>0?'sim'+tier:''}" data-pick="${id}">
+        <span class="tr-pick-ico">${dd.ico||'•'}</span>
+        <span class="tr-pick-b"><b>${spEsc(c.name)}</b><span>${spEsc(mus)}</span></span>
+        <span class="tr-pick-eq">${spEsc(c.equip||'—')}</span>
+      </button>`;
+    }).join('');
+    body.querySelectorAll('[data-pick]').forEach(b=> b.addEventListener('click', ()=>{
+      closeForm(); onPick(b.dataset.pick);
+    }));
+  };
+
+  openForm(`
+    <div class="form-hd"><h2>${spEsc(title)}</h2><span class="form-sub">${spEsc(sub)}</span></div>
+    <div class="form-body tr-pick-body">
+      <input class="finp tr-pick-q" id="trPickQ" type="search" placeholder="Buscar por nombre o material…" autocomplete="off">
+      <div class="tr-pick-filters">
+        <select class="fsel" id="trPickMus">
+          <option value="all">Todos los músculos</option>
+          ${Object.entries(EX_MUSCLES).map(([k,v])=>`<option value="${k}" ${_trPick.mus===k?'selected':''}>${v.lbl}</option>`).join('')}
+        </select>
+        <select class="fsel" id="trPickDisc">
+          <option value="all">Cualquier deporte</option>
+          ${Object.entries(EX_SPORTS).map(([k,v])=>`<option value="${k}" ${_trPick.disc===k?'selected':''}>${v.ico} ${v.lbl}</option>`).join('')}
+        </select>
+      </div>
+      <label class="tr-pick-gear"><input type="checkbox" id="trPickMat" ${_trPick.soloMat?'checked':''}> Solo con mi material <i>(${(prof.gear||[]).length} tipos)</i></label>
+      <div class="tr-pick-count" id="trPickCount"></div>
+      <div class="tr-pick-list" id="trPickList"></div>
+    </div>
+    <div class="form-actions"><button class="btn-sec" id="trPickCancel">Cancelar</button></div>`);
+
+  const qi = document.getElementById('trPickQ');
+  if(qi) qi.addEventListener('input', ()=>{ _trPick.q = qi.value; render(); });
+  const ms = document.getElementById('trPickMus');
+  if(ms) ms.addEventListener('change', ()=>{ _trPick.mus = ms.value; render(); });
+  const ds = document.getElementById('trPickDisc');
+  if(ds) ds.addEventListener('change', ()=>{ _trPick.disc = ds.value; render(); });
+  const mt = document.getElementById('trPickMat');
+  if(mt) mt.addEventListener('change', ()=>{ _trPick.soloMat = mt.checked; render(); });
+  document.getElementById('trPickCancel').addEventListener('click', closeForm);
+  render();
+}
+
+/* Sustituir el ejercicio actual por otro parecido
    (máquina ocupada, molestia puntual…) */
 function trSwapEx(){
   const x = trCurEx(); if(!x) return;
   const ex = EXERCISES[x.e] || {};
-  const alts = Object.keys(EXERCISES).filter(id=>{
-    if(id === x.e) return false;
-    const c = EXERCISES[id];
-    if(c.pat !== ex.pat) return false;
-    return (c.muscles||[]).some(m=> (ex.muscles||[]).includes(m));
-  }).slice(0, 40);
-  if(!alts.length){ pnToast('No hay alternativas equivalentes en el catálogo', 'warn'); return; }
-  openForm(`
-    <div class="form-hd"><h2>🔄 Cambiar ejercicio</h2><span class="form-sub">Mismo patrón (${spEsc((EX_PATTERNS[ex.pat]||{}).lbl||ex.pat)}) y músculos parecidos</span></div>
-    <div class="form-body"><div class="tr-alts">${alts.map(id=>{
-      const c = EXERCISES[id];
-      return `<button class="tr-alt" data-alt="${id}"><b>${spEsc(c.name)}</b><span>${spEsc(c.equip||'')}</span></button>`;
-    }).join('')}</div></div>
-    <div class="form-actions"><button class="btn-sec" id="trAltCancel">Cancelar</button></div>`);
-  formBody().querySelectorAll('.tr-alt').forEach(b=> b.addEventListener('click', ()=>{
-    const id = b.dataset.alt;
-    const pre = logPrefill(id, TrainState.who, x.goalReps);
-    x.e = id; x.hint = pre.hint;
-    x.sets.forEach(s=>{ if(!s.done){ s.kg = pre.kg; if(x.mode==='reps') s.reps = pre.reps; } });
-    trSaveState(); closeForm(); renderTrain();
-  }));
-  document.getElementById('trAltCancel').addEventListener('click', closeForm);
+  trOpenPicker({
+    title: '🔄 Cambiar ejercicio',
+    sub: `Sustituye «${ex.name||''}» · los más parecidos salen primero`,
+    refId: x.e,
+    exclude: [x.e],
+    onPick: id=>{
+      const pre = logPrefill(id, TrainState.who, x.goalReps);
+      x.e = id; x.hint = pre.hint;
+      const nx = EXERCISES[id] || {};
+      x.mode = (nx.mode === 'time') ? 'time' : 'reps';
+      x.goalDur = x.mode === 'time' ? (nx.dur||30) : null;
+      x.goalReps = x.mode === 'reps' ? (nx.reps||10) : null;
+      x.rest = nx.rest != null ? nx.rest : x.rest;
+      x.sets.forEach(s=>{ if(!s.done){ s.kg = pre.kg; if(x.mode==='reps') s.reps = pre.reps; else s.dur = x.goalDur; } });
+      trSaveState(); renderTrain();
+      pnToast(`Cambiado a ${nx.name}`, 'ok');
+    }
+  });
+}
+
+/* Añadir un ejercicio EXTRA no previsto, en cualquier momento */
+function trAddExtraEx(){
+  if(!TrainState) return;
+  const cur = trCurEx();
+  trOpenPicker({
+    title: '➕ Añadir ejercicio',
+    sub: 'Se añade al final de la sesión de hoy',
+    refId: cur ? cur.e : null,
+    exclude: TrainState.ex.map(x=>x.e),
+    onPick: id=>{
+      const e = EXERCISES[id]; if(!e) return;
+      const isTime = e.mode === 'time';
+      const goal = isTime ? null : (e.reps||10);
+      const pre  = isTime ? {kg:0, reps:0, hint:''} : logPrefill(id, TrainState.who, goal);
+      TrainState.ex.push({
+        e:id, extra:true,
+        mode: isTime ? 'time' : 'reps',
+        goalReps: goal, goalDur: isTime ? (e.dur||30) : null,
+        rest: e.rest || 60, hint: pre.hint,
+        sets: Array.from({length: e.sets||3}, ()=> ({kg:pre.kg, reps:isTime?0:pre.reps, rpe:0, done:false, dur:isTime?(e.dur||30):0}))
+      });
+      TrainState.cur = TrainState.ex.length - 1;      // salta directo a él
+      trSkipRest(); trSaveState(); renderTrain();
+      pnToast(`${e.name} añadido`, 'ok');
+    }
+  });
 }
 
 /* ── Cierre de la sesión ──────────────────────────────────── */
@@ -394,6 +548,7 @@ function renderTrain(){
     document.body.appendChild(el);
   }
   document.body.classList.add('train-mode');
+  renderTrainBar();          // retira la barra «Entrenar hoy» mientras entrenas
 
   el.innerHTML = `
   <div class="tr-hd">
@@ -417,7 +572,7 @@ function renderTrain(){
 
   <div class="tr-body">
     <div class="tr-ex">
-      <span class="tr-ex-n">Ejercicio ${st.cur+1} de ${st.ex.length}</span>
+      <span class="tr-ex-n">Ejercicio ${st.cur+1} de ${st.ex.length}${x.extra?' · añadido':''}</span>
       <h2>${spEsc(ex.name)}</h2>
       <div class="tr-ex-meta">
         <span>${spEsc(ex.equip||'')}</span>
@@ -465,13 +620,20 @@ function renderTrain(){
           </div>
         </div>
       </div>
-      <button class="tr-go" id="trDone">✓ Serie ${i+1} hecha</button>`}
+      <button class="tr-go" id="trDone">✓ Serie ${i+1} hecha</button>
+      <div class="tr-set-edit">
+        <button class="tr-set-edit-b" id="trAddSet">+ Serie</button>
+        ${trCanRemove() ? `<button class="tr-set-edit-b" id="trRmSet">− Serie</button>` : ''}
+        ${trCanUndo() ? `<button class="tr-set-edit-b" id="trUndo2">↩ Deshacer</button>` : ''}
+      </div>`}
+
+    <button class="tr-add-ex" id="trAddEx">➕ Añadir otro ejercicio</button>
   </div>
 
   <div class="tr-foot">
     <button class="tr-foot-b" id="trSwap">🔄 Cambiar</button>
     <button class="tr-foot-b" id="trSkip">⏭ Saltar</button>
-    <button class="tr-foot-b danger" id="trQuit">✕ Abandonar</button>
+    <button class="tr-foot-b danger" id="trQuit">✕ Salir</button>
     <button class="tr-foot-b prim" id="trFin2">🏁 Terminar</button>
   </div>`;
 
@@ -485,7 +647,11 @@ function renderTrain(){
   on('trFin',  trFinish);
   on('trFin2', trFinish);
   on('trUndo', trUndoSet);
+  on('trUndo2',trUndoSet);
   on('trAdd',  trAddSet);
+  on('trAddSet',trAddSet);
+  on('trRmSet',trRemoveSet);
+  on('trAddEx',trAddExtraEx);
   on('trNext', ()=> trGoEx(st.cur+1));
   el.querySelectorAll('[data-go]').forEach(b=> b.addEventListener('click', ()=> trGoEx(+b.dataset.go)));
   el.querySelectorAll('[data-kg]').forEach(b=> b.addEventListener('click', ()=> trBumpKg(+b.dataset.kg)));
@@ -511,8 +677,108 @@ function renderTrain(){
   if(trRestLeft() > 0) trRestTick();
 }
 
+/* ── Acceso rápido: barra «Entrenar hoy» ──────────────────────
+   Antes había que ir a Entrenamientos → abrir el día → pulsar ▶.
+   Demasiados pasos para lo que se hace a diario y desde el móvil.
+   Esta barra sale fija abajo en toda la sección de Deporte cuando
+   hoy toca entrenar (o hay una sesión a medias).
+══════════════════════════════════════════════════════════ */
+function trTodayEntries(){
+  if(typeof SportPlan === 'undefined' || !SportPlan || !SportPlan.days) return [];
+  return (SportPlan.days[spKey(new Date())] || []).filter(e=> SESSIONS[e.s]);
+}
+/* Lanza el entreno de hoy: si hay varias sesiones, deja elegir */
+function trStartToday(){
+  const pend = trLoadState();
+  if(pend){ resumeTraining(); return; }
+  const list = trTodayEntries();
+  if(!list.length){ pnToast('Hoy no tienes entrenamiento programado', 'warn'); return; }
+  if(list.length === 1){ trStartEntry(list[0]); return; }
+  openForm(`
+    <div class="form-hd"><h2>▶ Entrenar hoy</h2><span class="form-sub">Tienes ${list.length} sesiones programadas</span></div>
+    <div class="form-body"><div class="tr-pick-list">${list.map((e,i)=>{
+      const s = SESSIONS[e.s], t = sessionTotals(s,'A');
+      return `<button class="tr-pick-it" data-go="${i}">
+        <span class="tr-pick-ico">${(EX_TYPES[s.type]||{ico:'•'}).ico}</span>
+        <span class="tr-pick-b"><b>${spEsc(s.name)}</b><span>${t.min} min · ${(s.items||[]).length} ejercicios</span></span>
+      </button>`;
+    }).join('')}</div></div>
+    <div class="form-actions"><button class="btn-sec" id="trTodayCancel">Cancelar</button></div>`);
+  formBody().querySelectorAll('[data-go]').forEach(b=> b.addEventListener('click', ()=>{
+    closeForm(); trStartEntry(list[+b.dataset.go]);
+  }));
+  document.getElementById('trTodayCancel').addEventListener('click', closeForm);
+}
+/* Arranca una entrada del plan aplicando la fase del mesociclo */
+function trStartEntry(ent){
+  const live = (typeof spSessionFor === 'function') ? spSessionFor(ent) : SESSIONS[ent.s];
+  if(live && ent.phase){
+    const tmpId = '_live_' + ent.s + '_' + (ent.week||1);
+    SESSIONS[tmpId] = live;
+    startTraining(tmpId, ent.who === 'B' ? 'B' : 'A');
+  } else {
+    startTraining(ent.s, ent.who === 'B' ? 'B' : 'A');
+  }
+}
+
+/* Pinta / actualiza la barra. La llama showSportView en cada vista. */
+function renderTrainBar(){
+  let bar = document.getElementById('trTodayBar');
+  const inSport = document.body.classList.contains('sec-sport');
+  const training = document.body.classList.contains('train-mode');
+  const pend = trLoadState();
+  const list = trTodayEntries();
+  const show = inSport && !training && (pend || list.length);
+
+  if(!show){ if(bar) bar.remove(); document.body.classList.remove('has-trainbar'); return; }
+  if(!bar){
+    bar = document.createElement('div');
+    bar.id = 'trTodayBar';
+    bar.className = 'tr-bar';
+    document.body.appendChild(bar);
+  }
+  document.body.classList.add('has-trainbar');
+
+  if(pend){
+    const done = (pend.ex||[]).reduce((a,x)=> a + (x.sets||[]).filter(s=>s.done).length, 0);
+    const tot  = (pend.ex||[]).reduce((a,x)=> a + (x.sets||[]).length, 0);
+    bar.innerHTML = `
+      <span class="tr-bar-b">
+        <b>Entrenamiento a medias</b>
+        <span>${spEsc(pend.sessName||'')} · ${done}/${tot} series</span>
+      </span>
+      <button class="tr-bar-go" id="trBarGo">▶ Reanudar</button>`;
+  } else {
+    const s = SESSIONS[list[0].s];
+    const t = sessionTotals(s, 'A');
+    const ph = list[0].phase ? SP_PHASES[list[0].phase] : null;
+    bar.innerHTML = `
+      <span class="tr-bar-b">
+        <b>Hoy: ${spEsc(s.name)}${list.length>1?` <i>+${list.length-1}</i>`:''}</b>
+        <span>${t.min} min · ${(s.items||[]).length} ejercicios${ph?` · ${ph.ico} ${spEsc(ph.lbl)}`:''}</span>
+      </span>
+      <button class="tr-bar-go" id="trBarGo">▶ Entrenar</button>`;
+  }
+  const g = document.getElementById('trBarGo');
+  if(g) g.addEventListener('click', trStartToday);
+
+  // La barra va JUSTO encima de la tabbar. Se mide en vez de asumir 84px:
+  // la altura real depende de la fuente, del safe-area del móvil y de si
+  // la tabbar está oculta en esa sección.
+  const tab = document.getElementById('appTabbar');
+  const th  = (tab && getComputedStyle(tab).display !== 'none') ? tab.getBoundingClientRect().height : 0;
+  bar.style.bottom = th + 'px';
+  document.body.style.setProperty('--trbar-h', bar.getBoundingClientRect().height + 'px');
+}
+
 window.startTraining = startTraining;
 window.resumeTraining = resumeTraining;
 window.trHasPending = trHasPending;
 window.renderTrain = renderTrain;
+window.renderTrainBar = renderTrainBar;
+window.trStartToday = trStartToday;
+window.trStartEntry = trStartEntry;
+window.trOpenPicker = trOpenPicker;
+window.trAddExtraEx = trAddExtraEx;
+window.trRemoveSet = trRemoveSet;
 window.trFmtClock = trFmtClock;

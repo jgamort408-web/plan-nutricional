@@ -76,6 +76,7 @@ function setSection(sec){
     if(wk) wk.classList.add('hidden');
     document.querySelectorAll('.sportview').forEach(el=> el.classList.add('hidden'));
     document.body.classList.remove('spv-ex','spv-sess','spv-scal','spv-prog');   // fuera de Deporte: sin vista de deporte
+    if(typeof renderTrainBar === 'function') renderTrainBar();                   // retira la barra «Entrenar hoy»
     switchView(S.view);
   }
   lsSet('sport:section', sec);
@@ -94,6 +95,7 @@ function showSportView(v){
   if(v === 'sess') renderSessions();
   if(v === 'scal' && typeof renderSportCalendar === 'function') renderSportCalendar();
   if(v === 'prog' && typeof renderProgress === 'function') renderProgress();
+  if(typeof renderTrainBar === 'function') renderTrainBar();   // barra «Entrenar hoy»
   if(typeof renderTabbar === 'function') renderTabbar('sport');
 }
 
@@ -639,13 +641,17 @@ const SP_BALANCE = {empuje_h:'traccion_h', traccion_h:'empuje_h', empuje_v:'trac
 const SP_WARMUP_MIN = 8;
 let _genCriteria = null;
 
-/* ¿el usuario tiene el material que pide este ejercicio? */
-function spGearOk(ex, gear){
+/* ¿el usuario tiene el material que pide este ejercicio?
+   Usa los ítems normalizados de sport-gear.js (gearItemsOf), que
+   exigen tener TODO lo necesario. La versión anterior comparaba
+   subcadenas del texto libre de `equip` y bastaba con que coincidiera
+   UNA palabra: "Barra + banco" pasaba el filtro con solo tener barra. */
+function spGearOk(ex, gear, id){
   if(!gear || !gear.length) return true;
+  if(typeof gearCanDo === 'function' && id) return gearCanDo(id, gear);
+  // respaldo por texto si aún no está cargado sport-gear.js
   const eq = (ex.equip||'').toLowerCase();
-  if(!eq) return true;
-  // peso corporal / material trivial: siempre disponible
-  if(/peso corporal|esterilla|suelo|zapatillas|ninguno|toalla|silla|escal/.test(eq)) return true;
+  if(!eq || /peso corporal|sin material|ninguno|suelo/.test(eq)) return true;
   return gear.some(g=> (SP_GEAR[g]||{match:[]}).match.some(w=> w && eq.includes(w)));
 }
 /* ¿este ejercicio carga una zona lesionada? */
@@ -659,8 +665,8 @@ function spInjuryOk(ex, injuries){
   });
 }
 /* Filtro combinado de perfil */
-function spExAllowed(ex, prof){
-  return spGearOk(ex, prof.gear) && spInjuryOk(ex, prof.injuries);
+function spExAllowed(ex, prof, id){
+  return spGearOk(ex, prof.gear, id) && spInjuryOk(ex, prof.injuries);
 }
 
 function genIntensityItem(id, intensity, prof){
@@ -723,7 +729,7 @@ function buildSessionByCriteria(muscles, durMin, intensity, disc, opts){
     const ex = EXERCISES[id];
     if(disc && disc!=='all' && exDisc(ex)!==disc) return null;
     if(!spInjuryOk(ex, prof.injuries)) return null;
-    if(!relaxGear && !spGearOk(ex, prof.gear)) return null;
+    if(!relaxGear && !spGearOk(ex, prof.gear, id)) return null;
     const matched = (ex.muscles||[]).filter(m=>want.includes(m));
     return matched.length ? {id, ex, matched} : null;
   }).filter(Boolean);
