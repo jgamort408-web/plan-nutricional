@@ -28,11 +28,13 @@ con `build.mjs` → `app.min.js`. Ver §7 para las trampas de este modelo.
 
 ## 2. Auditoría · estado inicial
 
-### Catálogo: 242 → 334 ejercicios
+### Catálogo: 242 → 341 ejercicios · 17 sesiones
 
 Una primera versión de esta auditoría dijo «43 ejercicios». **Era incorrecta**: no se
 contabilizó `sport-catalog.js`, que aportaba 199 más. El total de partida era **242**.
-Tras la ampliación y quitar 7 duplicados son **334**.
+Tras la ampliación de disciplinas (+99), quitar 7 duplicados y añadir 7 máquinas de
+gimnasio son **341**. Y **17 sesiones** preparadas (13 base + 4 de gimnasio con
+máquinas de 60 min por nivel).
 
 | Disciplina | Antes | Ahora | |
 |---|---|---|---|
@@ -53,7 +55,7 @@ Tras la ampliación y quitar 7 duplicados son **334**.
 
 Patrones dentro de Gimnasio: tracción vertical **2 → 15**, core **3 → 7**.
 Siguen flojos **unilateral (6)** y **acarreo (2)**.
-Solo **10 de 334** ejercicios tienen `visual` (animación 3D, hoy desactivada).
+Solo **10 de 341** ejercicios tienen `visual` (animación 3D, hoy desactivada).
 
 #### Bug de datos encontrado al ampliar
 
@@ -90,6 +92,9 @@ obligatorios. Conviene pasarlo al añadir ejercicios.
 | A21 | 3 ejercicios «con propio peso» etiquetados `equip:"Barra"` → excluidos justo para quien entrena sin material | 🟠 | ✅ resuelto |
 | A22 | 7 ejercicios duplicados entre `EXERCISES_BASE` y `EXTRA_EXERCISES` | 🟡 | ✅ resuelto |
 | A23 | El guardián de arranque mostraba «La app no pudo arrancar» ante cualquier error **posterior** al arranque (p. ej. fallo puntual del service worker) | 🟠 | ✅ resuelto |
+| A24 | **Menú de ayuda (❔) se salía de la pantalla en móvil**: el botón se reordena a la izquierda pero el menú abría con `right:0` (hacia la izquierda) → `left:-132`. Sin tope de altura tampoco | 🔴 | ✅ resuelto |
+| A25 | No había sesiones de gimnasio con máquinas de 60 min preparadas | 🟠 | ✅ 4 sesiones por nivel |
+| A26 | Sin forma de elegir qué entrenar (hoy / preparada / por músculo / a medida) desde un único sitio | 🟠 | ✅ panel «Elegir entrenamiento» |
 | A11 | **Fallback silencioso**: si no hay ejercicios de la disciplina, `sport-calendar.js:412` cae a `'all'` y genera gimnasio llamándolo natación | 🟠 | ✅ resuelto |
 | A12 | Calentamiento no suma a la duración estimada | 🟡 | ✅ resuelto |
 | A13 | `alert()` nativo en `sport-calendar.js:391,420` y `sport-ui.js:607,608,726,732` | 🟡 | ✅ resuelto |
@@ -217,7 +222,7 @@ banco» pasaba el filtro teniendo solo barra.
 `GEAR_PLACES` define qué hay normalmente en cada sitio — casa sin material, casa
 con lo básico, casa equipada, gimnasio, parque, hotel — y el asistente lo usa para
 precargar el material. Cobertura actual: **71 ejercicios sin nada**, 247 en gimnasio
-completo, de 334.
+completo, de 341.
 
 ### Pendiente
 - [ ] Deporte de equipo (9) y aventura (7) → mínimo 15 cada uno.
@@ -225,7 +230,7 @@ completo, de 334.
       `name, type, muscles, met, equip, mode, sets, reps|dur, rest, cues, pat`
       y `disc` explícito si el nombre no permite inferir la disciplina.
 - [ ] Unilateral (6) y acarreo (2) en gimnasio → mínimo 10 cada uno
-- [ ] `visual` para los ejercicios principales (hoy 10/334) y reactivar `ANIM_ENABLED`
+- [ ] `visual` para los ejercicios principales (hoy 10/341) y reactivar `ANIM_ENABLED`
 - [ ] Exportar el historial de entrenamientos a CSV
 - [ ] Integrar kcal de entrenamiento registradas con el balance de Nutrición
 - [ ] Gráfica de peso corporal en Progreso (hoy solo fuerza)
@@ -308,7 +313,7 @@ aparecían con una vista guardada concreta.
 node validate-catalog.cjs   # valida los datos del catálogo (rápido, sin navegador)
 node build.mjs              # regenera app.min.js + sella sw.js y el HTML
 
-# smoke test en Chrome headless (55 comprobaciones)
+# smoke test en Chrome headless (63 comprobaciones)
 python -m http.server 8000  # en otra terminal
 node smoke-sport.cjs
 ```
@@ -337,7 +342,7 @@ El bloque 3 incluye **cobertura por disciplina**: verifica que cada deporte gene
 una sesión propia sin colar ejercicios de otras disciplinas (el fallo original de
 natación).
 
-Debe salir **55 OK · 0 fallos**. Las capturas quedan en `.shots/`.
+Debe salir **63 OK · 0 fallos**. Las capturas quedan en `.shots/`.
 Si tocas el generador o el registro, ejecútalo antes de mergear.
 
 > ⚠️ El archivo es `.cjs` a propósito: `package.json` tiene `"type":"module"`
