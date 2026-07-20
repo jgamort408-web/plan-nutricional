@@ -170,6 +170,28 @@ async function run(){
   (gg.conMaterial === 0) ? ok('filtro de material (solo peso corporal)', gg.n + ' ejercicios')
                          : bad('filtro de material', gg.conMaterial + ' requieren material');
 
+  // Cobertura por disciplina: el generador debe montar una sesión REAL de
+  // cada deporte, sin caer al fallback de gimnasio. Antes fallaba en
+  // natación (6 ejercicios), ciclismo (4) y baile (2).
+  const cov = await evalJS(`
+    var flojas = [], sinSesion = [];
+    Object.keys(EX_SPORTS).forEach(function(d){
+      var n = Object.keys(EXERCISES).filter(function(k){ return exDisc(EXERCISES[k])===d; }).length;
+      if(n < 10) flojas.push(d+':'+n);
+      // ¿puede montar una sesión con los músculos típicos de ese deporte?
+      var s = buildSessionByCriteria(['cardio','core','espalda'], 45, 'media', d);
+      if(!s) s = buildSessionByCriteria(['cardio'], 45, 'media', d);
+      if(!s) sinSesion.push(d);
+      else if(s.items.some(function(i){ return exDisc(EXERCISES[i.e])!==d; })) sinSesion.push(d+'(mezcla)');
+    });
+    return JSON.stringify({flojas:flojas, sinSesion:sinSesion, total:Object.keys(EXERCISES).length});`);
+  const CV = JSON.parse(cov||'{}');
+  (CV.total >= 340) ? ok('catálogo ampliado', CV.total + ' ejercicios') : bad('catálogo', CV.total);
+  (CV.sinSesion.length === 0) ? ok('cada disciplina genera sesión propia', 'sin mezclas')
+                              : bad('sesión por disciplina', CV.sinSesion.join(', '));
+  (CV.flojas.length <= 3) ? ok('disciplinas con catálogo suficiente', CV.flojas.length + ' flojas: ' + CV.flojas.join(', '))
+                          : bad('disciplinas pobres', CV.flojas.join(', '));
+
   // lesión: rodilla debe excluir sentadillas
   const inj = await evalJS(`
     var s = buildSessionByCriteria(['cuadriceps','gluteo','core'], 45, 'media', 'all', {profile:{level:'intermedio', gear:['barra','mancuernas','maquinas'], injuries:['rodilla']}});
