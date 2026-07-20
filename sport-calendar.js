@@ -133,7 +133,16 @@ function openSpDayPicker(key){
     <div class="form-hd"><h2>🗓️ ${spFmtLong(date)}</h2><span class="form-sub">${SP_DAYS[spWeekdayMon(date)].long} · añade una o varias sesiones e indica quién entrena</span></div>
     <div class="picker-body">
       <div class="picker-current">
-        ${cur.length ? `<div class="picker-cur-list">${cur.map((e,idx)=>{const s=SESSIONS[e.s];if(!s)return'';return `<div class="picker-cur-it"><span class="pi-ico-sm">${(EX_TYPES[s.type]||{ico:'•'}).ico}</span><span class="pi-n-sm">${spEsc(s.name)}</span>${whoSeg(e.who,`data-cwho="${idx}"`)}<button class="picker-cur-info" data-info="${idx}" title="Ver ejercicios">ⓘ</button><button class="picker-cur-rm" data-rm="${idx}" title="Quitar">✕</button></div>`;}).join('')}</div>`
+        ${cur.length ? `<div class="picker-cur-list">${cur.map((e,idx)=>{
+          const s=SESSIONS[e.s];if(!s)return'';
+          const ph = e.phase ? SP_PHASES[e.phase] : null;
+          return `<div class="picker-cur-it">
+            <span class="pi-ico-sm">${(EX_TYPES[s.type]||{ico:'•'}).ico}</span>
+            <span class="pi-n-sm">${spEsc(s.name)}${ph?` <span class="sp-phase ${e.phase}" title="${spEsc(ph.note)}">${ph.ico} ${spEsc(ph.lbl)}${e.week?' · sem '+e.week:''}</span>`:''}</span>
+            ${whoSeg(e.who,`data-cwho="${idx}"`)}
+            <button class="picker-cur-go" data-train="${idx}" title="Entrenar ahora">▶</button>
+            <button class="picker-cur-info" data-info="${idx}" title="Ver ejercicios">ⓘ</button>
+            <button class="picker-cur-rm" data-rm="${idx}" title="Quitar">✕</button></div>`;}).join('')}</div>`
                        : `<div class="picker-cur-empty">Día de descanso — sin sesión asignada</div>`}
       </div>
       <div class="picker-addhd">Catálogo de sesiones</div>
@@ -160,6 +169,21 @@ function openSpDayPicker(key){
   formBody().querySelectorAll('[data-info]').forEach(b=> b.addEventListener('click', e=>{
     e.stopPropagation(); const idx=+b.dataset.info; const ent=SportPlan.days[key][idx];
     if(ent) openSessionDetail(ent.s, {key, idx});
+  }));
+  // entrenar ahora (modo entrenamiento serie a serie)
+  formBody().querySelectorAll('[data-train]').forEach(b=> b.addEventListener('click', e=>{
+    e.stopPropagation(); const ent = SportPlan.days[key][+b.dataset.train];
+    if(!ent) return;
+    closeForm();
+    // la sesión que se entrena lleva aplicada la fase del mesociclo
+    const live = spSessionFor(ent);
+    if(live && ent.phase){
+      const tmpId = '_live_' + ent.s + '_' + (ent.week||1);
+      SESSIONS[tmpId] = live;
+      startTraining(tmpId, ent.who === 'B' ? 'B' : 'A');
+    } else {
+      startTraining(ent.s, ent.who === 'B' ? 'B' : 'A');
+    }
   }));
   // cambiar quién entrena
   formBody().querySelectorAll('[data-cwho] .who-b').forEach(b=> b.addEventListener('click', e=>{
@@ -405,11 +429,14 @@ function runAutoPlan(P){
   // 3) genera una sesión distinta por día y construye la cadencia
   const cfgSlots = [];
   const discLbl = (EX_SPORTS[disc]||{}).lbl || '';
-  let failed = 0;
+  let failed = 0, fellBack = 0;
   weekdays.forEach((wd, i)=>{
     const slot = slots[i] || slots[slots.length-1];
     let sess = buildSessionByCriteria(slot.m, dur, intensity, disc);
-    if(!sess) sess = buildSessionByCriteria(slot.m, dur, intensity, 'all');   // fallback sin filtro de deporte
+    // Fallback sin filtro de deporte. Antes era SILENCIOSO: si elegías
+    // "Natación" (6 ejercicios en catálogo) te generaba gimnasio y lo
+    // etiquetaba como natación. Ahora se cuenta y se avisa al final.
+    if(!sess){ sess = buildSessionByCriteria(slot.m, dur, intensity, 'all'); if(sess) fellBack++; }
     if(!sess){ failed++; return; }
     sess.name = `${discLbl?discLbl+' · ':''}${slot.l} · ${SP_DAYS[wd].long}`;
     sess.level = `Plan auto · ${(SP_INTENSITY[intensity]||{}).lbl.toLowerCase()}`;
@@ -428,8 +455,15 @@ function runAutoPlan(P){
   spCursor = new Date(spFromKey(start).getFullYear(), spFromKey(start).getMonth(), 1);
   renderSportCalendar();
   if(typeof renderSportActive==='function') renderSportActive();
-  if(typeof pnToast==='function') pnToast(`Plan generado: ${cfgSlots.length} sesiones/semana${failed?` (${failed} sin candidatos)`:''}`, 'ok');
-  else alert(`✓ Plan generado: ${cfgSlots.length} sesiones distintas por semana${failed?` (${failed} día/s sin candidatos)`:''}.`);
+  const nWeeks = Math.ceil((u==='days'?rangeVal:u==='weeks'?rangeVal*7:rangeVal*30)/7);
+  const nDeload = Math.floor(nWeeks / SP_MESO_LEN);
+  pnToast(`Plan generado: ${cfgSlots.length} sesiones/semana · ${nWeeks} semanas${nDeload?` con ${nDeload} de descarga`:''}${failed?` · ${failed} día/s sin candidatos`:''}`, 'ok');
+  if(fellBack){
+    const dl = (EX_SPORTS[disc]||{}).lbl || disc;
+    setTimeout(()=> pnAlert(
+      `${fellBack} de las ${cfgSlots.length} sesiones no se han podido montar solo con ejercicios de «${dl}»: el catálogo de esa disciplina aún es corto, así que se han completado con ejercicios de otras.\n\n` +
+      `Revisa esas sesiones antes de empezar el plan.`, {title:'Catálogo incompleto'}), 700);
+  }
 }
 
 function generateSportPlan(cfg, keep){
@@ -450,10 +484,59 @@ function generateSportPlan(cfg, keep){
     const entries = pat[idx];
     if(!entries) continue;
     if(keep && SportPlan.days[key] && SportPlan.days[key].length) continue;
-    SportPlan.days[key] = entries.map(e=>({s:e.s, who:e.who}));
+    const wk = Math.floor(i/7) + 1;                      // semana 1, 2, 3…
+    const ph = spPhaseOf(wk);
+    SportPlan.days[key] = entries.map(e=>({s:e.s, who:e.who, week:wk, phase:ph}));
   }
   persistSportPlan();
 }
+
+/* ── Periodización ────────────────────────────────────────────
+   Un plan que repite la misma sesión 16 semanas no produce
+   adaptación. Se organiza en mesociclos de 4 semanas:
+     sem 1  acumulación   · volumen base
+     sem 2  acumulación+  · +1 serie en los básicos
+     sem 3  intensificación · +1 serie y menos reps (más carga)
+     sem 4  DESCARGA      · −40 % volumen para asimilar
+   `spPhaseOf` devuelve la fase; `spApplyPhase` ajusta los items.
+══════════════════════════════════════════════════════════ */
+var SP_MESO_LEN = 4;
+var SP_PHASES = {
+  acumulacion:    {lbl:'Acumulación',    ico:'📈', dSet:0,  repF:1.00, note:'Volumen base. Técnica limpia y 2-3 reps en reserva.'},
+  acumulacion2:   {lbl:'Acumulación +',  ico:'📈', dSet:1,  repF:1.00, note:'Una serie más en los básicos. Mismo peso que la semana 1.'},
+  intensificacion:{lbl:'Intensificación',ico:'🔥', dSet:1,  repF:0.85, note:'Menos repeticiones y más carga. Aquí es donde se sube el peso.'},
+  deload:         {lbl:'Descarga',       ico:'🌙', dSet:-2, repF:1.00, note:'Semana ligera: −40 % de series y ~70 % del peso. No la saltes: es cuando adaptas.'}
+};
+function spPhaseOf(week){
+  const w = ((week-1) % SP_MESO_LEN) + 1;
+  if(w === SP_MESO_LEN) return 'deload';
+  if(w === 1) return 'acumulacion';
+  if(w === 2) return 'acumulacion2';
+  return 'intensificacion';
+}
+/* Aplica la fase a los items de una sesión (devuelve una copia) */
+function spApplyPhase(sess, phase){
+  const ph = SP_PHASES[phase]; if(!ph || !sess) return sess;
+  const out = Object.assign({}, sess);
+  out.items = (sess.items||[]).map(it=>{
+    const ex = EXERCISES[it.e] || {};
+    const base = it.sets || ex.sets || 3;
+    const n = Math.max(1, base + ph.dSet);
+    const c = Object.assign({}, it, {sets:n});
+    if(c.reps != null) c.reps = Math.max(3, Math.round(c.reps * ph.repF));
+    return c;
+  });
+  out.phaseNote = ph.note;
+  return out;
+}
+/* Entrada del plan → sesión con la fase aplicada (la que se entrena) */
+function spSessionFor(entry){
+  const s = SESSIONS[entry.s]; if(!s) return null;
+  return entry.phase ? spApplyPhase(s, entry.phase) : s;
+}
+window.spPhaseOf = spPhaseOf;
+window.spApplyPhase = spApplyPhase;
+window.spSessionFor = spSessionFor;
 
 /* ── Acciones de toolbar ─────────────────────────────────── */
 async function spCalClear(){

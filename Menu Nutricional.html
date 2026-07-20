@@ -1027,6 +1027,12 @@ main[data-vm="small"] .dish.add-card{min-height:62px;flex-direction:row}
 .pi-k{font-family:'DM Mono',monospace;font-size:.65rem;color:var(--ink-50);white-space:nowrap}
 .picker-cur-rm{width:22px;height:22px;border-radius:50%;background:transparent;border:none;color:var(--ink-50);font-size:.78rem;cursor:pointer;flex-shrink:0;line-height:1;transition:.18s;display:flex;align-items:center;justify-content:center}
 .picker-cur-rm:hover{background:var(--rose);color:#fff}
+.picker-cur-go{width:24px;height:24px;border-radius:50%;background:var(--sport);border:none;color:#fff;font-size:.7rem;cursor:pointer;flex-shrink:0;line-height:1;transition:.18s;display:flex;align-items:center;justify-content:center}
+.picker-cur-go:hover{background:var(--sport-d);transform:scale(1.1)}
+/* Fase del mesociclo junto al nombre de la sesión */
+.sp-phase{display:inline-flex;align-items:center;gap:3px;font-size:.62rem;font-weight:700;padding:2px 7px;border-radius:999px;background:rgba(var(--ink-rgb),.08);color:var(--ink-50);white-space:nowrap;margin-left:6px}
+.sp-phase.intensificacion{background:rgba(200,147,40,.18);color:var(--gold)}
+.sp-phase.deload{background:rgba(58,110,150,.18);color:var(--sea)}
 .picker-cur-empty{font-style:italic;color:var(--ink-50);font-size:.84rem;text-align:center;padding:6px 0}
 
 .picker-it .pi-added{font-family:'DM Mono',monospace;font-size:.55rem;font-weight:600;background:var(--olive);color:#fff;padding:2px 6px;border-radius:8px;margin-left:6px;letter-spacing:.05em;text-transform:uppercase;vertical-align:middle}
@@ -2321,6 +2327,213 @@ main[data-vm="small"] .dish-incart{font-size:.5rem;padding:3px 8px}
   .sess-it{grid-template-columns:1fr 44px 56px 52px 28px;gap:4px}
   .cad-slot{grid-template-columns:1fr 1fr;gap:5px}
 }
+
+/* ══════════════════════════════════════════════════════════
+   MODO ENTRENAMIENTO (sport-train.js)
+   Overlay a pantalla completa. Objetivo: usarlo con una mano,
+   con el móvil en la mano sudada y sin gafas. Botones grandes,
+   una sola acción principal por pantalla.
+══════════════════════════════════════════════════════════ */
+body.train-mode{overflow:hidden}
+.train-ov{position:fixed;inset:0;z-index:9000;background:var(--cream);display:flex;flex-direction:column;animation:trIn .22s ease}
+@keyframes trIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.tr-hd{display:flex;align-items:center;gap:10px;padding:calc(10px + env(safe-area-inset-top,0px)) 12px 10px;background:var(--sport-d);color:#fff;flex-shrink:0}
+.tr-x{width:34px;height:34px;border-radius:50%;border:none;background:rgba(255,255,255,.18);color:#fff;font-size:1.1rem;cursor:pointer;flex-shrink:0}
+.tr-hd-mid{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.25}
+.tr-sess{font-size:.9rem;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tr-prog{font-size:.7rem;opacity:.82}
+.tr-clock{display:flex;align-items:center;gap:6px;border:none;border-radius:999px;padding:7px 12px;background:rgba(255,255,255,.18);color:#fff;font-size:1rem;font-weight:700;cursor:pointer;flex-shrink:0}
+.tr-clock.paused{background:var(--gold);color:var(--warm)}
+.tr-clock i{font-size:.62rem;font-style:normal;opacity:.85}
+/* Puntos de progreso por ejercicio */
+.tr-steps{display:flex;gap:5px;padding:9px 12px;background:var(--sport);overflow-x:auto;flex-shrink:0;scrollbar-width:none}
+.tr-steps::-webkit-scrollbar{display:none}
+.tr-step{min-width:28px;height:28px;border-radius:50%;border:2px solid rgba(255,255,255,.45);background:transparent;color:#fff;font-size:.74rem;font-weight:700;cursor:pointer;flex-shrink:0;transition:.18s}
+.tr-step.on{background:#fff;color:var(--sport-d);border-color:#fff;transform:scale(1.12)}
+.tr-step.ok{background:rgba(255,255,255,.9);color:var(--sport-d);border-color:transparent}
+.tr-step.skip{opacity:.4;text-decoration:line-through}
+/* Cronómetro de descanso */
+.tr-rest{flex-shrink:0;max-height:0;overflow:hidden;transition:max-height .25s ease}
+.tr-rest.on{max-height:70px;background:var(--gold);color:var(--warm)}
+.tr-rest-bar{height:4px;background:rgba(0,0,0,.15)}
+.tr-rest-bar i{display:block;height:100%;background:var(--warm);transition:width .25s linear}
+.tr-rest-row{display:flex;align-items:center;gap:9px;padding:8px 13px}
+.tr-rest-lbl{font-size:.76rem;font-weight:700;flex:1}
+.tr-rest-t{font-size:1.25rem;font-weight:800;letter-spacing:.5px}
+.tr-rest-b{border:1.5px solid var(--warm);background:transparent;color:var(--warm);border-radius:999px;padding:4px 11px;font-size:.72rem;font-weight:700;cursor:pointer}
+.tr-rest-b:hover{background:var(--warm);color:var(--gold)}
+/* Cuerpo */
+.tr-body{flex:1;overflow-y:auto;padding:16px 14px 18px;display:flex;flex-direction:column;gap:14px}
+.tr-ex-n{font-size:.66rem;font-weight:700;letter-spacing:.9px;text-transform:uppercase;color:var(--ink-50)}
+.tr-ex h2{font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--ink);margin:3px 0 6px;line-height:1.2}
+.tr-ex-meta{display:flex;flex-wrap:wrap;gap:8px;font-size:.76rem;color:var(--ink-50)}
+.tr-best{color:var(--gold);font-weight:700}
+.tr-hint{margin-top:9px;padding:9px 11px;border-radius:var(--r-sm);background:rgba(94,138,62,.13);border-left:3px solid var(--sport);font-size:.79rem;color:var(--ink);line-height:1.45}
+.tr-cues{margin-top:9px;font-size:.79rem}
+.tr-cues summary{cursor:pointer;color:var(--sport);font-weight:700;font-size:.76rem}
+.tr-cues p{margin:7px 0 0;color:var(--ink-50);line-height:1.55}
+/* Lista de series */
+.tr-sets{display:flex;flex-direction:column;gap:5px}
+.tr-set{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--r-sm);background:var(--white);border:1.5px solid rgba(var(--ink-rgb),.1)}
+.tr-set.done{background:rgba(94,138,62,.1);border-color:rgba(94,138,62,.3)}
+.tr-set.cur{border-color:var(--sport);border-width:2px;box-shadow:0 0 0 3px rgba(94,138,62,.13)}
+.tr-set-n{width:22px;height:22px;border-radius:50%;background:rgba(var(--ink-rgb),.09);color:var(--ink-50);font-size:.7rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.tr-set.done .tr-set-n{background:var(--sport);color:#fff}
+.tr-set-v{flex:1;font-size:.92rem;font-weight:700;color:var(--ink)}
+.tr-set-rpe{font-size:.68rem;font-weight:700;padding:2px 7px;border-radius:999px;background:rgba(200,147,40,.18);color:var(--gold)}
+.tr-set-ok{color:var(--sport);font-weight:800;width:16px}
+/* Entrada de peso / reps */
+.tr-input{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.tr-in-grp label{display:block;font-size:.68rem;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--ink-50);margin-bottom:6px}
+.tr-stepper{display:flex;align-items:stretch;border-radius:var(--r-sm);overflow:hidden;border:1.5px solid rgba(var(--ink-rgb),.14);background:var(--white)}
+.tr-stepper button{width:46px;border:none;background:rgba(var(--ink-rgb),.06);color:var(--ink);font-size:1.35rem;font-weight:700;cursor:pointer;transition:.15s;-webkit-user-select:none;user-select:none}
+.tr-stepper button:active{background:var(--sport);color:#fff}
+.tr-stepper input{flex:1;min-width:0;border:none;background:transparent;text-align:center;font-size:1.45rem;font-weight:800;color:var(--ink);padding:11px 2px}
+.tr-stepper input:focus{outline:2px solid var(--sport);outline-offset:-2px}
+.tr-stepper input::-webkit-outer-spin-button,.tr-stepper input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.tr-stepper input[type=number]{-moz-appearance:textfield;appearance:textfield}
+/* Acción principal: enorme, imposible de fallar */
+.tr-go{width:100%;padding:18px;border:none;border-radius:var(--r);background:var(--sport);color:#fff;font-size:1.12rem;font-weight:800;cursor:pointer;transition:.16s;box-shadow:0 4px 14px rgba(94,138,62,.34);letter-spacing:.3px}
+.tr-go:hover{background:var(--sport-d)}
+.tr-go:active{transform:scale(.98)}
+.tr-done{text-align:center;padding:14px 0}
+.tr-done p{font-size:1rem;font-weight:700;color:var(--sport);margin:0 0 12px}
+.tr-done-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.tr-done-row .btn-prim,.tr-done-row .btn-sec{flex:1;min-width:130px}
+/* Pie */
+.tr-foot{display:flex;gap:6px;padding:9px 11px calc(9px + env(safe-area-inset-bottom,0px));background:var(--parch);border-top:1px solid rgba(var(--ink-rgb),.1);flex-shrink:0}
+.tr-foot-b{flex:1;padding:11px 5px;border:none;border-radius:var(--r-sm);background:transparent;color:var(--ink-50);font-size:.73rem;font-weight:700;cursor:pointer;transition:.15s}
+.tr-foot-b:hover{background:rgba(var(--ink-rgb),.08);color:var(--ink)}
+.tr-foot-b.danger:hover{background:var(--rose);color:#fff}
+.tr-foot-b.prim{background:var(--sport);color:#fff}
+.tr-foot-b.prim:hover{background:var(--sport-d)}
+/* Diálogos del modo entrenamiento */
+.tr-rpe{display:flex;flex-direction:column;gap:7px}
+.tr-rpe-b{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:var(--r-sm);border:1.5px solid rgba(var(--ink-rgb),.12);background:var(--white);cursor:pointer;text-align:left;transition:.15s}
+.tr-rpe-b:hover{border-color:var(--sport);background:rgba(94,138,62,.07)}
+.tr-rpe-b b{width:30px;height:30px;border-radius:50%;background:var(--sport);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.86rem;flex-shrink:0}
+.tr-rpe-b span{font-weight:700;color:var(--ink);font-size:.88rem}
+.tr-rpe-b i{font-style:normal;color:var(--ink-50);font-size:.76rem;margin-left:auto;text-align:right}
+.tr-alts{display:flex;flex-direction:column;gap:6px;max-height:52vh;overflow-y:auto}
+.tr-alt{display:flex;flex-direction:column;gap:2px;padding:10px 13px;border-radius:var(--r-sm);border:1.5px solid rgba(var(--ink-rgb),.12);background:var(--white);cursor:pointer;text-align:left;transition:.15s}
+.tr-alt:hover{border-color:var(--sport);background:rgba(94,138,62,.07)}
+.tr-alt b{font-size:.87rem;color:var(--ink)}
+.tr-alt span{font-size:.74rem;color:var(--ink-50)}
+.tr-feel{display:flex;gap:6px}
+.tr-feel-b{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:11px 3px;border-radius:var(--r-sm);border:1.5px solid rgba(var(--ink-rgb),.12);background:var(--white);cursor:pointer;transition:.15s}
+.tr-feel-b span{font-size:1.5rem;line-height:1}
+.tr-feel-b i{font-style:normal;font-size:.66rem;color:var(--ink-50)}
+.tr-feel-b.on{border-color:var(--sport);background:rgba(94,138,62,.12)}
+.tr-feel-b.on i{color:var(--sport);font-weight:700}
+
+/* ══════════════════════════════════════════════════════════
+   PANTALLA DE PROGRESO (sport-progress.js)
+══════════════════════════════════════════════════════════ */
+.pg-wrap{max-width:940px;margin:0 auto;padding:14px 13px 30px;display:flex;flex-direction:column;gap:16px}
+.pg-resume{display:flex;align-items:center;gap:11px;padding:11px 14px;border-radius:var(--r);background:rgba(200,147,40,.15);border:1.5px solid var(--gold);font-size:.85rem;font-weight:600;color:var(--ink)}
+.pg-resume span{flex:1}
+.pg-topbar{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+.pg-range{flex:1;min-width:230px}
+/* KPIs */
+.pg-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+.pg-kpi{display:flex;flex-direction:column;align-items:center;gap:3px;padding:14px 6px;border-radius:var(--r);background:var(--white);border:1px solid rgba(var(--ink-rgb),.09);box-shadow:var(--shadow)}
+.pg-kpi b{font-family:'Playfair Display',serif;font-size:1.6rem;color:var(--sport);line-height:1}
+.pg-kpi b i{font-size:.9rem;font-style:normal;opacity:.7}
+.pg-kpi span{font-size:.66rem;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:var(--ink-50);text-align:center}
+/* Secciones */
+.pg-sec{background:var(--white);border-radius:var(--r);padding:15px 15px 17px;border:1px solid rgba(var(--ink-rgb),.09);box-shadow:var(--shadow)}
+.pg-h{font-family:'Playfair Display',serif;font-size:1.04rem;color:var(--ink);margin:0 0 13px;display:flex;align-items:center;gap:8px}
+.pg-h-n{font-size:.68rem;font-family:system-ui,sans-serif;font-weight:700;padding:2px 8px;border-radius:999px;background:rgba(var(--ink-rgb),.08);color:var(--ink-50)}
+.pg-note{font-size:.72rem;color:var(--ink-50);margin:9px 0 0;line-height:1.5}
+.pg-empty-chart{padding:22px 14px;text-align:center;font-size:.82rem;color:var(--ink-50);background:rgba(var(--ink-rgb),.035);border-radius:var(--r-sm)}
+/* Barras de volumen */
+.pg-bars{display:flex;flex-direction:column;gap:7px}
+.pg-bar-row{display:grid;grid-template-columns:88px 1fr 38px;align-items:center;gap:9px}
+.pg-bar-lbl{font-size:.76rem;font-weight:600;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pg-bar-track{position:relative;height:17px;border-radius:999px;background:rgba(var(--ink-rgb),.07);overflow:hidden}
+.pg-bar-zone{position:absolute;top:0;bottom:0;background:rgba(94,138,62,.16);border-left:1px dashed rgba(94,138,62,.5);border-right:1px dashed rgba(94,138,62,.5)}
+.pg-bar-fill{position:absolute;top:0;bottom:0;left:0;border-radius:999px;background:var(--bc,var(--sport));opacity:.85;transition:width .4s ease}
+.pg-bar-fill.low{opacity:.45}
+.pg-bar-fill.high{background:var(--gold)}
+.pg-bar-v{font-size:.78rem;font-weight:700;text-align:right;color:var(--ink-50)}
+.pg-bar-v.ok{color:var(--sport)}
+.pg-bar-v.high{color:var(--gold)}
+.pg-bars-key{margin-top:9px;font-size:.7rem;color:var(--ink-50);line-height:1.5}
+/* Gráfica de fuerza */
+.pg-exsel{width:100%;margin-bottom:11px}
+.pg-chart{width:100%;height:150px;display:block}
+.pg-grid{stroke:rgba(var(--ink-rgb),.13);stroke-width:1}
+.pg-axis{fill:rgba(var(--ink-rgb),.5);font-size:8px;font-family:ui-monospace,monospace}
+.pg-area{fill:rgba(94,138,62,.16);stroke:none}
+.pg-line{fill:none;stroke:var(--sport);stroke-width:2.2;stroke-linejoin:round;stroke-linecap:round}
+.pg-dot{fill:var(--sport);stroke:var(--white);stroke-width:1.6}
+.pg-chart-foot{display:flex;justify-content:space-between;align-items:center;font-size:.7rem;color:var(--ink-50);margin-top:5px}
+.pg-chart-foot b{font-size:.8rem}
+.pg-chart-foot b.up{color:var(--sport)}
+.pg-chart-foot b.down{color:var(--rose)}
+/* PRs */
+.pg-prs{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px}
+.pg-pr{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border-radius:var(--r-sm);background:rgba(200,147,40,.1);border-left:3px solid var(--gold)}
+.pg-pr b{font-size:.82rem;color:var(--ink)}
+.pg-pr span{font-size:.94rem;font-weight:800;color:var(--gold)}
+.pg-pr i{font-style:normal;font-size:.68rem;color:var(--ink-50)}
+/* Historial */
+.pg-list{display:flex;flex-direction:column;gap:7px}
+.pg-entry{border-radius:var(--r-sm);border:1px solid rgba(var(--ink-rgb),.1);overflow:hidden;background:var(--white)}
+.pg-entry.open{border-color:var(--sport)}
+.pg-entry-hd{width:100%;display:flex;align-items:center;gap:11px;padding:10px 12px;background:transparent;border:none;cursor:pointer;text-align:left}
+.pg-entry-hd:hover{background:rgba(var(--ink-rgb),.035)}
+.pg-e-date{display:flex;flex-direction:column;align-items:center;min-width:34px;flex-shrink:0}
+.pg-e-date b{font-family:'Playfair Display',serif;font-size:1.14rem;color:var(--sport);line-height:1}
+.pg-e-date i{font-style:normal;font-size:.6rem;text-transform:uppercase;color:var(--ink-50)}
+.pg-e-mid{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.pg-e-mid b{font-size:.85rem;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pg-e-mid span{font-size:.72rem;color:var(--ink-50)}
+.pg-e-feel{font-size:1.1rem}
+.pg-e-caret{color:var(--ink-50);font-size:.8rem}
+.pg-entry-body{padding:3px 12px 12px;border-top:1px solid rgba(var(--ink-rgb),.08)}
+.pg-e-ex{padding:8px 0;border-bottom:1px dashed rgba(var(--ink-rgb),.09)}
+.pg-e-ex:last-of-type{border-bottom:none}
+.pg-e-ex b{display:block;font-size:.79rem;color:var(--ink);margin-bottom:5px}
+.pg-e-sets{display:flex;flex-wrap:wrap;gap:5px}
+.pg-e-set{font-size:.73rem;font-weight:600;padding:3px 8px;border-radius:999px;background:rgba(94,138,62,.12);color:var(--ink)}
+.pg-e-set i{font-style:normal;color:var(--gold);font-weight:700}
+.pg-e-notes{font-size:.77rem;color:var(--ink-50);margin:9px 0 0;line-height:1.5;font-style:italic}
+.pg-e-acts{margin-top:10px;display:flex;justify-content:flex-end}
+.btn-sec.sm,.btn-prim.sm{padding:6px 12px;font-size:.74rem}
+.pg-export{margin-top:12px;width:100%}
+/* Onboarding cuando aún no hay datos */
+.pg-onboard{text-align:center;padding:36px 20px;background:var(--white);border-radius:var(--r);border:1px dashed rgba(var(--ink-rgb),.2)}
+.pg-ob-ico{font-size:2.6rem;display:block;margin-bottom:10px}
+.pg-onboard h3{font-family:'Playfair Display',serif;font-size:1.14rem;color:var(--ink);margin:0 0 8px}
+.pg-onboard p{font-size:.85rem;color:var(--ink-50);line-height:1.62;max-width:420px;margin:0 auto}
+.pg-onboard b{color:var(--sport)}
+
+@media(max-width:760px){
+  .pg-kpis{grid-template-columns:repeat(2,1fr)}
+  .pg-bar-row{grid-template-columns:74px 1fr 34px;gap:7px}
+  .pg-bar-lbl{font-size:.71rem}
+  .tr-ex h2{font-size:1.28rem}
+  .tr-stepper input{font-size:1.28rem}
+  .tr-stepper button{width:40px}
+  .tr-rpe-b i{display:none}
+}
+
+/* Modo oscuro · superficies del modo entrenamiento y progreso.
+   El resto se adapta solo por las variables --ink/--white/--parch. */
+html[data-theme="dark"] .train-ov{background:var(--cream)}
+html[data-theme="dark"] .tr-set,
+html[data-theme="dark"] .tr-stepper,
+html[data-theme="dark"] .tr-rpe-b,
+html[data-theme="dark"] .tr-alt,
+html[data-theme="dark"] .tr-feel-b,
+html[data-theme="dark"] .pg-sec,
+html[data-theme="dark"] .pg-kpi,
+html[data-theme="dark"] .pg-entry{background:var(--parch)}
+html[data-theme="dark"] .tr-rest.on{background:var(--gold);color:#1a1409}
+html[data-theme="dark"] .tr-rest-bar i{background:#1a1409}
+html[data-theme="dark"] .tr-rest-b{border-color:#1a1409;color:#1a1409}
+html[data-theme="dark"] .pg-dot{stroke:var(--parch)}
 </style>
 </head>
 <body>
@@ -2397,6 +2610,7 @@ main[data-vm="small"] .dish-incart{font-size:.5rem;padding:3px 8px}
     <button class="svtab on" data-sview="ex"><span class="vti">💪</span>Ejercicios</button>
     <button class="svtab"    data-sview="sess"><span class="vti">📋</span>Sesiones</button>
     <button class="svtab"    data-sview="scal"><span class="vti">🗓️</span>Entrenamientos</button>
+    <button class="svtab"    data-sview="prog"><span class="vti">📈</span>Progreso</button>
   </nav>
   <nav class="catnav" id="catnav" aria-label="Categorías"></nav>
 </header>
@@ -2504,6 +2718,9 @@ main[data-vm="small"] .dish-incart{font-size:.5rem;padding:3px 8px}
     <div id="spCalGrid"></div>
   </div>
 </div>
+
+<!-- VISTA: PROGRESO (entrenamientos registrados · sport-progress.js) -->
+<div id="sportview-prog" class="sportview hidden"></div>
 
 <!-- VISTA UNIFICADA · SEMANA (comidas + entreno + balance por fecha) -->
 <div id="view-week" class="hidden">
@@ -2622,7 +2839,7 @@ main[data-vm="small"] .dish-incart{font-size:.5rem;padding:3px 8px}
 <!-- Núcleo de la app: bundle generado por build.mjs (30 scripts en 1).
      Para volver a los scripts sueltos en desarrollo, sustituye esta línea
      por los <script src> individuales. Regenera con: node build.mjs -->
-<script src="app.min.js?v=fd0a40ba"></script>
+<script src="app.min.js?v=f91e2ac7"></script>
 <script>
 /* ── Carga diferida del "pack de contenido" · Teoría + Bibliografía ──
    Son ~364 KB de texto que la mayoría de sesiones no abren. No se

@@ -43,10 +43,50 @@
   // kcal objetivo → minutos aprox (≈8 kcal/min a intensidad moderada)
   function kcalToMin(k){ return Math.max(15, Math.min(120, Math.round((+k||400)/8))); }
 
+  /* Reparte los slots entre los días elegidos evitando que dos días
+     CONSECUTIVOS del calendario compartan grupo muscular (regla de las
+     48 h de recuperación). Devuelve un array de slots alineado con
+     `days`. Si no hay combinación perfecta, deja la que menos solape. */
+  function spaceSlots(slotsDef, days){
+    const n = days.length;
+    const base = Array.from({length:n}, (_, k)=> slotsDef[k % slotsDef.length]);
+    if(n < 2) return base;
+    const overlap = (a, b)=> (a.m||[]).filter(m=> (b.m||[]).includes(m) && m!=='core').length;
+    // ¿cuántos días naturales separan dos días de entreno? (idx lunes-base)
+    const gap = (i, j)=>{ const d = days[j] - days[i]; return d > 0 ? d : d + 7; };
+    let best = base, bestCost = Infinity;
+    // permutaciones (n ≤ 7 → como mucho 5040, instantáneo)
+    const perm = (arr, cur)=>{
+      if(!arr.length){
+        let cost = 0;
+        for(let i=0;i<cur.length;i++){
+          const j = (i+1) % cur.length;
+          if(gap(i, j) < 2) cost += overlap(cur[i], cur[j]) * 10;   // días pegados
+          else if(gap(i, j) < 3) cost += overlap(cur[i], cur[j]);   // 2 días: penaliza poco
+        }
+        if(cost < bestCost){ bestCost = cost; best = cur.slice(); }
+        return;
+      }
+      if(bestCost === 0) return;
+      for(let i=0;i<arr.length;i++){
+        const rest = arr.slice(0,i).concat(arr.slice(i+1));
+        perm(rest, cur.concat([arr[i]]));
+      }
+    };
+    if(n <= 7) perm(base, []); else return base;
+    return best;
+  }
+
   function steps(){
     const list = [
       {key:'objetivo', type:'single', ico:'🎯', title:'¿Cuál es tu objetivo?', hint:'Ajusto intensidad y cómo repartir el trabajo.', options:OBJETIVOS},
+      {key:'level',    type:'single', ico:'📊', title:'¿Cuánto llevas entrenando?', hint:'Determina cuántas series aguantas y si conviene peso libre o máquinas guiadas.',
+        options:Object.entries(typeof SP_LEVELS!=='undefined'?SP_LEVELS:{}).map(([k,v])=>({v:k, ico:'📊', lbl:v.lbl, sub:v.ex}))},
       {key:'disc',     type:'single', ico:'🏟️', title:'¿Dónde entrenas (por defecto)?', hint:'Filtra los ejercicios por contexto. Luego podrás poner un deporte distinto cada día.', options:sportsList()},
+      {key:'gear',     type:'multi',  ico:'🏋️', title:'¿Qué material tienes?', hint:'Solo propondré ejercicios que puedas hacer de verdad.',
+        options:Object.entries(typeof SP_GEAR!=='undefined'?SP_GEAR:{}).map(([k,v])=>({v:k, ico:v.ico, lbl:v.lbl}))},
+      {key:'injuries', type:'multi',  ico:'🩹', title:'¿Alguna zona que cuidar?', hint:'Opcional. Evitaré los ejercicios que carguen esas zonas. Si no tienes molestias, pasa al siguiente paso.',
+        options:Object.entries(typeof SP_INJURIES!=='undefined'?SP_INJURIES:{}).map(([k,v])=>({v:k, ico:'🩹', lbl:v.lbl}))},
       {key:'days',     type:'multi',  ico:'📅', title:'¿Qué días entrenas?', hint:'Elige los días concretos de la semana (p. ej. lunes y viernes).', options:WD.map((d,i)=>({v:i, lbl:d}))},
       {key:'measure',  type:'single', ico:'📏', title:'¿Cómo mides cada sesión?', hint:'Por duración o por las calorías que quieras gastar.', options:[{v:'time',ico:'⏱️',lbl:'Por tiempo (minutos)'},{v:'kcal',ico:'🔥',lbl:'Por kcal a gastar'}]},
       {key:'amount',   type:'single', ico:'⏱️', title:'', hint:'', options:[]},   // se rellena según measure
@@ -65,7 +105,10 @@
     if(typeof generateSportPlan!=='function' || typeof buildSessionByCriteria!=='function'){ return; }
     // Defaults COMPLETOS: el usuario puede pulsar "⚡ Valores por defecto" en cualquier
     // paso y generar sin rellenar nada (objetivo "estar en forma" 3 días/sem, 45 min, 8 sem).
-    _i = 0; _A = {objetivo:'forma', disc:'gimnasio', days:[0,2,4], measure:'time', amount:45, weeks:8, daySport:{}};
+    // arranca con lo que ya sepamos del perfil guardado
+    const prof = (typeof spProfile==='function') ? spProfile() : {level:'intermedio', gear:['barra','mancuernas','maquinas','barrafija'], injuries:[]};
+    _i = 0; _A = {objetivo:'forma', level:prof.level, gear:prof.gear.slice(), injuries:prof.injuries.slice(),
+                  disc:'gimnasio', days:[0,2,4], measure:'time', amount:45, weeks:8, daySport:{}};
     if(!_root){ _root = document.createElement('div'); _root.id='sportAsst'; _root.className='masst'; document.body.appendChild(_root); _root.addEventListener('click', onClick);
       // Swipe móvil: izquierda = siguiente, derecha = atrás (reutiliza los botones de navegación).
       if(typeof pnSwipe==='function') pnSwipe(_root,
@@ -90,9 +133,15 @@
         const ds = _A.daySport[i] && _A.daySport[i]!==_A.disc ? ` (${(EX_SPORTS[_A.daySport[i]]||{}).lbl||_A.daySport[i]})` : '';
         return WD[i]+ds;
       }).join(', ') || '—';
+      const lvlLbl = ((typeof SP_LEVELS!=='undefined' && SP_LEVELS[_A.level])||{}).lbl || '—';
+      const gearLbl = (_A.gear||[]).map(g=>((typeof SP_GEAR!=='undefined'&&SP_GEAR[g])||{}).lbl||g).join(', ') || 'Solo peso corporal';
+      const injLbl = (_A.injuries||[]).map(g=>((typeof SP_INJURIES!=='undefined'&&SP_INJURIES[g])||{}).lbl||g).join(', ');
       bodyHtml = `<ul class="masst-sum">
         <li><span>🎯 Objetivo</span><b>${esc(objLbl)}</b></li>
+        <li><span>📊 Nivel</span><b>${esc(lvlLbl)}</b></li>
         <li><span>🏟️ Deporte base</span><b>${esc(discLbl)}</b></li>
+        <li><span>🏋️ Material</span><b>${esc(gearLbl)}</b></li>
+        ${injLbl?`<li><span>🩹 A cuidar</span><b>${esc(injLbl)}</b></li>`:''}
         <li><span>📅 Días</span><b>${esc(daysLbl)}</b></li>
         <li><span>🧩 Reparto</span><b>${esc(splitObj(split).lbl)}</b></li>
         <li><span>${_A.measure==='kcal'?'🔥 Por kcal':'⏱️ Por tiempo'}</span><b>${_A.measure==='kcal'?('~'+_A.amount+' kcal · ≈'+dur+' min'):(_A.amount+' min')}</b></li>
@@ -164,7 +213,14 @@
     const single = e.target.closest('[data-set]');
     if(single){ let v=single.dataset.val; const k=single.dataset.set; if(k==='amount'||k==='weeks') v=+v; _A[k]=v; if(_i<steps().length-1) _i++; render(); return; }
     const multi = e.target.closest('[data-multi]');
-    if(multi){ const k=multi.dataset.multi; const v=+multi.dataset.val; const arr=_A[k]||(_A[k]=[]); const j=arr.indexOf(v); if(j>=0) arr.splice(j,1); else arr.push(v); render(); return; }
+    if(multi){
+      const k=multi.dataset.multi;
+      // 'days' son índices numéricos; 'gear'/'injuries' son claves de texto
+      const v = (k==='days') ? +multi.dataset.val : multi.dataset.val;
+      const arr=_A[k]||(_A[k]=[]); const j=arr.indexOf(v);
+      if(j>=0) arr.splice(j,1); else arr.push(v);
+      render(); return;
+    }
     const nav = e.target.closest('[data-nav]');
     if(nav){
       const a=nav.dataset.nav;
@@ -191,11 +247,21 @@
       const who = 'AB';
       const cfgSlots = [];
       let n = 0;
+      // guarda el perfil: lo usarán el generador y el modo entrenamiento
+      const prof = (typeof spProfileSet==='function')
+        ? spProfileSet({level:_A.level, gear:(_A.gear&&_A.gear.length)?_A.gear:['ninguno'], injuries:_A.injuries||[]})
+        : null;
+
+      // Recuperación 48 h: reordena los slots para que dos días seguidos
+      // no repitan grupo muscular. Con 4 días seguidos de pecho no se
+      // adapta nada: el músculo necesita ~48 h para resintetizar proteína.
+      const order = spaceSlots(slotsDef, days);
+
       days.forEach((wd, k)=>{
         const disc = _A.daySport[wd] || _A.disc;
-        const slot = slotsDef[k % slotsDef.length];
-        let sess = buildSessionByCriteria(slot.m, dur, intensity, disc);
-        if(!sess) sess = buildSessionByCriteria(slot.m, dur, intensity, 'all');
+        const slot = order[k];
+        let sess = buildSessionByCriteria(slot.m, dur, intensity, disc, {profile:prof});
+        if(!sess) sess = buildSessionByCriteria(slot.m, dur, intensity, 'all', {profile:prof});
         if(!sess) return;
         const discLbl = (EX_SPORTS[disc]||{}).lbl || '';
         sess.name = `${discLbl?discLbl+' · ':''}${slot.l} · ${WD[wd]}`;

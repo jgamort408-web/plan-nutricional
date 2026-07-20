@@ -11,7 +11,7 @@ const ANIM_ENABLED = false;
 /* ── Conmutador Nutrición / Deporte ──────────────────────── */
 let sportMode = false;
 var sportView = lsGet('sport:view', 'ex');
-const SPORT_VIEWS = ['ex','sess','scal'];
+const SPORT_VIEWS = ['ex','sess','scal','prog'];
 
 function setSection(sec){
   // Cambiar de sección es navegar: cierra cualquier página de contenido o de Usuarios
@@ -75,7 +75,7 @@ function setSection(sec){
   } else {
     if(wk) wk.classList.add('hidden');
     document.querySelectorAll('.sportview').forEach(el=> el.classList.add('hidden'));
-    document.body.classList.remove('spv-ex','spv-sess','spv-scal');   // fuera de Deporte: sin vista de deporte
+    document.body.classList.remove('spv-ex','spv-sess','spv-scal','spv-prog');   // fuera de Deporte: sin vista de deporte
     switchView(S.view);
   }
   lsSet('sport:section', sec);
@@ -88,11 +88,12 @@ function showSportView(v){
   document.querySelectorAll('#sportVtabs .svtab').forEach(b=> b.classList.toggle('on', b.dataset.sview === v));
   document.querySelectorAll('.sportview').forEach(el=> el.classList.add('hidden'));
   document.getElementById('sportview-' + v).classList.remove('hidden');
-  document.body.classList.remove('spv-ex','spv-sess','spv-scal');
+  document.body.classList.remove('spv-ex','spv-sess','spv-scal','spv-prog');
   document.body.classList.add('spv-' + v);
   if(v === 'ex')   renderExercises();
   if(v === 'sess') renderSessions();
   if(v === 'scal' && typeof renderSportCalendar === 'function') renderSportCalendar();
+  if(v === 'prog' && typeof renderProgress === 'function') renderProgress();
   if(typeof renderTabbar === 'function') renderTabbar('sport');
 }
 
@@ -614,10 +615,15 @@ function openSessionEditor(editId, prefill){
   sessLive();
 }
 
-/* ── Constructor aleatorio de sesiones por criterios ─────────
+/* ── Constructor de sesiones por criterios ───────────────────
    El usuario elige músculos/objetivo, duración e intensidad y se
    genera una sesión coherente y secuenciada de forma profesional
    (básicos compuestos primero, accesorios y core al final).
+
+   La selección es DETERMINISTA y con puntuación (antes era un
+   `sort(()=>Math.random()-0.5)`, que mezclaba básicos y accesorios
+   sin criterio). Además respeta el perfil del usuario: nivel,
+   material disponible y lesiones. Ver DEPORTE.md §3.4.
 ══════════════════════════════════════════════════════════ */
 const SP_INTENSITY = {
   suave: {lbl:'Suave',  dSet:-1, repF:1.20, restF:0.85, minRest:30, ex:'Más reps, descansos cortos · técnica y volumen'},
@@ -625,12 +631,45 @@ const SP_INTENSITY = {
   alta:  {lbl:'Alta',   dSet:1,  repF:0.70, restF:1.25, minRest:45, ex:'Menos reps, más series y descanso · fuerza'}
 };
 const SP_PAT_ORDER = {movilidad:0, sentadilla:1, bisagra:1, pliometria:1, empuje_h:2, empuje_v:2, traccion_h:2, traccion_v:2, unilateral:3, acarreo:3, ergometro:4, carrera:4, condicionamiento:4, accesorio:5, core:6};
+/* Patrones compuestos multiarticulares: son los que deben abrir la sesión */
+const SP_COMPOUND = ['sentadilla','bisagra','empuje_h','empuje_v','traccion_h','traccion_v','unilateral'];
+/* Pares que deben equilibrarse dentro de una sesión (salud articular) */
+const SP_BALANCE = {empuje_h:'traccion_h', traccion_h:'empuje_h', empuje_v:'traccion_v', traccion_v:'empuje_v'};
+/* Minutos de calentamiento que se descuentan del tiempo disponible */
+const SP_WARMUP_MIN = 8;
 let _genCriteria = null;
 
-function genIntensityItem(id, intensity){
+/* ¿el usuario tiene el material que pide este ejercicio? */
+function spGearOk(ex, gear){
+  if(!gear || !gear.length) return true;
+  const eq = (ex.equip||'').toLowerCase();
+  if(!eq) return true;
+  // peso corporal / material trivial: siempre disponible
+  if(/peso corporal|esterilla|suelo|zapatillas|ninguno|toalla|silla|escal/.test(eq)) return true;
+  return gear.some(g=> (SP_GEAR[g]||{match:[]}).match.some(w=> w && eq.includes(w)));
+}
+/* ¿este ejercicio carga una zona lesionada? */
+function spInjuryOk(ex, injuries){
+  if(!injuries || !injuries.length) return true;
+  return !injuries.some(k=>{
+    const inj = SP_INJURIES[k]; if(!inj) return false;
+    if((inj.avoidPat||[]).includes(ex.pat)) return true;
+    // solo bloquea si la zona lesionada es el músculo PRINCIPAL del ejercicio
+    return (inj.avoid||[]).includes((ex.muscles||[])[0]);
+  });
+}
+/* Filtro combinado de perfil */
+function spExAllowed(ex, prof){
+  return spGearOk(ex, prof.gear) && spInjuryOk(ex, prof.injuries);
+}
+
+function genIntensityItem(id, intensity, prof){
   const ex = EXERCISES[id]; const r = SP_INTENSITY[intensity] || SP_INTENSITY.media;
+  const lvl = SP_LEVELS[(prof||spProfile()).level] || SP_LEVELS.intermedio;
   const it = {e:id};
-  const sets = Math.max(2, (ex.sets||3) + r.dSet);
+  // el nivel acota las series: un principiante no hace 5 series de nada
+  const raw  = (ex.sets||3) + r.dSet;
+  const sets = Math.max(lvl.sets[0], Math.min(lvl.sets[1], raw));
   if(ex.mode==='time'){
     it.sets = sets; it.dur = ex.dur||30; it.rest = Math.max(r.minRest, Math.round((ex.rest||30)*r.restF));
   } else {
@@ -638,51 +677,139 @@ function genIntensityItem(id, intensity){
   }
   return it;
 }
-function buildSessionByCriteria(muscles, durMin, intensity, disc){
+
+/* Puntuación determinista de un candidato.
+   Manda la cobertura de los músculos pedidos; después el patrón
+   (compuestos antes que accesorios) y, a igualdad, el que lleve más
+   tiempo sin salir en una sesión, para que haya variedad sin azar. */
+function spScoreCand(c, want, prof){
+  const ex = c.ex;
+  let s = c.matched.length * 10;
+  if(SP_COMPOUND.includes(ex.pat)) s += 6;
+  if(ex.pat === 'core' || ex.pat === 'accesorio') s -= 2;
+  // principiante: prioriza guiado y estable; avanzado: prioriza peso libre
+  const eq = (ex.equip||'').toLowerCase();
+  const guided = /maquina|máquina|polea|cable|prensa|contractora|multipower/.test(eq);
+  if(prof.level === 'novato')    s += guided ? 5 : 0;
+  if(prof.level === 'avanzado')  s += guided ? 0 : 3;
+  // desempate estable y variado: hace cuánto se registró por última vez
+  try{
+    const last = logLastFor(c.id, 'A');
+    if(!last) s += 2;                                   // nunca hecho → aporta novedad
+    else {
+      const days = Math.round((Date.now() - spFromKey(last.entry.date).getTime())/86400000);
+      s += Math.min(3, days/7);                         // +1 por semana sin hacerlo, tope 3
+    }
+  }catch(e){}
+  // desempate final determinista (sin Math.random): hash del id
+  let h = 0; for(let i=0;i<c.id.length;i++) h = (h*31 + c.id.charCodeAt(i)) % 97;
+  return s + h/1000;
+}
+
+function buildSessionByCriteria(muscles, durMin, intensity, disc, opts){
+  opts = opts || {};
   const want = (muscles||[]).slice();
   if(!want.length) return null;
-  const targetSec = durMin*60;
-  let cands = Object.keys(EXERCISES).map(id=>{
+  const prof = opts.profile || spProfile();
+  const lvl  = SP_LEVELS[prof.level] || SP_LEVELS.intermedio;
+  // el calentamiento ocupa tiempo real: se descuenta del objetivo
+  const targetSec = Math.max(600, (durMin - SP_WARMUP_MIN) * 60);
+
+  /* Degradación controlada: si el filtro de material deja el catálogo sin
+     candidatos (p. ej. "antebrazo" con solo 1 ejercicio, y que necesita
+     material que no tienes), se reintenta ignorando el material antes de
+     rendirse. Las LESIONES nunca se ignoran: son seguridad, no comodidad. */
+  const pick = (relaxGear)=> Object.keys(EXERCISES).map(id=>{
     const ex = EXERCISES[id];
     if(disc && disc!=='all' && exDisc(ex)!==disc) return null;
+    if(!spInjuryOk(ex, prof.injuries)) return null;
+    if(!relaxGear && !spGearOk(ex, prof.gear)) return null;
     const matched = (ex.muscles||[]).filter(m=>want.includes(m));
-    return matched.length ? {id, ex, score:matched.length, matched} : null;
+    return matched.length ? {id, ex, matched} : null;
   }).filter(Boolean);
+
+  let cands = pick(false), relaxed = false;
+  if(!cands.length){ cands = pick(true); relaxed = cands.length > 0; }
   if(!cands.length) return null;
-  cands.sort(()=>Math.random()-0.5);                                  // variedad
-  cands.sort((a,b)=> b.score-a.score || (b.ex.muscles.length-a.ex.muscles.length));
+
+  cands.forEach(c=> c.score = spScoreCand(c, want, prof));
+  cands.sort((a,b)=> b.score - a.score);
 
   const covered=new Set(), usedIds=new Set(), chosen=[];
-  // 1) cubrir cada músculo objetivo (compuestos primero)
+  const take = c=>{ chosen.push(c); usedIds.add(c.id); c.matched.forEach(x=>covered.add(x)); };
+
+  // 1) cubrir cada músculo objetivo (el mejor candidato de cada uno)
   for(const m of want){
     if(covered.has(m)) continue;
     const pick = cands.find(c=>!usedIds.has(c.id) && c.matched.includes(m));
-    if(pick){ chosen.push(pick); usedIds.add(pick.id); pick.matched.forEach(x=>covered.add(x)); }
+    if(pick) take(pick);
   }
-  const estSec = ()=> chosen.reduce((a,c)=> a+itemTotalSec(genIntensityItem(c.id,intensity)), 0);
-  // 2) rellenar hasta la duración objetivo
-  while(estSec() < targetSec*0.9 && chosen.length<9){
-    const pick = cands.find(c=>!usedIds.has(c.id));
-    if(!pick) break; chosen.push(pick); usedIds.add(pick.id);
-  }
-  // 3) recortar si se pasa mucho
-  while(estSec() > targetSec*1.15 && chosen.length>Math.max(1,want.length)) chosen.pop();
-  // secuenciación profesional
-  chosen.sort((a,b)=> (SP_PAT_ORDER[a.ex.pat]??5)-(SP_PAT_ORDER[b.ex.pat]??5));
 
-  const items = chosen.map(c=>genIntensityItem(c.id,intensity));
+  const estSec = ()=> chosen.reduce((a,c)=> a+itemTotalSec(genIntensityItem(c.id,intensity,prof)), 0);
+  const patCount = ()=> chosen.reduce((a,c)=>{ a[c.ex.pat]=(a[c.ex.pat]||0)+1; return a; }, {});
+
+  // 2) rellenar hasta la duración objetivo (tope de ejercicios según nivel).
+  //    Si el patrón que toca ya está desequilibrado, prefiere su opuesto:
+  //    así el relleno no rompe el equilibrio que ajustamos en el paso 3.
+  while(estSec() < targetSec*0.9 && chosen.length < lvl.maxEx){
+    const pc = patCount();
+    const debt = Object.keys(SP_BALANCE).filter(p=> (pc[p]||0) > (pc[SP_BALANCE[p]]||0))
+                       .map(p=> SP_BALANCE[p]);
+    const next = (debt.length && cands.find(c=> !usedIds.has(c.id) && debt.includes(c.ex.pat)))
+              || cands.find(c=> !usedIds.has(c.id));
+    if(!next) break;
+    take(next);
+  }
+
+  // 3) equilibrio empuje/tracción. Un plan que empuja más de lo que tira
+  //    acaba en hombro dolorido: por cada empuje de más, mete su tracción.
+  //    Va DESPUÉS del relleno; si fuera antes, el relleno lo desharía.
+  Object.keys(SP_BALANCE).forEach(p=>{
+    for(let guard=0; guard<4; guard++){
+      const pc = patCount();
+      if((pc[p]||0) <= (pc[SP_BALANCE[p]]||0)) break;
+      const comp = cands.find(c=> !usedIds.has(c.id) && c.ex.pat === SP_BALANCE[p]);
+      if(!comp) break;
+      // si ya no cabe, cambia un accesorio por el compensador en vez de alargar
+      if(chosen.length >= lvl.maxEx){
+        let idx = -1;
+        for(let i=chosen.length-1; i>=0; i--){
+          if(!SP_COMPOUND.includes(chosen[i].ex.pat)){ idx = i; break; }
+        }
+        if(idx < 0) break;
+        usedIds.delete(chosen[idx].id);
+        chosen.splice(idx, 1);
+      }
+      take(comp);
+    }
+  });
+
+  // 4) recortar si se pasa: quita primero accesorios, nunca los básicos
+  while(estSec() > targetSec*1.15 && chosen.length > Math.max(1, Math.min(want.length, 3))){
+    let idx = -1;
+    for(let i=chosen.length-1; i>=0; i--){
+      if(!SP_COMPOUND.includes(chosen[i].ex.pat)){ idx = i; break; }
+    }
+    chosen.splice(idx >= 0 ? idx : chosen.length-1, 1);
+  }
+  // secuenciación profesional: movilidad → compuestos → unilateral → cardio → accesorio → core
+  chosen.sort((a,b)=> (SP_PAT_ORDER[a.ex.pat]??5)-(SP_PAT_ORDER[b.ex.pat]??5) || b.score-a.score);
+
+  const items = chosen.map(c=>genIntensityItem(c.id,intensity,prof));
   const typeCount={}; chosen.forEach(c=> typeCount[c.ex.type]=(typeCount[c.ex.type]||0)+1);
   const type = Object.keys(typeCount).sort((a,b)=>typeCount[b]-typeCount[a])[0] || 'fuerza';
   const lblMus = want.map(m=>(EX_MUSCLES[m]||{}).lbl||m);
   const intLbl = (SP_INTENSITY[intensity]||SP_INTENSITY.media).lbl;
   const discLbl = (disc && disc!=='all' && EX_SPORTS[disc]) ? EX_SPORTS[disc].lbl : '';
+  const rpe = lvl.rpe;
   return {
     name:`${discLbl?discLbl+' · ':''}${lblMus.slice(0,3).join(' · ')}`,
-    type, level:`Generada · ${intLbl.toLowerCase()}`,
+    type, level:`Generada · ${intLbl.toLowerCase()} · ${lvl.lbl.toLowerCase()}`,
     focus:lblMus.join(', '),
     disc: (disc && disc!=='all') ? disc : undefined,
-    warmup:'5–10 min de movilidad articular general y activación progresiva de los grupos a trabajar.',
-    notes:`Generada para ~${durMin} min · intensidad ${intLbl.toLowerCase()}.${discLbl?' Deporte: '+discLbl+'.':''} Ajusta cargas para terminar cada serie con 1–3 reps en reserva.`,
+    warmup:`${SP_WARMUP_MIN} min: movilidad articular general y 1-2 series de aproximación con poco peso en el primer ejercicio.`,
+    relaxed: relaxed || undefined,
+    notes:`Generada para ~${durMin} min (${SP_WARMUP_MIN} de calentamiento incluidos) · intensidad ${intLbl.toLowerCase()} · nivel ${lvl.lbl.toLowerCase()}.${discLbl?' Deporte: '+discLbl+'.':''} Trabaja a RPE ${rpe[0]}-${rpe[1]}: termina cada serie con ${10-rpe[1]}-${10-rpe[0]} repeticiones en reserva.${relaxed?' ⚠️ No había ejercicios para estos músculos con tu material: se han incluido algunos que requieren equipo que no marcaste.':''}`,
     items, user:true, generated:true
   };
 }
