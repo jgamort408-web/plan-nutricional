@@ -59,7 +59,7 @@ var GEAR_RULES = [
   [/barra ez|barra z\b/,                       'barra_ez'],
   [/barra fija|dominadas/,                     'barra_fija'],
   [/paralelas|fondos/,                         'paralelas'],
-  [/\bbarra\b|disco/,                          'barra'],
+  [/\bbarra\b(?! fija)|disco/,                  'barra'],   // "barra fija" es dominadas, no barra olímpica
   [/rack|jaula|soporte/,                       'rack'],
   [/banco/,                                    'banco'],
   [/mancuern/,                                 'mancuernas'],
@@ -104,10 +104,13 @@ function gearItemsOf(id){
   if(Array.isArray(ex.gear) && ex.gear.length) return (_gearCache[id] = ex.gear.slice());
 
   const raw = (ex.equip||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
-  const out = [];
+  let out = [];
   if(!GEAR_NONE.test(raw.trim())){
     GEAR_RULES.forEach(([re, item])=>{ if(re.test(raw) && !out.includes(item)) out.push(item); });
   }
+  // una barra fija (dominadas) NO es barra olímpica: "Barra de dominadas"
+  // dispara ambas reglas; si hay barra_fija y no hay discos, quita 'barra'.
+  if(out.includes('barra_fija') && !/disco/.test(raw)) out = out.filter(k=> k!=='barra');
   if(!out.length) out.push('ninguno');
   return (_gearCache[id] = out);
 }

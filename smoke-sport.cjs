@@ -381,6 +381,19 @@ async function run(){
   (MM.prim>0 && MM.sec>0 && !MM.externo) ? ok('mapa muscular (primario+secundarios, autocontenido)') : bad('mapa muscular', mmap);
   (MM.enDetalle) ? ok('mapa muscular en el detalle del ejercicio') : bad('mapa muscular en detalle', mmap);
   await sleep(200);
+  // preferencia de imagen real (ex-img/) cuando existe manifest
+  const imgPref = await evalJS(`
+    var sinImg = /<svg/.test(exIllusBox('press_banca_barra',{}));       // por defecto: pictograma SVG
+    var nullPath = illImageFor('press_banca_barra')===null;
+    illUseManifest({press_banca_barra:'png'});                          // simula que el generador creó una
+    var box = exIllusBox('press_banca_barra',{});
+    var usaImg = /<img[^>]+ex-img\\/press_banca_barra\\.png/.test(box);
+    illUseManifest(null);                                               // restaura
+    var vuelveSvg = /<svg/.test(exIllusBox('press_banca_barra',{}));
+    return JSON.stringify({sinImg:sinImg, nullPath:nullPath, usaImg:usaImg, vuelveSvg:vuelveSvg});`);
+  const IP = JSON.parse(imgPref||'{}');
+  (IP.sinImg && IP.nullPath && IP.vuelveSvg) ? ok('sin imágenes: usa el pictograma SVG (fallback)') : bad('fallback a SVG', imgPref);
+  (IP.usaImg) ? ok('con manifest: la app prefiere la imagen real (ex-img/)') : bad('preferencia de imagen', imgPref);
 
   /* ── 6a. Menú de ayuda en móvil (no se sale de pantalla) ── */
   console.log('\n\x1b[1m6a · Menú de ayuda (móvil)\x1b[0m');

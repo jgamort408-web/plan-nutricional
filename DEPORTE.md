@@ -226,8 +226,28 @@ color del músculo (`--il`) y tema claro/oscuro. Se muestra en las tarjetas del
 catálogo, el detalle, el modo entrenamiento y los selectores.
 
 Para afinar una pose: añadir/editar en `ILL_POSES` y su regla en `illPoseKey`.
-Para una foto real de un ejercicio concreto en el futuro: se podría añadir un
-campo `img` (data URI) al ejercicio y que `exIllus` lo prefiera.
+
+**Imágenes reales generadas** (`gen-exercise-art.cjs` → carpeta `ex-img/`): la app
+prefiere una imagen sobre el pictograma cuando existe. `exIllusBox` mira
+`illImageFor(id)`; el manifest `ex-img/manifest.json` (lo escribe el generador) se
+carga al arrancar (`illInitImages`). Son ficheros de mismo origen → el SW los
+cachea y funcionan offline. Sin manifest, todo sigue en SVG.
+
+### Generador de arte (`gen-exercise-art.cjs`)
+
+Crea una ilustración **original** por ejercicio con la **API de OpenAI** (Images),
+en un estilo propio de la casa (plano, editorial, paleta cálida de la app, un
+acento por músculo primario). Los prompts son de nivel experto: biomecánica
+correcta por patrón de movimiento, modificadores de variante leídos del nombre
+(inclinado, cerrado, unilateral…), énfasis del músculo primario, y negativos
+(sin texto/logos). No descarga ni parte de imágenes de terceros: solo usa el
+*movimiento* y la *anatomía* (hechos, no copyright).
+
+Flujo: `--refs` genera un set **insignia** de referencia → `--contact` para
+revisarlas → `--redo id` para rehacer / borrar el PNG para descartar → cuando
+convencen, `--all --use-refs` genera los lotes usando las insignia como
+referencia de estilo (endpoint `images/edits`) para coherencia visual. Lee la
+clave de `OPENAI_API_KEY` (no se guarda). `--dry-run` imprime los prompts gratis.
 
 **Mapa muscular** (`muscleMapBox`): silueta frontal + dorsal con los músculos
 implicados resaltados (primario intenso, secundarios tenues) + leyenda. Es la
@@ -343,7 +363,7 @@ aparecían con una vista guardada concreta.
 node validate-catalog.cjs   # valida los datos del catálogo (rápido, sin navegador)
 node build.mjs              # regenera app.min.js + sella sw.js y el HTML
 
-# smoke test en Chrome headless (70 comprobaciones)
+# smoke test en Chrome headless (72 comprobaciones)
 python -m http.server 8000  # en otra terminal
 node smoke-sport.cjs
 ```
@@ -372,7 +392,7 @@ El bloque 3 incluye **cobertura por disciplina**: verifica que cada deporte gene
 una sesión propia sin colar ejercicios de otras disciplinas (el fallo original de
 natación).
 
-Debe salir **70 OK · 0 fallos**. Las capturas quedan en `.shots/`.
+Debe salir **72 OK · 0 fallos**. Las capturas quedan en `.shots/`.
 Si tocas el generador o el registro, ejecútalo antes de mergear.
 
 > ⚠️ El archivo es `.cjs` a propósito: `package.json` tiene `"type":"module"`

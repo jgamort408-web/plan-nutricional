@@ -2361,6 +2361,10 @@ main[data-vm="small"] .dish-incart{font-size:.5rem;padding:3px 8px}
   background:color-mix(in srgb, var(--il, var(--sport)) 11%, var(--white));
   color:var(--il, var(--sport));border-radius:12px;overflow:hidden;flex-shrink:0}
 .ex-illus-svg{width:100%;height:100%;display:block}
+/* imagen real generada (ex-img/): rellena la caja, sin el tinte del pictograma */
+.ex-illus.has-img{background:transparent}
+.ex-illus-img{width:100%;height:100%;object-fit:cover;display:block}
+.ex-illus.hero.has-img,.ex-illus.train.has-img{background:transparent}
 .ex-illus-svg .ill-ground{stroke:currentColor;opacity:.26;stroke-width:2}
 .ex-illus-svg .ill-mach{stroke:currentColor;opacity:.5}
 .ex-illus-svg .ill-water{stroke:currentColor;opacity:.55;stroke-width:2.4}
@@ -3008,7 +3012,7 @@ html[data-theme="dark"] .pg-dot{stroke:var(--parch)}
 <!-- Núcleo de la app: bundle generado por build.mjs (30 scripts en 1).
      Para volver a los scripts sueltos en desarrollo, sustituye esta línea
      por los <script src> individuales. Regenera con: node build.mjs -->
-<script src="app.min.js?v=5a5cf18e"></script>
+<script src="app.min.js?v=0b069d83"></script>
 <script>
 /* ── Carga diferida del "pack de contenido" · Teoría + Bibliografía ──
    Son ~364 KB de texto que la mayoría de sesiones no abren. No se
