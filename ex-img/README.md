@@ -39,10 +39,12 @@ node gen-exercise-art.cjs --redo dominadas --persona m2 # con otra persona
 ## Diversidad
 
 El estilo de **dibujo** es constante; la **persona** varía. Hay 12 modelos
-(`m1..m6` mujeres, `h1..h6` hombres) con distintas edades, tallas, tonos de piel
-y estado físico. Cada ejercicio se asigna a uno de forma determinista y
-equilibrada (~mitad y mitad). Para ajustar el elenco, edita la lista `PERSONAS`
-en `gen-exercise-art.cjs`.
+(`m1..m6` mujeres, `h1..h6` hombres) de **distintos orígenes y rasgos** (asiáticos
+—oriental, sudeste, sur—, africanos, sudamericanos, europeos, de Oriente Medio) y
+con distintas edades, tallas, tonos de piel y estado físico. Cada ejercicio se
+asigna a uno de forma determinista y equilibrada (~mitad y mitad). Para ajustar el
+elenco, edita la lista `PERSONAS` en `gen-exercise-art.cjs`. Los músculos **no** se
+colorean sobre el cuerpo; el acento va solo en el material.
 
 Son ilustraciones **originales** (arte propio a partir del movimiento y la
 anatomía). No se descargan ni derivan imágenes de terceros.

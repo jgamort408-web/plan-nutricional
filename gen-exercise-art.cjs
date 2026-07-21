@@ -8,8 +8,9 @@
    el pictograma SVG.
 
    ── Flujo recomendado ──────────────────────────────────────
-   1) Crea un ELENCO de modelos humanos diversos (mujeres y hombres,
-      distintas edades, tallas, tonos de piel y estado físico):
+   1) Crea un ELENCO de modelos humanos diversos (mujeres y hombres, de
+      distintos orígenes y rasgos —asiáticos, africanos, sudamericanos,
+      europeos…—, edades, tallas, tonos de piel y estado físico):
         node gen-exercise-art.cjs --cast
         (revisa ex-img/_cast/_contact.html · rehaz uno con
          --cast --persona h3 --force · edita la lista PERSONAS para ajustar)
@@ -68,10 +69,10 @@ const E = EXERCISES;
 const STYLE_HOUSE = [
   'Editorial vector illustration for a premium fitness app, in ONE cohesive house DRAWING style (the drawing style is constant across the whole set; only the person varies).',
   'Flat design: clean geometric shapes, smooth confident linework of even weight, and simple 2–3 tone shading (no photorealism, no gradient meshes, no 3D render).',
-  'Believable human proportions (about 7.5 heads tall), simplified friendly facial features (no fine facial detail), simple athletic wear. Depict the specific person described in the subject with respect and accuracy — their gender, age, body size and skin tone.',
-  'Warm limited palette for the scene: soft cream paper background #F6EDD8; outlines and clothing in deep warm brown #2C1F0E; realistic natural skin tone for the person; and ONE single accent colour <ACCENT> reserved only for the primary working muscle and the equipment.',
+  'Believable human proportions (about 7.5 heads tall), simplified friendly facial features (no fine facial detail), simple athletic wear. Depict the specific person described in the subject faithfully and respectfully — their gender, age, body size, skin tone and ethnic/regional facial features and hair — so the whole set feels genuinely diverse.',
+  'Warm limited palette for the scene: soft cream paper background #F6EDD8; outlines and clothing in deep warm brown #2C1F0E; realistic natural skin tone for the person; and ONE single accent colour <ACCENT> used sparingly ONLY on the equipment or a small prop — never on the body.',
   'A single soft directional long shadow grounds the figure. Balanced, centered, the full body comfortably inside the frame with generous margins and calm negative space.',
-  'Anatomically accurate joint angles and posture; the working muscle subtly suggested in the accent colour, never labelled.',
+  'Anatomically accurate joint angles and posture. Do NOT colour, highlight, shade or mark any muscles — the body stays one natural skin tone with no coloured muscle patches.',
   'Modern, quiet, high-end, instantly readable. Absolutely NO text, letters, numbers, arrows, logos, UI or watermark. Square 1:1.'
 ].join(' ');
 
@@ -116,24 +117,25 @@ const POSE_BRIEF = {
 };
 
 /* ══════════════════════════════════════════════════════════
-   ELENCO DIVERSO · personas variadas en género, edad, tamaño y tono
-   de piel, y distinto estado físico. El estilo de DIBUJO es común;
-   la PERSONA varía. Asignación determinista por id (reproducible y
-   repartida) para que el catálogo tenga diversidad equilibrada.
+   ELENCO DIVERSO · personas variadas en género, ORIGEN/RASGOS (asiático,
+   africano, sudamericano, europeo, de Oriente Medio…), edad, tamaño,
+   tono de piel y estado físico. El estilo de DIBUJO es común; la PERSONA
+   varía. Asignación determinista por id (reproducible y repartida) para
+   que el catálogo tenga diversidad equilibrada.
 ══════════════════════════════════════════════════════════ */
 const PERSONAS = [
-  { id:'m1', desc:'a young woman with warm brown skin and a lean, toned athletic build' },
-  { id:'h1', desc:'a middle-aged man with light skin and a larger, heavier body, average everyday fitness' },
-  { id:'m2', desc:'a woman with deep brown skin and a strong, visibly muscular build' },
-  { id:'h2', desc:'a young man with tan olive skin and an average, everyday build' },
-  { id:'m3', desc:'an older woman with fair skin, short silver hair and a slim build' },
-  { id:'h3', desc:'a man with dark brown skin and a tall, athletic build' },
-  { id:'m4', desc:'a woman with light skin and a soft, curvy plus-size body, a happy beginner' },
-  { id:'h4', desc:'a young man with medium brown skin and a wiry, slim build' },
-  { id:'m5', desc:'a middle-aged woman with olive skin and a healthy, average build' },
-  { id:'h5', desc:'an older man with medium skin, grey hair and a stocky, sturdy build' },
-  { id:'m6', desc:'a woman with light-tan skin and a compact, muscular gymnast build' },
-  { id:'h6', desc:'a man with fair skin and a softer, out-of-shape build, just getting started' }
+  { id:'m1', desc:'a young East Asian woman with a lean, toned athletic build' },
+  { id:'h1', desc:'a middle-aged White European man with light skin, a larger heavier body and average everyday fitness' },
+  { id:'m2', desc:'a Black woman of African descent with deep skin and a strong, visibly muscular build' },
+  { id:'h2', desc:'a young Latino man of South American descent with tan brown skin and an average, everyday build' },
+  { id:'m3', desc:'an older White European woman with fair skin, short silver hair and a slim build' },
+  { id:'h3', desc:'a tall Black man of African descent with dark skin and an athletic build' },
+  { id:'m4', desc:'a Latina woman of South American descent with a soft, curvy plus-size body, a happy beginner' },
+  { id:'h4', desc:'a young Southeast Asian man with medium skin and a wiry, slim build' },
+  { id:'m5', desc:'a middle-aged South Asian woman with medium-brown skin and a healthy, average build' },
+  { id:'h5', desc:'an older East Asian man with grey hair and a stocky, sturdy build' },
+  { id:'m6', desc:'a Middle Eastern woman with olive skin and a compact, muscular build' },
+  { id:'h6', desc:'a South Asian man with brown skin and a softer, out-of-shape build, just getting started' }
 ];
 /* hash estable id → índice de persona (reparto uniforme y reproducible) */
 function personaFor(id, override){
@@ -200,13 +202,11 @@ function buildPrompt(id, personaOverride) {
   const pose = illPoseKey(ex, id);
   const brief = (POSE_BRIEF[pose] || POSE_BRIEF.generic) + variantModifier(ex.name || '');
   const primary = (ex.muscles || [])[0];
-  const accent = (EX_MUSCLES[primary] || {}).c || '#B5603A';
-  const realMuscle = primary && !['cardio', 'fullbody', 'movilidad'].includes(primary);
+  const accent = (EX_MUSCLES[primary] || {}).c || '#B5603A';   // acento solo para el material
   const persona = personaFor(id, personaOverride);
   const style = STYLE_HOUSE.replace('<ACCENT>', accent);
   return `Subject: ${persona.desc}, ${brief}, ${equipClause(ex, id)}. `
     + `The pose must read instantly and unambiguously as this exact exercise, technically correct. `
-    + (realMuscle ? `Subtly tint the ${engMuscle(primary)} — the primary working muscle — in the accent colour. ` : '')
     + `\n\nStyle: ${style}`;
 }
 
