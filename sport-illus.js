@@ -206,13 +206,47 @@ function exIllus(id, opts){
   _illCache[key] = svg;
   return svg;
 }
-/* Envuelto en su contenedor (para tarjetas): incluye acento por tipo */
+/* ── Imágenes reales generadas (ex-img/) ──────────────────────
+   Si el generador (gen-exercise-art.cjs) ha creado una imagen para
+   este ejercicio, la app la prefiere sobre el pictograma SVG. El
+   manifest (ex-img/manifest.json) dice qué ids tienen imagen; se
+   carga una vez al arrancar. Sin manifest, todo sigue en SVG. */
+var _illImg = null;                 // {id: 'png'|'webp'} o null si no hay
+function illImageFor(id){
+  if(!_illImg || !_illImg[id]) return null;
+  return 'ex-img/' + id + '.' + _illImg[id];
+}
+/* Fija el manifest directamente (lo usa illInitImages y sirve para tests) */
+function illUseManifest(m){
+  _illImg = (m && typeof m === 'object' && Object.keys(m).length) ? m : null;
+  try{ if(typeof renderSportActive === 'function') renderSportActive(); }catch(e){}
+}
+function illInitImages(){
+  if(typeof fetch !== 'function' || typeof document === 'undefined') return;
+  fetch('ex-img/manifest.json', {cache:'no-cache'})
+    .then(r => r.ok ? r.json() : null)
+    .then(m => {
+      if(m && typeof m === 'object' && Object.keys(m).length){
+        _illImg = m;
+        // repinta la sección de deporte si ya está montada
+        try{ if(typeof renderSportActive === 'function') renderSportActive(); }catch(e){}
+      }
+    })
+    .catch(()=>{});   // sin manifest → pictogramas, sin ruido
+}
+
+/* Envuelto en su contenedor (para tarjetas): imagen real si existe,
+   si no el pictograma SVG. Incluye acento por músculo. */
 function exIllusBox(id, opts){
   opts = opts || {};
   const ex = (typeof EXERCISES!=='undefined') ? EXERCISES[id] : null;
   const accent = ex && ex.muscles && ex.muscles[0] && typeof EX_MUSCLES!=='undefined' && EX_MUSCLES[ex.muscles[0]]
     ? EX_MUSCLES[ex.muscles[0]].c : '';
-  return `<span class="ex-illus ${opts.cls||''}"${accent?` style="--il:${accent}"`:''}>${exIllus(id, opts)}</span>`;
+  const img = illImageFor(id);
+  const inner = img
+    ? `<img class="ex-illus-img" src="${img}" alt="${((ex&&ex.name)||'').replace(/"/g,'')}" loading="lazy" decoding="async" onerror="this.replaceWith(document.createRange().createContextualFragment(window.exIllus?exIllus('${id}',{}):''))">`
+    : exIllus(id, opts);
+  return `<span class="ex-illus ${opts.cls||''}${img?' has-img':''}"${accent?` style="--il:${accent}"`:''}>${inner}</span>`;
 }
 /* ¿la pose es genérica? (para saber cuáles conviene afinar luego) */
 function illIsGeneric(id){ const ex=EXERCISES[id]; return ex ? illPoseKey(ex,id)==='generic' : true; }
@@ -283,5 +317,14 @@ window.exIllus = exIllus;
 window.exIllusBox = exIllusBox;
 window.illPoseKey = illPoseKey;
 window.illIsGeneric = illIsGeneric;
+window.illImageFor = illImageFor;
+window.illInitImages = illInitImages;
+window.illUseManifest = illUseManifest;
 window.muscleMapSVG = muscleMapSVG;
 window.muscleMapBox = muscleMapBox;
+
+/* carga el manifest de imágenes al arrancar (si lo hay) */
+if(typeof document !== 'undefined'){
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', illInitImages, {once:true});
+  else illInitImages();
+}
