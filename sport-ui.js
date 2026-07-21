@@ -248,7 +248,10 @@ function openExerciseDetail(id){
     <div class="form-hd"><h2>${t.ico} ${spEsc(ex.name)}</h2><span class="form-sub">${t.lbl}${pat?' · '+pat.lbl:''} · ${spEsc(ex.equip||'—')}</span></div>
     <div class="form-body">
       ${hasAnim?`<div class="anim-wrap"><div class="anim-canvas" id="exAnimMount"><div class="anim-msg">Cargando 3D…</div></div><div class="anim-bar"><button class="anim-btn" id="exAnimToggle">⏸ Pausar</button><span class="anim-hint">🖱️ Arrastra para girar · maniquí 3D</span></div></div>`
-        : (typeof exIllusBox==='function' ? `<div class="ex-illus-hero">${exIllusBox(id,{cls:'hero'})}<span class="ex-illus-cap">Ilustración esquemática del movimiento</span></div>` : '')}
+        : (typeof exIllusBox==='function' ? `<div class="ex-visual-row">
+            <div class="ex-illus-hero">${exIllusBox(id,{cls:'hero'})}<span class="ex-illus-cap">Movimiento</span></div>
+            ${typeof muscleMapBox==='function' ? `<div class="ex-musclemap">${muscleMapBox(ex.muscles)}</div>` : ''}
+          </div>` : '')}
       <div class="msc-row big">${muscleChips(sessionMuscles({items:[{e:id}]}),{dot:true})}</div>
       <div class="sp-detail-grid">
         <div class="sdg-cell"><b>${itemScheme({e:id})}</b><i>pauta</i></div>

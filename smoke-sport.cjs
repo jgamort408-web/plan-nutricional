@@ -367,6 +367,20 @@ async function run(){
     },400); });`);
   (inCards>5) ? ok('pictogramas en las tarjetas del catálogo', inCards+' visibles') : bad('pictogramas en catálogo', 'solo '+inCards);
   await shot('smoke-illus-cards');
+  // mapa muscular (misma info que las guías externas, imagen nuestra)
+  const mmap = await evalJS(`
+    var svg = muscleMapSVG(['pecho','hombro','triceps']);
+    var prim = (svg.match(/bm-hi prim/g)||[]).length;
+    var sec  = (svg.match(/bm-hi sec/g)||[]).length;
+    var ext  = /https?:|src=|<image/.test(svg);
+    openExerciseDetail('press_banca_barra');
+    var enDetalle = !!document.querySelector('.muscle-map .bm-svg');
+    if(typeof closeForm==='function') closeForm();
+    return JSON.stringify({prim:prim, sec:sec, externo:ext, enDetalle:enDetalle});`);
+  const MM = JSON.parse(mmap||'{}');
+  (MM.prim>0 && MM.sec>0 && !MM.externo) ? ok('mapa muscular (primario+secundarios, autocontenido)') : bad('mapa muscular', mmap);
+  (MM.enDetalle) ? ok('mapa muscular en el detalle del ejercicio') : bad('mapa muscular en detalle', mmap);
+  await sleep(200);
 
   /* ── 6a. Menú de ayuda en móvil (no se sale de pantalla) ── */
   console.log('\n\x1b[1m6a · Menú de ayuda (móvil)\x1b[0m');
