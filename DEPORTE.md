@@ -229,6 +229,18 @@ Para afinar una pose: añadir/editar en `ILL_POSES` y su regla en `illPoseKey`.
 Para una foto real de un ejercicio concreto en el futuro: se podría añadir un
 campo `img` (data URI) al ejercicio y que `exIllus` lo prefiera.
 
+**Mapa muscular** (`muscleMapBox`): silueta frontal + dorsal con los músculos
+implicados resaltados (primario intenso, secundarios tenues) + leyenda. Es la
+misma información que dan las guías externas (qué músculos trabaja el ejercicio)
+pero como imagen original nuestra. Se muestra en el detalle, junto al pictograma.
+
+> **Nota sobre guías externas** (SimplyFitness u otras): no se pueden **incrustar**
+> — envían `X-Frame-Options: DENY` y `frame-ancestors 'none'`, el navegador
+> rechaza el iframe. Y **no se deben copiar sus ilustraciones** (ni «rehacerlas con
+> IA a partir de las suyas»: sería obra derivada, sigue con copyright). Lo legal es
+> reusar la **información** (hechos: movimiento, músculos) en arte propio — que es
+> lo que hacen `sport-illus.js` y el mapa muscular.
+
 ### Sistema de material (`sport-gear.js`)
 
 El campo `equip` es texto libre («Barra + rack», «Piscina, gafas»): sirve para leer,
@@ -331,7 +343,7 @@ aparecían con una vista guardada concreta.
 node validate-catalog.cjs   # valida los datos del catálogo (rápido, sin navegador)
 node build.mjs              # regenera app.min.js + sella sw.js y el HTML
 
-# smoke test en Chrome headless (68 comprobaciones)
+# smoke test en Chrome headless (70 comprobaciones)
 python -m http.server 8000  # en otra terminal
 node smoke-sport.cjs
 ```
@@ -360,7 +372,7 @@ El bloque 3 incluye **cobertura por disciplina**: verifica que cada deporte gene
 una sesión propia sin colar ejercicios de otras disciplinas (el fallo original de
 natación).
 
-Debe salir **68 OK · 0 fallos**. Las capturas quedan en `.shots/`.
+Debe salir **70 OK · 0 fallos**. Las capturas quedan en `.shots/`.
 Si tocas el generador o el registro, ejecútalo antes de mergear.
 
 > ⚠️ El archivo es `.cjs` a propósito: `package.json` tiene `"type":"module"`

@@ -2374,9 +2374,25 @@ main[data-vm="small"] .dish-incart{font-size:.5rem;padding:3px 8px}
 .sp-card.ex .sp-card-body{flex:1;min-width:0}
 .sp-grid[data-spvm="compact"] .sp-card.ex{gap:10px}
 .sp-grid[data-spvm="compact"] .ex-illus.card{width:48px;height:48px}
-/* detalle */
-.ex-illus-hero{display:flex;flex-direction:column;align-items:center;gap:5px;margin-bottom:12px}
+/* detalle: movimiento + mapa muscular lado a lado */
+.ex-visual-row{display:flex;gap:12px;align-items:stretch;margin-bottom:12px;flex-wrap:wrap;justify-content:center}
+.ex-illus-hero{display:flex;flex-direction:column;align-items:center;gap:5px}
 .ex-illus-cap{font-size:.68rem;color:var(--ink-50);letter-spacing:.02em}
+.ex-musclemap{flex:1;min-width:150px;max-width:230px;display:flex;flex-direction:column;background:var(--white);border:1px solid rgba(var(--ink-rgb),.1);border-radius:16px;padding:8px 10px}
+.muscle-map{display:flex;flex-direction:column;gap:4px;height:100%}
+.bm-svg{width:100%;height:112px;display:block}
+.bm-sil{fill:rgba(var(--ink-rgb),.07);stroke:rgba(var(--ink-rgb),.14);stroke-width:.8}
+.bm-hi{stroke:none}
+.bm-hi.prim{fill:var(--sport);opacity:.92}
+.bm-hi.sec{fill:var(--sport);opacity:.42}
+.bm-lbl{font-size:5px;fill:var(--ink-50);text-anchor:middle;font-family:'DM Mono',monospace;letter-spacing:.05em;text-transform:uppercase}
+.bm-legend{display:flex;flex-wrap:wrap;gap:4px 10px;padding-top:4px;border-top:1px solid rgba(var(--ink-rgb),.08)}
+.bm-leg{display:inline-flex;align-items:center;gap:5px;font-size:.72rem;color:var(--ink-50)}
+.bm-leg.prim{color:var(--ink);font-weight:700}
+.bm-leg i{width:9px;height:9px;border-radius:50%;background:var(--mc,#888);flex-shrink:0}
+html[data-theme="dark"] .ex-musclemap{background:var(--parch)}
+html[data-theme="dark"] .bm-hi.prim{fill:var(--sport-l)}
+html[data-theme="dark"] .bm-hi.sec{fill:var(--sport-l);opacity:.4}
 /* modo entrenamiento */
 .tr-ex-illus{text-align:center}
 html[data-theme="dark"] .ex-illus{background:color-mix(in srgb, var(--il, var(--sport-l)) 16%, var(--parch));color:var(--il, var(--sport-l))}
@@ -2992,7 +3008,7 @@ html[data-theme="dark"] .pg-dot{stroke:var(--parch)}
 <!-- Núcleo de la app: bundle generado por build.mjs (30 scripts en 1).
      Para volver a los scripts sueltos en desarrollo, sustituye esta línea
      por los <script src> individuales. Regenera con: node build.mjs -->
-<script src="app.min.js?v=627b4c78"></script>
+<script src="app.min.js?v=5a5cf18e"></script>
 <script>
 /* ── Carga diferida del "pack de contenido" · Teoría + Bibliografía ──
    Son ~364 KB de texto que la mayoría de sesiones no abren. No se

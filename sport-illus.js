@@ -217,7 +217,71 @@ function exIllusBox(id, opts){
 /* ¿la pose es genérica? (para saber cuáles conviene afinar luego) */
 function illIsGeneric(id){ const ex=EXERCISES[id]; return ex ? illPoseKey(ex,id)==='generic' : true; }
 
+/* ── Mapa muscular ────────────────────────────────────────────
+   Silueta frontal + dorsal con los músculos implicados resaltados
+   (el primero de la lista = primario, más intenso). Es la MISMA
+   información que muestran las guías de ejercicios (qué músculos
+   trabaja), pero como imagen original nuestra: hechos, no copyright.
+
+   Las regiones se colorean sobre una silueta tenue. Cada músculo se
+   asocia a una o varias manchas anatómicas aproximadas por vista.
+══════════════════════════════════════════════════════════ */
+/* Manchas por músculo: {f:[frente], b:[espalda]} en dos figuras
+   (frente centrada en x≈30, espalda en x≈90; alto útil 8..92). */
+const ILL_MUSCLE_SHAPES = {
+  pecho:     {f:['<ellipse cx="26" cy="30" rx="4.5" ry="3"/>','<ellipse cx="34" cy="30" rx="4.5" ry="3"/>'], b:[]},
+  espalda:   {f:[], b:['<ellipse cx="90" cy="30" rx="7.5" ry="6"/>','<ellipse cx="90" cy="42" rx="5" ry="5"/>']},
+  hombro:    {f:['<circle cx="21" cy="25" r="3.2"/>','<circle cx="39" cy="25" r="3.2"/>'], b:['<circle cx="81" cy="25" r="3.2"/>','<circle cx="99" cy="25" r="3.2"/>']},
+  biceps:    {f:['<ellipse cx="19" cy="33" rx="2.4" ry="4"/>','<ellipse cx="41" cy="33" rx="2.4" ry="4"/>'], b:[]},
+  triceps:   {f:[], b:['<ellipse cx="79" cy="33" rx="2.4" ry="4"/>','<ellipse cx="101" cy="33" rx="2.4" ry="4"/>']},
+  antebrazo: {f:['<ellipse cx="17" cy="43" rx="2.2" ry="4"/>','<ellipse cx="43" cy="43" rx="2.2" ry="4"/>'], b:['<ellipse cx="77" cy="43" rx="2.2" ry="4"/>','<ellipse cx="103" cy="43" rx="2.2" ry="4"/>']},
+  core:      {f:['<ellipse cx="30" cy="40" rx="4.5" ry="6"/>'], b:['<ellipse cx="90" cy="40" rx="4" ry="5"/>']},
+  cuadriceps:{f:['<ellipse cx="27" cy="60" rx="3" ry="8"/>','<ellipse cx="33" cy="60" rx="3" ry="8"/>'], b:[]},
+  isquios:   {f:[], b:['<ellipse cx="87" cy="60" rx="3" ry="8"/>','<ellipse cx="93" cy="60" rx="3" ry="8"/>']},
+  gluteo:    {f:[], b:['<ellipse cx="87" cy="50" rx="4" ry="4"/>','<ellipse cx="93" cy="50" rx="4" ry="4"/>']},
+  gemelo:    {f:['<ellipse cx="27" cy="76" rx="2.4" ry="5"/>','<ellipse cx="33" cy="76" rx="2.4" ry="5"/>'], b:['<ellipse cx="87" cy="76" rx="2.4" ry="5"/>','<ellipse cx="93" cy="76" rx="2.4" ry="5"/>']},
+  fullbody:  {f:['<rect x="24" y="20" width="12" height="26" rx="5"/>'], b:['<rect x="84" y="20" width="12" height="26" rx="5"/>']}
+};
+/* Silueta tenue de una figura (frente o espalda idénticas de forma) */
+function _illSilhouette(cx){
+  return `<g class="bm-sil">`
+    + `<circle cx="${cx}" cy="12" r="6"/>`
+    + `<rect x="${cx-7}" y="18" width="14" height="28" rx="6"/>`
+    + `<rect x="${cx-13}" y="20" width="5" height="26" rx="2.5"/>`
+    + `<rect x="${cx+8}" y="20" width="5" height="26" rx="2.5"/>`
+    + `<rect x="${cx-6.5}" y="46" width="6" height="34" rx="3"/>`
+    + `<rect x="${cx+0.5}" y="46" width="6" height="34" rx="3"/>`
+    + `</g>`;
+}
+/* SVG del mapa muscular para una lista de músculos */
+function muscleMapSVG(muscles, opts){
+  opts = opts || {};
+  muscles = (muscles||[]).filter(m=> ILL_MUSCLE_SHAPES[m]);
+  const primary = muscles[0];
+  const front = [], back = [];
+  muscles.forEach(m=>{
+    const s = ILL_MUSCLE_SHAPES[m]; if(!s) return;
+    const cls = (m===primary) ? 'bm-hi prim' : 'bm-hi sec';
+    (s.f||[]).forEach(sh=> front.push(sh.replace('/>', ` class="${cls}"/>`)));
+    (s.b||[]).forEach(sh=> back.push(sh.replace('/>', ` class="${cls}"/>`)));
+  });
+  return `<svg viewBox="0 0 120 96" class="bm-svg${opts.cls?' '+opts.cls:''}" role="img" aria-label="Músculos trabajados">`
+    + _illSilhouette(30) + _illSilhouette(90)
+    + front.join('') + back.join('')
+    + `<text x="30" y="94" class="bm-lbl">frente</text><text x="90" y="94" class="bm-lbl">espalda</text>`
+    + `</svg>`;
+}
+/* Caja del mapa muscular con leyenda de primario/secundario */
+function muscleMapBox(muscles){
+  const named = (muscles||[]).filter(m=> typeof EX_MUSCLES!=='undefined' && EX_MUSCLES[m]);
+  const primary = named[0];
+  const legend = named.map(m=> `<span class="bm-leg ${m===primary?'prim':'sec'}"><i style="--mc:${(EX_MUSCLES[m]||{}).c||'#888'}"></i>${(EX_MUSCLES[m]||{}).lbl||m}${m===primary?' · principal':''}</span>`).join('');
+  return `<div class="muscle-map">${muscleMapSVG(muscles)}<div class="bm-legend">${legend}</div></div>`;
+}
+
 window.exIllus = exIllus;
 window.exIllusBox = exIllusBox;
 window.illPoseKey = illPoseKey;
 window.illIsGeneric = illIsGeneric;
+window.muscleMapSVG = muscleMapSVG;
+window.muscleMapBox = muscleMapBox;
