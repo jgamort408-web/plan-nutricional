@@ -321,9 +321,9 @@ function trOpenPicker(opts){
         head = `<div class="tr-pick-sep">${tier===2?'✅ Muy parecidos':tier===1?'↔ Parecidos':'· Otros ejercicios'}</div>`;
       }
       const mus = (c.muscles||[]).slice(0,3).map(m=>(EX_MUSCLES[m]||{}).lbl||m).join(' · ');
-      const dd  = EX_SPORTS[exDisc(c)] || {ico:''};
+      const thumb = (typeof exIllusBox==='function') ? exIllusBox(id,{cls:'thumb'}) : `<span class="tr-pick-ico">${(EX_SPORTS[exDisc(c)]||{}).ico||'•'}</span>`;
       return `${head}<button class="tr-pick-it ${tier>0?'sim'+tier:''}" data-pick="${id}">
-        <span class="tr-pick-ico">${dd.ico||'•'}</span>
+        ${thumb}
         <span class="tr-pick-b"><b>${spEsc(c.name)}</b><span>${spEsc(mus)}</span></span>
         <span class="tr-pick-eq">${spEsc(c.equip||'—')}</span>
       </button>`;
@@ -572,6 +572,7 @@ function renderTrain(){
 
   <div class="tr-body">
     <div class="tr-ex">
+      ${typeof exIllusBox==='function' ? `<div class="tr-ex-illus">${exIllusBox(x.e,{cls:'train'})}</div>` : ''}
       <span class="tr-ex-n">Ejercicio ${st.cur+1} de ${st.ex.length}${x.extra?' · añadido':''}</span>
       <h2>${spEsc(ex.name)}</h2>
       <div class="tr-ex-meta">

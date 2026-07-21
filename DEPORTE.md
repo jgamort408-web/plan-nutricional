@@ -1,6 +1,6 @@
 # Sección Deporte · auditoría, diseño y checklist
 
-> Documento vivo. Estado a **20 julio 2026**.
+> Documento vivo. Estado a **21 julio 2026**.
 > Sirve para que cualquier programador pueda continuar el trabajo sin contexto previo.
 
 ---
@@ -17,6 +17,7 @@
 | `sport-assistant.js` | 226 | Asistente de 8 pasos para crear plan |
 | `sport-anim.js` | 606 | Visor 3D (en standby, `ANIM_ENABLED = false`) |
 | `sport-gear.js` | — | **NUEVO** · material por ejercicio (ítems normalizados) y lugares |
+| `sport-illus.js` | — | **NUEVO** · pictogramas SVG por ejercicio (`exIllus`, offline) |
 | `sport-log.js` | — | **NUEVO** · registro de entrenamientos, PRs, 1RM, volumen |
 | `sport-train.js` | — | **NUEVO** · modo entrenamiento serie a serie |
 | `sport-progress.js` | — | **NUEVO** · pantalla de progreso |
@@ -98,7 +99,8 @@ obligatorios. Conviene pasarlo al añadir ejercicios.
 | A11 | **Fallback silencioso**: si no hay ejercicios de la disciplina, `sport-calendar.js:412` cae a `'all'` y genera gimnasio llamándolo natación | 🟠 | ✅ resuelto |
 | A12 | Calentamiento no suma a la duración estimada | 🟡 | ✅ resuelto |
 | A13 | `alert()` nativo en `sport-calendar.js:391,420` y `sport-ui.js:607,608,726,732` | 🟡 | ✅ resuelto |
-| A14 | Solo 10/242 ejercicios con `visual` | 🟡 | 🔲 pendiente |
+| A14 | Solo 10/242 ejercicios con `visual` (animación 3D) | 🟡 | ➖ sustituido por A27 |
+| A27 | Sin imagen para identificar cada ejercicio | 🟠 | ✅ pictogramas SVG (`sport-illus.js`) |
 
 ---
 
@@ -210,6 +212,22 @@ Nueva pestaña 📈 **Progreso** en la barra de Deporte:
 - [x] Asistente: paso **«¿dónde entrenas?»** + confirmación de material con
       contador en vivo de ejercicios disponibles
 - [x] Guardián de arranque acotado a fallos reales de arranque (A23)
+- [x] **Pictogramas SVG por ejercicio** (`sport-illus.js`) en tarjetas, detalle,
+      modo entrenamiento y selectores
+
+### Pictogramas de ejercicios (`sport-illus.js`)
+
+No se pueden empaquetar 341 fotos reales (la app funciona offline y el service
+worker bloquea imágenes externas: justo en el gimnasio con mala cobertura
+fallarían). En su lugar, `exIllus(id)` genera una **ilustración SVG esquemática**
+(silueta + material) por ejercicio, elegida por patrón de movimiento + equipo +
+nombre. ~35 poses cubren los 341 (solo 1 genérico). Autocontenido, hereda el
+color del músculo (`--il`) y tema claro/oscuro. Se muestra en las tarjetas del
+catálogo, el detalle, el modo entrenamiento y los selectores.
+
+Para afinar una pose: añadir/editar en `ILL_POSES` y su regla en `illPoseKey`.
+Para una foto real de un ejercicio concreto en el futuro: se podría añadir un
+campo `img` (data URI) al ejercicio y que `exIllus` lo prefiera.
 
 ### Sistema de material (`sport-gear.js`)
 
@@ -313,7 +331,7 @@ aparecían con una vista guardada concreta.
 node validate-catalog.cjs   # valida los datos del catálogo (rápido, sin navegador)
 node build.mjs              # regenera app.min.js + sella sw.js y el HTML
 
-# smoke test en Chrome headless (63 comprobaciones)
+# smoke test en Chrome headless (68 comprobaciones)
 python -m http.server 8000  # en otra terminal
 node smoke-sport.cjs
 ```
@@ -342,7 +360,7 @@ El bloque 3 incluye **cobertura por disciplina**: verifica que cada deporte gene
 una sesión propia sin colar ejercicios de otras disciplinas (el fallo original de
 natación).
 
-Debe salir **63 OK · 0 fallos**. Las capturas quedan en `.shots/`.
+Debe salir **68 OK · 0 fallos**. Las capturas quedan en `.shots/`.
 Si tocas el generador o el registro, ejecútalo antes de mergear.
 
 > ⚠️ El archivo es `.cjs` a propósito: `package.json` tiene `"type":"module"`

@@ -216,19 +216,23 @@ function exCardHtml(id){
   const t = EX_TYPES[ex.type] || {ico:'•',lbl:ex.type};
   const isUser = !!ex.user;
   const fav = isFav(id);
+  const illus = (typeof exIllusBox==='function') ? exIllusBox(id,{cls:'card'}) : '';
   return `<article class="sp-card ex${fav?' is-fav':''}" data-id="${id}">
     ${fav?'<span class="sp-fav-mark" title="En favoritos" aria-label="En favoritos">★</span>':''}
     ${isUser?'<span class="sp-badge">Tuyo</span>':''}
-    <div class="sp-card-hd"><span class="sp-ico">${t.ico}</span><span class="sp-type">${t.lbl}</span><span class="sp-disc">${(EX_SPORTS[exDisc(ex)]||{}).ico||''}</span></div>
-    <div class="sp-card-n">${spEsc(ex.name)}</div>
-    <div class="msc-row">${muscleChips(ex.muscles,{dot:true})}</div>
-    <div class="sp-card-meta">
-      <span>${itemScheme({e:id})}</span>
-      <span>·</span>
-      <span>${ex.met} MET</span>
-      ${(ANIM_ENABLED && typeof hasAnimFor==='function'&&hasAnimFor(ex))?'<span>·</span><span class="anim-tag">▶ 3D</span>':''}
-      ${ex.pat&&EX_PATTERNS[ex.pat]?`<span>·</span><span>${EX_PATTERNS[ex.pat].lbl}</span>`:''}
-      ${ex.equip?`<span>·</span><span>${spEsc(ex.equip)}</span>`:''}
+    ${illus}
+    <div class="sp-card-body">
+      <div class="sp-card-hd"><span class="sp-ico">${t.ico}</span><span class="sp-type">${t.lbl}</span><span class="sp-disc">${(EX_SPORTS[exDisc(ex)]||{}).ico||''}</span></div>
+      <div class="sp-card-n">${spEsc(ex.name)}</div>
+      <div class="msc-row">${muscleChips(ex.muscles,{dot:true})}</div>
+      <div class="sp-card-meta">
+        <span>${itemScheme({e:id})}</span>
+        <span>·</span>
+        <span>${ex.met} MET</span>
+        ${(ANIM_ENABLED && typeof hasAnimFor==='function'&&hasAnimFor(ex))?'<span>·</span><span class="anim-tag">▶ 3D</span>':''}
+        ${ex.pat&&EX_PATTERNS[ex.pat]?`<span>·</span><span>${EX_PATTERNS[ex.pat].lbl}</span>`:''}
+        ${ex.equip?`<span>·</span><span>${spEsc(ex.equip)}</span>`:''}
+      </div>
     </div>
   </article>`;
 }
@@ -243,7 +247,8 @@ function openExerciseDetail(id){
   const html = `
     <div class="form-hd"><h2>${t.ico} ${spEsc(ex.name)}</h2><span class="form-sub">${t.lbl}${pat?' · '+pat.lbl:''} · ${spEsc(ex.equip||'—')}</span></div>
     <div class="form-body">
-      ${hasAnim?`<div class="anim-wrap"><div class="anim-canvas" id="exAnimMount"><div class="anim-msg">Cargando 3D…</div></div><div class="anim-bar"><button class="anim-btn" id="exAnimToggle">⏸ Pausar</button><span class="anim-hint">🖱️ Arrastra para girar · maniquí 3D</span></div></div>`:''}
+      ${hasAnim?`<div class="anim-wrap"><div class="anim-canvas" id="exAnimMount"><div class="anim-msg">Cargando 3D…</div></div><div class="anim-bar"><button class="anim-btn" id="exAnimToggle">⏸ Pausar</button><span class="anim-hint">🖱️ Arrastra para girar · maniquí 3D</span></div></div>`
+        : (typeof exIllusBox==='function' ? `<div class="ex-illus-hero">${exIllusBox(id,{cls:'hero'})}<span class="ex-illus-cap">Ilustración esquemática del movimiento</span></div>` : '')}
       <div class="msc-row big">${muscleChips(sessionMuscles({items:[{e:id}]}),{dot:true})}</div>
       <div class="sp-detail-grid">
         <div class="sdg-cell"><b>${itemScheme({e:id})}</b><i>pauta</i></div>
