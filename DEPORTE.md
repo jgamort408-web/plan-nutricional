@@ -244,9 +244,12 @@ correcta por patrón de movimiento, modificadores de variante leídos del nombre
 *movimiento* y la *anatomía* (hechos, no copyright).
 
 **Diversidad**: el estilo de dibujo es constante, pero la persona varía. Un
-**elenco** de 12 modelos (`PERSONAS`: 6 mujeres `m1..m6`, 6 hombres `h1..h6`) con
-distintas edades, tallas, tonos de piel y estado físico. Cada ejercicio se asigna
-a un modelo de forma determinista y equilibrada (~168/173 en 341).
+**elenco** de 12 modelos (`PERSONAS`: 6 mujeres `m1..m6`, 6 hombres `h1..h6`) de
+distintos orígenes/rasgos (asiáticos, africanos, sudamericanos, europeos, de
+Oriente Medio), edades, tallas, tonos de piel y estado físico. Cada ejercicio se
+asigna a un modelo de forma determinista y equilibrada (~168/173 en 341). Los
+músculos no se colorean sobre el cuerpo (queda raro); el acento va solo en el
+material.
 
 Flujo: `--cast` genera el elenco (revisar en `_cast/_contact.html`, rehacer con
 `--cast --persona h3 --force`) → opcional `--refs` para fijar el estilo → `--all
