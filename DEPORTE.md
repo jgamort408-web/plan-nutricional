@@ -243,10 +243,16 @@ correcta por patrón de movimiento, modificadores de variante leídos del nombre
 (sin texto/logos). No descarga ni parte de imágenes de terceros: solo usa el
 *movimiento* y la *anatomía* (hechos, no copyright).
 
-Flujo: `--refs` genera un set **insignia** de referencia → `--contact` para
-revisarlas → `--redo id` para rehacer / borrar el PNG para descartar → cuando
-convencen, `--all --use-refs` genera los lotes usando las insignia como
-referencia de estilo (endpoint `images/edits`) para coherencia visual. Lee la
+**Diversidad**: el estilo de dibujo es constante, pero la persona varía. Un
+**elenco** de 12 modelos (`PERSONAS`: 6 mujeres `m1..m6`, 6 hombres `h1..h6`) con
+distintas edades, tallas, tonos de piel y estado físico. Cada ejercicio se asigna
+a un modelo de forma determinista y equilibrada (~168/173 en 341).
+
+Flujo: `--cast` genera el elenco (revisar en `_cast/_contact.html`, rehacer con
+`--cast --persona h3 --force`) → opcional `--refs` para fijar el estilo → `--all
+--use-cast` genera los lotes reutilizando el modelo asignado a cada ejercicio como
+referencia (endpoint `images/edits`), así cada persona sale coherente y el conjunto
+es diverso. `--redo id [--persona m2]` rehace; borrar el PNG lo descarta. Lee la
 clave de `OPENAI_API_KEY` (no se guarda). `--dry-run` imprime los prompts gratis.
 
 **Mapa muscular** (`muscleMapBox`): silueta frontal + dorsal con los músculos

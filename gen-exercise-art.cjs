@@ -8,22 +8,29 @@
    el pictograma SVG.
 
    ── Flujo recomendado ──────────────────────────────────────
-   1) Fija el estilo con unas pocas imágenes INSIGNIA (referencia):
+   1) Crea un ELENCO de modelos humanos diversos (mujeres y hombres,
+      distintas edades, tallas, tonos de piel y estado físico):
+        node gen-exercise-art.cjs --cast
+        (revisa ex-img/_cast/_contact.html · rehaz uno con
+         --cast --persona h3 --force · edita la lista PERSONAS para ajustar)
+   2) (Opcional) fija el estilo de dibujo con unas INSIGNIA:
         node gen-exercise-art.cjs --refs
-        node gen-exercise-art.cjs --contact        (abre ex-img/_contact.html)
-      Rehaz o descarta las que no te gusten:
-        node gen-exercise-art.cjs --redo dominadas,curl_biceps
-        (descartar = borra el PNG y vuelve a generarlo)
-   2) Cuando las insignia te convenzan, genera los lotes USÁNDOLAS
-      como referencia de estilo (coherencia visual):
-        node gen-exercise-art.cjs --pattern squat --use-refs
-        node gen-exercise-art.cjs --all --use-refs
+   3) Genera los lotes: cada ejercicio se asigna a un modelo del elenco
+      (reparto diverso y reproducible) y lo reutiliza como referencia:
+        node gen-exercise-art.cjs --pattern squat --use-cast
+        node gen-exercise-art.cjs --all --use-cast
+      Rehaz o descarta las que no te gusten (borra el PNG para descartar):
+        node gen-exercise-art.cjs --redo dominadas
+        node gen-exercise-art.cjs --redo dominadas --persona m2   (otra persona)
 
    ── Flags ──────────────────────────────────────────────────
-     --refs         genera el set insignia (referencias de estilo)
-     --use-refs     usa las insignia como referencia (endpoint edits)
+     --cast         genera el elenco de modelos diversos (ex-img/_cast/)
+     --use-cast     cada ejercicio reutiliza su modelo del elenco (edits)
+     --persona pid  fuerza una persona (ids: m1..m6, h1..h6)
+     --refs         genera el set insignia (referencia de ESTILO)
+     --use-refs     usa las insignia como referencia de estilo
      --redo a,b     rehace esos ids (= --force --only a,b)
-     --contact      escribe ex-img/_contact.html para revisar de un vistazo
+     --contact      escribe ex-img/_contact.html para revisar
      --dry-run      no llama a la API; imprime los prompts (gratis)
      --sample       muestra variada (~6)
      --only a,b     ids concretos
@@ -59,10 +66,10 @@ const E = EXERCISES;
    la paleta cálida de la app y un acento por músculo primario.
 ══════════════════════════════════════════════════════════ */
 const STYLE_HOUSE = [
-  'Editorial vector illustration for a premium fitness app, in a single cohesive house style.',
+  'Editorial vector illustration for a premium fitness app, in ONE cohesive house DRAWING style (the drawing style is constant across the whole set; only the person varies).',
   'Flat design: clean geometric shapes, smooth confident linework of even weight, and simple 2–3 tone shading (no photorealism, no gradient meshes, no 3D render).',
-  'One consistent, gender-neutral athletic character with correct, believable human proportions (about 7.5 heads tall), simplified facial features (no detailed face), athletic wear.',
-  'Warm limited palette: soft cream paper background #F6EDD8; the body and outlines in deep warm brown #2C1F0E; and ONE single accent colour <ACCENT> reserved only for the primary working muscle and the equipment.',
+  'Believable human proportions (about 7.5 heads tall), simplified friendly facial features (no fine facial detail), simple athletic wear. Depict the specific person described in the subject with respect and accuracy — their gender, age, body size and skin tone.',
+  'Warm limited palette for the scene: soft cream paper background #F6EDD8; outlines and clothing in deep warm brown #2C1F0E; realistic natural skin tone for the person; and ONE single accent colour <ACCENT> reserved only for the primary working muscle and the equipment.',
   'A single soft directional long shadow grounds the figure. Balanced, centered, the full body comfortably inside the frame with generous margins and calm negative space.',
   'Anatomically accurate joint angles and posture; the working muscle subtly suggested in the accent colour, never labelled.',
   'Modern, quiet, high-end, instantly readable. Absolutely NO text, letters, numbers, arrows, logos, UI or watermark. Square 1:1.'
@@ -72,41 +79,75 @@ const STYLE_HOUSE = [
    Describen la fase más reconocible del ejercicio y las claves que la
    hacen anatómicamente creíble. El material lo añade equipClause. */
 const POSE_BRIEF = {
-  squat:'a full-body side view of an athlete at the bottom of a squat: hips sitting back and just below the knee crease, shins close to vertical, knees tracking over the toes, chest tall, spine long and neutral, weight balanced over the mid-foot, quads and glutes under tension',
-  hinge:'a side view of a stiff-legged hip hinge / Romanian deadlift at mid-shin: hips driven far back, long flat back, soft unlocked knees, shoulders in front of the bar, hamstrings and glutes loaded and lengthened',
-  lunge:'a side view of a forward lunge at the bottom: front shin vertical with the knee stacked over the ankle, rear knee lowered just above the floor, torso upright and tall, front glute and quad working',
-  benchpress:'a side view of a bench press mid-rep: lying supine on a bench, feet planted, slight arch, elbows tucked around 45–75°, forearms vertical, pressing the load up over the mid-chest, pecs and triceps engaged',
-  pushup:'a side view of a push-up at the bottom: one straight rigid line from head to heels, hands under the shoulders, elbows bent back around 45°, chest just above the floor, braced core',
-  ohp:'a front view of a standing strict overhead press at lockout: bar/dumbbells pressed directly over the crown, ribs down, glutes and core braced, wrists stacked over elbows over shoulders, deltoids working',
-  row:'a side view of a bent-over row: torso hinged to near parallel with a flat back, knees soft, pulling the load to the lower ribs with the elbow driving back past the torso, lats and mid-back squeezing',
-  pulldown:'a front view of a seated cable lat pulldown: tall chest, slight lean back, driving the elbows down and back to bring the bar to the upper chest, lats fully engaged',
-  pullup:'a front view of a pull-up at the top: hanging from a fixed overhead bar, chin above the bar, shoulder blades pulled down and together, elbows driven to the ribs, lats and biceps working',
-  curl:'a front view of a standing biceps curl at peak contraction: tall torso, upper arms pinned to the sides, elbows flexed to bring the load toward the shoulders, biceps squeezed, wrists neutral',
-  tricepsext:'a front view of a standing cable triceps push-down: tall torso, upper arms fixed to the sides, elbows extending fully to drive the handle down, triceps engaged',
-  lateralraise:'a front view of a dumbbell lateral raise at the top: arms lifted out to the sides to shoulder height, slight elbow bend, shoulder blades stable, side deltoids working',
-  frontraise:'a side view of a dumbbell front raise at the top: one arm lifted straight forward to shoulder height, tall posture, front deltoid working',
-  fly:'a front view of a chest fly: upright or on a bench, arms opening wide in a smooth arc with a soft elbow bend, pecs stretching, a controlled squeeze',
-  facepull:'a front view of a cable face pull: pulling a rope toward the eyes/forehead with high flaring elbows, shoulder blades retracted, rear deltoids and upper back working',
-  shrug:'a front view of a shrug at the top: tall arms holding a load at the sides, shoulders lifted straight up toward the ears, traps contracted',
-  calf:'a side view of a standing calf raise at the top: fully risen onto the balls of the feet, ankles plantarflexed, tall body, calves contracted',
-  legext:'a side view of a seated leg-extension machine at lockout: seated upright against the pad, knees extending to lift the ankle pad, quadriceps contracted',
-  legcurl:'a side view of a lying leg-curl machine: face-down, curling the heels toward the glutes against the pad, hamstrings contracted',
-  abduction:'a front view of a seated hip-abduction machine: seated upright, knees pressing outward against the pads, glutes (gluteus medius) working',
-  legpress:'a side view of a 45° leg-press machine mid-rep: reclined on the seat, both feet on the platform, knees bent toward the chest about to press away, quads and glutes loaded',
-  plank:'a side view of a forearm plank hold: forearms on the floor under the shoulders, one perfectly straight rigid line from head to heels, braced core and glutes',
-  crunch:'a side view of an abdominal crunch at the top: lying on the back, knees bent, feet down, curling only the shoulder blades off the floor, abs contracted',
-  run:'a dynamic side view of running mid-stride: airborne float phase, one knee driving high, opposite arm forward, relaxed hands, tall posture, clear athletic motion',
-  bike:'a side view of cycling on a stationary bike: seated, hands on the bars, one leg driving the pedal down, athletic forward lean',
-  rowmachine:'a side view of an indoor rowing erg at the mid-drive: legs pressing, torso opening back, arms about to pull the handle to the lower ribs',
-  swim:'a side view of front-crawl swimming: streamlined body at the surface, one arm reaching forward in the catch, the other finishing the pull, a few clean stylized water lines',
-  jump:'a side view of an explosive vertical / box jump caught at the apex: hips and knees extending, arms swinging up, powerful athletic motion',
-  boxing:'a side view of a boxing stance throwing a straight cross: rear hand extending, lead hand guarding the chin, hips rotating, on the balls of the feet',
-  racket:'a side view of a tennis forehand at contact: rotated hips and shoulders, racket meeting the ball out in front, athletic split stance',
-  dance:'a full-body dynamic dance pose: expressive, balanced and graceful, extended limbs, clear line of motion',
-  carry:'a front view of a farmer\'s carry: walking tall, shoulders back, a heavy load hanging in each hand at the sides, braced core and grip',
-  stretch:'a calm side view of a mobility stretch: a gentle, elongated, controlled position with relaxed breathing',
-  generic:'a front view of a controlled resistance exercise: tall neutral athletic posture, deliberate form'
+  squat:'shown from the side at the bottom of a squat: hips sitting back and just below the knee crease, shins close to vertical, knees tracking over the toes, chest tall, spine long and neutral, weight balanced over the mid-foot, quads and glutes under tension',
+  hinge:'shown from the side in a stiff-legged hip hinge / Romanian deadlift at mid-shin: hips driven far back, long flat back, soft unlocked knees, shoulders in front of the bar, hamstrings and glutes loaded and lengthened',
+  lunge:'shown from the side at the bottom of a forward lunge: front shin vertical with the knee stacked over the ankle, rear knee lowered just above the floor, torso upright and tall, front glute and quad working',
+  benchpress:'shown from the side mid-rep of a bench press: lying supine on a bench, feet planted, slight arch, elbows tucked around 45–75°, forearms vertical, pressing the load up over the mid-chest, pecs and triceps engaged',
+  pushup:'shown from the side at the bottom of a push-up: one straight rigid line from head to heels, hands under the shoulders, elbows bent back around 45°, chest just above the floor, braced core',
+  ohp:'shown from the front at lockout of a standing strict overhead press: load pressed directly over the crown, ribs down, glutes and core braced, wrists stacked over elbows over shoulders, deltoids working',
+  row:'shown from the side performing a bent-over row: torso hinged to near parallel with a flat back, knees soft, pulling the load to the lower ribs with the elbow driving back past the torso, lats and mid-back squeezing',
+  pulldown:'shown from the front seated at a cable lat pulldown: tall chest, slight lean back, driving the elbows down and back to bring the bar to the upper chest, lats fully engaged',
+  pullup:'shown from the front at the top of a pull-up: hanging from a fixed overhead bar, chin above the bar, shoulder blades pulled down and together, elbows driven to the ribs, lats and biceps working',
+  curl:'shown from the front at peak contraction of a standing biceps curl: tall torso, upper arms pinned to the sides, elbows flexed to bring the load toward the shoulders, biceps squeezed, wrists neutral',
+  tricepsext:'shown from the front performing a standing cable triceps push-down: tall torso, upper arms fixed to the sides, elbows extending fully to drive the handle down, triceps engaged',
+  lateralraise:'shown from the front at the top of a lateral raise: arms lifted out to the sides to shoulder height, slight elbow bend, shoulder blades stable, side deltoids working',
+  frontraise:'shown from the side at the top of a front raise: one arm lifted straight forward to shoulder height, tall posture, front deltoid working',
+  fly:'shown from the front performing a chest fly: upright or on a bench, arms opening wide in a smooth arc with a soft elbow bend, pecs stretching, a controlled squeeze',
+  facepull:'shown from the front performing a cable face pull: pulling a rope toward the eyes/forehead with high flaring elbows, shoulder blades retracted, rear deltoids and upper back working',
+  shrug:'shown from the front at the top of a shrug: tall arms holding a load at the sides, shoulders lifted straight up toward the ears, traps contracted',
+  calf:'shown from the side at the top of a standing calf raise: fully risen onto the balls of the feet, ankles plantarflexed, tall body, calves contracted',
+  legext:'shown from the side at lockout of a seated leg-extension machine: seated upright against the pad, knees extending to lift the ankle pad, quadriceps contracted',
+  legcurl:'shown from the side on a lying leg-curl machine: face-down, curling the heels toward the glutes against the pad, hamstrings contracted',
+  abduction:'shown from the front on a seated hip-abduction machine: seated upright, knees pressing outward against the pads, glutes (gluteus medius) working',
+  legpress:'shown from the side mid-rep of a 45° leg-press machine: reclined on the seat, both feet on the platform, knees bent toward the chest about to press away, quads and glutes loaded',
+  plank:'shown from the side holding a forearm plank: forearms on the floor under the shoulders, one perfectly straight rigid line from head to heels, braced core and glutes',
+  crunch:'shown from the side at the top of an abdominal crunch: lying on the back, knees bent, feet down, curling only the shoulder blades off the floor, abs contracted',
+  run:'shown from the side running mid-stride: airborne float phase, one knee driving high, opposite arm forward, relaxed hands, tall posture, clear athletic motion',
+  bike:'shown from the side cycling on a stationary bike: seated, hands on the bars, one leg driving the pedal down, athletic forward lean',
+  rowmachine:'shown from the side on an indoor rowing erg at the mid-drive: legs pressing, torso opening back, arms about to pull the handle to the lower ribs',
+  swim:'shown from the side swimming front-crawl: streamlined body at the surface, one arm reaching forward in the catch, the other finishing the pull, a few clean stylized water lines',
+  jump:'shown from the side in an explosive vertical / box jump caught at the apex: hips and knees extending, arms swinging up, powerful athletic motion',
+  boxing:'shown from the side in a boxing stance throwing a straight cross: rear hand extending, lead hand guarding the chin, hips rotating, on the balls of the feet',
+  racket:'shown from the side at contact of a tennis forehand: rotated hips and shoulders, racket meeting the ball out in front, athletic split stance',
+  dance:'shown full-body in a dynamic dance pose: expressive, balanced and graceful, extended limbs, clear line of motion',
+  carry:'shown from the front performing a farmer\'s carry: walking tall, shoulders back, a heavy load hanging in each hand at the sides, braced core and grip',
+  stretch:'shown from the side in a calm mobility stretch: a gentle, elongated, controlled position with relaxed breathing',
+  generic:'shown from the front performing a controlled resistance exercise: tall neutral athletic posture, deliberate form'
 };
+
+/* ══════════════════════════════════════════════════════════
+   ELENCO DIVERSO · personas variadas en género, edad, tamaño y tono
+   de piel, y distinto estado físico. El estilo de DIBUJO es común;
+   la PERSONA varía. Asignación determinista por id (reproducible y
+   repartida) para que el catálogo tenga diversidad equilibrada.
+══════════════════════════════════════════════════════════ */
+const PERSONAS = [
+  { id:'m1', desc:'a young woman with warm brown skin and a lean, toned athletic build' },
+  { id:'h1', desc:'a middle-aged man with light skin and a larger, heavier body, average everyday fitness' },
+  { id:'m2', desc:'a woman with deep brown skin and a strong, visibly muscular build' },
+  { id:'h2', desc:'a young man with tan olive skin and an average, everyday build' },
+  { id:'m3', desc:'an older woman with fair skin, short silver hair and a slim build' },
+  { id:'h3', desc:'a man with dark brown skin and a tall, athletic build' },
+  { id:'m4', desc:'a woman with light skin and a soft, curvy plus-size body, a happy beginner' },
+  { id:'h4', desc:'a young man with medium brown skin and a wiry, slim build' },
+  { id:'m5', desc:'a middle-aged woman with olive skin and a healthy, average build' },
+  { id:'h5', desc:'an older man with medium skin, grey hair and a stocky, sturdy build' },
+  { id:'m6', desc:'a woman with light-tan skin and a compact, muscular gymnast build' },
+  { id:'h6', desc:'a man with fair skin and a softer, out-of-shape build, just getting started' }
+];
+/* hash estable id → índice de persona (reparto uniforme y reproducible) */
+function personaFor(id, override){
+  if(override){ const p = PERSONAS.find(x => x.id === override); if(p) return p; }
+  let h = 0; for(let i=0;i<id.length;i++) h = (h*31 + id.charCodeAt(i)) >>> 0;
+  return PERSONAS[h % PERSONAS.length];
+}
+/* Prompt para una imagen de MODELO del elenco (pose neutra de referencia) */
+function castPrompt(persona){
+  const style = STYLE_HOUSE.replace('<ACCENT>', '#B5603A');
+  return `Subject: ${persona.desc}, standing relaxed in a neutral athletic stance, facing forward, `
+    + `full body from head to feet, simple athletic clothing, friendly and confident. `
+    + `\n\nStyle: ${style}`;
+}
 
 /* Modificadores de VARIANTE por palabras del nombre (afinan la técnica
    sin contradecir el brief base). */
@@ -119,7 +160,7 @@ function variantModifier(name) {
   if (/agarre ancho|ancho|wide/.test(n)) mods.push('with a wide grip');
   if (/agarre neutro|neutro|martillo|hammer/.test(n)) mods.push('with a neutral (palms-facing) grip');
   if (/supin|invertid|chin/.test(n)) mods.push('with a supinated (underhand) grip');
-  if (/sentad|seated/.test(n)) mods.push('seated');
+  if (/sentad(?!illa)|seated/.test(n)) mods.push('seated');   // "sentado", no "sentadilla"
   if (/de pie|standing/.test(n)) mods.push('standing');
   if (/tumbad|lying|banco/.test(n) && !/inclinad|declinad/.test(n)) mods.push('lying on a bench');
   if (/una mano|un brazo|unilateral|single|a una pierna/.test(n)) mods.push('single-sided (one arm or one leg)');
@@ -153,16 +194,17 @@ function engMuscle(m) {
     isquios: 'hamstrings', gluteo: 'glutes', gemelo: 'calves' })[m] || m;
 }
 
-/* Prompt experto completo de un ejercicio */
-function buildPrompt(id) {
+/* Prompt experto completo de un ejercicio (con persona diversa) */
+function buildPrompt(id, personaOverride) {
   const ex = E[id];
   const pose = illPoseKey(ex, id);
   const brief = (POSE_BRIEF[pose] || POSE_BRIEF.generic) + variantModifier(ex.name || '');
   const primary = (ex.muscles || [])[0];
   const accent = (EX_MUSCLES[primary] || {}).c || '#B5603A';
   const realMuscle = primary && !['cardio', 'fullbody', 'movilidad'].includes(primary);
+  const persona = personaFor(id, personaOverride);
   const style = STYLE_HOUSE.replace('<ACCENT>', accent);
-  return `${brief}, ${equipClause(ex, id)}. `
+  return `Subject: ${persona.desc}, ${brief}, ${equipClause(ex, id)}. `
     + `The pose must read instantly and unambiguously as this exact exercise, technically correct. `
     + (realMuscle ? `Subtly tint the ${engMuscle(primary)} — the primary working muscle — in the accent colour. ` : '')
     + `\n\nStyle: ${style}`;
@@ -202,6 +244,9 @@ function parseArgs() {
     else if (f === '--force') o.force = true;
     else if (f === '--refs') o.refs = true;
     else if (f === '--use-refs') o.useRefs = true;
+    else if (f === '--cast') o.cast = true;
+    else if (f === '--use-cast') o.useCast = true;
+    else if (f === '--persona') o.persona = a[++i];
     else if (f === '--contact') o.contact = true;
     else if (f === '--redo') { o.only = (a[++i] || '').split(',').map(s => s.trim()).filter(Boolean); o.force = true; }
     else if (f === '--only') o.only = (a[++i] || '').split(',').map(s => s.trim()).filter(Boolean);
@@ -280,14 +325,16 @@ async function main() {
   const o = parseArgs();
   const outDir = path.isAbsolute(o.out) ? o.out : path.join(ROOT, o.out);
 
+  if (o.cast) { await genCast(o, outDir); return; }
   if (o.contact && !o.refs && !o.all && !o.only && !o.sample && !o.pattern) { writeContact(outDir); return; }
 
   const ids = pickIds(o);
   if (!ids) {
     console.log('Elige qué generar. Flujo recomendado:\n' +
-      '  node gen-exercise-art.cjs --refs         (imágenes insignia de referencia)\n' +
+      '  node gen-exercise-art.cjs --cast         (elenco de modelos diversos)\n' +
+      '  node gen-exercise-art.cjs --refs         (imágenes insignia de estilo)\n' +
       '  node gen-exercise-art.cjs --contact      (revisar)\n' +
-      '  node gen-exercise-art.cjs --all --use-refs   (lotes con estilo coherente)\n' +
+      '  node gen-exercise-art.cjs --all --use-cast   (lotes: cada ejercicio con su modelo diverso)\n' +
       'Usa --dry-run para ver los prompts sin gastar. Más flags en la cabecera.');
     return;
   }
@@ -300,15 +347,25 @@ async function main() {
 
   if (o.dry) {
     pending.slice(0, 6).forEach(id => {
-      console.log('\n\x1b[1m' + id + '\x1b[0m  (' + E[id].name + ')  · pose ' + illPoseKey(E[id], id));
-      console.log('  ' + buildPrompt(id).replace(/\n/g, '\n  '));
+      const p = personaFor(id, o.persona);
+      console.log('\n\x1b[1m' + id + '\x1b[0m  (' + E[id].name + ')  · pose ' + illPoseKey(E[id], id) + ' · persona ' + p.id);
+      console.log('  ' + buildPrompt(id, o.persona).replace(/\n/g, '\n  '));
     });
-    if (pending.length > 6) console.log(`\n… y ${pending.length - 6} más con el mismo estilo.`);
+    if (pending.length > 6) console.log(`\n… y ${pending.length - 6} más (personas variadas, mismo estilo).`);
     return;
   }
   if (!process.env.OPENAI_API_KEY) { console.error('\n✘ Falta OPENAI_API_KEY. (Usa --dry-run para ver los prompts sin clave.)'); process.exit(1); }
 
-  // referencias de estilo (si --use-refs): carga las insignia disponibles
+  // referencias de PERSONA (si --use-cast): reutiliza los modelos del elenco
+  let cast = {};
+  if (o.useCast) {
+    const castDir = path.join(outDir, '_cast');
+    PERSONAS.forEach(p => { const f = path.join(castDir, p.id + '.png'); if (fs.existsSync(f)) cast[p.id] = fs.readFileSync(f); });
+    const n = Object.keys(cast).length;
+    if (!n) { console.error('✘ --use-cast pero no hay elenco. Genera antes con --cast.'); process.exit(1); }
+    console.log(`  usando el elenco (${n} modelos) como referencia de persona`);
+  }
+  // referencias de ESTILO (si --use-refs): las insignia
   let refs = {};
   if (o.useRefs) {
     REF_IDS.forEach(rid => { const p = path.join(outDir, rid + '.png'); if (fs.existsSync(p)) refs[rid] = fs.readFileSync(p); });
@@ -321,13 +378,19 @@ async function main() {
   for (const id of pending) {
     process.stdout.write(`  · ${id} … `);
     try {
-      const prompt = buildPrompt(id);
+      const prompt = buildPrompt(id, o.persona);
       let buf;
-      if (o.useRefs && Object.keys(refs).length) {
+      if (o.useCast && Object.keys(cast).length) {
+        const p = personaFor(id, o.persona);
+        const ref = cast[p.id];
+        buf = ref
+          ? await apiEdit(prompt + '\nDepict the SAME individual as in the reference image (same face, body type, skin tone, hair and clothing); change only their pose to perform the exercise; keep the exact house drawing style and palette.', [ref], o)
+          : await apiGenerate(prompt, o);
+      } else if (o.useRefs && Object.keys(refs).length) {
         const pref = preferredRef(illPoseKey(E[id], id));
         const chosen = [pref, 'sentadilla_trasera', 'press_banca_barra']
           .filter((r, i, a) => a.indexOf(r) === i && refs[r]).slice(0, 3).map(r => refs[r]);
-        buf = await apiEdit(prompt + '\nMatch the exact house style, palette and character of the reference image(s).', chosen, o);
+        buf = await apiEdit(prompt + '\nMatch the exact house drawing style and palette of the reference image(s), but keep the person as described in the subject.', chosen, o);
       } else {
         buf = await apiGenerate(prompt, o);
       }
@@ -343,6 +406,40 @@ async function main() {
   console.log(`\n✔ ${done} generadas · ${fail} fallos · manifest: ${Object.keys(manifest).length} imágenes`);
   if (o.contact) writeContact(outDir);
   else console.log('Revisa con:  node gen-exercise-art.cjs --contact');
+}
+
+/* ── Elenco de modelos diversos ───────────────────────────────── */
+async function genCast(o, outDir) {
+  const castDir = path.join(outDir, '_cast');
+  const targets = o.persona ? PERSONAS.filter(p => p.id === o.persona) : PERSONAS;
+  const pending = targets.filter(p => o.force || o.dry || !fs.existsSync(path.join(castDir, p.id + '.png')));
+  console.log(`\nElenco: ${targets.length} modelos · ${pending.length} por generar` + (o.dry ? ' · DRY-RUN' : ` · ${o.size} ${o.quality}`));
+  if (o.dry) {
+    pending.forEach(p => { console.log('\n\x1b[1m' + p.id + '\x1b[0m  ' + p.desc); console.log('  ' + castPrompt(p).replace(/\n/g, '\n  ')); });
+    return;
+  }
+  if (!process.env.OPENAI_API_KEY) { console.error('\n✘ Falta OPENAI_API_KEY.'); process.exit(1); }
+  if (!fs.existsSync(castDir)) fs.mkdirSync(castDir, { recursive: true });
+  let done = 0, fail = 0;
+  for (const p of pending) {
+    process.stdout.write(`  · ${p.id} (${p.desc.slice(0, 40)}…) … `);
+    try {
+      const buf = await apiGenerate(castPrompt(p), o);
+      fs.writeFileSync(path.join(castDir, p.id + '.png'), buf);
+      done++; console.log('\x1b[32mok\x1b[0m');
+    } catch (err) {
+      fail++; console.log('\x1b[31mfalló\x1b[0m · ' + err.message);
+      if (/HTTP 401/.test(err.message)) break;
+      await new Promise(r => setTimeout(r, 1500));
+    }
+  }
+  // hoja de revisión del elenco
+  const cells = PERSONAS.filter(p => fs.existsSync(path.join(castDir, p.id + '.png')))
+    .map(p => `<figure><img src="${p.id}.png"><figcaption>${p.id}<br><small>${p.desc}</small></figcaption></figure>`).join('');
+  fs.writeFileSync(path.join(castDir, '_contact.html'),
+    `<!doctype html><meta charset=utf8><title>Elenco</title><style>body{background:#F6EDD8;color:#2C1F0E;font:14px system-ui;padding:20px}.g{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}figure{margin:0;background:#FFFDF7;border:1px solid #e5dcc6;border-radius:12px;overflow:hidden}img{width:100%;display:block;aspect-ratio:1}figcaption{padding:8px 10px;font-size:12px}small{color:#8a7a5f}</style><h1>Elenco de modelos</h1><p>Rehaz uno con <code>--cast --persona ${PERSONAS[0].id} --force</code>. Edita la lista PERSONAS en el .cjs para ajustar.</p><div class=g>${cells}</div>`);
+  console.log(`\n✔ elenco: ${done} modelos · ${fail} fallos → ${castDir}`);
+  console.log('Revisa ex-img/_cast/_contact.html · luego genera con --use-cast');
 }
 
 main().catch(e => { console.error('✘', e.message); process.exit(1); });
