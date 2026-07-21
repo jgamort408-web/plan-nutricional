@@ -2353,6 +2353,35 @@ main[data-vm="small"] .dish-incart{font-size:.5rem;padding:3px 8px}
 }
 
 /* ══════════════════════════════════════════════════════════
+   PICTOGRAMAS DE EJERCICIOS (sport-illus.js)
+   SVG autocontenido; hereda el color por músculo (--il) o el acento
+   de deporte. Sirve para identificar el movimiento de un vistazo.
+══════════════════════════════════════════════════════════ */
+.ex-illus{display:inline-flex;align-items:center;justify-content:center;
+  background:color-mix(in srgb, var(--il, var(--sport)) 11%, var(--white));
+  color:var(--il, var(--sport));border-radius:12px;overflow:hidden;flex-shrink:0}
+.ex-illus-svg{width:100%;height:100%;display:block}
+.ex-illus-svg .ill-ground{stroke:currentColor;opacity:.26;stroke-width:2}
+.ex-illus-svg .ill-mach{stroke:currentColor;opacity:.5}
+.ex-illus-svg .ill-water{stroke:currentColor;opacity:.55;stroke-width:2.4}
+/* variantes por tamaño */
+.ex-illus.card{width:60px;height:60px}
+.ex-illus.thumb{width:42px;height:42px;border-radius:9px}
+.ex-illus.train{width:96px;height:96px;border-radius:16px;margin:0 auto 4px}
+.ex-illus.hero{width:120px;height:120px;border-radius:18px}
+/* tarjeta de ejercicio en fila: [ilustración] [contenido] */
+.sp-card.ex{display:flex;gap:12px;align-items:flex-start}
+.sp-card.ex .sp-card-body{flex:1;min-width:0}
+.sp-grid[data-spvm="compact"] .sp-card.ex{gap:10px}
+.sp-grid[data-spvm="compact"] .ex-illus.card{width:48px;height:48px}
+/* detalle */
+.ex-illus-hero{display:flex;flex-direction:column;align-items:center;gap:5px;margin-bottom:12px}
+.ex-illus-cap{font-size:.68rem;color:var(--ink-50);letter-spacing:.02em}
+/* modo entrenamiento */
+.tr-ex-illus{text-align:center}
+html[data-theme="dark"] .ex-illus{background:color-mix(in srgb, var(--il, var(--sport-l)) 16%, var(--parch));color:var(--il, var(--sport-l))}
+
+/* ══════════════════════════════════════════════════════════
    MODO ENTRENAMIENTO (sport-train.js)
    Overlay a pantalla completa. Objetivo: usarlo con una mano,
    con el móvil en la mano sudada y sin gafas. Botones grandes,
@@ -2963,7 +2992,7 @@ html[data-theme="dark"] .pg-dot{stroke:var(--parch)}
 <!-- Núcleo de la app: bundle generado por build.mjs (30 scripts en 1).
      Para volver a los scripts sueltos en desarrollo, sustituye esta línea
      por los <script src> individuales. Regenera con: node build.mjs -->
-<script src="app.min.js?v=79d5344a"></script>
+<script src="app.min.js?v=627b4c78"></script>
 <script>
 /* ── Carga diferida del "pack de contenido" · Teoría + Bibliografía ──
    Son ~364 KB de texto que la mayoría de sesiones no abren. No se

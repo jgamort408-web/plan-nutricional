@@ -342,6 +342,32 @@ async function run(){
   (CM.despues === CM.antes + 1) ? ok('guarda el entrenamiento en el historial') : bad('guardar entreno', commit);
   (CM.limpio === 1 && CM.ov === 0) ? ok('limpia el estado y cierra el overlay') : bad('limpieza post-entreno', commit);
 
+  /* ── 5c. Pictogramas de ejercicios ──────────────────────── */
+  console.log('\n\x1b[1m5c · Pictogramas\x1b[0m');
+  const illus = await evalJS(`
+    var ks=Object.keys(EXERCISES);
+    var vacios=ks.filter(function(id){ var s=exIllus(id); return !s || s.indexOf('<path')<0 && s.indexOf('<circle')<0; });
+    var genericos=ks.filter(function(id){ return illIsGeneric(id); });
+    // que cada SVG sea autocontenido (sin http/src externos)
+    var externos=ks.filter(function(id){ return /https?:|src=|<image/.test(exIllus(id)); });
+    // muestra de coherencia
+    var squat=illPoseKey(EXERCISES['sentadilla_trasera'], 'sentadilla_trasera');
+    var swim=EXERCISES['nadar_crol']?illPoseKey(EXERCISES['nadar_crol'],'nadar_crol'):'';
+    return JSON.stringify({total:ks.length, vacios:vacios.length, genericos:genericos.length, externos:externos.length, squat:squat, swim:swim});`);
+  const IL = JSON.parse(illus||'{}');
+  (IL.vacios===0) ? ok('todos los ejercicios tienen pictograma', IL.total) : bad('pictogramas vacíos', IL.vacios);
+  (IL.externos===0) ? ok('pictogramas autocontenidos (offline)') : bad('pictogramas', IL.externos+' con recursos externos');
+  (IL.genericos<=3) ? ok('cobertura de poses', IL.genericos+' genéricos') : bad('poses genéricas', IL.genericos);
+  (IL.squat==='squat' && IL.swim==='swim') ? ok('resolución coherente (sentadilla→squat, crol→swim)') : bad('resolución', illus);
+  // que aparezcan en las tarjetas del catálogo
+  const inCards = await evalJS(`
+    showSportView('ex');
+    return new Promise(function(res){ setTimeout(function(){
+      res(document.querySelectorAll('#spExGrid .sp-card .ex-illus, .sp-grid .sp-card .ex-illus').length);
+    },400); });`);
+  (inCards>5) ? ok('pictogramas en las tarjetas del catálogo', inCards+' visibles') : bad('pictogramas en catálogo', 'solo '+inCards);
+  await shot('smoke-illus-cards');
+
   /* ── 6a. Menú de ayuda en móvil (no se sale de pantalla) ── */
   console.log('\n\x1b[1m6a · Menú de ayuda (móvil)\x1b[0m');
   const help = await evalJS(`
