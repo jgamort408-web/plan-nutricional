@@ -27,7 +27,7 @@ const CORE = [
   'menu-foods.js', 'menu-comp.js', 'menu-recipes2.js', 'menu-recipes-junio.js',
   'menu-recipes-comp.js', 'menu-cuisines.js', 'menu-app.js', 'menu-forms.js',
   'menu-onboard.js', 'menu-builder.js', 'menu-calendar.js', 'menu-saved.js',
-  'menu-shop.js', 'sport-catalog.js', 'sport-data.js', 'sport-engine.js',
+  'menu-shop.js', 'sport-catalog.js', 'sport-data.js', 'sport-exdesc.js', 'sport-engine.js',
   // sport-log.js va ANTES que sport-ui/train/progress: define SP_LEVELS,
   // SP_GEAR y SP_INJURIES, que los demás leen al generar y al entrenar.
   'sport-gear.js', 'sport-illus.js', 'sport-log.js', 'sport-ui.js', 'sport-calendar.js', 'sport-train.js',

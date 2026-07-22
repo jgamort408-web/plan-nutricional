@@ -383,7 +383,8 @@ async function run(){
   await sleep(200);
   // preferencia de imagen real (ex-img/) cuando existe manifest
   const imgPref = await evalJS(`
-    var sinImg = /<svg/.test(exIllusBox('press_banca_barra',{}));       // por defecto: pictograma SVG
+    illUseManifest(null);                                              // aísla de imágenes ya generadas en el árbol
+    var sinImg = /<svg/.test(exIllusBox('press_banca_barra',{}));       // sin manifest: pictograma SVG
     var nullPath = illImageFor('press_banca_barra')===null;
     illUseManifest({press_banca_barra:'png'});                          // simula que el generador creó una
     var box = exIllusBox('press_banca_barra',{});
@@ -639,7 +640,8 @@ async function run(){
                            entradas: h.querySelectorAll('.pg-entry').length,
                            grafica: h.querySelectorAll('.pg-chart').length});`);
   const P = JSON.parse(pg||'{}');
-  (P.visible && P.kpis === 4) ? ok('renderiza la vista de progreso', P.kpis + ' KPIs') : bad('vista de progreso', pg);
+  // KPIs: 4 fijos (entrenos, semanas, horas, kcal) + condicionales (toneladas, distancia)
+  (P.visible && P.kpis >= 4) ? ok('renderiza la vista de progreso', P.kpis + ' KPIs') : bad('vista de progreso', pg);
   (P.barras > 0) ? ok('barras de volumen', P.barras + ' grupos') : bad('barras de volumen');
   (P.entradas > 0) ? ok('historial', P.entradas + ' entradas') : bad('historial');
   await sleep(400);
@@ -701,6 +703,27 @@ async function run(){
 
   if(errors.length) bad('errores de consola durante 6-8', errors[0].split('\n')[0]);
   else ok('sin errores de consola');
+
+  /* ── 9. Registro por tiempo y kcal ──────────────────────── */
+  console.log('\n\x1b[1m9 · Registro por tiempo y kcal\x1b[0m');
+  const t9 = await evalJS(`
+    // senderismo 90 min: kcal = MET(6) · peso · horas → debe depender del peso
+    var hike={durSec:5400, bodyweight:80, ex:[{e:'senderismo', mode:'time', sets:[{dur:5400, dist:9000, done:true}]}]};
+    var k80 = logEntryKcal(hike);
+    var k60 = logEntryKcal(Object.assign({}, hike, {bodyweight:60}));
+    var isTime = logExIsTime(hike.ex[0]);
+    var label = logSetLabel(hike.ex[0], hike.ex[0].sets[0]);
+    // el modo entrenamiento crea una serie por TIEMPO con duración (no reps)
+    SESSIONS.__t9 = {name:'t9', type:'cardio', items:[{e:'senderismo'}]};
+    var st = trBuildState('__t9','A');
+    var timeSet = !!(st && st.ex[0] && st.ex[0].mode==='time' && st.ex[0].sets[0].dur>0);
+    delete SESSIONS.__t9;
+    return JSON.stringify({k80:k80, k60:k60, isTime:isTime, label:label, timeSet:timeSet});`);
+  const T9 = JSON.parse(t9||'{}');
+  (T9.k80 > 700 && T9.k80 < 740) ? ok('kcal por tiempo (senderismo 90 min ≈ ' + T9.k80 + ')') : bad('kcal por tiempo', t9);
+  (T9.k80 > T9.k60) ? ok('kcal depende del peso del usuario (' + T9.k80 + ' vs ' + T9.k60 + ')') : bad('kcal por peso', t9);
+  (T9.isTime && /min|\bh\b/.test(T9.label) && /km/.test(T9.label)) ? ok('serie por tiempo con distancia (' + T9.label + ')') : bad('etiqueta por tiempo', t9);
+  (T9.timeSet) ? ok('el modo entrenamiento crea serie por tiempo (duración, no reps)') : bad('serie por tiempo en entreno', t9);
 
   /* ── Resumen ────────────────────────────────────────────── */
   console.log(`\n\x1b[1m${pass} pruebas OK · ${fail} fallos\x1b[0m`);

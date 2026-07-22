@@ -39,15 +39,23 @@ function trBuildState(sessId, who){
     const nSets  = it.sets || e.sets || 3;
     const isTime = (it.dur != null) || e.mode === 'time';
     const goal   = isTime ? null : (it.reps != null ? it.reps : (e.reps || 10));
-    const pre    = isTime ? {kg:0, reps:0, hint:''} : logPrefill(it.e, who, goal);
+    const dur0   = isTime ? (it.dur != null ? it.dur : (e.dur || 30)) : 0;
+    let pre;
+    if(isTime){
+      const lt = (typeof logLastTimeFor === 'function') ? logLastTimeFor(it.e, who) : null;
+      pre = {kg:0, reps:0, hint: lt ? `Última vez: ${logFmtDur(lt.dur)}${lt.dist?' · '+logFmtDist(lt.dist):''}` : ''};
+    } else {
+      pre = logPrefill(it.e, who, goal);
+    }
     return {
       e: it.e,
       mode: isTime ? 'time' : 'reps',
       goalReps: goal,
-      goalDur: isTime ? (it.dur != null ? it.dur : (e.dur||30)) : null,
+      goalDur: isTime ? dur0 : null,
+      dist: (typeof logExHasDist === 'function') && logExHasDist(it.e),   // ¿pide distancia?
       rest: it.rest != null ? it.rest : (e.rest || 60),
       hint: pre.hint,
-      sets: Array.from({length:nSets}, ()=> ({kg:pre.kg, reps:isTime?0:pre.reps, rpe:0, done:false, dur:isTime?(it.dur!=null?it.dur:(e.dur||30)):0}))
+      sets: Array.from({length:nSets}, ()=> ({kg:pre.kg, reps:isTime?0:pre.reps, rpe:0, done:false, dur:dur0, dist:0}))
     };
   }).filter(Boolean);
   if(!ex.length) return null;
@@ -172,6 +180,26 @@ function trBumpReps(delta){
   x.sets[i].reps = Math.max(0, (+x.sets[i].reps||0) + delta);
   trSaveState(); renderTrain();
 }
+/* ── Medidas por tiempo (duración) y distancia ────────────────
+   Para lo que va por tiempo (senderismo, carrera, plancha…) el ± toca la
+   DURACIÓN, no las repeticiones; y el salto se adapta a la magnitud para
+   que no haya que pulsar mil veces en una caminata larga. */
+function trDurUnit(x){ return (x.goalDur||0) >= 120 ? 'min' : 's'; }        // muestra minutos si es larga
+function trDurStep(x){ return trDurUnit(x) === 'min' ? 60 : ((x.goalDur||0) >= 60 ? 15 : 5); }
+function trDistStep(){ return 100; }                                        // 100 m por toque
+function trBumpDur(delta){
+  const x = trCurEx(); if(!x) return;
+  const i = trNextSetIdx(x);
+  x.sets[i].dur = Math.max(0, (+x.sets[i].dur||0) + delta);
+  for(let j=i+1;j<x.sets.length;j++) if(!x.sets[j].done) x.sets[j].dur = x.sets[i].dur;
+  trSaveState(); renderTrain();
+}
+function trBumpDist(delta){
+  const x = trCurEx(); if(!x) return;
+  const i = trNextSetIdx(x);
+  x.sets[i].dist = Math.max(0, Math.round((+x.sets[i].dist||0) + delta));
+  trSaveState(); renderTrain();
+}
 /* Cierra la serie en curso y arranca el descanso */
 function trDoneSet(){
   const x = trCurEx(); if(!x) return;
@@ -184,7 +212,7 @@ function trDoneSet(){
   if(pr) pnToast(`🏆 ¡Récord en ${(EXERCISES[x.e]||{}).name}! ${s.kg} kg × ${s.reps}`, 'ok');
   if(!isLast) trStartRest(x.rest);
   renderTrain();
-  if(isLast) trAskRpe(x);
+  if(isLast && x.mode === 'reps') trAskRpe(x);   // el RPE por reps no aplica a cardio por tiempo
 }
 function trUndoSet(){
   const x = trCurEx(); if(!x) return;
@@ -194,8 +222,14 @@ function trUndoSet(){
 }
 function trAddSet(){
   const x = trCurEx(); if(!x) return;
-  const last = x.sets[x.sets.length-1] || {kg:0, reps:x.goalReps||10};
-  x.sets.push({kg:last.kg, reps:x.mode==='time'?0:last.reps, rpe:0, done:false, dur:x.goalDur||0});
+  const last = x.sets[x.sets.length-1] || {kg:0, reps:x.goalReps||10, dur:x.goalDur||0, dist:0};
+  x.sets.push({
+    kg: last.kg,
+    reps: x.mode==='time' ? 0 : last.reps,
+    rpe: 0, done: false,
+    dur: x.mode==='time' ? (last.dur || x.goalDur || 0) : 0,
+    dist: x.mode==='time' ? (+last.dist || 0) : 0
+  });
   trSaveState(); renderTrain();
 }
 /* ¿hay alguna serie cerrada que se pueda deshacer? */
@@ -382,8 +416,9 @@ function trSwapEx(){
       x.mode = (nx.mode === 'time') ? 'time' : 'reps';
       x.goalDur = x.mode === 'time' ? (nx.dur||30) : null;
       x.goalReps = x.mode === 'reps' ? (nx.reps||10) : null;
+      x.dist = (typeof logExHasDist === 'function') && logExHasDist(id);
       x.rest = nx.rest != null ? nx.rest : x.rest;
-      x.sets.forEach(s=>{ if(!s.done){ s.kg = pre.kg; if(x.mode==='reps') s.reps = pre.reps; else s.dur = x.goalDur; } });
+      x.sets.forEach(s=>{ if(!s.done){ s.kg = pre.kg; if(x.mode==='reps'){ s.reps = pre.reps; } else { s.dur = x.goalDur; s.dist = 0; } } });
       trSaveState(); renderTrain();
       pnToast(`Cambiado a ${nx.name}`, 'ok');
     }
@@ -408,8 +443,9 @@ function trAddExtraEx(){
         e:id, extra:true,
         mode: isTime ? 'time' : 'reps',
         goalReps: goal, goalDur: isTime ? (e.dur||30) : null,
+        dist: (typeof logExHasDist === 'function') && logExHasDist(id),
         rest: e.rest || 60, hint: pre.hint,
-        sets: Array.from({length: e.sets||3}, ()=> ({kg:pre.kg, reps:isTime?0:pre.reps, rpe:0, done:false, dur:isTime?(e.dur||30):0}))
+        sets: Array.from({length: e.sets||3}, ()=> ({kg:pre.kg, reps:isTime?0:pre.reps, rpe:0, done:false, dur:isTime?(e.dur||30):0, dist:0}))
       });
       TrainState.cur = TrainState.ex.length - 1;      // salta directo a él
       trSkipRest(); trSaveState(); renderTrain();
@@ -461,20 +497,19 @@ function trCommit(feel, notes){
     startTs: st.startTs, endTs: Date.now(), durSec,
     bodyweight: (typeof personWeight === 'function') ? personWeight(st.who) : 0,
     feel: feel || 0, notes: notes || '',
-    ex: st.ex.map(x=> ({e:x.e, sets:(x.sets||[]).filter(s=> s.done).map(s=> ({kg:+s.kg||0, reps:+s.reps||0, rpe:+s.rpe||0, done:true}))}))
-             .filter(x=> x.sets.length)
+    // conserva el TIPO de medida: series por tiempo guardan dur (+dist);
+    // series de fuerza guardan kg×reps. Sin esto no se puede recalcular
+    // el gasto ni mostrar bien el histórico de lo que va por tiempo.
+    ex: st.ex.map(x=> ({
+          e: x.e, mode: x.mode || 'reps',
+          sets: (x.sets||[]).filter(s=> s.done).map(s=> x.mode === 'time'
+            ? {dur:+s.dur||0, dist:+s.dist||0, rpe:+s.rpe||0, done:true}
+            : {kg:+s.kg||0, reps:+s.reps||0, rpe:+s.rpe||0, done:true})
+        })).filter(x=> x.sets.length)
   };
-  // kcal reales: MET del ejercicio × peso × tiempo trabajado
-  try{
-    const w = entry.bodyweight || 70;
-    let kcal = 0;
-    entry.ex.forEach(x=>{
-      const ex = EXERCISES[x.e]; if(!ex) return;
-      kcal += (ex.met||4) * w * (x.sets.length * (x.sets[0].reps||10) * 3 / 3600);
-    });
-    kcal += 1.3 * w * (durSec/3600) * 0.5;      // descansos, aproximado
-    entry.kcal = Math.round(kcal);
-  }catch(e){ entry.kcal = 0; }
+  // kcal reales: MET·peso·tiempo activo (duración o reps registradas) +
+  // descansos, con el PESO CORPORAL del perfil de la persona.
+  entry.kcal = (typeof logEntryKcal === 'function') ? logEntryKcal(entry, entry.bodyweight) : 0;
 
   logSave(entry);
   trClearState();
@@ -526,6 +561,55 @@ function trRenderRest(){
   wrap.querySelectorAll('[data-rest]').forEach(b=> b.addEventListener('click', ()=>{
     if(b.dataset.rest === 'skip') trSkipRest(); else trAddRest(+b.dataset.rest);
   }));
+}
+
+/* Entrada de una serie de FUERZA: peso + repeticiones */
+function trRepsInput(x, s){
+  return `<div class="tr-input">
+    <div class="tr-in-grp">
+      <label>Peso (kg)</label>
+      <div class="tr-stepper">
+        <button data-kg="-${spLoadStep(x.e)}">−</button>
+        <input class="mono" type="number" inputmode="decimal" step="0.5" id="trKg" value="${s.kg||''}" placeholder="0">
+        <button data-kg="${spLoadStep(x.e)}">+</button>
+      </div>
+    </div>
+    <div class="tr-in-grp">
+      <label>Repeticiones</label>
+      <div class="tr-stepper">
+        <button data-rp="-1">−</button>
+        <input class="mono" type="number" inputmode="numeric" id="trReps" value="${s.reps||''}" placeholder="0">
+        <button data-rp="1">+</button>
+      </div>
+    </div>
+  </div>`;
+}
+/* Entrada de una serie por TIEMPO: duración (min o s según magnitud) y,
+   en carrera/bici/nado/remo, distancia opcional. Nunca pide kg. */
+function trTimeInput(x, s){
+  const unit = trDurUnit(x), step = trDurStep(x);
+  const durVal = unit === 'min' ? (Math.round((+s.dur||0)/60*10)/10) : (+s.dur||0);
+  const dur = `
+    <div class="tr-in-grp">
+      <label>${unit === 'min' ? 'Minutos' : 'Segundos'}</label>
+      <div class="tr-stepper">
+        <button data-dur="-${step}">−</button>
+        <input class="mono" type="number" inputmode="decimal" id="trDur" value="${durVal||''}" placeholder="0">
+        <button data-dur="${step}">+</button>
+      </div>
+      <span class="tr-in-sub mono">${logFmtDur(+s.dur||0)}</span>
+    </div>`;
+  const dist = x.dist ? `
+    <div class="tr-in-grp">
+      <label>Distancia (km) <i>opcional</i></label>
+      <div class="tr-stepper">
+        <button data-dist="-${trDistStep()}">−</button>
+        <input class="mono" type="number" inputmode="decimal" step="0.1" id="trDist" value="${s.dist?(Math.round(+s.dist/10)/100):''}" placeholder="0">
+        <button data-dist="${trDistStep()}">+</button>
+      </div>
+      <span class="tr-in-sub mono">${+s.dist>0?logFmtDist(s.dist):'—'}</span>
+    </div>` : '';
+  return `<div class="tr-input tr-input-time">${dur}${dist}</div>`;
 }
 
 function renderTrain(){
@@ -586,7 +670,7 @@ function renderTrain(){
     <div class="tr-sets">${x.sets.map((k,n)=>`
       <div class="tr-set ${k.done?'done':''} ${n===i&&!doneAll?'cur':''}">
         <span class="tr-set-n">${n+1}</span>
-        <span class="tr-set-v mono">${x.mode==='time' ? (k.dur+'s') : `${k.kg?k.kg+' kg':'—'} × ${k.reps||'—'}`}</span>
+        <span class="tr-set-v mono">${x.mode==='time' ? (logFmtDur(k.dur) + (+k.dist>0?' · '+logFmtDist(k.dist):'')) : `${k.kg?k.kg+' kg':'—'} × ${k.reps||'—'}`}</span>
         ${k.rpe?`<span class="tr-set-rpe">RPE ${k.rpe}</span>`:''}
         <span class="tr-set-ok">${k.done?'✓':''}</span>
       </div>`).join('')}
@@ -603,25 +687,8 @@ function renderTrain(){
             : `<button class="btn-prim" id="trFin">🏁 Terminar</button>`}
         </div>
       </div>` : `
-      <div class="tr-input">
-        <div class="tr-in-grp">
-          <label>Peso (kg)</label>
-          <div class="tr-stepper">
-            <button data-kg="-${spLoadStep(x.e)}">−</button>
-            <input class="mono" type="number" inputmode="decimal" step="0.5" id="trKg" value="${s.kg||''}" placeholder="0">
-            <button data-kg="${spLoadStep(x.e)}">+</button>
-          </div>
-        </div>
-        <div class="tr-in-grp">
-          <label>${x.mode==='time'?'Segundos':'Repeticiones'}</label>
-          <div class="tr-stepper">
-            <button data-rp="-1">−</button>
-            <input class="mono" type="number" inputmode="numeric" id="trReps" value="${x.mode==='time'?(s.dur||''):(s.reps||'')}" placeholder="0">
-            <button data-rp="1">+</button>
-          </div>
-        </div>
-      </div>
-      <button class="tr-go" id="trDone">✓ Serie ${i+1} hecha</button>
+      ${x.mode === 'time' ? trTimeInput(x, s) : trRepsInput(x, s)}
+      <button class="tr-go" id="trDone">✓ ${x.mode==='time' ? (x.sets.length>1?('Bloque '+(i+1)+' hecho'):'Registrar') : ('Serie '+(i+1)+' hecha')}</button>
       <div class="tr-set-edit">
         <button class="tr-set-edit-b" id="trAddSet">+ Serie</button>
         ${trCanRemove() ? `<button class="tr-set-edit-b" id="trRmSet">− Serie</button>` : ''}
@@ -657,20 +724,27 @@ function renderTrain(){
   el.querySelectorAll('[data-go]').forEach(b=> b.addEventListener('click', ()=> trGoEx(+b.dataset.go)));
   el.querySelectorAll('[data-kg]').forEach(b=> b.addEventListener('click', ()=> trBumpKg(+b.dataset.kg)));
   el.querySelectorAll('[data-rp]').forEach(b=> b.addEventListener('click', ()=> trBumpReps(+b.dataset.rp)));
+  el.querySelectorAll('[data-dur]').forEach(b=> b.addEventListener('click', ()=> trBumpDur(+b.dataset.dur)));
+  el.querySelectorAll('[data-dist]').forEach(b=> b.addEventListener('click', ()=> trBumpDist(+b.dataset.dist)));
 
   // los inputs escriben directamente en el estado (sin re-render, para no perder el foco)
   const kgI = document.getElementById('trKg'), rpI = document.getElementById('trReps');
+  const durI = document.getElementById('trDur'), distI = document.getElementById('trDist');
   if(kgI) kgI.addEventListener('input', ()=>{
     const v = Math.max(0, +kgI.value||0);
     s.kg = v;
     for(let j=i+1;j<x.sets.length;j++) if(!x.sets[j].done) x.sets[j].kg = v;
     trSaveState();
   });
-  if(rpI) rpI.addEventListener('input', ()=>{
-    const v = Math.max(0, +rpI.value||0);
-    if(x.mode==='time') s.dur = v; else s.reps = v;
+  if(rpI) rpI.addEventListener('input', ()=>{ s.reps = Math.max(0, +rpI.value||0); trSaveState(); });
+  if(durI) durI.addEventListener('input', ()=>{
+    const raw = Math.max(0, +durI.value||0);
+    const sec = trDurUnit(x) === 'min' ? Math.round(raw*60) : Math.round(raw);
+    s.dur = sec;
+    for(let j=i+1;j<x.sets.length;j++) if(!x.sets[j].done) x.sets[j].dur = sec;
     trSaveState();
   });
+  if(distI) distI.addEventListener('input', ()=>{ s.dist = Math.max(0, Math.round((+distI.value||0)*1000)); trSaveState(); });
   on('trDone', trDoneSet);
 
   trStartTick();
