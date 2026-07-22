@@ -18,6 +18,7 @@
 | `sport-anim.js` | 606 | Visor 3D (en standby, `ANIM_ENABLED = false`) |
 | `sport-gear.js` | — | **NUEVO** · material por ejercicio (ítems normalizados) y lugares |
 | `sport-illus.js` | — | **NUEVO** · pictogramas SVG por ejercicio (`exIllus`, offline) |
+| `sport-exdesc.js` | — | **NUEVO** · `EX_DESC[id] = {b,c}`: brief experto por ejercicio (`.b`, en inglés, para el generador de imágenes) + cue de técnica (`.c`, en español, sobrescribe `EXERCISES[id].cues` al cargar). 341/341. Corrige duplicados y ejercicios mal clasificados por pose (p. ej. swing de kettlebell salía como sentadilla; patada de tríceps como boxeo; chin-up como remoergómetro) |
 | `sport-log.js` | — | **NUEVO** · registro de entrenamientos, PRs, 1RM, volumen |
 | `sport-train.js` | — | **NUEVO** · modo entrenamiento serie a serie |
 | `sport-progress.js` | — | **NUEVO** · pantalla de progreso |
@@ -113,11 +114,29 @@ Clave `sport:log:v1`. Un registro por sesión ejecutada:
 ```js
 { id:'lg_1721...', date:'2026-07-20', sessId:'push_a', sessName:'Empuje A',
   who:'A', startTs:1721..., endTs:1721..., durSec:3720, restSec:900,
-  bodyweight:78, feel:4, notes:'',
-  ex:[ { e:'press_banca_barra',
+  bodyweight:78, feel:4, notes:'', kcal:412,
+  ex:[ // FUERZA (mode:'reps') → kg × reps
+       { e:'press_banca_barra', mode:'reps',
          sets:[ {kg:60, reps:8, rpe:8, done:true},
-                {kg:60, reps:7, rpe:9, done:true} ] } ] }
+                {kg:60, reps:7, rpe:9, done:true} ] },
+       // TIEMPO (mode:'time') → duración (s) y, en carrera/bici/nado/remo,
+       // distancia (m) opcional. NUNCA kg/reps.
+       { e:'senderismo', mode:'time',
+         sets:[ {dur:5400, dist:9000, rpe:0, done:true} ] } ] }
 ```
+
+**Medidas por tipo de ejercicio.** Cada bloque guarda lo que le corresponde:
+`mode:'reps'` (fuerza) → `{kg,reps,rpe}`; `mode:'time'` (senderismo, carrera,
+plancha, natación por series…) → `{dur, dist?, rpe}`. El modo entrenamiento
+adapta el input: peso+reps, o duración (en minutos si es larga, segundos si es
+corta) + distancia opcional. `logExHasDist(id)` decide si pedir distancia
+(disciplinas `carrera`, `ciclismo`, `natacion`, `remo`).
+
+**kcal (`logEntryKcal`)** = Σ `MET_ejercicio · peso(kg) · horas_activas` +
+descanso a ~1.3 MET. El tiempo activo sale de las medidas REALES registradas
+(duración en tiempo; `reps·~3 s` en fuerza) y el peso corporal del perfil de la
+persona → cada usuario gasta distinto. (Antes se calculaba `reps·3 s` también en
+tiempo, con `reps=0` → un senderismo de 90 min contaba como ~30 s. Corregido.)
 
 API pública (todas en `window`):
 
@@ -232,6 +251,15 @@ prefiere una imagen sobre el pictograma cuando existe. `exIllusBox` mira
 `illImageFor(id)`; el manifest `ex-img/manifest.json` (lo escribe el generador) se
 carga al arrancar (`illInitImages`). Son ficheros de mismo origen → el SW los
 cachea y funcionan offline. Sin manifest, todo sigue en SVG.
+
+**Peso/carga**: las imágenes NO van en `app.min.js` ni en el `SHELL` del SW → no
+pesan en la descarga de la app. Se cargan con `loading="lazy"` y el SW las cachea
+al verlas (offline progresivo). El generador crea **PNG** (sin pérdida, máxima
+calidad) por defecto; `--webp`/`--format webp --compress N` si se quiere con
+pérdida. El manifest guarda la extensión por id (`{id:"png"|"webp"}`), así que
+`illImageFor` sirve `ex-img/<id>.<ext>` y admite mezcla. Para aligerar un lote PNG
+**sin perder calidad**: `npm i -D sharp && node convert-webp.cjs` (WebP lossless,
+idéntico píxel a píxel, ~20-40% menos; `--q N` para lossy). No gasta API.
 
 ### Generador de arte (`gen-exercise-art.cjs`)
 
@@ -372,7 +400,7 @@ aparecían con una vista guardada concreta.
 node validate-catalog.cjs   # valida los datos del catálogo (rápido, sin navegador)
 node build.mjs              # regenera app.min.js + sella sw.js y el HTML
 
-# smoke test en Chrome headless (72 comprobaciones)
+# smoke test en Chrome headless (76 comprobaciones)
 python -m http.server 8000  # en otra terminal
 node smoke-sport.cjs
 ```
@@ -396,12 +424,13 @@ código 1 si hay errores. **Pásalo siempre que toques el catálogo.**
 | 6b | **Material y accesos**: `gearItemsOf`, exigir todo el material, sesión en casa sin nada, selector con buscador/filtros/parecidos, ejercicio extra, deshacer, barra «Entrenar hoy» y su ▶ |
 | 7b | **Guardián de arranque**: ignora fallos de SW y errores posteriores al arranque |
 | 8 | Modo oscuro (luminancia real de las superficies) |
+| 9 | **Registro por tiempo y kcal**: `logEntryKcal` correcto y dependiente del peso, etiqueta de serie por tiempo con distancia, y que el modo entrenamiento cree series por duración (no reps) |
 
 El bloque 3 incluye **cobertura por disciplina**: verifica que cada deporte genere
 una sesión propia sin colar ejercicios de otras disciplinas (el fallo original de
 natación).
 
-Debe salir **72 OK · 0 fallos**. Las capturas quedan en `.shots/`.
+Debe salir **76 OK · 0 fallos**. Las capturas quedan en `.shots/`.
 Si tocas el generador o el registro, ejecútalo antes de mergear.
 
 > ⚠️ El archivo es `.cjs` a propósito: `package.json` tiene `"type":"module"`

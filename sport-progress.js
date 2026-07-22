@@ -110,7 +110,8 @@ function pgEntryCard(e){
       <span class="pg-e-date"><b>${d.getDate()}</b><i>${SP_MONTHS[d.getMonth()].slice(0,3)}</i></span>
       <span class="pg-e-mid">
         <b>${spEsc(e.sessName||'Entrenamiento')}</b>
-        <span>${logSetCount(e)} ${logSetCount(e)===1?'serie':'series'} · ${logTonnage(e).toLocaleString('es-ES')} kg · ${trFmtClock(e.durSec||0)}</span>
+        <span>${(()=>{ const n=logSetCount(e), tn=logTonnage(e), di=(typeof logDistanceOf==='function')?logDistanceOf(e):0, kc=(+e.kcal||((typeof logEntryKcal==='function')?logEntryKcal(e):0));
+          return `${n} ${n===1?'serie':'series'}${tn?` · ${tn.toLocaleString('es-ES')} kg`:''}${di?` · ${logFmtDist(di)}`:''} · ${trFmtClock(e.durSec||0)}${kc?` · ${kc} kcal`:''}`; })()}</span>
       </span>
       <span class="pg-e-feel">${feel}</span>
       <span class="pg-e-caret">${open?'▾':'▸'}</span>
@@ -121,7 +122,7 @@ function pgEntryCard(e){
         return `<div class="pg-e-ex">
           <b>${spEsc(ex.name)}</b>
           <div class="pg-e-sets">${(x.sets||[]).map(s=>
-            `<span class="pg-e-set mono">${s.kg?s.kg+'×':''}${s.reps}${s.rpe?` <i>@${s.rpe}</i>`:''}</span>`).join('')}</div>
+            `<span class="pg-e-set mono">${(typeof logSetLabel==='function')?logSetLabel(x,s):((s.kg?s.kg+'×':'')+(s.reps||0))}${s.rpe?` <i>@${s.rpe}</i>`:''}</span>`).join('')}</div>
         </div>`;
       }).join('')}
       ${e.notes ? `<p class="pg-e-notes">📝 ${spEsc(e.notes)}</p>` : ''}
@@ -175,8 +176,10 @@ function renderProgress(){
     <div class="pg-kpis">
       <div class="pg-kpi"><b>${sum.sessions}</b><span>entrenos</span></div>
       <div class="pg-kpi"><b>${logStreak(_pgWho)}</b><span>sem. seguidas</span></div>
-      <div class="pg-kpi"><b>${Math.round(sum.tonnage/1000)}<i>t</i></b><span>movidas</span></div>
       <div class="pg-kpi"><b>${Math.round(sum.sec/3600)}<i>h</i></b><span>entrenando</span></div>
+      <div class="pg-kpi"><b>${(sum.kcal||0).toLocaleString('es-ES')}</b><span>kcal</span></div>
+      ${sum.tonnage ? `<div class="pg-kpi"><b>${Math.round(sum.tonnage/1000)}<i>t</i></b><span>movidas</span></div>` : ''}
+      ${sum.dist ? `<div class="pg-kpi"><b>${Math.round(sum.dist/100)/10}<i>km</i></b><span>recorridos</span></div>` : ''}
     </div>
 
     <section class="pg-sec">

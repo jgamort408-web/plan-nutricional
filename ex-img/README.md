@@ -8,6 +8,14 @@ La app (`sport-illus.js` → `exIllusBox`) prefiere la imagen sobre el pictogram
 SVG cuando existe. Son ficheros de mismo origen: el service worker los cachea y
 funcionan offline.
 
+**Prompts por ejercicio.** Cada ejercicio tiene un *brief* propio (biomecánica
+de la fase reconocible, ángulo de cámara e implemento) en `sport-exdesc.js`
+(`EX_DESC[id].b`); el generador lo usa en vez de una frase genérica por familia.
+Así dos variantes del mismo grupo (p. ej. curl concentrado vs. curl invertido)
+producen imágenes distintas y correctas. El mismo fichero guarda el texto de
+técnica que ve el usuario en la app (`.c`). Para afinar un ejercicio, edita su
+`b`/`c` y comprueba el prompt con `--dry-run --only <id>`.
+
 ## Cómo generarlas
 
 ```bash
@@ -48,6 +56,34 @@ colorean sobre el cuerpo; el acento va solo en el material.
 
 Son ilustraciones **originales** (arte propio a partir del movimiento y la
 anatomía). No se descargan ni derivan imágenes de terceros.
+
+## Peso y velocidad de carga
+
+La app **no** descarga estas imágenes al instalarse: no van en `app.min.js` ni en
+el `SHELL` del service worker. Cada tarjeta usa `<img loading="lazy" decoding="async">`,
+así que el navegador solo baja la miniatura cuando te acercas a ella, y el service
+worker la **cachea la primera vez que se ve** (offline progresivo). El índice es
+`manifest.json` (unos KB): dice qué ids tienen imagen; el resto cae al pictograma SVG.
+
+El generador crea **PNG** (sin pérdida, máxima calidad) por defecto. Cada imagen
+pesa ~1,2 MB; como se cargan de forma diferida y se cachean al verlas, esto no
+afecta a la descarga inicial de la app, pero sí al tamaño del repo/caché.
+
+Si quieres aligerarlas **sin perder calidad**, reempaquétalas a WebP sin pérdida
+(idénticas píxel a píxel, ~20-40% menos) — coste CERO de API:
+
+```bash
+npm i -D sharp                 # herramienta de desarrollo, una vez
+node convert-webp.cjs          # PNG → WebP SIN pérdida (misma calidad), reescribe manifest
+node convert-webp.cjs --keep   # igual, pero conserva los PNG
+```
+
+El cargador admite mezcla png/webp (el manifest guarda la extensión por id). Si
+algún día prefieres ficheros mucho más pequeños a cambio de algo de pérdida:
+`node convert-webp.cjs --q 90` (apenas se nota) o `--q 80` (~10-20× menos).
+
+`_cast/` (los 12 modelos) son **referencias** para `--use-cast`, no se envían a la
+app; su peso no afecta a la descarga. Puedes dejarlos fuera de git si quieres.
 
 ## Subir para producción
 

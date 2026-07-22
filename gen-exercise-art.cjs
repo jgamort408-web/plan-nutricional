@@ -40,6 +40,10 @@
      --limit N      como mucho N
      --force        sobrescribe las existentes
      --size S       1024x1024 (def) | 1024x1536 | 1536x1024 | auto
+     --format F     png (def, sin pérdida) | webp | jpeg
+     --webp         atajo de --format webp (más ligero, con pérdida)
+     --compress N   compresión webp/jpeg 0..100 (def 80)
+     --png          atajo de --format png
      --quality Q    low | medium (def) | high
      --model M      gpt-image-1 (def)
      --out DIR      carpeta (def: ex-img)
@@ -59,6 +63,9 @@ let sd = fs.readFileSync(path.join(ROOT, 'sport-data.js'), 'utf8').split('functi
 sd += '\n;global.EXERCISES=EXERCISES;global.EX_MUSCLES=EX_MUSCLES;global.EX_SPORTS=EX_SPORTS;global.exDisc=exDisc;';
 (0, eval)(sd);
 (0, eval)(fs.readFileSync(path.join(ROOT, 'sport-illus.js'), 'utf8'));
+/* Descripciones expertas POR EJERCICIO (brief de imagen .b + cue de app .c).
+   Si un id tiene entrada, su .b sustituye al brief de pose genérico. */
+try { (0, eval)(fs.readFileSync(path.join(ROOT, 'sport-exdesc.js'), 'utf8')); } catch (e) { global.EX_DESC = {}; }
 const E = EXERCISES;
 
 /* ══════════════════════════════════════════════════════════
@@ -196,16 +203,25 @@ function engMuscle(m) {
     isquios: 'hamstrings', gluteo: 'glutes', gemelo: 'calves' })[m] || m;
 }
 
-/* Prompt experto completo de un ejercicio (con persona diversa) */
+/* ¿tiene este ejercicio un brief propio (autosuficiente) en EX_DESC? */
+function ownBrief(id) {
+  const d = (typeof EX_DESC !== 'undefined') ? EX_DESC[id] : null;
+  return d && d.b ? d.b : null;
+}
+/* Prompt experto completo de un ejercicio (con persona diversa).
+   Preferencia: brief PROPIO por ejercicio (describe postura + implemento,
+   ya desambiguado) → si no, brief de POSE genérico + variante + material. */
 function buildPrompt(id, personaOverride) {
   const ex = E[id];
-  const pose = illPoseKey(ex, id);
-  const brief = (POSE_BRIEF[pose] || POSE_BRIEF.generic) + variantModifier(ex.name || '');
   const primary = (ex.muscles || [])[0];
   const accent = (EX_MUSCLES[primary] || {}).c || '#B5603A';   // acento solo para el material
   const persona = personaFor(id, personaOverride);
   const style = STYLE_HOUSE.replace('<ACCENT>', accent);
-  return `Subject: ${persona.desc}, ${brief}, ${equipClause(ex, id)}. `
+  const own = ownBrief(id);
+  const subject = own
+    ? own                                                       // autosuficiente (incluye implemento)
+    : (POSE_BRIEF[illPoseKey(ex, id)] || POSE_BRIEF.generic) + variantModifier(ex.name || '') + ', ' + equipClause(ex, id);
+  return `Subject: ${persona.desc}, ${subject}. `
     + `The pose must read instantly and unambiguously as this exact exercise, technically correct. `
     + `\n\nStyle: ${style}`;
 }
@@ -235,10 +251,14 @@ function preferredRef(pose) {
 
 /* ── CLI ──────────────────────────────────────────────────────── */
 function parseArgs() {
-  const a = process.argv.slice(2); const o = { size: '1024x1024', quality: 'medium', model: 'gpt-image-1', out: 'ex-img' };
+  const a = process.argv.slice(2); const o = { size: '1024x1024', quality: 'medium', model: 'gpt-image-1', out: 'ex-img', format: 'png', compress: 80 };
   for (let i = 0; i < a.length; i++) {
     const f = a[i];
     if (f === '--dry-run') o.dry = true;
+    else if (f === '--png') o.format = 'png';
+    else if (f === '--webp') o.format = 'webp';
+    else if (f === '--format') o.format = (a[++i] || 'png').toLowerCase();
+    else if (f === '--compress') o.compress = Math.max(0, Math.min(100, +a[++i] || 80));
     else if (f === '--sample') o.sample = true;
     else if (f === '--all') o.all = true;
     else if (f === '--force') o.force = true;
@@ -273,10 +293,12 @@ function pickIds(o) {
 
 /* ── API ──────────────────────────────────────────────────────── */
 async function apiGenerate(prompt, o) {
+  const body = { model: o.model, prompt, size: o.size, quality: o.quality, n: 1, output_format: o.format };
+  if (o.format !== 'png') body.output_compression = o.compress;   // WebP/JPEG: peso ~10-20× menor
   const res = await fetch('https://api.openai.com/v1/images/generations', {
     method: 'POST',
     headers: { 'Authorization': 'Bearer ' + process.env.OPENAI_API_KEY, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model: o.model, prompt, size: o.size, quality: o.quality, n: 1 })
+    body: JSON.stringify(body)
   });
   return handleRes(res);
 }
@@ -286,6 +308,8 @@ async function apiEdit(prompt, refBuffers, o) {
   form.append('prompt', prompt);
   form.append('size', o.size);
   form.append('quality', o.quality);
+  form.append('output_format', o.format);
+  if (o.format !== 'png') form.append('output_compression', String(o.compress));
   refBuffers.forEach((b, i) => form.append('image[]', new Blob([b], { type: 'image/png' }), 'ref' + i + '.png'));
   const res = await fetch('https://api.openai.com/v1/images/edits', {
     method: 'POST',
@@ -309,7 +333,7 @@ function saveManifest(dir, m) { fs.writeFileSync(path.join(dir, 'manifest.json')
 function writeContact(dir) {
   const m = loadManifest(dir);
   const ids = Object.keys(m);
-  const cells = ids.map(id => `<figure><img src="${id}.png" loading="lazy"><figcaption>${(E[id] || {}).name || id}<br><small>${id}</small></figcaption></figure>`).join('');
+  const cells = ids.map(id => `<figure><img src="${id}.${m[id]||'png'}" loading="lazy"><figcaption>${(E[id] || {}).name || id}<br><small>${id}</small></figcaption></figure>`).join('');
   const html = `<!doctype html><meta charset=utf8><title>Revisión de imágenes</title>
 <style>body{background:#F6EDD8;color:#2C1F0E;font:14px system-ui;margin:0;padding:20px}
 h1{font-size:18px}.g{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px}
@@ -340,15 +364,20 @@ async function main() {
   }
   if (!o.dry && !fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
   const manifest = o.dry ? {} : loadManifest(outDir);
-  const pending = ids.filter(id => o.force || o.dry || !fs.existsSync(path.join(outDir, id + '.png')));
+  // "hecha" = existe el fichero en CUALQUIER formato (png/webp), para poder
+  // reanudar aunque cambie el formato por defecto.
+  const doneOnDisk = id => fs.existsSync(path.join(outDir, id + '.' + o.format)) ||
+    fs.existsSync(path.join(outDir, id + '.png')) || fs.existsSync(path.join(outDir, id + '.webp'));
+  const pending = ids.filter(id => o.force || o.dry || !doneOnDisk(id));
 
   console.log(`\n${ids.length} seleccionados · ${pending.length} por generar` +
-    (o.dry ? ' · DRY-RUN (sin API)' : ` · ${o.size} ${o.quality} · ${o.model}${o.useRefs ? ' · con referencias' : ''}`));
+    (o.dry ? ' · DRY-RUN (sin API)' : ` · ${o.size} ${o.quality} ${o.format}${o.format!=='png'?'@'+o.compress:''} · ${o.model}${o.useRefs ? ' · con referencias' : ''}`));
 
   if (o.dry) {
     pending.slice(0, 6).forEach(id => {
       const p = personaFor(id, o.persona);
-      console.log('\n\x1b[1m' + id + '\x1b[0m  (' + E[id].name + ')  · pose ' + illPoseKey(E[id], id) + ' · persona ' + p.id);
+      const src = ownBrief(id) ? 'brief propio' : ('pose ' + illPoseKey(E[id], id));
+      console.log('\n\x1b[1m' + id + '\x1b[0m  (' + E[id].name + ')  · ' + src + ' · persona ' + p.id);
       console.log('  ' + buildPrompt(id, o.persona).replace(/\n/g, '\n  '));
     });
     if (pending.length > 6) console.log(`\n… y ${pending.length - 6} más (personas variadas, mismo estilo).`);
@@ -394,8 +423,8 @@ async function main() {
       } else {
         buf = await apiGenerate(prompt, o);
       }
-      fs.writeFileSync(path.join(outDir, id + '.png'), buf);
-      manifest[id] = 'png'; saveManifest(outDir, manifest);
+      fs.writeFileSync(path.join(outDir, id + '.' + o.format), buf);
+      manifest[id] = o.format; saveManifest(outDir, manifest);
       done++; console.log('\x1b[32mok\x1b[0m (' + Math.round(buf.length / 1024) + ' KB)');
     } catch (err) {
       fail++; console.log('\x1b[31mfalló\x1b[0m · ' + err.message);

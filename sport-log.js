@@ -90,7 +90,94 @@ function est1RM(kg, reps){
   if(!kg) return 0;
   return Math.round(kg * (1 + reps/30) * 10) / 10;
 }
-function setIsWork(s){ return s && s.done !== false && (+s.reps > 0); }
+/* Una serie cuenta como trabajo si está hecha y tiene reps (fuerza) o
+   duración (tiempo: carrera, plancha, natación…). */
+function setIsWork(s){ return s && s.done !== false && ((+s.reps > 0) || (+s.dur > 0)); }
+
+/* ── Medidas: tiempo vs repeticiones, y distancia ─────────────
+   Cada ejercicio registra lo que le corresponde: series×reps(+kg) en
+   fuerza, o duración (y opcionalmente distancia) en lo que va por tiempo
+   (senderismo, carrera, nado, remo…). Estas ayudas leen tanto el estado
+   nuevo como entradas antiguas (compatibilidad). */
+var SP_DIST_DISC = ['carrera','ciclismo','natacion','remo'];   // disciplinas con distancia
+/* ¿este bloque de ejercicio va por TIEMPO? (por su `mode`, o por el del
+   catálogo, o porque sus series traen duración) */
+function logExIsTime(x){
+  if(x && x.mode) return x.mode === 'time';
+  const ex = EXERCISES[x && x.e];
+  if(ex && ex.mode) return ex.mode === 'time';
+  return !!(x && (x.sets||[]).some(s=> +s.dur > 0));
+}
+/* ¿tiene sentido pedir distancia para este ejercicio? */
+function logExHasDist(exId){
+  const ex = EXERCISES[exId]; if(!ex) return false;
+  if(ex.mode !== 'time') return false;
+  try{ return SP_DIST_DISC.includes(exDisc(ex)); }catch(e){ return false; }
+}
+/* Duración legible: "45 s", "12 min", "1 h 30 min" */
+function logFmtDur(sec){
+  sec = Math.max(0, Math.round(+sec||0));
+  if(sec < 60) return sec + ' s';
+  const m = Math.round(sec/60);
+  if(m < 60) return m + ' min';
+  const h = Math.floor(m/60), r = m%60;
+  return r ? `${h} h ${r} min` : `${h} h`;
+}
+/* Distancia legible: metros por debajo de 1 km, si no km con 1 decimal */
+function logFmtDist(m){
+  m = +m||0; if(!m) return '';
+  return m >= 1000 ? (Math.round(m/100)/10) + ' km' : Math.round(m) + ' m';
+}
+/* Etiqueta de una serie registrada (fuerza o tiempo) para el historial */
+function logSetLabel(x, s){
+  if(logExIsTime(x)){
+    const t = logFmtDur(+s.dur||0);
+    const d = (+s.dist > 0) ? ' · ' + logFmtDist(s.dist) : '';
+    return t + d;
+  }
+  return (s.kg ? s.kg + '×' : '') + (+s.reps||0);
+}
+/* Segundos ACTIVOS realmente registrados en una entrada (sin descansos):
+   tiempo → duración anotada; fuerza → ~3 s por repetición. */
+function logActiveSec(entry){
+  let sec = 0;
+  (entry && entry.ex || []).forEach(x=>{
+    const time = logExIsTime(x);
+    (x.sets||[]).forEach(s=>{
+      if(!setIsWork(s)) return;
+      sec += time ? (+s.dur||0) : (+s.reps||0) * 3;
+    });
+  });
+  return sec;
+}
+/* Distancia total registrada en una entrada (metros) */
+function logDistanceOf(entry){
+  let m = 0;
+  (entry && entry.ex || []).forEach(x=> (x.sets||[]).forEach(s=>{ if(setIsWork(s)) m += +s.dist||0; }));
+  return m;
+}
+/* kcal de una entrada para un peso dado.
+   kcal ≈ Σ MET_ejercicio · peso(kg) · horas_activas  +  descanso a ~1.3 MET.
+   El tiempo activo sale de las DURACIONES/REPS reales registradas, y el
+   descanso de la diferencia con la duración total de la sesión. Depende
+   del peso corporal del usuario (perfil) → cada persona gasta distinto. */
+function logEntryKcal(entry, weight){
+  weight = +weight || +(entry && entry.bodyweight) || 70;
+  let kcal = 0, active = 0;
+  (entry && entry.ex || []).forEach(x=>{
+    const ex = EXERCISES[x.e]; const met = (ex && ex.met) || 4;
+    const time = logExIsTime(x);
+    (x.sets||[]).forEach(s=>{
+      if(!setIsWork(s)) return;
+      const sec = time ? (+s.dur||0) : (+s.reps||0) * 3;
+      active += sec;
+      kcal += met * weight * (sec/3600);
+    });
+  });
+  const rest = Math.max(0, (+(entry && entry.durSec)||0) - active);
+  kcal += 1.3 * weight * (rest/3600);
+  return Math.round(kcal);
+}
 
 /* Tonelaje (Σ kg × reps) de una entrada */
 function logTonnage(entry){
@@ -229,8 +316,22 @@ function logSummary(from, to, who){
     sec:      rows.reduce((a,e)=> a + (+e.durSec||0), 0),
     tonnage:  rows.reduce((a,e)=> a + logTonnage(e), 0),
     sets:     rows.reduce((a,e)=> a + logSetCount(e), 0),
-    kcal:     rows.reduce((a,e)=> a + (+e.kcal||0), 0)
+    dist:     rows.reduce((a,e)=> a + logDistanceOf(e), 0),
+    // kcal guardado al registrar (con el peso de la persona); si falta
+    // en una entrada antigua, se recalcula al vuelo.
+    kcal:     rows.reduce((a,e)=> a + (+e.kcal || logEntryKcal(e)), 0)
   };
+}
+/* Última vez por TIEMPO de un ejercicio → prellena duración/distancia */
+function logLastTimeFor(exId, who){
+  for(const e of logFor(who)){
+    const x = (e.ex||[]).find(x=> x.e === exId);
+    if(x && logExIsTime(x)){
+      const s = (x.sets||[]).filter(setIsWork).pop();
+      if(s) return {dur:+s.dur||0, dist:+s.dist||0, date:e.date};
+    }
+  }
+  return null;
 }
 
 /* ── Progresión de cargas ─────────────────────────────────────
@@ -297,13 +398,16 @@ function logPrefill(exId, who, targetReps){
 
 /* ── Exportación ──────────────────────────────────────────── */
 function logToCSV(who){
-  const rows = [['fecha','sesion','ejercicio','serie','kg','reps','rpe','1RM_est']];
+  const rows = [['fecha','sesion','ejercicio','tipo','serie','kg','reps','segundos','distancia_m','rpe','1RM_est']];
   logFor(who).slice().reverse().forEach(e=>{
     (e.ex||[]).forEach(x=>{
       const nm = (EXERCISES[x.e]||{}).name || x.e;
+      const time = logExIsTime(x);
       (x.sets||[]).forEach((s, i)=>{
         if(!setIsWork(s)) return;
-        rows.push([e.date, e.sessName||'', nm, i+1, s.kg||'', s.reps||'', s.rpe||'', est1RM(s.kg, s.reps)||'']);
+        rows.push(time
+          ? [e.date, e.sessName||'', nm, 'tiempo', i+1, '', '', s.dur||'', s.dist||'', s.rpe||'', '']
+          : [e.date, e.sessName||'', nm, 'reps',   i+1, s.kg||'', s.reps||'', '', '', s.rpe||'', est1RM(s.kg, s.reps)||'']);
       });
     });
   });
@@ -324,6 +428,15 @@ window.logTrackedExercises = logTrackedExercises;
 window.logVolumeByMuscle = logVolumeByMuscle;
 window.logTonnage = logTonnage;
 window.logSetCount = logSetCount;
+window.logExIsTime = logExIsTime;
+window.logExHasDist = logExHasDist;
+window.logActiveSec = logActiveSec;
+window.logDistanceOf = logDistanceOf;
+window.logEntryKcal = logEntryKcal;
+window.logFmtDur = logFmtDur;
+window.logFmtDist = logFmtDist;
+window.logSetLabel = logSetLabel;
+window.logLastTimeFor = logLastTimeFor;
 window.logPRs = logPRs;
 window.logIsPR = logIsPR;
 window.logStreak = logStreak;
