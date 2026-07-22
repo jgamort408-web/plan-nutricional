@@ -261,6 +261,14 @@ pérdida. El manifest guarda la extensión por id (`{id:"png"|"webp"}`), así qu
 **sin perder calidad**: `npm i -D sharp && node convert-webp.cjs` (WebP lossless,
 idéntico píxel a píxel, ~20-40% menos; `--q N` para lossy). No gasta API.
 
+**Miniaturas (dos resoluciones).** `ex-img/sm/<id>.webp` son versiones a 320 px
+(~7 KB) generadas con `make-thumbs.cjs` (`npm i -D sharp && node make-thumbs.cjs`).
+`exIllusBox` sirve la **miniatura** en tarjetas, listas y modo entrenamiento
+(carga instantánea) y la imagen de **alta** solo en la ficha/detalle (`cls:'hero'`,
+`fetchpriority=high`). `illThumbFor(id)` da la miniatura; si faltara, el `onerror`
+del `<img>` cae a la imagen de alta y, en último caso, al pictograma SVG. Se genera
+una miniatura por cada imagen de alta, así que la cobertura es 1:1.
+
 ### Generador de arte (`gen-exercise-art.cjs`)
 
 Crea una ilustración **original** por ejercicio con la **API de OpenAI** (Images),
@@ -400,7 +408,7 @@ aparecían con una vista guardada concreta.
 node validate-catalog.cjs   # valida los datos del catálogo (rápido, sin navegador)
 node build.mjs              # regenera app.min.js + sella sw.js y el HTML
 
-# smoke test en Chrome headless (76 comprobaciones)
+# smoke test en Chrome headless (77 comprobaciones)
 python -m http.server 8000  # en otra terminal
 node smoke-sport.cjs
 ```
@@ -430,7 +438,7 @@ El bloque 3 incluye **cobertura por disciplina**: verifica que cada deporte gene
 una sesión propia sin colar ejercicios de otras disciplinas (el fallo original de
 natación).
 
-Debe salir **76 OK · 0 fallos**. Las capturas quedan en `.shots/`.
+Debe salir **77 OK · 0 fallos**. Las capturas quedan en `.shots/`.
 Si tocas el generador o el registro, ejecútalo antes de mergear.
 
 > ⚠️ El archivo es `.cjs` a propósito: `package.json` tiene `"type":"module"`
