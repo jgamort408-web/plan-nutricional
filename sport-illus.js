@@ -212,9 +212,17 @@ function exIllus(id, opts){
    manifest (ex-img/manifest.json) dice qué ids tienen imagen; se
    carga una vez al arrancar. Sin manifest, todo sigue en SVG. */
 var _illImg = null;                 // {id: 'png'|'webp'} o null si no hay
+/* Imagen de ALTA resolución (ex-img/<id>.<ext>) → vista de detalle/ficha */
 function illImageFor(id){
   if(!_illImg || !_illImg[id]) return null;
   return 'ex-img/' + id + '.' + _illImg[id];
+}
+/* MINIATURA de baja resolución (ex-img/sm/<id>.webp, ~7 KB) → tarjetas,
+   listas y modo entrenamiento: carga instantánea. Se genera una por cada
+   imagen de alta (make-thumbs.cjs), así que existe siempre que exista la alta. */
+function illThumbFor(id){
+  if(!_illImg || !_illImg[id]) return null;
+  return 'ex-img/sm/' + id + '.webp';
 }
 /* Fija el manifest directamente (lo usa illInitImages y sirve para tests) */
 function illUseManifest(m){
@@ -242,11 +250,26 @@ function exIllusBox(id, opts){
   const ex = (typeof EXERCISES!=='undefined') ? EXERCISES[id] : null;
   const accent = ex && ex.muscles && ex.muscles[0] && typeof EX_MUSCLES!=='undefined' && EX_MUSCLES[ex.muscles[0]]
     ? EX_MUSCLES[ex.muscles[0]].c : '';
-  const img = illImageFor(id);
-  const inner = img
-    ? `<img class="ex-illus-img" src="${img}" alt="${((ex&&ex.name)||'').replace(/"/g,'')}" loading="lazy" decoding="async" onerror="this.replaceWith(document.createRange().createContextualFragment(window.exIllus?exIllus('${id}',{}):''))">`
-    : exIllus(id, opts);
-  return `<span class="ex-illus ${opts.cls||''}${img?' has-img':''}"${accent?` style="--il:${accent}"`:''}>${inner}</span>`;
+  // La ficha/detalle (hero) carga la imagen de ALTA; el resto, la miniatura.
+  const isHero = /\bhero\b/.test(opts.cls||'');
+  const full   = illImageFor(id);
+  const thumb  = isHero ? null : illThumbFor(id);
+  const src    = isHero ? full : (thumb || full);
+  let inner;
+  if(src){
+    const alt = ((ex&&ex.name)||'').replace(/"/g,'');
+    const toSvg = `this.replaceWith(document.createRange().createContextualFragment(window.exIllus?exIllus('${id}',{}):''))`;
+    // si falla la miniatura, primero prueba la imagen de alta; si también falla, pictograma
+    const onerr = (thumb && full && thumb !== full)
+      ? `if(this.dataset.f){${toSvg}}else{this.dataset.f=1;this.src='${full}'}`
+      : toSvg;
+    // hero: carga prioritaria (la miras de cerca); miniatura: diferida
+    const load = isHero ? 'fetchpriority="high"' : 'loading="lazy"';
+    inner = `<img class="ex-illus-img" src="${src}" alt="${alt}" ${load} decoding="async" onerror="${onerr}">`;
+  } else {
+    inner = exIllus(id, opts);
+  }
+  return `<span class="ex-illus ${opts.cls||''}${src?' has-img':''}"${accent?` style="--il:${accent}"`:''}>${inner}</span>`;
 }
 /* ¿la pose es genérica? (para saber cuáles conviene afinar luego) */
 function illIsGeneric(id){ const ex=EXERCISES[id]; return ex ? illPoseKey(ex,id)==='generic' : true; }
@@ -318,6 +341,7 @@ window.exIllusBox = exIllusBox;
 window.illPoseKey = illPoseKey;
 window.illIsGeneric = illIsGeneric;
 window.illImageFor = illImageFor;
+window.illThumbFor = illThumbFor;
 window.illInitImages = illInitImages;
 window.illUseManifest = illUseManifest;
 window.muscleMapSVG = muscleMapSVG;

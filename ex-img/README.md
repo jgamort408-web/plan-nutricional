@@ -82,6 +82,23 @@ El cargador admite mezcla png/webp (el manifest guarda la extensión por id). Si
 algún día prefieres ficheros mucho más pequeños a cambio de algo de pérdida:
 `node convert-webp.cjs --q 90` (apenas se nota) o `--q 80` (~10-20× menos).
 
+## Miniaturas (`sm/`) — dos resoluciones
+
+`ex-img/sm/<id>.webp` son versiones a **320 px (~7 KB)** de cada imagen de alta.
+La app las usa en **tarjetas, listas y modo entrenamiento** (carga instantánea) y
+reserva la imagen de **alta resolución** para la **ficha de detalle**. Regenéralas
+tras crear/actualizar imágenes:
+
+```bash
+npm i -D sharp                 # una vez
+node make-thumbs.cjs           # ex-img/sm/<id>.webp a 320 px (resumible)
+node make-thumbs.cjs --force   # regenera todas
+node make-thumbs.cjs --size 384 --q 80
+```
+
+Se genera una miniatura por cada imagen de alta (1:1). Súbelas junto con las de
+alta (`git add ex-img/`).
+
 `_cast/` (los 12 modelos) son **referencias** para `--use-cast`, no se envían a la
 app; su peso no afecta a la descarga. Puedes dejarlos fuera de git si quieres.
 
