@@ -264,10 +264,18 @@ idéntico píxel a píxel, ~20-40% menos; `--q N` para lossy). No gasta API.
 **Miniaturas (dos resoluciones).** `ex-img/sm/<id>.webp` son versiones a 320 px
 (~7 KB) generadas con `make-thumbs.cjs` (`npm i -D sharp && node make-thumbs.cjs`).
 `exIllusBox` sirve la **miniatura** en tarjetas, listas y modo entrenamiento
-(carga instantánea) y la imagen de **alta** solo en la ficha/detalle (`cls:'hero'`,
-`fetchpriority=high`). `illThumbFor(id)` da la miniatura; si faltara, el `onerror`
-del `<img>` cae a la imagen de alta y, en último caso, al pictograma SVG. Se genera
-una miniatura por cada imagen de alta, así que la cobertura es 1:1.
+(carga instantánea) y la imagen de **alta** en la ficha/detalle. Ahí la carga es
+**progresiva**: la miniatura (ya cacheada de la lista) se ve al instante y la de
+alta se **funde encima** al terminar de cargar (`<img class="hi" onload=…on>`); si
+la alta falla, se queda la miniatura; si no hay ninguna, el pictograma SVG.
+`illThumbFor(id)` da la miniatura. Se genera una por cada imagen de alta (1:1).
+
+**Pictogramas de reserva** (`illPoseKey`, solo se ven offline sin caché o en
+ejercicios propios del usuario): se afinó el resolutor para eliminar fallos de
+subcadena (`'sup'` capturaba *supina*/*superman*; `'swing'`, el swing de
+kettlebell; `'patada'`, la patada de tríceps y las de burro) y overrides por
+característica (columpio→bisagra, almeja/hidrante/patada de burro→abducción,
+groiner→zancada, superman/cuadrupedia→plancha, muñeca→curl). 0 «generic».
 
 ### Generador de arte (`gen-exercise-art.cjs`)
 
