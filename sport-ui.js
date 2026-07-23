@@ -222,7 +222,7 @@ function exCardHtml(id){
     ${isUser?'<span class="sp-badge">Tuyo</span>':''}
     ${illus}
     <div class="sp-card-body">
-      <div class="sp-card-hd"><span class="sp-ico">${t.ico}</span><span class="sp-type">${t.lbl}</span><span class="sp-disc">${(EX_SPORTS[exDisc(ex)]||{}).ico||''}</span></div>
+      <div class="sp-card-hd"><span class="sp-ico">${t.ico}</span><span class="sp-type">${t.lbl}</span>${(()=>{const di=(EX_SPORTS[exDisc(ex)]||{}).ico||''; return di&&di!==t.ico?`<span class="sp-disc">${di}</span>`:'';})()}</div>
       <div class="sp-card-n">${spEsc(ex.name)}</div>
       <div class="msc-row">${muscleChips(ex.muscles,{dot:true})}</div>
       <div class="sp-card-meta">

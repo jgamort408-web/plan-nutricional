@@ -133,6 +133,16 @@ function illPoseKey(ex, id){
   const pat = ex.pat;
   const has = (...w)=> w.some(x=> n.includes(x));
 
+  // 0) casos concretos que otras reglas confundirían por subcadena o patrón
+  //    (una patada de tríceps no es de combate; un swing de kettlebell no es baile…)
+  if(has('patadas traseras','patada de triceps')) return 'tricepsext';
+  if(has('patadas de burro','patada de burro','patada de gluteo','contragolpe','almeja','hidrante')) return 'abduction';
+  if(has('levantamiento de pierna acostado','acostado de lado','acostado lateralmente','elevaciones de cadera acostado')) return 'abduction';
+  if(has('columpio','posicion de rana','rana con','elevacion de cadera','elevaciones de cadera','hip thrust')) return 'hinge';
+  if(has('groiner')) return 'lunge';
+  if(has('superman','cuadrupedia','bird dog','bird-dog')) return 'plank';
+  if(has('muneca','wrist','antebrazo')) return 'curl';
+
   // 1) por nombre (disciplinas y movimientos inequívocos)
   if(has('natacion','nadar','crol','braza','espalda','mariposa','pull-buoy','aquagym','estilos','pies de','aletas','palas')) return 'swim';
   if(has('bici','bicicleta','spinning','eliptica','ciclismo','rodillo','cadencia','sweet spot')) return 'bike';
@@ -140,8 +150,8 @@ function illPoseKey(ex, id){
   if(has('correr','carrera','sprint','fartlek','trote','rodaje','tempo','series de 4','cuesta','escalera','caminar','senderismo','marcha nordica','tirada')) return 'run';
   if(has('boxeo','kickboxing','sombra','saco','manopla','patada','rodilla','combate','sparring','guardia','esquiva')) return 'boxing';
   if(has('tenis','padel','raqueta','volea','smash','saque','bandeja','vibora','dejada','multibola','badminton','revs','derecha','reves')) return 'racket';
-  if(has('baile','zumba','salsa','bachata','hip-hop','danza','ballet','batuka','flamenco','swing','coreografia')) return 'dance';
-  if(has('kayak','piragu','paddle','sup','surf')) return 'rowmachine';
+  if(has('baile','zumba','salsa','bachata','hip-hop','danza','ballet','batuka','flamenco','lindy','coreografia')) return 'dance';
+  if(has('kayak','piragu','paddle','surf')) return 'rowmachine';   // 'sup' suelto capturaba supina/superman
   if(has('yoga','pilates','estiramiento','estira','movilidad','gato','cobra','psoas','cadera 90','dislocacion','perro boca','tai chi','respiracion')) return 'stretch';
   if(has('salto','burpee','box jump','pliometr','saltar a la comba','comba','jumping jack','thruster','wall ball','slam','battle','bear crawl','mountain climber','sled','trineo')) return has('comba','jumping','burpee','mountain','bear','battle','slam')?'jump':'jump';
   if(has('dominada','pull-up','pull up','chin-up')) return 'pullup';
@@ -250,26 +260,34 @@ function exIllusBox(id, opts){
   const ex = (typeof EXERCISES!=='undefined') ? EXERCISES[id] : null;
   const accent = ex && ex.muscles && ex.muscles[0] && typeof EX_MUSCLES!=='undefined' && EX_MUSCLES[ex.muscles[0]]
     ? EX_MUSCLES[ex.muscles[0]].c : '';
-  // La ficha/detalle (hero) carga la imagen de ALTA; el resto, la miniatura.
   const isHero = /\bhero\b/.test(opts.cls||'');
   const full   = illImageFor(id);
-  const thumb  = isHero ? null : illThumbFor(id);
-  const src    = isHero ? full : (thumb || full);
-  let inner;
-  if(src){
-    const alt = ((ex&&ex.name)||'').replace(/"/g,'');
-    const toSvg = `this.replaceWith(document.createRange().createContextualFragment(window.exIllus?exIllus('${id}',{}):''))`;
-    // si falla la miniatura, primero prueba la imagen de alta; si también falla, pictograma
+  const thumb  = illThumbFor(id);
+  const alt    = ((ex&&ex.name)||'').replace(/"/g,'');
+  const toSvg  = `this.replaceWith(document.createRange().createContextualFragment(window.exIllus?exIllus('${id}',{}):''))`;
+  let inner, hasImg = false;
+
+  if(isHero && full){
+    // FICHA · carga progresiva: la MINIATURA (ya cacheada de la lista) se ve al
+    // instante y la imagen de ALTA se funde encima al terminar de cargar. Si la
+    // alta falla (offline), se queda la miniatura; si no hay ninguna, pictograma.
+    hasImg = true;
+    const lo = (thumb && thumb !== full)
+      ? `<img class="ex-illus-img lo" src="${thumb}" alt="" aria-hidden="true" onerror="this.remove()">`
+      : '';
+    inner = lo + `<img class="ex-illus-img hi" src="${full}" alt="${alt}" fetchpriority="high" decoding="async" onload="this.classList.add('on')" onerror="${lo ? 'this.remove()' : toSvg}">`;
+  } else if(!isHero && (thumb || full)){
+    // TARJETAS/LISTAS/ENTRENO · miniatura ligera; si falta, cae a la alta y luego al SVG
+    hasImg = true;
+    const src   = thumb || full;
     const onerr = (thumb && full && thumb !== full)
       ? `if(this.dataset.f){${toSvg}}else{this.dataset.f=1;this.src='${full}'}`
       : toSvg;
-    // hero: carga prioritaria (la miras de cerca); miniatura: diferida
-    const load = isHero ? 'fetchpriority="high"' : 'loading="lazy"';
-    inner = `<img class="ex-illus-img" src="${src}" alt="${alt}" ${load} decoding="async" onerror="${onerr}">`;
+    inner = `<img class="ex-illus-img" src="${src}" alt="${alt}" loading="lazy" decoding="async" onerror="${onerr}">`;
   } else {
     inner = exIllus(id, opts);
   }
-  return `<span class="ex-illus ${opts.cls||''}${src?' has-img':''}"${accent?` style="--il:${accent}"`:''}>${inner}</span>`;
+  return `<span class="ex-illus ${opts.cls||''}${hasImg?' has-img':''}"${accent?` style="--il:${accent}"`:''}>${inner}</span>`;
 }
 /* ¿la pose es genérica? (para saber cuáles conviene afinar luego) */
 function illIsGeneric(id){ const ex=EXERCISES[id]; return ex ? illPoseKey(ex,id)==='generic' : true; }

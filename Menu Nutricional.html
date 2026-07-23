@@ -2369,6 +2369,12 @@ main[data-vm="small"] .dish-incart{font-size:.5rem;padding:3px 8px}
 html[data-theme="dark"] .ex-illus.has-img{background:#F6EDD8}
 /* micro-zoom al pasar el ratón por la tarjeta (sutil, no afecta a móvil) */
 .sp-card.ex:hover .ex-illus.has-img .ex-illus-img{transform:scale(1.045)}
+/* FICHA · carga progresiva: la miniatura (ya cacheada) se ve al instante y la
+   imagen de alta se funde encima al cargar (.hi.on). Ambas ocupan la misma caja. */
+.ex-illus.hero{position:relative}
+.ex-illus.hero .ex-illus-img{position:absolute;inset:0;transition:opacity .4s ease}
+.ex-illus.hero .ex-illus-img.hi{opacity:0}
+.ex-illus.hero .ex-illus-img.hi.on{opacity:1}
 .ex-illus-svg .ill-ground{stroke:currentColor;opacity:.26;stroke-width:2}
 .ex-illus-svg .ill-mach{stroke:currentColor;opacity:.5}
 .ex-illus-svg .ill-water{stroke:currentColor;opacity:.55;stroke-width:2.4}
@@ -2376,7 +2382,7 @@ html[data-theme="dark"] .ex-illus.has-img{background:#F6EDD8}
 .ex-illus.card{width:60px;height:60px}
 .ex-illus.thumb{width:42px;height:42px;border-radius:9px}
 .ex-illus.train{width:104px;height:104px;border-radius:16px;margin:0 auto 4px}
-.ex-illus.hero{width:148px;height:148px;border-radius:18px}
+.ex-illus.hero{width:190px;height:190px;border-radius:18px}
 /* tarjeta de ejercicio en fila: [ilustración] [contenido] */
 .sp-card.ex{display:flex;gap:12px;align-items:flex-start}
 .sp-card.ex .sp-card-body{flex:1;min-width:0}
@@ -3020,7 +3026,7 @@ html[data-theme="dark"] .pg-dot{stroke:var(--parch)}
 <!-- Núcleo de la app: bundle generado por build.mjs (30 scripts en 1).
      Para volver a los scripts sueltos en desarrollo, sustituye esta línea
      por los <script src> individuales. Regenera con: node build.mjs -->
-<script src="app.min.js?v=ef42e618"></script>
+<script src="app.min.js?v=9ad1eeea"></script>
 <script>
 /* ── Carga diferida del "pack de contenido" · Teoría + Bibliografía ──
    Son ~364 KB de texto que la mayoría de sesiones no abren. No se
