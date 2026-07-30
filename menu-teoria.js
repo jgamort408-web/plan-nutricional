@@ -754,6 +754,7 @@
   const esc = window.escHtml || (s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])));
 
   let _root=null, _closed=false, _view='index', _articleId=null, _crumbs=[];
+  let _indexGroups=[], _indexCursor=0, _indexObserver=null, _indexScroll=null, _indexOnScroll=null;
 
   function art(id){ return window.TeoriaData.ARTICULOS.find(a=>a.id===id); }
   function imgSrc(name){ return name ? `img-teoria/${name}.svg` : ''; }
@@ -804,6 +805,8 @@
     .teo-chip:hover{border-color:var(--accent,#B5603A)}
     .teo-tema[hidden],.teo-card[hidden]{display:none}
     .teo-noresult{color:var(--ink-50);font-style:italic;padding:14px 2px}
+    .teo-load{min-height:42px;padding:12px 2px;text-align:center;color:var(--ink-50);font-family:'DM Mono',monospace;font-size:.64rem;letter-spacing:.05em}
+    .teo-load[hidden]{display:none}
     /* Navegación Anterior / Siguiente entre artículos */
     .teo-pager{display:flex;gap:10px;margin-top:26px;padding-top:16px;border-top:1px solid rgba(var(--ink-rgb,44,31,14),.1)}
     .teo-pg{flex:1;display:flex;flex-direction:column;gap:2px;border:1.5px solid rgba(var(--ink-rgb,44,31,14),.14);background:var(--white);border-radius:12px;padding:10px 13px;cursor:pointer;transition:.15s;min-width:0}
@@ -825,48 +828,100 @@
     return out;
   }
 
-  /* Filtro en vivo del índice (sin re-render, para no perder el foco). */
-  function filterIndex(q){
-    if(!_root) return;
-    q=(q||'').trim().toLowerCase();
-    let anyVisible=false;
-    _root.querySelectorAll('.teo-tema').forEach(block=>{
-      let vis=0;
-      block.querySelectorAll('.teo-card').forEach(c=>{
-        const m = !q || (c.dataset.search||'').indexOf(q)>=0;
-        c.hidden=!m; if(m) vis++;
-      });
-      block.hidden = vis===0; if(vis) anyVisible=true;
-    });
-    const chips=_root.querySelector('.teo-chips'); if(chips) chips.hidden=!!q;
-    const nr=_root.querySelector('.teo-noresult'); if(nr) nr.hidden=anyVisible;
+  function stopIndexLoading(){
+    if(_indexObserver){ _indexObserver.disconnect(); _indexObserver=null; }
+    if(_indexScroll && _indexOnScroll) _indexScroll.removeEventListener('scroll', _indexOnScroll);
+    _indexScroll=null; _indexOnScroll=null;
   }
 
-  function indexHtml(){
+  function theoryGroups(q){
     const {TEMAS,ARTICULOS,NIVELES}=window.TeoriaData;
+    q=(q||'').trim().toLowerCase();
     const byTema={}; ARTICULOS.forEach(a=>{ (byTema[a.tema]=byTema[a.tema]||[]).push(a); });
-    const themeKeys = Object.keys(TEMAS).filter(t=>byTema[t]);
-    const chips = themeKeys.map(t=>`<button class="teo-chip" data-goto="teo-tema-${t}">${TEMAS[t].ico} ${esc(TEMAS[t].lbl)}</button>`).join('');
-    const blocks = themeKeys.map(t=>{
+    return Object.keys(TEMAS).filter(t=>byTema[t]).map(t=>{
       const tm=TEMAS[t];
-      const cards = byTema[t].map(a=>{
-        const hay = (a.titulo+' '+(a.lead||'')+' '+(tm.lbl||'')).toLowerCase();
-        return `<button class="teo-card" data-art="${a.id}" data-search="${esc(hay)}">
+      const items=byTema[t].filter(a=>!q || (a.titulo+' '+(a.lead||'')+' '+(tm.lbl||'')).toLowerCase().includes(q));
+      return {key:t, meta:tm, items, niveles:NIVELES};
+    }).filter(g=>g.items.length);
+  }
+
+  function themeBlockHtml(group){
+    const {key:t,meta:tm,items,niveles:NIVELES}=group;
+    const cards = items.map(a=>{
+      const hay = (a.titulo+' '+(a.lead||'')+' '+(tm.lbl||'')).toLowerCase();
+      return `<button class="teo-card" data-art="${a.id}" data-search="${esc(hay)}">
         <div class="teo-card-t">${esc(a.titulo)}</div>
         <div class="teo-card-l">${esc(a.lead)}</div>
         <span class="teo-card-n">${esc(NIVELES[a.nivel]||a.nivel)}</span>
       </button>`;
-      }).join('');
-      return `<div class="teo-tema" id="teo-tema-${t}">
-        <h4 class="teo-tema-h">${tm.ico} ${esc(tm.lbl)}</h4>
-        <div class="teo-tema-sub">${esc(tm.sub)}</div>
-        <div class="teo-cards">${cards}</div>
-      </div>`;
     }).join('');
+    return `<div class="teo-tema" id="teo-tema-${t}">
+      <h4 class="teo-tema-h">${tm.ico} ${esc(tm.lbl)}</h4>
+      <div class="teo-tema-sub">${esc(tm.sub)}</div>
+      <div class="teo-cards">${cards}</div>
+    </div>`;
+  }
+
+  function appendTheoryBatch(){
+    if(!_root || !_root.isConnected) return;
+    const list=_root.querySelector('.teo-index-list');
+    if(!list) return;
+    const end=Math.min(_indexCursor+2,_indexGroups.length);
+    let html='';
+    while(_indexCursor<end) html+=themeBlockHtml(_indexGroups[_indexCursor++]);
+    if(html) list.insertAdjacentHTML('beforeend',html);
+    const load=_root.querySelector('.teo-load');
+    const done=_indexCursor>=_indexGroups.length;
+    if(load) load.hidden=done;
+    if(done) stopIndexLoading();
+  }
+
+  function initTheoryIndex(q){
+    if(!_root) return;
+    stopIndexLoading();
+    _indexGroups=theoryGroups(q);
+    _indexCursor=0;
+    const list=_root.querySelector('.teo-index-list');
+    if(list) list.innerHTML='';
+    const chips=_root.querySelector('.teo-chips'); if(chips) chips.hidden=!!(q||'').trim();
+    const nr=_root.querySelector('.teo-noresult'); if(nr) nr.hidden=!!_indexGroups.length;
+    const load=_root.querySelector('.teo-load'); if(load) load.hidden=!_indexGroups.length;
+    appendTheoryBatch();
+    if(_indexCursor>=_indexGroups.length) return;
+    const sentinel=_root.querySelector('.teo-load');
+    _indexScroll=_root.closest('.app-page-scroll');
+    if('IntersectionObserver' in window && sentinel){
+      _indexObserver=new IntersectionObserver(entries=>{
+        if(entries.some(e=>e.isIntersecting)) appendTheoryBatch();
+      },{root:_indexScroll,rootMargin:'500px 0px'});
+      _indexObserver.observe(sentinel);
+    } else if(_indexScroll){
+      _indexOnScroll=()=>{
+        if(_indexScroll.scrollHeight-_indexScroll.scrollTop-_indexScroll.clientHeight<600) appendTheoryBatch();
+      };
+      _indexScroll.addEventListener('scroll',_indexOnScroll,{passive:true});
+    }
+  }
+
+  /* Filtro en vivo: reconstruye solo el listado progresivo y mantiene el foco. */
+  function filterIndex(q){ initTheoryIndex(q); }
+
+  function ensureTheoryTheme(id){
+    let el=document.getElementById(id);
+    while(!el && _indexCursor<_indexGroups.length){ appendTheoryBatch(); el=document.getElementById(id); }
+    return el;
+  }
+
+  function indexHtml(){
+    const {TEMAS,ARTICULOS}=window.TeoriaData;
+    const byTema={}; ARTICULOS.forEach(a=>{ (byTema[a.tema]=byTema[a.tema]||[]).push(a); });
+    const themeKeys = Object.keys(TEMAS).filter(t=>byTema[t]);
+    const chips = themeKeys.map(t=>`<button class="teo-chip" data-goto="teo-tema-${t}">${TEMAS[t].ico} ${esc(TEMAS[t].lbl)}</button>`).join('');
     return `<div class="teo-intro">Aprende la teoría de la nutrición paso a paso. Cada artículo enlaza con otros relacionados (para seguir el hilo) y con la <strong>bibliografía</strong> que lo respalda. Empieza por <strong>Fundamentos</strong> si es tu primera vez.</div>
       <input class="teo-search" type="search" placeholder="🔎 Buscar un artículo por título o tema…" aria-label="Buscar artículo">
       <div class="teo-chips">${chips}</div>
-      ${blocks}
+      <div class="teo-index-list"></div>
+      <div class="teo-load">Cargando más temas…</div>
       <div class="teo-noresult" hidden>No hay artículos que coincidan con tu búsqueda.</div>`;
   }
 
@@ -901,8 +956,10 @@
   function render(){
     if(!_root) return;
     const inArticle = _view==='article' && art(_articleId);
+    stopIndexLoading();
     _root.innerHTML = inArticle ? articleHtml(art(_articleId)) : indexHtml();
     const sc=_root.closest('.app-page-scroll'); if(sc) sc.scrollTop=0;
+    if(!inArticle) initTheoryIndex('');
     // Botón en la cabecera para volver SIEMPRE al índice mientras lees un artículo.
     if(typeof AppPage!=='undefined'){
       if(inArticle) AppPage.setHeaderAction('← Índice', goIndex);
@@ -925,7 +982,7 @@
           const s=e.target.closest('.teo-search'); if(s) filterIndex(s.value);
         });
         body.addEventListener('click', e=>{
-          const g=e.target.closest('[data-goto]'); if(g){ const el=document.getElementById(g.dataset.goto); if(el){ try{ el.scrollIntoView({behavior:'smooth',block:'start'}); }catch(_){ el.scrollIntoView(); } } return; }
+          const g=e.target.closest('[data-goto]'); if(g){ const el=ensureTheoryTheme(g.dataset.goto); if(el){ try{ el.scrollIntoView({behavior:'smooth',block:'start'}); }catch(_){ el.scrollIntoView(); } } return; }
           const a=e.target.closest('[data-art]'); if(a){ goArticle(a.dataset.art); return; }
           const share=e.target.closest('[data-share-art]'); if(share){
             const item=art(share.dataset.shareArt);

@@ -450,6 +450,9 @@
   .pn-info-body ul{margin:0 0 12px;padding-left:20px}
   .pn-info-body li{margin-bottom:5px}
   .pn-info-body strong{color:var(--warm-2,#3D2C1A)}
+  .pn-info-callout{margin:12px 0;padding:12px 14px;border-left:4px solid var(--accent,#B5603A);
+    border-radius:0 12px 12px 0;background:rgba(181,96,58,.08)}
+  .pn-info-muted{font-size:.86rem;color:var(--ink-50,rgba(var(--ink-rgb,44,31,14),.58))}
   .pn-info-foot{padding:14px 22px 20px}
   .pn-info-foot button{width:100%;border:none;border-radius:12px;background:var(--accent,#B5603A);color:#fff;
     font-family:'DM Mono',monospace;font-size:.74rem;letter-spacing:.05em;text-transform:uppercase;
@@ -460,74 +463,91 @@
   const INFO_HTML = `
     <p><strong>Plan Nutricional</strong> es una herramienta personal de organización
     creada por <strong>Juan María Gámez Ortiz</strong>. Su objetivo es ayudarte a
-    orientarte de forma coherente y razonada con tu alimentación, tu entrenamiento y
-    tu bienestar.</p>
+    ordenar de forma razonada tu alimentación, actividad física, entrenamiento y
+    bienestar.</p>
 
-    <h4>No es una aplicación de uso exclusivo ni profesional</h4>
-    <p>Esta app <strong>no sustituye</strong> el consejo de un médico, dietista-nutricionista,
-    entrenador ni psicólogo. Es una guía orientativa: úsala con criterio y nunca al pie
-    de la letra.</p>
+    <div class="pn-info-callout"><strong>Importante:</strong> la app no presta asistencia
+    sanitaria, diagnóstico, tratamiento, rehabilitación ni supervisión deportiva. No
+    sustituye a profesionales de medicina, enfermería, fisioterapia, dietética-nutrición,
+    psicología o ciencias de la actividad física y del deporte.</div>
 
-    <h4>La información puede contener errores</h4>
+    <h4>Contenido, cálculos y alcance</h4>
     <ul>
-      <li>Los valores nutricionales, cálculos de calorías y macros son <strong>estimaciones</strong>
-      y pueden no ser exactos.</li>
-      <li>Parte del contenido (recetas, textos, sugerencias) puede estar
-      <strong>generado por inteligencia artificial</strong> o aportado por
-      <strong>otros usuarios</strong>, por lo que puede contener imprecisiones.</li>
-      <li>Mantén siempre el <strong>espíritu crítico</strong>: contrasta, ajusta a tu caso
-      y consulta a un profesional ante cualquier duda de salud.</li>
+      <li>Los valores nutricionales, las calorías y los macros son <strong>estimaciones</strong>
+      y pueden diferir del producto, la preparación y la persona reales.</li>
+      <li>Las sesiones, ejercicios, cargas, repeticiones, tiempos, descansos, gasto
+      energético, progresiones y propuestas de recuperación son orientativos. No
+      garantizan resultados ni que una actividad sea adecuada o segura para cada persona.</li>
+      <li>Recetas, textos, planes y sugerencias pueden incorporar contenido generado con
+      <strong>inteligencia artificial</strong> o aportado por usuarios. Comprueba siempre
+      ingredientes, alérgenos, técnica, material y coherencia antes de utilizarlos.</li>
+      <li>La bibliografía y la teoría explican criterios generales, pero la evidencia
+      evoluciona y no convierten la app en una evaluación individual.</li>
     </ul>
 
     <h4>Privacidad y tus datos</h4>
-    <p>Todos tus datos (perfiles, objetivos, recetas, menús, calendario, planes de
-    entrenamiento, favoritos y todo lo de <strong>Mente</strong>, incluidas fotos y notas
-    de voz) se guardan <strong>únicamente en este dispositivo</strong>, en el
-    almacenamiento del navegador. La app <strong>no los envía a ningún servidor</strong>,
-    no usa cookies de seguimiento ni herramientas de analítica, y no comparte nada con
-    terceros.</p>
+    <p>Los perfiles, objetivos, recetas, menús, calendarios, entrenamientos, favoritos y
+    registros de <strong>Mente</strong> se guardan en el almacenamiento de este dispositivo.
+    La app no utiliza analítica ni cookies de seguimiento propias.</p>
     <ul>
-      <li>La única petición externa es la descarga de las <strong>tipografías</strong>
-      (Google Fonts); si estás sin conexión, la app funciona igual con la fuente del
-      sistema.</li>
-      <li>Puedes <strong>exportar una copia</strong> de todos tus datos y volver a
-      importarla desde <em>menú ☰ → Configuración → Copia de datos</em>.</li>
-      <li>Puedes <strong>borrar todo</strong> de este dispositivo en cualquier momento
-      desde esa misma pantalla; la eliminación es inmediata y no se puede deshacer.</li>
+      <li>La app puede solicitar recursos externos como tipografías. Los enlaces externos
+      solo se abren cuando tú los eliges.</li>
+      <li>Si utilizas la función de compartir, el contenido seleccionado se entrega a la
+      aplicación o servicio que tú escojas mediante las opciones del dispositivo.</li>
+      <li>Puedes exportar e importar una copia desde <em>menú ☰ → Configuración → Copia
+      de datos</em>, o borrar los datos locales desde esa misma pantalla.</li>
     </ul>
-    <p style="font-size:.86rem;color:var(--ink-50,rgba(var(--ink-rgb,44,31,14),.5))">Como los datos viven
-    solo en este dispositivo, si lo cambias, reinstalas el navegador o borras sus datos,
-    se perderán salvo que hayas exportado una copia antes.</p>
+    <p class="pn-info-muted">Si cambias de dispositivo, reinstalas el navegador o borras
+    sus datos, la información puede perderse salvo que hayas exportado una copia.</p>
 
-    <h4>Descargo de responsabilidad</h4>
-    <p>Esta app es <strong>solo una herramienta</strong> orientativa y <strong>no está
-    pensada para personas con enfermedad</strong>. Lee el descargo completo:</p>
-    <p><button class="pn-info-link" data-go="descargo">⚖️ Ver descargo de responsabilidad →</button></p>
+    <h4 id="legal-disclaimer">Descargo de responsabilidad · nutrición, deporte y bienestar</h4>
+    <p>Las propuestas de la app están dirigidas a la organización general de personas
+    adultas sanas. Deben individualizarse especialmente en menores, embarazo o lactancia,
+    edad avanzada, discapacidad, antecedentes de lesión, alergias o intolerancias,
+    trastornos de la conducta alimentaria, enfermedad aguda o crónica, dolor persistente
+    y tratamiento médico o farmacológico.</p>
 
-    <p style="font-size:.82rem;color:var(--ink-50,rgba(var(--ink-rgb,44,31,14),.5));margin-top:14px">
-    © <span class="pn-info-year">2026</span> Juan María Gámez Ortiz · Licencia CC BY-NC 4.0 ·
+    <h4>Antes y durante el ejercicio</h4>
+    <ul>
+      <li>Elige ejercicios compatibles con tu experiencia, movilidad, espacio y material;
+      aprende la técnica y progresa de forma gradual. Revisa el estado y la colocación del
+      equipamiento y utiliza supervisión cualificada cuando la actividad lo requiera.</li>
+      <li>Un peso o número de repeticiones sugerido se basa solo en los datos registrados:
+      es un <strong>punto de partida editable</strong>, no una orden ni una prueba de capacidad.</li>
+      <li>Interrumpe el ejercicio ante dolor agudo, mareo, desmayo, dolor torácico,
+      dificultad respiratoria inusual, pérdida de control o cualquier síntoma preocupante,
+      y solicita valoración sanitaria; ante una urgencia, busca atención inmediata.</li>
+      <li>No entrenes ignorando una indicación clínica ni uses la app para decidir el
+      retorno tras una lesión, cirugía o enfermedad.</li>
+    </ul>
+
+    <h4>Alimentación y planificación</h4>
+    <ul>
+      <li>Comprueba etiquetas, caducidad, conservación, higiene, cocinado y alérgenos.
+      Las sustituciones y menús automáticos pueden no detectar todos los riesgos.</li>
+      <li>No apliques déficits, restricciones, ayunos, suplementos o cambios relevantes
+      sin valoración profesional cuando existan síntomas, enfermedad, medicación,
+      necesidades especiales o una relación problemática con la comida.</li>
+      <li>Los registros de peso, comida o entrenamiento son opcionales. Si generan
+      ansiedad, culpa, conductas compulsivas o empeoran tu bienestar, deja de utilizarlos
+      y busca apoyo profesional.</li>
+    </ul>
+
+    <h4>Uso responsable y disponibilidad</h4>
+    <p>La decisión final de usar, modificar o descartar una propuesta corresponde al
+    usuario. El autor no puede garantizar la exactitud, idoneidad, disponibilidad
+    permanente ni un resultado concreto. Nada de lo anterior limita los derechos o
+    responsabilidades que no puedan excluirse conforme a la legislación aplicable.</p>
+
+    <h4>Propiedad intelectual y enlaces</h4>
+    <p>Salvo que se indique otra cosa, el contenido propio se ofrece bajo licencia
+    <strong>CC BY-NC 4.0</strong>. Marcas, publicaciones, documentos y páginas enlazadas
+    pertenecen a sus respectivos titulares. Los enlaces externos se facilitan como
+    referencia y sus responsables pueden modificar contenido, condiciones o privacidad.</p>
+
+    <p class="pn-info-muted" style="margin-top:14px">©
+    <span class="pn-info-year">2026</span> Juan María Gámez Ortiz · Licencia CC BY-NC 4.0 ·
     Desarrollado con la ayuda de Claude.</p>
-  `;
-  const DESCARGO_HTML = `
-    <h4>Esta aplicación no es para tratar enfermedades</h4>
-    <p><strong>Esta aplicación no está pensada para personas que padezcan algún tipo de
-    enfermedad</strong> (metabólica, digestiva, renal, cardiovascular, trastornos de la
-    conducta alimentaria u otras), ni para mujeres embarazadas o en lactancia, ni para
-    personas en tratamiento médico o farmacológico. En esos casos, la alimentación y el
-    ejercicio deben estar supervisados por un profesional sanitario.</p>
-
-    <h4>Solo es una herramienta</h4>
-    <p>Conviene insistir: esto es <strong>únicamente una herramienta</strong> de
-    organización orientativa, no un consejo médico ni un plan terapéutico. Antes de
-    aplicar cualquier cambio en tu dieta o tu actividad física, y especialmente ante
-    cualquier síntoma o duda de salud, <strong>consulta con tu médico/a de familia</strong>.</p>
-
-    <h4>Responsabilidad del usuario</h4>
-    <p>El uso de esta aplicación y de la información que contiene es
-    <strong>responsabilidad exclusiva del usuario</strong>. El autor no se hace
-    responsable de decisiones, daños o perjuicios derivados de su uso. Si tienes una
-    condición médica, alergias, intolerancias o sigues un tratamiento, consulta con un
-    profesional antes de aplicar cualquier cambio.</p>
   `;
   function injectInfoCSS(){
     if(document.getElementById('pn-info-css')) return;
@@ -535,32 +555,37 @@
     (document.head||document.documentElement).appendChild(s);
   }
   const LEGAL_PAGES = {
-    info:     { title:'ℹ️ Información y aviso legal', html:()=>INFO_HTML },
-    descargo: { title:'⚖️ Descargo de responsabilidad', html:()=>DESCARGO_HTML }
+    info: { title:'ℹ️ Información y aviso legal', html:()=>INFO_HTML }
   };
   // Página legal usando el shell común AppPage (sin cabecera interna ni "Atrás").
   function pnLegalPage(key){
-    key = LEGAL_PAGES[key] ? key : 'info';
+    key = 'info';
     injectInfoCSS();
     const page = LEGAL_PAGES[key];
     if(typeof AppPage==='undefined'){ return; }
     AppPage.open({
-      key: key==='info' ? 'infolegal' : 'descargo',
+      key: 'infolegal',
       group: 'info', title: page.title,
       render(body){
         body.classList.add('pn-info-body');
         body.innerHTML = page.html();
         const yr=body.querySelector('.pn-info-year'); if(yr) yr.textContent=new Date().getFullYear();
-        body.addEventListener('click', e=>{ const go=e.target.closest('[data-go]'); if(go) pnLegalPage(go.dataset.go); });
       }
     });
   }
   function pnInfoLegal(){ pnLegalPage('info'); }
-  function pnDescargo(){ pnLegalPage('descargo'); }
+  // Compatibilidad con enlaces o marcadores de versiones antiguas.
+  function pnDescargo(){
+    pnInfoLegal();
+    requestAnimationFrame(()=>{
+      const el=document.getElementById('legal-disclaimer');
+      if(el){ try{ el.scrollIntoView({block:'start'}); }catch(e){ el.scrollIntoView(); } }
+    });
+  }
   window.pnInfoLegal = pnInfoLegal;
   window.pnDescargo  = pnDescargo;
   window.pnLegalPage = pnLegalPage;
-  if(typeof AppPage!=='undefined'){ AppPage.register('infolegal', pnInfoLegal); AppPage.register('descargo', pnDescargo); }
+  if(typeof AppPage!=='undefined'){ AppPage.register('infolegal', pnInfoLegal); }
 
   /* ── Novedades por versión: clave manual, se sube al añadir funciones ── */
   const NEWS_KEY = '2026-07';

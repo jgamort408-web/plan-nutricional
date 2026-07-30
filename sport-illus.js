@@ -287,7 +287,7 @@ function exIllusBox(id, opts){
   } else {
     inner = exIllus(id, opts);
   }
-  return `<span class="ex-illus ${opts.cls||''}${hasImg?' has-img':''}"${accent?` style="--il:${accent}"`:''}>${inner}</span>`;
+  return `<span class="ex-illus ${opts.cls||''}${hasImg?' has-img':''}"${opts.decorative?' aria-hidden="true"':''}${accent?` style="--il:${accent}"`:''}>${inner}</span>`;
 }
 /* ¿la pose es genérica? (para saber cuáles conviene afinar luego) */
 function illIsGeneric(id){ const ex=EXERCISES[id]; return ex ? illPoseKey(ex,id)==='generic' : true; }
