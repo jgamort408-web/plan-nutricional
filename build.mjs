@@ -33,7 +33,7 @@ const CORE = [
   'sport-gear.js', 'sport-illus.js', 'sport-log.js', 'sport-ui.js', 'sport-calendar.js', 'sport-train.js',
   'sport-progress.js', 'sport-anim.js', 'menu-unified.js',
   'menu-session.js', 'menu-assistant.js', 'menu-month.js', 'sport-assistant.js',
-  'menu-feedback.js', 'menu-translate.js'
+  'menu-feedback.js', 'menu-translate.js', 'app-share.js'
 ];
 
 const OUT = 'app.min.js';

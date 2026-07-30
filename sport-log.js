@@ -387,13 +387,92 @@ function logSuggestLoad(exId, who, targetReps){
   return {kg: spRoundLoad(kg), reps: goal, why:`Te faltaron reps · misma carga hasta cerrar ${goal}`};
 }
 
+/* Propuesta editable SERIE A SERIE.
+   Usa las últimas exposiciones, el RPE, la sensación de la sesión y el
+   nivel del perfil. La progresión es conservadora: suma una repetición
+   antes de añadir carga y descarga si aparecen señales claras de fatiga.
+   Devuelve {sets:[{kg,reps,why}], summary, source}. */
+function logSuggestSets(exId, who, targetReps, nSets){
+  const ex = EXERCISES[exId] || {};
+  const goal = Math.max(1, +targetReps || +ex.reps || 10);
+  const low  = Math.max(1, goal - 2);
+  nSets = Math.max(1, +nSets || +ex.sets || 3);
+  const history = [];
+  for(const entry of logFor(who)){
+    const x = (entry.ex||[]).find(r=> r.e===exId && !logExIsTime(r));
+    const sets = x ? (x.sets||[]).filter(setIsWork) : [];
+    if(sets.length) history.push({entry, sets});
+    if(history.length >= 3) break;
+  }
+  if(!history.length){
+    return {
+      sets:Array.from({length:nSets}, ()=>({kg:0,reps:goal,why:'Primera vez: elige una carga que deje 2-3 repeticiones en reserva'})),
+      summary:`Primera vez · ${nSets}×${goal}, carga editable`,
+      source:'defaults'
+    };
+  }
+
+  const last = history[0], prevSets = last.sets;
+  const kgTop = Math.max(...prevSets.map(s=>+s.kg||0));
+  const rpes = prevSets.map(s=>+s.rpe||0).filter(Boolean);
+  const rpe = rpes.length ? Math.max(...rpes) : 8;
+  const feel = +last.entry.feel || 0;
+  const allGoal = prevSets.length >= Math.min(nSets, 2) && prevSets.every(s=>(+s.reps||0)>=goal);
+  const minReps = Math.min(...prevSets.map(s=>+s.reps||0));
+  const step = spLoadStep(exId);
+  const profile = spProfile();
+  const lvl = (SP_LEVELS[profile.level]||SP_LEVELS.intermedio).lbl;
+  let mode = 'reps', load = kgTop, summary = '';
+
+  if(!kgTop){
+    mode = 'reps';
+    summary = `Última vez sin carga · intenta mejorar 1 repetición por serie`;
+  } else if((feel && feel <= 2) || rpe >= 9.5 || minReps < low - 1){
+    mode = 'deload';
+    load = spRoundLoad(kgTop * .9);
+    summary = `Recuperación prudente · ${load} kg y ${low}–${goal} reps`;
+  } else if(allGoal && rpe <= 8){
+    mode = 'load';
+    load = spRoundLoad(kgTop + step);
+    summary = `Objetivo completado con margen · +${step} kg y vuelve a ${low} reps`;
+  } else if(allGoal){
+    mode = 'hold';
+    summary = `Objetivo completado con RPE ${rpe} · consolida la misma carga`;
+  } else {
+    mode = 'reps';
+    summary = `Doble progresión · misma carga y +1 repetición donde puedas`;
+  }
+
+  const sets = Array.from({length:nSets}, (_,i)=>{
+    const p = prevSets[Math.min(i, prevSets.length-1)] || prevSets[prevSets.length-1] || {};
+    let kg = +p.kg || load || 0;
+    let reps = +p.reps || low;
+    let why = '';
+    if(mode==='deload'){
+      kg = load; reps = Math.max(low, Math.min(goal, reps));
+      why = `−10 % por fatiga/RPE alto · perfil ${lvl}`;
+    } else if(mode==='load'){
+      kg = load; reps = low;
+      why = `Sube carga tras completar ${goal} reps con margen`;
+    } else if(mode==='hold'){
+      kg = load; reps = goal;
+      why = `Repite hasta que el RPE baje de ${rpe}`;
+    } else {
+      kg = kg || load;
+      reps = Math.min(goal, Math.max(low, reps + 1));
+      why = kg ? 'Misma carga · una repetición más que la última vez' : 'Ajusta la carga y conserva 2-3 reps en reserva';
+    }
+    return {kg:spRoundLoad(kg), reps, why};
+  });
+  return {sets, summary, source:'history', date:last.entry.date, level:profile.level};
+}
+
 /* Prellenado del modo entrenamiento: qué mostrar en la casilla de
    cada serie antes de que el usuario toque nada. */
 function logPrefill(exId, who, targetReps){
-  const sug = logSuggestLoad(exId, who, targetReps);
-  if(sug) return {kg:sug.kg, reps:sug.reps, hint:sug.why};
-  const ex = EXERCISES[exId] || {};
-  return {kg:0, reps:+targetReps || +ex.reps || 10, hint:'Primera vez · anota lo que hagas'};
+  const sug = logSuggestSets(exId, who, targetReps, 1);
+  const first = sug.sets[0];
+  return {kg:first.kg, reps:first.reps, hint:sug.summary, why:first.why};
 }
 
 /* ── Exportación ──────────────────────────────────────────── */
@@ -442,6 +521,7 @@ window.logIsPR = logIsPR;
 window.logStreak = logStreak;
 window.logSummary = logSummary;
 window.logSuggestLoad = logSuggestLoad;
+window.logSuggestSets = logSuggestSets;
 window.logPrefill = logPrefill;
 window.logToCSV = logToCSV;
 window.est1RM = est1RM;

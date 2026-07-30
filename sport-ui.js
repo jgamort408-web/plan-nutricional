@@ -269,6 +269,7 @@ function openExerciseDetail(id){
       ${ex.user?`<button class="btn-danger" id="exDel">🗑 Eliminar</button>`:''}
       <button class="btn-sec" id="exFav">${isFav(id)?'★ Favorito':'☆ Favorito'}</button>
       <button class="btn-sec" id="exEdit">✎ ${ex.user?'Editar':'Duplicar y editar'}</button>
+      <button class="btn-sec" id="exShare">↗ Compartir</button>
       <button class="btn-prim" id="exClose">Cerrar</button>
     </div>`;
   openForm(html);
@@ -281,6 +282,7 @@ function openExerciseDetail(id){
   document.getElementById('exClose').addEventListener('click', closeForm);
   document.getElementById('exFav').addEventListener('click', ()=>{ const on=toggleFav(id); const b=document.getElementById('exFav'); b.textContent=on?'★ Favorito':'☆ Favorito'; b.classList.toggle('on-fav', on); });
   document.getElementById('exEdit').addEventListener('click', ()=> openExerciseEditor(ex.user?id:null, ex.user?null:ex));
+  document.getElementById('exShare').addEventListener('click', ()=>{ if(typeof shareAppItem==='function') shareAppItem('exercise',id); });
   const del = document.getElementById('exDel');
   if(del) del.addEventListener('click', async ()=>{
     if(!await pnConfirm('¿Eliminar este ejercicio?', {danger:true, okText:'Eliminar'})) return;
@@ -291,8 +293,8 @@ function openExerciseDetail(id){
 }
 
 /* ── Crear ejercicios/sesiones con IA (genera prompt → copiar → importar JSON) ── */
-function spCopyText(text){
-  const ok = ()=> alert('✅ Prompt copiado.\n\nPégalo en tu IA (ChatGPT, Claude…), guarda lo que te devuelva como archivo .json y luego impórtalo en Ajustes → Usuarios → Copia de datos → «Importar ejercicios / Importar sesiones».');
+function spCopyText(text, message){
+  const ok = ()=>{ if(typeof pnToast==='function') pnToast(message||'Prompt copiado al portapapeles', 'ok'); else alert(message||'✓ Copiado'); };
   const fallback = ()=>{ const ta=document.createElement('textarea'); ta.value=text; ta.style.cssText='position:fixed;left:-9999px;top:0'; document.body.appendChild(ta); ta.focus(); ta.select(); try{ document.execCommand('copy'); ok(); }catch(e){ alert('Copia el prompt manualmente.'); } ta.remove(); };
   try{ if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(ok).catch(fallback); return; } }catch(e){}
   fallback();
@@ -327,19 +329,58 @@ function buildExercisePrompt(idea){
 `DEVUELVE: un array JSON, p. ej. [ {…}, {…} ]. Solo el JSON.`
   ].join('\n');
 }
-function buildSessionPrompt(idea){
+function spAiHistorySummary(){
+  if(typeof logAll!=='function') return [];
+  const out={}, rows=logAll().slice(0,80);
+  rows.forEach(entry=>(entry.ex||[]).forEach(x=>{
+    if(!EXERCISES[x.e]) return;
+    const list=out[x.e]||(out[x.e]=[]);
+    if(list.length>=3) return;
+    list.push({date:entry.date,feel:+entry.feel||0,sets:(x.sets||[]).map(s=>x.mode==='time'?{dur:+s.dur||0,dist:+s.dist||0,rpe:+s.rpe||0}:{kg:+s.kg||0,reps:+s.reps||0,rpe:+s.rpe||0})});
+  }));
+  return Object.entries(out).map(([id,last])=>({id,last}));
+}
+function spAiProfileSummary(){
+  const p=typeof spProfile==='function'?spProfile():{};
+  const people=(typeof PEOPLE!=='undefined'?PEOPLE:['A','B']).map(id=>({id,bodyweight:typeof personWeight==='function'?personWeight(id):0}));
+  return {level:p.level||'intermedio',gear:p.gear||[],injuries:p.injuries||[],people};
+}
+function buildSessionPrompt(idea, options){
+  options=options||{};
   const types = Object.entries(EX_TYPES).map(([k,v])=>`${k} (${v.lbl})`).join(', ');
-  const catalog = Object.keys(EXERCISES).map(id=>`${id} — ${EXERCISES[id].name}`).join('\n');
+  const catalog = Object.keys(EXERCISES).map(id=>JSON.stringify(Object.assign({id},EXERCISES[id]))).join('\n');
+  const progression=options.progression||'doble';
+  const weeks=Math.max(1,Math.min(16,+options.weeks||4));
+  const includeLocal=options.includeHistory!==false;
+  const profile=includeLocal?spAiProfileSummary():{omitted:true};
+  const hist=includeLocal?spAiHistorySummary():[];
   return [
 `Actúa como entrenador personal experto y como experto en seguir formatos de salida al pie de la letra.`,
 ``,
-`OBJETIVO: diseña una SESIÓN de entrenamiento según la petición y devuélvela EXCLUSIVAMENTE como un único JSON válido. No escribas nada antes ni después del JSON.`,
+`OBJETIVO: diseña una o varias SESIONES según la petición. Devuelve EXCLUSIVAMENTE un array JSON válido, sin markdown ni texto antes o después.`,
 ``,
 `PETICIÓN: ${idea || '(libre: propón una sesión equilibrada)'}`,
 ``,
+`PROGRESIÓN SOLICITADA: ${progression}. Horizonte: ${weeks} semana(s).`,
+`- "doble": crea una sesión base; la app subirá repeticiones y después peso usando el historial y RPE.`,
+`- "lineal": crea variantes por etapa con cambios conservadores de series/repeticiones; la carga concreta la propondrá la app.`,
+`- "ondulante": crea variantes pesada/moderada/ligera compatibles entre sí.`,
+`- "mesociclo_4": crea 4 variantes: base, acumulación, intensificación y descarga.`,
+`No incluyas campos de peso: la app propone kg serie a serie con el historial real del usuario.`,
+`Respeta lesiones y material. Si hay una contraindicación o faltan datos, indícalo brevemente en "notes", sin diagnosticar.`,
+`No aumentes a la vez volumen, repeticiones y densidad de forma agresiva.`,
+`Cada variante debe ser utilizable por sí sola y tener un nombre inequívoco.`,
+`Cantidad orientativa: ${progression==='doble'?1:(progression==='ondulante'?3:(progression==='mesociclo_4'?4:Math.min(weeks,4)))} sesión/es.`,
+``,
+`PERFIL LOCAL DE ENTRENAMIENTO (${includeLocal?'incluido por el usuario':'omitido por el usuario'}):`,
+JSON.stringify(profile),
+``,
+`HISTORIAL RECIENTE POR ID (máximo 3 exposiciones por ejercicio; puede estar vacío):`,
+JSON.stringify(hist),
+``,
 `IMPORTANTE: en "items[].e" usa SOLO ids de ejercicios que ya existen en la app (lista abajo). No inventes ids.`,
 ``,
-`FORMATO:`,
+`FORMATO EXACTO de CADA elemento del array:`,
 `{`,
 `  "name": "Nombre de la sesión",`,
 `  "focus": "enfoque breve",`,
@@ -347,14 +388,73 @@ function buildSessionPrompt(idea){
 `  "level": "Principiante | Intermedio | Avanzado",`,
 `  "warmup": "calentamiento sugerido",`,
 `  "notes": "notas",`,
-`  "items": [ { "e": "id_de_ejercicio_existente", "sets": 4, "reps": 10, "dur": 0, "rest": 75 } ]`,
+`  "items": [`,
+`    { "e": "id_existente", "sets": 4, "reps": 10, "rest": 75 },`,
+`    { "e": "id_existente_por_tiempo", "sets": 3, "dur": 40, "rest": 30 }`,
+`  ]`,
 `}`,
+`Usa "reps" O "dur", nunca ambos en el mismo item. Todos los números deben ser JSON numérico, no texto.`,
 ``,
-`EJERCICIOS DISPONIBLES (id — nombre):`,
+`CATÁLOGO COMPLETO DE EJERCICIOS DE LA APP (un objeto JSON por línea, con id y todos sus datos):`,
 catalog,
 ``,
-`DEVUELVE: solo el JSON de la sesión.`
+`DEVUELVE: solo el array JSON de sesión/es.`
   ].join('\n');
+}
+
+/* Taller IA: genera el prompt con catálogo+ids+perfil+historial y recibe
+   directamente el JSON devuelto por la IA para importarlo. */
+function openSessionAiStudio(prefill){
+  const html=`<div class="form-hd"><h2>✨ Sesiones con IA</h2><span class="form-sub">Prompt completo → copiar → pegar JSON → importar</span></div>
+    <div class="form-body ai-session-studio">
+      <div class="ai-steps"><span><b>1</b> Describe</span><span><b>2</b> Copia el prompt</span><span><b>3</b> Pega el JSON</span></div>
+      <div class="fgrp"><label class="flbl">Qué quieres entrenar</label><textarea class="ftxt" id="spAiIdea" rows="3" placeholder="Ej. 4 sesiones torso/pierna para hipertrofia, 60 min, priorizando espalda…">${spEsc(prefill||'')}</textarea></div>
+      <div class="frow-2">
+        <div class="fgrp"><label class="flbl">Progresión</label><select class="fsel" id="spAiProg">
+          <option value="doble">Doble progresión (reps → peso)</option>
+          <option value="mesociclo_4">Mesociclo de 4 semanas + descarga</option>
+          <option value="lineal">Lineal por etapas</option>
+          <option value="ondulante">Ondulante pesada/moderada/ligera</option>
+        </select></div>
+        <div class="fgrp"><label class="flbl">Semanas</label><input class="finp mono" id="spAiWeeks" type="number" min="1" max="16" value="4"></div>
+      </div>
+      <label class="ai-privacy"><input type="checkbox" id="spAiHist" checked> Incluir perfil local e historial reciente de series, kg y RPE <small>Se incorporan al texto que tú copiarás; la app no lo envía por sí sola.</small></label>
+      <button class="btn-prim ai-build" id="spAiBuild" type="button">⚙ Generar prompt completo</button>
+      <div class="ai-out hidden" id="spAiOut">
+        <div class="ai-out-h"><span>Prompt listo <small id="spAiMeta"></small></span><button class="btn-sec" id="spAiCopy" type="button">⧉ Copiar prompt</button></div>
+        <textarea class="json-area" id="spAiPromptOut" readonly spellcheck="false"></textarea>
+      </div>
+      <div class="ai-import">
+        <div class="flbl">JSON devuelto por la IA</div>
+        <textarea class="json-area" id="spAiJson" spellcheck="false" placeholder='Pega aquí el array: [ {"name":"...", "items":[...]} ]'></textarea>
+        <div class="json-status" id="spAiStatus">Se validarán todos los ids antes de guardar.</div>
+      </div>
+    </div>
+    <div class="form-actions"><button class="btn-sec" id="spAiClose">Cerrar</button><button class="btn-prim" id="spAiImport">Importar sesión/es</button></div>`;
+  openForm(html);
+  let prompt='';
+  const build=()=>{
+    prompt=buildSessionPrompt((document.getElementById('spAiIdea').value||'').trim(),{
+      progression:document.getElementById('spAiProg').value,
+      weeks:+document.getElementById('spAiWeeks').value||4,
+      includeHistory:document.getElementById('spAiHist').checked
+    });
+    document.getElementById('spAiPromptOut').value=prompt;
+    document.getElementById('spAiMeta').textContent=`· ${Object.keys(EXERCISES).length} ejercicios · ${Math.round(prompt.length/1000)} mil caracteres`;
+    document.getElementById('spAiOut').classList.remove('hidden');
+  };
+  document.getElementById('spAiBuild').addEventListener('click',build);
+  document.getElementById('spAiCopy').addEventListener('click',()=>{if(!prompt)build();spCopyText(prompt,'Prompt completo copiado');});
+  document.getElementById('spAiClose').addEventListener('click',closeForm);
+  document.getElementById('spAiImport').addEventListener('click',()=>{
+    const st=document.getElementById('spAiStatus'); let raw;
+    try{raw=JSON.parse(document.getElementById('spAiJson').value);}catch(e){st.className='json-status err';st.textContent='JSON inválido: '+e.message;return;}
+    const res=importSport('sess',raw);
+    if(res.error){st.className='json-status err';st.textContent='✘ '+res.error;return;}
+    persistSessions();st.className='json-status ok';st.textContent=`✓ ${res.count} sesión/es importada/s.`;
+    setTimeout(()=>{closeForm();renderSessions();},650);
+  });
+  if(prefill) build();
 }
 
 /* ── Editor de ejercicio ─────────────────────────────────── */
@@ -403,9 +503,17 @@ function openExerciseEditor(editId, prefill){
 
 /* ── SESIONES (catálogo) ─────────────────────────────────── */
 let _spSessFilter = 'all';
+let _spSessSearch = '';
 let _spSessSheetOpen = false, _spSessSheetScroll = 0;
+function spSessMatches(id){
+  const s=SESSIONS[id]; if(!s) return false;
+  if(_spSessFilter!=='all' && s.type!==_spSessFilter) return false;
+  const q=_norm(_spSessSearch).trim(); if(!q) return true;
+  if(_norm(s.name).includes(q)||_norm(s.focus||'').includes(q)||_norm(s.level||'').includes(q)) return true;
+  return (s.items||[]).some(it=>EXERCISES[it.e]&&_norm(EXERCISES[it.e].name).includes(q));
+}
 function spSessResultCount(){
-  return Object.keys(SESSIONS).filter(id=> _spSessFilter==='all' || SESSIONS[id].type===_spSessFilter).length;
+  return Object.keys(SESSIONS).filter(spSessMatches).length;
 }
 function setSpSessSheet(open){
   _spSessSheetOpen = open;
@@ -426,7 +534,10 @@ function renderSessions(){
   const nActive = _spSessFilter!=='all' ? 1 : 0;
   const cont = document.getElementById('spSessFilters');
   cont.innerHTML = `
-    <div class="fbar-quick fbar-end">
+    <div class="fbar-quick">
+      <input class="sp-search" id="spSessSearch" type="search" placeholder="🔎 Buscar sesión o ejercicio incluido…" value="${spEsc(_spSessSearch)}">
+      <button class="fbtn-open ai" id="spSessAi" type="button" title="Crear e importar sesiones con IA">✨ IA</button>
+      <button class="fbtn-open" id="spSessImport" type="button" title="Pegar sesiones en JSON">↥ JSON</button>
       <button class="fbtn-open ${nActive?'has-active':''}" id="spSessOpen" type="button" aria-label="Filtros">
         <span class="ffunnel">⚙</span> Filtros<span class="fbadge">${nActive}</span>
       </button>
@@ -448,10 +559,16 @@ function renderSessions(){
   const cl = document.getElementById('spSessClear'); if(cl) cl.addEventListener('click', ()=>{ _spSessFilter='all'; renderSessions(); });
   const sb = document.querySelector('#spSessSheet .fsheet-body'); if(sb) sb.addEventListener('scroll', ()=>{ _spSessSheetScroll = sb.scrollTop; });
   if(_spSessSheetOpen) setSpSessSheet(true);
-
-  const ids = Object.keys(SESSIONS).filter(id=> _spSessFilter==='all' || SESSIONS[id].type===_spSessFilter);
+  const sq=document.getElementById('spSessSearch'); if(sq) sq.addEventListener('input',()=>{_spSessSearch=sq.value;renderSessGrid();});
+  const ai=document.getElementById('spSessAi'); if(ai) ai.addEventListener('click',()=>openSessionAiStudio(_spSessSearch));
+  const imp=document.getElementById('spSessImport'); if(imp) imp.addEventListener('click',()=>openSportImport('sess'));
+  renderSessGrid();
+}
+function renderSessGrid(){
+  const ids = Object.keys(SESSIONS).filter(spSessMatches);
   const grid = document.getElementById('spSessGrid');
-  grid.innerHTML = ids.length ? ids.map(sessCardHtml).join('') : `<div class="sp-empty">Sin sesiones para este filtro.</div>`;
+  if(!grid) return;
+  grid.innerHTML = ids.length ? ids.map(sessCardHtml).join('') : `<div class="sp-empty">${_spSessSearch?`Sin sesiones que coincidan con “${spEsc(_spSessSearch)}”.`:'Sin sesiones para este filtro.'}</div>`;
   grid.querySelectorAll('.sp-card').forEach(c=> c.addEventListener('click', ()=> openSessionDetail(c.dataset.id)));
 }
 function sessTotalsLabel(sess){
@@ -503,12 +620,16 @@ function openSessionDetail(id, ctx){
     </div>
     <div class="form-actions">
       ${s.user?`<button class="btn-danger" id="sessDel">🗑 Eliminar</button>`:''}
+      ${s.theoryId?`<button class="btn-sec" id="sessTheory">📖 Teoría</button>`:''}
       <button class="btn-sec" id="sessEdit">✎ ${s.user?'Editar':'Duplicar y editar'}</button>
+      <button class="btn-sec" id="sessShare">↗ Compartir</button>
       <button class="btn-prim" id="sessClose">Cerrar</button>
     </div>`;
   openForm(html);
   document.getElementById('sessClose').addEventListener('click', closeForm);
   document.getElementById('sessEdit').addEventListener('click', ()=> openSessionEditor(s.user?id:null, s.user?null:s));
+  const th=document.getElementById('sessTheory'); if(th) th.addEventListener('click',()=>{ closeForm(); if(typeof openTeoriaArticle==='function') openTeoriaArticle(s.theoryId); else if(typeof openTeoria==='function') openTeoria(); });
+  document.getElementById('sessShare').addEventListener('click',()=>{ if(typeof shareAppItem==='function') shareAppItem('session',id); });
   // abrir cada ejercicio
   formBody().querySelectorAll('.sd-ex').forEach(r=>{
     const open = ()=> openExerciseDetail(r.dataset.exid);
@@ -545,11 +666,45 @@ function openSessionDetail(id, ctx){
 }
 
 /* ── Editor de sesión ────────────────────────────────────── */
+function openSessionExercisePicker(currentId, onPick){
+  const ov=document.createElement('div');
+  ov.className='si-picker-ov';
+  ov.innerHTML=`<div class="si-picker" role="dialog" aria-modal="true" aria-label="Buscar ejercicio">
+    <div class="si-picker-hd"><div><b>🔎 Elegir ejercicio</b><span>Busca por nombre, id o material</span></div><button type="button" data-close aria-label="Cerrar">✕</button></div>
+    <div class="si-picker-tools">
+      <input class="finp" type="search" placeholder="Escribe para buscar…" autocomplete="off" autofocus>
+      <select class="fsel"><option value="all">Todos los músculos</option>${Object.entries(EX_MUSCLES).map(([k,v])=>`<option value="${k}">${spEsc(v.lbl)}</option>`).join('')}</select>
+    </div>
+    <div class="si-picker-count"></div><div class="si-picker-list"></div>
+  </div>`;
+  document.body.appendChild(ov);
+  const q=ov.querySelector('input'), mus=ov.querySelector('select'), list=ov.querySelector('.si-picker-list'), count=ov.querySelector('.si-picker-count');
+  const close=()=>ov.remove();
+  const render=()=>{
+    const needle=_norm(q.value).trim();
+    let ids=Object.keys(EXERCISES).filter(id=>{
+      const ex=EXERCISES[id];
+      if(mus.value!=='all' && !(ex.muscles||[]).includes(mus.value)) return false;
+      if(!needle) return true;
+      return _norm(ex.name).includes(needle) || _norm(id).includes(needle) || _norm(ex.equip||'').includes(needle);
+    }).sort((a,b)=>EXERCISES[a].name.localeCompare(EXERCISES[b].name));
+    const total=ids.length; ids=ids.slice(0,100);
+    count.textContent=`${total} ${total===1?'ejercicio':'ejercicios'}${total>100?' · mostrando 100':''}`;
+    list.innerHTML=ids.map(id=>{const ex=EXERCISES[id];return `<button type="button" class="${id===currentId?'on':''}" data-id="${id}">
+      <span><b>${spEsc(ex.name)}</b><small>${spEsc(id)} · ${spEsc(ex.equip||'sin material')}</small></span><i>＋</i></button>`;}).join('')||'<div class="sp-empty">No hay ejercicios que coincidan.</div>';
+    list.querySelectorAll('[data-id]').forEach(b=>b.addEventListener('click',()=>{const id=b.dataset.id;close();onPick(id);}));
+  };
+  q.addEventListener('input',render); mus.addEventListener('change',render);
+  ov.querySelector('[data-close]').addEventListener('click',close);
+  ov.addEventListener('click',e=>{if(e.target===ov)close();});
+  render(); setTimeout(()=>q.focus(),0);
+}
 function sessItemRowHtml(it){
   it = it || {e:'', sets:3, reps:10, rest:60};
-  const opts = Object.keys(EXERCISES).map(eid=>`<option value="${eid}" ${it.e===eid?'selected':''}>${spEsc(EXERCISES[eid].name)}</option>`).join('');
+  const picked = it.e && EXERCISES[it.e] ? EXERCISES[it.e].name : '';
   return `<div class="sess-it">
-    <select class="fsel si-ex"><option value="">— ejercicio —</option>${opts}</select>
+    <button class="si-ex-pick ${picked?'has':''}" type="button" title="Buscar y elegir ejercicio">${picked?spEsc(picked):'🔎 Buscar ejercicio…'}</button>
+    <input class="si-ex" type="hidden" value="${spEsc(it.e||'')}">
     <input class="finp mono si-sets" type="number" min="1" placeholder="ser" value="${it.sets||''}">
     <input class="finp mono si-rr" type="number" min="0" placeholder="rep/seg" value="${it.dur!=null?it.dur:(it.reps!=null?it.reps:'')}">
     <input class="finp mono si-rest" type="number" min="0" placeholder="desc" value="${it.rest!=null?it.rest:''}">
@@ -581,9 +736,18 @@ function openSessionEditor(editId, prefill){
   openForm(html);
   const form = document.getElementById('sessForm');
   const sessAi = document.getElementById('sessAiPrompt');
-  if(sessAi) sessAi.addEventListener('click', ()=>{ const idea=(form.querySelector('[name="name"]')?.value||'').trim(); spCopyText(buildSessionPrompt(idea)); });
+  if(sessAi) sessAi.addEventListener('click', ()=> openSessionAiStudio((form.querySelector('[name="name"]')?.value||'').trim()));
   const wireRow = row=>{
-    row.querySelectorAll('select,input').forEach(el=> el.addEventListener('input', sessLive));
+    row.querySelectorAll('select,input:not(.si-ex)').forEach(el=> el.addEventListener('input', sessLive));
+    const pick=row.querySelector('.si-ex-pick');
+    if(pick) pick.addEventListener('click', ()=>{
+      openSessionExercisePicker(row.querySelector('.si-ex').value||'', id=>{
+          row.querySelector('.si-ex').value=id;
+          pick.textContent=EXERCISES[id].name;
+          pick.classList.add('has');
+          sessLive();
+      });
+    });
     row.querySelector('.si-rm').addEventListener('click', ()=>{ if(form.querySelectorAll('.sess-it').length>1){ row.remove(); sessLive(); } });
   };
   function readItems(){
@@ -945,7 +1109,9 @@ function openSportImport(kind){
 
 function importSport(kind, raw){
   let entries = [];
-  if(Array.isArray(raw)) entries = raw.map(r=>[null, r]);
+  if(kind==='ex' && raw && Array.isArray(raw.exercises)) raw = raw.exercises;
+  if(kind!=='ex' && raw && Array.isArray(raw.sessions)) raw = raw.sessions;
+  if(Array.isArray(raw)) entries = raw.map(r=>[r && r.id ? r.id : null, r]);
   else if(raw && typeof raw==='object' && (raw.name)) entries = [[null, raw]];
   else if(raw && typeof raw==='object') entries = Object.entries(raw);
   else return {error:'formato no reconocido'};
@@ -972,7 +1138,10 @@ function normalizeSession(r){
   const items=[]; const unknown=[];
   r.items.forEach(it=>{ if(!it||!it.e) return; if(!EXERCISES[it.e]){ unknown.push(it.e); return; } const o={e:it.e, sets:+it.sets||EXERCISES[it.e].sets||1}; if(it.dur!=null) o.dur=+it.dur; if(it.reps!=null) o.reps=+it.reps; if(it.rest!=null) o.rest=+it.rest; items.push(o); });
   if(!items.length) return {error: unknown.length?`ejercicios desconocidos: ${unknown.join(', ')}`:'items vacíos'};
-  return {data:{name:''+r.name, focus:(''+(r.focus||'')), type:EX_TYPES[r.type]?r.type:'fuerza', level:(''+(r.level||'')), warmup:(''+(r.warmup||'')), notes:(''+(r.notes||'')), items, user:true}};
+  const data={name:''+r.name, focus:(''+(r.focus||'')), type:EX_TYPES[r.type]?r.type:'fuerza', level:(''+(r.level||'')), warmup:(''+(r.warmup||'')), notes:(''+(r.notes||'')), items, user:true};
+  if(r.theoryId) data.theoryId=(''+r.theoryId);
+  if(r.progression && typeof r.progression==='object') data.progression=JSON.parse(JSON.stringify(r.progression));
+  return {data};
 }
 
 /* ── BIND (una vez) ──────────────────────────────────────── */
@@ -1000,3 +1169,5 @@ function normalizeSession(r){
 
 window.setSection = setSection;
 window.renderSportActive = renderSportActive;
+window.openSessionAiStudio = openSessionAiStudio;
+window.buildSessionPrompt = buildSessionPrompt;

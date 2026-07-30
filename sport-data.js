@@ -268,7 +268,36 @@ const SESSIONS_BASE = {
     focus:'Volumen alto en máquinas y poleas, cuerpo completo, con trabajo unilateral',
     warmup:'10 min: cardio suave + movilidad completa + series de aproximación en prensa y jalón.',
     notes:'Sesión de volumen: acércate al fallo (1-2 reps en reserva) en las últimas series. Cuida la técnica cuando llegue la fatiga.',
-    items:[{e:'sf_prensa_de_piernas',sets:4,reps:10,rest:135},{e:'gim_remo_sentado_polea',sets:4,reps:10,rest:120},{e:'sf_press_de_banca_en_maquina_sentado',sets:4,reps:10,rest:120},{e:'sf_sentadilla_hack',sets:4,reps:12,rest:105},{e:'gim_jalon_unilateral',sets:3,reps:12,rest:75},{e:'sf_elevacion_lateral_con_cable_a_una_mano',sets:3,reps:15,rest:60},{e:'gim_curl_femoral_sentado',sets:3,reps:12,rest:75},{e:'sf_cruce_de_poleas',sets:3,reps:14,rest:60},{e:'sf_abdominales_con_cuerda_en_polea_alta',sets:3,reps:15,rest:60}]}
+    items:[{e:'sf_prensa_de_piernas',sets:4,reps:10,rest:135},{e:'gim_remo_sentado_polea',sets:4,reps:10,rest:120},{e:'sf_press_de_banca_en_maquina_sentado',sets:4,reps:10,rest:120},{e:'sf_sentadilla_hack',sets:4,reps:12,rest:105},{e:'gim_jalon_unilateral',sets:3,reps:12,rest:75},{e:'sf_elevacion_lateral_con_cable_a_una_mano',sets:3,reps:15,rest:60},{e:'gim_curl_femoral_sentado',sets:3,reps:12,rest:75},{e:'sf_cruce_de_poleas',sets:3,reps:14,rest:60},{e:'sf_abdominales_con_cuerda_en_polea_alta',sets:3,reps:15,rest:60}]},
+
+  /* ── Torso / Pierna · 4 días + abdomen ─────────────────────
+     Adaptación de «Nuevas cosas que revisar»: reparte el volumen en dos
+     exposiciones semanales por grupo sin asumir que la frecuencia sea
+     mágica por sí sola. La ficha de teoría enlazada explica los matices. */
+  hipertrofia_torso_1:{name:'Hipertrofia · Torso 1', type:'fuerza', level:'Intermedio', disc:'gimnasio',
+    focus:'Empuje horizontal pesado, tracción horizontal, hombro y brazos',
+    warmup:'8 min: movilidad torácica y escapular + 2 series progresivas del primer press y del primer remo.',
+    notes:'Trabaja normalmente a 1-3 repeticiones en reserva. Conserva los ejercicios durante 6-8 semanas y usa la sugerencia de carga de la app.',
+    theoryId:'organizar-volumen-y-splits',
+    items:[{e:'sf_press_de_banca_con_barra',sets:4,reps:8,rest:150},{e:'gim_remo_sentado_polea',sets:4,reps:10,rest:120},{e:'sf_press_de_hombro_con_mancuernas',sets:3,reps:10,rest:105},{e:'sf_cruce_de_poleas',sets:3,reps:15,rest:75},{e:'sf_extension_de_triceps_con_mancuernas_por_encima_de_la_cabeza',sets:3,reps:12,rest:75},{e:'sf_curl_inclinado_con_mancuernas',sets:3,reps:12,rest:75}]},
+  hipertrofia_pierna_1_core:{name:'Hipertrofia · Pierna 1 + abdomen', type:'fuerza', level:'Intermedio', disc:'gimnasio',
+    focus:'Dominante de rodilla, cadena posterior, gemelos y flexión de tronco',
+    warmup:'8 min: bici suave, movilidad de tobillo y cadera + 2 series progresivas de sentadilla hack.',
+    notes:'Evita convertir todas las series en fallo. Si cae el rendimiento o no recuperas entre sesiones, mantén o reduce volumen antes de añadir series.',
+    theoryId:'organizar-volumen-y-splits',
+    items:[{e:'sf_sentadilla_hack',sets:4,reps:10,rest:150},{e:'sf_peso_muerto_rumano_piernas_rectas_con_barra',sets:3,reps:10,rest:135},{e:'zancadas',sets:3,reps:12,rest:90},{e:'gim_extension_cuadriceps',sets:3,reps:15,rest:75},{e:'gim_gemelo_prensa',sets:4,reps:15,rest:60},{e:'sf_abdominales_con_cuerda_en_polea_alta',sets:3,reps:15,rest:60}]},
+  hipertrofia_torso_2:{name:'Hipertrofia · Torso 2', type:'fuerza', level:'Intermedio', disc:'gimnasio',
+    focus:'Tracción vertical, pecho inclinado, deltoides lateral y brazos',
+    warmup:'8 min: remo suave, movilidad torácica y activación escapular + series progresivas del primer jalón.',
+    notes:'Mantén técnica y rango de movimiento. Sube repeticiones antes que carga cuando la sugerencia indique consolidar.',
+    theoryId:'organizar-volumen-y-splits',
+    items:[{e:'gim_dominada_neutra',sets:4,reps:8,rest:150},{e:'sf_press_banca_inclinado_con_mancuernas',sets:4,reps:10,rest:120},{e:'sf_remo_inclinado_con_barra_con_agarre_supinado',sets:3,reps:12,rest:105},{e:'sf_elevacion_lateral_con_cable_a_una_mano',sets:4,reps:15,rest:60},{e:'sf_press_frances_sentado_con_barra',sets:3,reps:12,rest:75},{e:'sf_curl_de_predicador_con_barra_ez',sets:3,reps:12,rest:75}]},
+  hipertrofia_pierna_2_core:{name:'Hipertrofia · Pierna 2 + abdomen', type:'fuerza', level:'Intermedio', disc:'gimnasio',
+    focus:'Prensa, isquiosurales, glúteo medio, gemelos y abdomen inferior',
+    warmup:'8 min: elíptica suave, movilidad de cadera y tobillo + 2 series progresivas de prensa.',
+    notes:'Deja 48-72 h antes de repetir pierna cuando sea posible. El volumen semanal es un punto de partida que debe ajustarse a recuperación y progreso.',
+    theoryId:'organizar-volumen-y-splits',
+    items:[{e:'sf_prensa_de_piernas',sets:4,reps:12,rest:150},{e:'sf_curl_de_pierna_tumbado_en_maquina_de_femoral',sets:4,reps:12,rest:105},{e:'sf_abduccion_de_cadera_con_maquina_de_abduccion_de_cadera',sets:3,reps:15,rest:75},{e:'gim_extension_cuadriceps',sets:3,reps:15,rest:75},{e:'sf_elevacion_de_gemelos_sentado',sets:4,reps:15,rest:60},{e:'gim_elevacion_colgado',sets:3,reps:12,rest:60}]}
 };
 
 /* Catálogo importado (deportesvarios + SimplyFitness) → datos base */

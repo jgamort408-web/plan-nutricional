@@ -70,6 +70,7 @@ function renderSaved(){
         if(act==='del')       deleteMenu(id);
         if(act==='pdf')       exportMenuPdf(SavedMenus[id].data, SavedMenus[id].name);
         if(act==='json')      exportMenuJson(id);
+        if(act==='share' && typeof shareAppItem==='function') shareAppItem('menu', id);
       });
     });
     card.addEventListener('click', ()=> loadMenu(id));
@@ -108,6 +109,7 @@ function smCardHtml(id){
         <button data-act="load" class="primary">Cargar</button>
         <button data-act="pdf">PDF</button>
         <button data-act="json">JSON</button>
+        <button data-act="share">Compartir</button>
         <button data-act="dup">Duplicar</button>
         <button data-act="ren">Renombrar</button>
         <button data-act="del" class="danger">Eliminar</button>
