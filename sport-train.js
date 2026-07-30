@@ -15,6 +15,7 @@ var TrainState = null;
 var _trTick = null;      // intervalo del cronómetro de sesión
 var _trRestTick = null;  // intervalo del cronómetro de descanso
 var _trNavDir = '';      // animación breve al cambiar ejercicio
+var _trBarDismissed = false; // permite cerrar la franja durante la sesión de uso
 
 /* ── Persistencia ─────────────────────────────────────────── */
 function trSaveState(){ if(TrainState) lsSet(LS_SP_TRAIN, TrainState); }
@@ -571,6 +572,7 @@ function trExit(){
   document.body.classList.remove('train-mode');
   const el = document.getElementById('trainOverlay');
   if(el) el.remove();
+  _trBarDismissed = false;
   if(typeof renderSportActive === 'function') renderSportActive();
 }
 function trMinimize(){
@@ -578,6 +580,7 @@ function trMinimize(){
   clearInterval(_trTick); clearInterval(_trRestTick);
   document.body.classList.remove('train-mode');
   const el = document.getElementById('trainOverlay'); if(el) el.remove();
+  _trBarDismissed = false;
   pnToast('Entrenamiento en pausa · reanúdalo desde Entrenamientos', 'ok');
   if(typeof renderSportActive === 'function') renderSportActive();
 }
@@ -854,17 +857,31 @@ function trStartEntry(ent){
   }
 }
 
+function trDismissBar(){
+  _trBarDismissed = true;
+  const bar = document.getElementById('trTodayBar');
+  if(bar) bar.remove();
+  document.body.classList.remove('has-trainbar');
+  document.body.style.removeProperty('--trbar-h');
+}
+
 /* Pinta / actualiza la barra. La llama showSportView en cada vista.
-   Siempre visible en Deporte: entrena hoy, reanuda, o elige/genera. */
+   Solo aparece en Deporte: entrena hoy, reanuda, o elige/genera. */
 function renderTrainBar(){
   let bar = document.getElementById('trTodayBar');
   const inSport = document.body.classList.contains('sec-sport');
   const training = document.body.classList.contains('train-mode');
+  const pageOpen = document.body.classList.contains('app-page-open');
   const pend = trLoadState();
   const list = trTodayEntries();
-  const show = inSport && !training;
+  const show = inSport && !training && !pageOpen && !_trBarDismissed;
 
-  if(!show){ if(bar) bar.remove(); document.body.classList.remove('has-trainbar'); return; }
+  if(!show){
+    if(bar) bar.remove();
+    document.body.classList.remove('has-trainbar');
+    document.body.style.removeProperty('--trbar-h');
+    return;
+  }
   if(!bar){
     bar = document.createElement('div');
     bar.id = 'trTodayBar';
@@ -882,7 +899,8 @@ function renderTrainBar(){
         <span>${spEsc(pend.sessName||'')} · ${done}/${tot} series</span>
       </span>
       <button class="tr-bar-alt" id="trBarPick" title="Elegir otro">☰</button>
-      <button class="tr-bar-go" id="trBarGo">▶ Reanudar</button>`;
+      <button class="tr-bar-go" id="trBarGo">▶ Reanudar</button>
+      <button class="tr-bar-close" id="trBarClose" title="Cerrar" aria-label="Cerrar franja de entrenamiento">×</button>`;
   } else if(list.length){
     const s = SESSIONS[list[0].s];
     const t = sessionTotals(s, 'A');
@@ -893,7 +911,8 @@ function renderTrainBar(){
         <span>${t.min} min · ${(s.items||[]).length} ejercicios${ph?` · ${ph.ico} ${spEsc(ph.lbl)}`:''}</span>
       </span>
       <button class="tr-bar-alt" id="trBarPick" title="Elegir otro">☰</button>
-      <button class="tr-bar-go" id="trBarGo">▶ Entrenar</button>`;
+      <button class="tr-bar-go" id="trBarGo">▶ Entrenar</button>
+      <button class="tr-bar-close" id="trBarClose" title="Cerrar" aria-label="Cerrar franja de entrenamiento">×</button>`;
   } else {
     // sin nada programado: el botón principal abre el selector
     bar.innerHTML = `
@@ -901,7 +920,8 @@ function renderTrainBar(){
         <b>¿Entrenamos?</b>
         <span>Elige una sesión, por músculo o genérala a medida</span>
       </span>
-      <button class="tr-bar-go" id="trBarPick2">▶ Elegir entrenamiento</button>`;
+      <button class="tr-bar-go" id="trBarPick2">▶ Elegir entrenamiento</button>
+      <button class="tr-bar-close" id="trBarClose" title="Cerrar" aria-label="Cerrar franja de entrenamiento">×</button>`;
   }
   const g = document.getElementById('trBarGo');
   if(g) g.addEventListener('click', trStartToday);
@@ -909,6 +929,8 @@ function renderTrainBar(){
   if(p1) p1.addEventListener('click', trChooseWorkout);
   const p2 = document.getElementById('trBarPick2');
   if(p2) p2.addEventListener('click', trChooseWorkout);
+  const close = document.getElementById('trBarClose');
+  if(close) close.addEventListener('click', trDismissBar);
 
   // La barra va JUSTO encima de la tabbar. Se mide en vez de asumir 84px:
   // la altura real depende de la fuente, del safe-area del móvil y de si
@@ -916,6 +938,7 @@ function renderTrainBar(){
   const tab = document.getElementById('appTabbar');
   const th  = (tab && getComputedStyle(tab).display !== 'none') ? tab.getBoundingClientRect().height : 0;
   bar.style.bottom = th + 'px';
+  document.body.style.setProperty('--trtab-h', th + 'px');
   document.body.style.setProperty('--trbar-h', bar.getBoundingClientRect().height + 'px');
 }
 

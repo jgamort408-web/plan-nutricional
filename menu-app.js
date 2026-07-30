@@ -121,6 +121,12 @@ function toggleDishFav(id){ const f=getDishFavs(); const i=f.indexOf(id); if(i>=
 
 /* default targets (snapshot before any user override) */
 const DEFAULT_TARGETS = JSON.parse(JSON.stringify(TARGETS));
+const PERSON_FALLBACK_COLORS = ['#B5603A','#5A6B2C','#C28B2C','#3B82A0','#7A5A9E','#C15D69','#438477','#667085'];
+function targetPersonColor(id){
+  const t=TARGETS[id]||{};
+  const raw=(t.color||'').toString().toUpperCase();
+  return /^#[0-9A-F]{6}$/.test(raw) ? raw : PERSON_FALLBACK_COLORS[Math.max(0,PEOPLE.indexOf(id))%PERSON_FALLBACK_COLORS.length];
+}
 
 /* recompute combined (AB = todas las personas) + etiqueta de cada persona */
 function recomputeAB(){
@@ -146,6 +152,7 @@ function hydrate(){
       TARGETS[id] = Object.assign(TARGETS[id] || {}, {
         kcal: pp.kcal, p: pp.p, f: pp.f, c: pp.c,
         name: pp.name || '', sym: pp.sym || PERSON_SYMS[i] || '🧑', icon: pp.icon || '',
+        color: pp.color || PERSON_FALLBACK_COLORS[i%PERSON_FALLBACK_COLORS.length],
         restr: Array.isArray(pp.restr) ? pp.restr : [],
         modifier: (pp.modifier != null && isFinite(pp.modifier)) ? pp.modifier : null
       });
@@ -181,7 +188,7 @@ function persistPersona(){ lsSet(LS.PERSONA, S.p); }
 function persistTargets(){
   const people = PEOPLE.map(id=>{
     const t = TARGETS[id] || {};
-    return { id, kcal:t.kcal, p:t.p, f:t.f, c:t.c, name:t.name||'', sym:t.sym||'', icon:t.icon||'', restr:t.restr||[], modifier:(t.modifier!=null?t.modifier:null) };
+    return { id, kcal:t.kcal, p:t.p, f:t.f, c:t.c, name:t.name||'', sym:t.sym||'', icon:t.icon||'', color:targetPersonColor(id), restr:t.restr||[], modifier:(t.modifier!=null?t.modifier:null) };
   });
   lsSet(LS.PEOPLE, people);
 }
@@ -1402,7 +1409,8 @@ function renderPersonToggle(){
   const tk = personaToken(S.p), full = personaLabel(S.p);
   const longCls = (!tk.emoji && tk.txt.length >= 3) ? 'is-long' : '';
   // Avatar redondo: muestra la persona activa; al pulsar, cicla a la siguiente.
-  tog.innerHTML = `<button class="pbtn pcycle on ${tk.emoji?'is-emoji':''} ${longCls}" id="personaCycle" title="${escHtml(full)} · pulsa para cambiar de persona" aria-label="Persona activa: ${escHtml(full)}. Pulsa para cambiar">${escHtml(tk.txt)}</button>`;
+  const color=S.p==='AB'?'#667085':targetPersonColor(S.p);
+  tog.innerHTML = `<button class="pbtn pcycle on ${tk.emoji?'is-emoji':''} ${longCls}" id="personaCycle" style="--person-color:${color}" title="${escHtml(full)} · pulsa para cambiar de persona" aria-label="Persona activa: ${escHtml(full)}. Pulsa para cambiar">${escHtml(tk.txt)}</button>`;
   const btn = document.getElementById('personaCycle');
   if(btn && seq.length>1) btn.addEventListener('click', ()=>{
     const i = seq.indexOf(S.p);

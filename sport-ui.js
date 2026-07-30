@@ -623,10 +623,17 @@ function openSessionDetail(id, ctx){
       ${s.theoryId?`<button class="btn-sec" id="sessTheory">📖 Teoría</button>`:''}
       <button class="btn-sec" id="sessEdit">✎ ${s.user?'Editar':'Duplicar y editar'}</button>
       <button class="btn-sec" id="sessShare">↗ Compartir</button>
-      <button class="btn-prim" id="sessClose">Cerrar</button>
+      <button class="btn-sec" id="sessClose">Cerrar</button>
+      <button class="btn-prim" id="sessTrain">▶ Entrenar</button>
     </div>`;
   openForm(html);
   document.getElementById('sessClose').addEventListener('click', closeForm);
+  document.getElementById('sessTrain').addEventListener('click', ()=>{
+    const selected = inCal ? formBody().querySelector('[data-detwho] .who-b.on') : null;
+    const who = selected && selected.dataset.who === 'B' ? 'B' : (curWho === 'B' ? 'B' : 'A');
+    closeForm();
+    startTraining(id, who);
+  });
   document.getElementById('sessEdit').addEventListener('click', ()=> openSessionEditor(s.user?id:null, s.user?null:s));
   const th=document.getElementById('sessTheory'); if(th) th.addEventListener('click',()=>{ closeForm(); if(typeof openTeoriaArticle==='function') openTeoriaArticle(s.theoryId); else if(typeof openTeoria==='function') openTeoria(); });
   document.getElementById('sessShare').addEventListener('click',()=>{ if(typeof shareAppItem==='function') shareAppItem('session',id); });
@@ -691,7 +698,9 @@ function openSessionExercisePicker(currentId, onPick){
     const total=ids.length; ids=ids.slice(0,100);
     count.textContent=`${total} ${total===1?'ejercicio':'ejercicios'}${total>100?' · mostrando 100':''}`;
     list.innerHTML=ids.map(id=>{const ex=EXERCISES[id];return `<button type="button" class="${id===currentId?'on':''}" data-id="${id}">
-      <span><b>${spEsc(ex.name)}</b><small>${spEsc(id)} · ${spEsc(ex.equip||'sin material')}</small></span><i>＋</i></button>`;}).join('')||'<div class="sp-empty">No hay ejercicios que coincidan.</div>';
+      ${typeof exIllusBox==='function' ? exIllusBox(id,{cls:'sess-search',decorative:true}) : ''}
+      <span class="si-picker-copy"><b>${spEsc(ex.name)}</b><small>${spEsc(id)} · ${spEsc(ex.equip||'sin material')}</small></span>
+      <i aria-hidden="true">${id===currentId?'✓':'＋'}</i></button>`;}).join('')||'<div class="sp-empty">No hay ejercicios que coincidan.</div>';
     list.querySelectorAll('[data-id]').forEach(b=>b.addEventListener('click',()=>{const id=b.dataset.id;close();onPick(id);}));
   };
   q.addEventListener('input',render); mus.addEventListener('change',render);
@@ -699,11 +708,18 @@ function openSessionExercisePicker(currentId, onPick){
   ov.addEventListener('click',e=>{if(e.target===ov)close();});
   render(); setTimeout(()=>q.focus(),0);
 }
+function sessExercisePickContent(id){
+  const ex=id&&EXERCISES[id];
+  if(!ex) return '<span class="si-ex-placeholder">🔎 Buscar ejercicio…</span>';
+  return `${typeof exIllusBox==='function' ? exIllusBox(id,{cls:'sess-selected',decorative:true}) : ''}
+    <span class="si-ex-pick-copy"><b>${spEsc(ex.name)}</b><small>${spEsc(ex.equip||'sin material')}</small></span>
+    <span class="si-ex-chevron" aria-hidden="true">⌄</span>`;
+}
 function sessItemRowHtml(it){
   it = it || {e:'', sets:3, reps:10, rest:60};
-  const picked = it.e && EXERCISES[it.e] ? EXERCISES[it.e].name : '';
+  const picked = it.e && EXERCISES[it.e] ? it.e : '';
   return `<div class="sess-it">
-    <button class="si-ex-pick ${picked?'has':''}" type="button" title="Buscar y elegir ejercicio">${picked?spEsc(picked):'🔎 Buscar ejercicio…'}</button>
+    <button class="si-ex-pick ${picked?'has':''}" type="button" title="Buscar y elegir ejercicio">${sessExercisePickContent(picked)}</button>
     <input class="si-ex" type="hidden" value="${spEsc(it.e||'')}">
     <input class="finp mono si-sets" type="number" min="1" placeholder="ser" value="${it.sets||''}">
     <input class="finp mono si-rr" type="number" min="0" placeholder="rep/seg" value="${it.dur!=null?it.dur:(it.reps!=null?it.reps:'')}">
@@ -743,7 +759,7 @@ function openSessionEditor(editId, prefill){
     if(pick) pick.addEventListener('click', ()=>{
       openSessionExercisePicker(row.querySelector('.si-ex').value||'', id=>{
           row.querySelector('.si-ex').value=id;
-          pick.textContent=EXERCISES[id].name;
+          pick.innerHTML=sessExercisePickContent(id);
           pick.classList.add('has');
           sessLive();
       });

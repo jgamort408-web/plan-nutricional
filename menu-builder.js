@@ -915,9 +915,11 @@ function openFoodEditor(foodId, prefillName, cb){
    GESTOR DE ALIMENTOS · pestaña Alimentos en Ajustes
 ══════════════════════════════════════════════════════════ */
 let _foodSearch = '';
+let _foodSection = 'all';
+let _foodOrigin = 'all';
+function foodManagerNorm(s){ return (s||'').toString().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,''); }
 function renderFoodsManager(){
-  const q = _foodSearch.toLowerCase();
-  const ids = Object.keys(FOODS).filter(id=> !q || FOODS[id].name.toLowerCase().includes(q));
+  const ids = Object.keys(FOODS);
   const bySec = {};
   ids.forEach(id=>{ const s=FOODS[id].sec||'desp'; (bySec[s]=bySec[s]||[]).push(id); });
   const secOrder = Object.keys(FOOD_SECTIONS).sort((a,b)=>FOOD_SECTIONS[a].order-FOOD_SECTIONS[b].order);
@@ -926,7 +928,8 @@ function renderFoodsManager(){
     const rows = bySec[s].sort((a,b)=>FOODS[a].name.localeCompare(FOODS[b].name)).map(id=>{
       const f = FOODS[id];
       const unitTxt = f.unit ? ` · 1 ${f.unit.lbl} ≈ ${f.unit.g} g` : '';
-      return `<div class="fm-it ${f.user?'is-user':''}" data-id="${id}">
+      const search=foodManagerNorm(`${f.name} ${id} ${sm.lbl||''}`);
+      return `<div class="fm-it ${f.user?'is-user':''}" data-id="${id}" data-sec="${f.sec||'desp'}" data-user="${f.user?'1':'0'}" data-search="${esc(search)}">
         <div class="fm-n">${esc(f.name)} ${f.user?'<span class="fm-badge">tuyo</span>':''}<small>${id}${unitTxt}</small></div>
         <div class="fm-mac">${f.kcal} kcal<br>${f.p}P · ${f.f}G · ${f.c}C</div>
         <button class="fm-edit" data-edit="${id}" title="Editar">✎</button>
@@ -940,24 +943,55 @@ function renderFoodsManager(){
       <span style="background:var(--olive);color:#fff;font-family:'DM Mono',monospace;font-size:.55rem;padding:2px 6px;border-radius:3px">TUYO</span>.
       Las recetas se recalculan al cambiar un alimento.
     </p>
+    <div class="fm-manager-count" id="fmVisibleCount" data-total="${ids.length}">${ids.length} alimentos</div>
     <div class="fm-tools">
-      <input class="finp fm-search" id="fmSearch" placeholder="Buscar alimento…" value="${esc(_foodSearch)}">
+      <input class="finp fm-search" id="fmSearch" type="search" placeholder="Buscar por alimento o identificador…" aria-label="Buscar alimento" value="${esc(_foodSearch)}">
       <button class="btn-prim" id="fmNew" style="white-space:nowrap">＋ Nuevo</button>
     </div>
-    ${sections || '<div class="ur-empty">Sin resultados.</div>'}`;
+    <div class="mgr-filterbar">
+      <select class="fsel mgr-select" id="fmSecFilter" aria-label="Filtrar alimentos por grupo">
+        <option value="all">Todos los grupos</option>
+        ${secOrder.map(s=>`<option value="${s}" ${_foodSection===s?'selected':''}>${FOOD_SECTIONS[s].ico||''} ${esc(FOOD_SECTIONS[s].lbl||s)}</option>`).join('')}
+      </select>
+      <select class="fsel mgr-select" id="fmOriginFilter" aria-label="Filtrar alimentos por origen">
+        <option value="all" ${_foodOrigin==='all'?'selected':''}>Base y propios</option>
+        <option value="user" ${_foodOrigin==='user'?'selected':''}>Solo mis alimentos</option>
+        <option value="base" ${_foodOrigin==='base'?'selected':''}>Solo catálogo base</option>
+      </select>
+    </div>
+    <div class="fm-manager-results">${sections}</div>
+    <div class="ur-empty mgr-empty" id="fmNoResults" hidden>Sin alimentos que coincidan con la búsqueda y los filtros.</div>`;
+}
+
+function applyFoodsManagerFilters(){
+  const q=foodManagerNorm(_foodSearch.trim());
+  let visible=0;
+  const rows=[...formBody().querySelectorAll('.fm-manager-results .fm-it')];
+  rows.forEach(row=>{
+    const originOk=_foodOrigin==='all'||(_foodOrigin==='user'&&row.dataset.user==='1')||(_foodOrigin==='base'&&row.dataset.user!=='1');
+    const ok=(!q||(row.dataset.search||'').includes(q))&&(_foodSection==='all'||row.dataset.sec===_foodSection)&&originOk;
+    row.hidden=!ok; if(ok) visible++;
+  });
+  formBody().querySelectorAll('.fm-manager-results .fm-sec').forEach(sec=>{
+    sec.hidden=![...sec.querySelectorAll('.fm-it')].some(row=>!row.hidden);
+  });
+  const count=document.getElementById('fmVisibleCount');
+  if(count){
+    const total=+count.dataset.total||0;
+    count.textContent=visible===total?`${total} alimentos`:`${visible} de ${total} alimentos`;
+  }
+  const empty=document.getElementById('fmNoResults');
+  if(empty) empty.hidden=visible>0;
 }
 
 function wireFoodsManager(){
   const s = document.getElementById('fmSearch');
-  if(s) s.addEventListener('input', ()=>{
-    _foodSearch = s.value;
-    const caret = s.selectionStart;
-    const sc = formBody().scrollTop;
-    renderSettings();
-    const ns = document.getElementById('fmSearch');
-    if(ns){ ns.focus(); try{ ns.setSelectionRange(caret, caret); }catch(e){} }
-    formBody().scrollTop = sc;
-  });
+  if(s) s.addEventListener('input', ()=>{ _foodSearch=s.value; applyFoodsManagerFilters(); });
+  const sec=document.getElementById('fmSecFilter');
+  if(sec) sec.addEventListener('change',()=>{ _foodSection=sec.value; applyFoodsManagerFilters(); });
+  const origin=document.getElementById('fmOriginFilter');
+  if(origin) origin.addEventListener('change',()=>{ _foodOrigin=origin.value; applyFoodsManagerFilters(); });
+  applyFoodsManagerFilters();
   const nb = document.getElementById('fmNew');
   if(nb) nb.addEventListener('click', ()=> openFoodEditor(null, '', ()=> renderSettings()));
   formBody().querySelectorAll('[data-edit]').forEach(b=> b.addEventListener('click', ()=> openFoodEditor(b.dataset.edit, null, ()=> renderSettings())));

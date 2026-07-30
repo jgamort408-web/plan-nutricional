@@ -1559,7 +1559,10 @@
   const esc = window.escHtml || (s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])));
   function norm(s){ return (s||'').toString().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,''); }
 
-  let _state = { q:'', tipo:'all', tema:'all', sort:'tema', root:null, closed:false };
+  let _state = {
+    q:'', tipo:'all', tema:'all', sort:'tema', root:null, closed:false,
+    groups:[], groupIdx:0, itemIdx:0, observer:null, scrollRoot:null, onScroll:null
+  };
 
   function injectCSS(){
     if(document.getElementById('pn-bib-css')) return;
@@ -1614,6 +1617,8 @@
       padding:9px 14px;min-height:42px;cursor:pointer;font-size:.82rem;font-weight:600;align-self:flex-start;margin-top:auto}
     .bib-open:hover{background:var(--accent,#B5603A);color:#fff}
     .bib-empty{text-align:center;color:var(--ink-50);padding:40px 10px}
+    .bib-load{min-height:44px;padding:14px 2px;text-align:center;color:var(--ink-50);font-family:'DM Mono',monospace;font-size:.64rem;letter-spacing:.05em}
+    .bib-load[hidden]{display:none}
     `;
     (document.head||document.documentElement).appendChild(s);
   }
@@ -1658,13 +1663,80 @@
     </div>`;
   }
 
-  function renderBody(){
+  function stopBibLoading(){
+    if(_state.observer){ _state.observer.disconnect(); _state.observer=null; }
+    if(_state.scrollRoot && _state.onScroll) _state.scrollRoot.removeEventListener('scroll',_state.onScroll);
+    _state.scrollRoot=null; _state.onScroll=null;
+  }
+
+  function bibDone(){ return _state.groupIdx>=_state.groups.length; }
+
+  function appendBibBatch(){
+    const root=_state.root;
+    if(!root || !root.isConnected){ stopBibLoading(); return; }
+    const results=root.querySelector('.bib-results'); if(!results) return;
+    let remaining=12;
+    while(remaining>0 && !bibDone()){
+      const gi=_state.groupIdx;
+      const group=_state.groups[gi];
+      const h=group[0], items=group[1];
+      let grid=results.querySelector(`[data-bib-group="${gi}"]`);
+      if(!grid){
+        results.insertAdjacentHTML('beforeend',`${h?`<h3 class="bib-group-h">${h}</h3>`:''}<div class="bib-grid" data-bib-group="${gi}"></div>`);
+        grid=results.querySelector(`[data-bib-group="${gi}"]`);
+      }
+      const take=items.slice(_state.itemIdx,_state.itemIdx+remaining);
+      if(take.length) grid.insertAdjacentHTML('beforeend',take.map(itemHtml).join(''));
+      _state.itemIdx+=take.length;
+      remaining-=take.length;
+      if(_state.itemIdx>=items.length){ _state.groupIdx++; _state.itemIdx=0; }
+      if(!take.length && _state.itemIdx<items.length) break;
+    }
+    const load=root.querySelector('.bib-load');
+    if(load) load.hidden=bibDone();
+    if(bibDone()) stopBibLoading();
+  }
+
+  function findBibTarget(targetId){
+    if(!_state.root || !targetId) return null;
+    const sel=(window.CSS&&CSS.escape) ? CSS.escape(targetId) : targetId;
+    return _state.root.querySelector('.bib-item[data-id="'+sel+'"]');
+  }
+
+  function ensureBibTarget(targetId){
+    let el=findBibTarget(targetId);
+    while(!el && !bibDone()){ appendBibBatch(); el=findBibTarget(targetId); }
+    return el;
+  }
+
+  function renderBody(targetId){
     const root=_state.root; if(!root) return;
+    stopBibLoading();
     const list=filtered();
-    const groups=groupAndSort(list);
-    const body = groups.map(([h,items])=>`${h?`<h3 class="bib-group-h">${h}</h3>`:''}<div class="bib-grid">${items.map(itemHtml).join('')}</div>`).join('');
+    _state.groups=groupAndSort(list);
+    _state.groupIdx=0; _state.itemIdx=0;
     const scroll = root.querySelector('.bib-scroll');
-    scroll.innerHTML = `<div class="bib-count">${list.length} referencia${list.length===1?'':'s'}</div>${body||'<div class="bib-empty">No hay referencias que coincidan con tu búsqueda o filtros.</div>'}`;
+    scroll.innerHTML = `<div class="bib-count">${list.length} referencia${list.length===1?'':'s'}</div>
+      <div class="bib-results"></div>
+      ${list.length?'':'<div class="bib-empty">No hay referencias que coincidan con tu búsqueda o filtros.</div>'}
+      <div class="bib-load"${list.length?'':' hidden'}>Cargando más referencias…</div>`;
+    appendBibBatch();
+    if(targetId) ensureBibTarget(targetId);
+    if(bibDone()) return;
+    const sentinel=root.querySelector('.bib-load');
+    _state.scrollRoot=root.closest('.app-page-scroll');
+    if('IntersectionObserver' in window && sentinel){
+      _state.observer=new IntersectionObserver(entries=>{
+        if(entries.some(e=>e.isIntersecting)) appendBibBatch();
+      },{root:_state.scrollRoot,rootMargin:'500px 0px'});
+      _state.observer.observe(sentinel);
+    } else if(_state.scrollRoot){
+      _state.onScroll=()=>{
+        const sc=_state.scrollRoot;
+        if(sc.scrollHeight-sc.scrollTop-sc.clientHeight<600) appendBibBatch();
+      };
+      _state.scrollRoot.addEventListener('scroll',_state.onScroll,{passive:true});
+    }
   }
 
   // Aviso de redirección antes de abrir en el navegador.
@@ -1708,12 +1780,11 @@
             </div>
           </div>
           <div class="bib-scroll"></div>`;
-        renderBody();
+        renderBody(targetId);
         // Salto a una referencia concreta (desde Teoría): scroll + resaltado.
         if(targetId){
           requestAnimationFrame(()=>{
-            const sel = (window.CSS&&CSS.escape) ? CSS.escape(targetId) : targetId;
-            const el = body.querySelector('.bib-item[data-id="'+sel+'"]');
+            const el = ensureBibTarget(targetId);
             if(el){ try{ el.scrollIntoView({behavior:'smooth',block:'center'}); }catch(_){ el.scrollIntoView(); } el.classList.add('bib-hl'); setTimeout(()=>el.classList.remove('bib-hl'), 2600); }
           });
         }

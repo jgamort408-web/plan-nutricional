@@ -10,6 +10,12 @@ const formBody  = () => document.getElementById('formBody');
 
 /* Iconos elegibles para el avatar de persona (o "Aa" = inicial del nombre) */
 const PERSON_ICON_CHOICES = ['🧑','👩','👨','👧','👦','🧒','👵','👴','💪','🏃','🧘','🥗','⭐','🌟','🐱','🐶','🦊','🦁','🌶️','🍀'];
+const PERSON_COLOR_CHOICES = ['#B5603A','#5A6B2C','#C28B2C','#3B82A0','#7A5A9E','#C15D69','#438477','#667085'];
+function settingsNorm(s){ return (s||'').toString().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,''); }
+function personColorValue(t, idx){
+  const raw=((t&&t.color)||'').toString().toUpperCase();
+  return PERSON_COLOR_CHOICES.includes(raw) ? raw : PERSON_COLOR_CHOICES[(idx||0)%PERSON_COLOR_CHOICES.length];
+}
 
 function openForm(html){
   formBody().innerHTML = html;
@@ -32,6 +38,7 @@ function closeForm(fromPop){
     try{ if(window.AppPage) AppPage.restoreSubtitle(); }catch(e){}
     if(_settingsPop){ window.removeEventListener('popstate', _settingsPop); _settingsPop=null; if(!fromPop){ try{ history.back(); }catch(e){} } }
     _syncHdrH();
+    if(typeof renderTrainBar==='function') renderTrainBar();
   }
 }
 
@@ -54,9 +61,14 @@ function _showSettingsPage(subtitle){
   const bg = formBg();
   bg.classList.add('users-mode','show');
   document.body.classList.add('no-scroll','app-page-open','page-users');
+  if(typeof renderTrainBar==='function') renderTrainBar();
   try{ if(window.AppPage) AppPage.setSubtitle(subtitle||'Tu cuenta'); }catch(e){}
   formBody().scrollTop = 0;
-  const fb = formBody().querySelector('.form-body'); if(fb) fb.scrollTop = 0;
+  const fb = formBody().querySelector('.form-body');
+  if(fb){
+    if(window.appCreditFooterHtml && !fb.querySelector('.app-page-foot')) fb.insertAdjacentHTML('beforeend', window.appCreditFooterHtml());
+    fb.scrollTop = 0;
+  }
   _syncHdrH();
   if(!_settingsPop){
     _settingsPop = ()=> closeForm(true);
@@ -66,6 +78,7 @@ function _showSettingsPage(subtitle){
 }
 
 function openUsuarios(){
+  formBody().dataset.settingsPage = 'users';
   formBody().innerHTML = `
     <div class="form-hd"><h2>🪪 Usuarios</h2><span class="form-sub">Perfiles, preferencias y tus recetas</span></div>
     <div class="form-body">
@@ -78,6 +91,7 @@ function openUsuarios(){
 }
 
 function openConfig(){
+  formBody().dataset.settingsPage = 'config';
   formBody().innerHTML = `
     <div class="form-hd"><h2>⚙️ Configuración</h2><span class="form-sub">Datos y opciones de la app</span></div>
     <div class="form-body">
@@ -100,8 +114,11 @@ function openConfig(){
 }
 // Compatibilidad: openSettings(tab) enruta a la página correspondiente.
 function openSettings(tab){ if(tab==='config' || tab==='datos') openConfig(); else openUsuarios(); }
+// Compatibilidad con acciones antiguas que necesitan volver a pintar la página actual.
+function renderSettings(){ formBody().dataset.settingsPage==='config' ? openConfig() : openUsuarios(); }
 window.openUsuarios = openUsuarios;
 window.openConfig = openConfig;
+window.renderSettings = renderSettings;
 
 /* ── CONFIGURACIÓN · preferencias de la app ─────────────────
    Pensado para hacer la app más respetuosa con cada usuario.
@@ -468,6 +485,7 @@ function renderPersonasForm(){
     const defaultSex = idx === 0 ? 'M' : 'F';
     const sex = ci.sex || defaultSex;
     const isBase = (k === basePersonId());
+    const color = personColorValue(t, idx);
     return `
       <div class="fcard" data-pkey="${k}">
         <div class="fcard-hd">
@@ -483,6 +501,12 @@ function renderPersonasForm(){
           <div class="fchips icon-chips" data-icon-for="${k}">
             <button type="button" class="fchip icon-chip ${!t.icon?'on':''}" data-icon="">Aa</button>
             ${PERSON_ICON_CHOICES.map(ic=>`<button type="button" class="fchip icon-chip ${t.icon===ic?'on':''}" data-icon="${ic}">${ic}</button>`).join('')}
+          </div>
+        </div>
+        <div class="fgrp">
+          <label class="flbl">Color identificativo <span class="flbl-ex">— se usa en el avatar y el selector de persona</span></label>
+          <div class="person-colors" data-color-for="${k}">
+            ${PERSON_COLOR_CHOICES.map((c,i)=>`<button type="button" class="person-color ${color===c?'on':''}" data-color="${c}" style="--pick:${c}" aria-label="Color ${i+1}" title="Elegir este color"><span></span></button>`).join('')}
           </div>
         </div>
         <div class="fgrp">
@@ -613,11 +637,12 @@ function renderProfileGallery(){
     const t = TARGETS[id]||{};
     const ci = calcInputs[id]||{};
     const av = t.icon || (t.name ? t.name.trim().charAt(0).toUpperCase() : '🧑');
+    const color = personColorValue(t, i);
     const restr = (t.restr||[]).map(k=> restrLbl[k] ? `<span class="pr-chip">${restrLbl[k].ico} ${restrLbl[k].lbl}</span>` : '').join('') || '<span class="pr-chip">Sin restricciones</span>';
     const peso = ci.kg ? ci.kg+' kg' : '—';
     const talla = ci.cm ? ci.cm+' cm' : '—';
     return `
-      <div class="prof-card" data-prof="${id}">
+      <div class="prof-card" data-prof="${id}" style="--profile-color:${color}">
         <div class="prof-av">${av}</div>
         <div class="prof-name">${(t.name||('Persona '+(i+1))).replace(/</g,'&lt;')}</div>
         <div class="prof-tag">Perfil ${i+1}${i===0?' · base':''}</div>
@@ -654,6 +679,8 @@ function savePeopleFromForm(opts){
     t.restr = [...c.querySelectorAll('.restr-chips .fchip.on')].map(b=>b.dataset.r);
     const iconBtn = c.querySelector('.icon-chips .icon-chip.on');
     t.icon = iconBtn ? (iconBtn.dataset.icon || '') : (t.icon||'');
+    const colorBtn = c.querySelector('.person-colors .person-color.on');
+    t.color = colorBtn ? colorBtn.dataset.color : personColorValue(t, PEOPLE.indexOf(k));
   });
   // Modificadores (con las kcal ya actualizadas y la base recalculada)
   const baseId = basePersonId();
@@ -733,7 +760,7 @@ function wirePersonasForm(){
     const base = TARGETS[basePersonId()] || {kcal:1800,p:120,f:60,c:180};
     let n = 1; let id = 'P' + n;
     while(TARGETS[id] || PEOPLE.includes(id)) id = 'P' + (++n);
-    TARGETS[id] = { kcal:base.kcal, p:base.p, f:base.f, c:base.c, name:'', sym: PERSON_SYMS[PEOPLE.length] || '🧑', restr:[], modifier:1 };
+    TARGETS[id] = { kcal:base.kcal, p:base.p, f:base.f, c:base.c, name:'', sym: PERSON_SYMS[PEOPLE.length] || '🧑', color:PERSON_COLOR_CHOICES[PEOPLE.length%PERSON_COLOR_CHOICES.length], restr:[], modifier:1 };
     PEOPLE.push(id);
     recomputeAB();
     renderSettings();
@@ -782,6 +809,13 @@ function wirePersonasForm(){
     b.addEventListener('click', ()=>{
       const wrap = b.closest('.icon-chips');
       wrap.querySelectorAll('.icon-chip').forEach(x=> x.classList.toggle('on', x === b));
+    });
+  });
+  // Color de persona (single-select por tarjeta).
+  formBody().querySelectorAll('.person-colors .person-color').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const wrap=b.closest('.person-colors');
+      wrap.querySelectorAll('.person-color').forEach(x=>x.classList.toggle('on',x===b));
     });
   });
 
@@ -991,13 +1025,18 @@ function showCalcMsg(card, msg, kind){
 }
 
 /* ── MY RECIPES LIST ─────────────────────────────────── */
+let _recipeSearch = '';
+let _recipeCat = 'all';
 function renderRecipesList(){
   const userIds = Object.keys(DISHES).filter(id => id.startsWith('U') && !DISHES[id].loose);
   const catLbl = {des:'Desayuno', com:'Comida', mer:'Merienda', cen:'Cena'};
   const rows = userIds.length ? userIds.map(id=>{
     const d = DISHES[id];
+    const ingredients=(d.comp||[]).map(it=>(FOODS[it.f]||{}).name||it.as||it.f||'').join(' ');
+    const ingredientText=Array.isArray(d.ing)?d.ing.join(' '):(d.ing||'');
+    const search=settingsNorm([d.nom,catLbl[d.cat],ingredients,ingredientText].join(' '));
     return `
-      <div class="ur" data-id="${id}">
+      <div class="ur" data-id="${id}" data-cat="${d.cat||''}" data-search="${escHtml(search)}">
         <div class="ur-ico">${d.icon||'🍴'}</div>
         <div class="ur-body">
           <div class="ur-n">${escHtml(d.nom)}</div>
@@ -1016,16 +1055,46 @@ function renderRecipesList(){
       Tus recetas se guardan en este navegador y aparecen en su categoría junto a las del plan, marcadas como <span style="background:var(--olive);color:#fff;font-family:'DM Mono',monospace;font-size:.55rem;padding:2px 6px;border-radius:3px;letter-spacing:.05em;text-transform:uppercase;font-weight:500">Tuya</span>.
     </p>
     <div class="ur-toolbar">
-      <span class="ur-count">${userIds.length} receta${userIds.length===1?'':'s'} propia${userIds.length===1?'':'s'}</span>
+      <span class="ur-count" id="urVisibleCount" data-total="${userIds.length}">${userIds.length} receta${userIds.length===1?'':'s'} propia${userIds.length===1?'':'s'}</span>
       ${userIds.length ? `<button class="btn-danger ur-clear" id="clearRecipesBtn" title="Borrar todas tus recetas">🗑 Borrar todas</button>` : ''}
     </div>
+    ${userIds.length?`<div class="mgr-filterbar">
+      <input class="finp" id="urSearch" type="search" placeholder="Buscar entre mis recetas…" aria-label="Buscar entre mis recetas" value="${escHtml(_recipeSearch)}">
+      <select class="fsel mgr-select" id="urCatFilter" aria-label="Filtrar recetas por momento">
+        <option value="all" ${_recipeCat==='all'?'selected':''}>Todas las comidas</option>
+        ${Object.entries(catLbl).map(([k,v])=>`<option value="${k}" ${_recipeCat===k?'selected':''}>${v}</option>`).join('')}
+      </select>
+    </div>`:''}
     <div class="urlist">${rows}</div>
+    <div class="ur-empty" id="urNoResults" hidden>No hay recetas propias que coincidan con la búsqueda y el filtro.</div>
     <div class="form-actions" style="margin-top:14px">
       <button class="btn-sec" id="newRecipeBtn" style="flex:1">＋ Nueva receta</button>
     </div>`;
 }
 
+function applyRecipeFilters(){
+  const q=settingsNorm(_recipeSearch.trim());
+  let visible=0;
+  const rows=[...formBody().querySelectorAll('.urlist .ur')];
+  rows.forEach(row=>{
+    const ok=(!q||(row.dataset.search||'').includes(q))&&(_recipeCat==='all'||row.dataset.cat===_recipeCat);
+    row.hidden=!ok; if(ok) visible++;
+  });
+  const count=document.getElementById('urVisibleCount');
+  if(count){
+    const total=+count.dataset.total||0;
+    count.textContent=(visible===total?`${total} receta${total===1?'':'s'} propia${total===1?'':'s'}`:`${visible} de ${total} recetas`);
+  }
+  const empty=document.getElementById('urNoResults');
+  if(empty) empty.hidden=!rows.length||visible>0;
+}
+
 function wireRecipesList(){
+  const search=document.getElementById('urSearch');
+  if(search) search.addEventListener('input',()=>{ _recipeSearch=search.value; applyRecipeFilters(); });
+  const cat=document.getElementById('urCatFilter');
+  if(cat) cat.addEventListener('change',()=>{ _recipeCat=cat.value; applyRecipeFilters(); });
+  applyRecipeFilters();
   formBody().querySelectorAll('.ur').forEach(row=>{
     const id = row.dataset.id;
     row.querySelectorAll('[data-act]').forEach(btn=>{

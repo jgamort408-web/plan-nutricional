@@ -1,8 +1,8 @@
 /* ══════════════════════════════════════════════════════════
    APP PAGE · shell común para las páginas de contenido
    ----------------------------------------------------------
-   Recomendaciones, Medidas, Teoría, Bibliografía, Información y
-   Descargo comparten este "marco de página": ocupan el área bajo
+   Recomendaciones, Medidas, Teoría, Bibliografía e Información legal
+   comparten este "marco de página": ocupan el área bajo
    el header (que se mantiene con su aspecto, dejando visible solo
    el botón de ayuda), sin cabecera interna ni botón "Atrás" propio,
    con el color de acento de la sección activa, y son navegables a
@@ -13,7 +13,7 @@
   'use strict';
 
   // Orden de navegación por swipe entre páginas del mismo grupo.
-  const GROUPS = { info: ['reco','measures','teoria','biblio','infolegal','descargo'] };
+  const GROUPS = { info: ['reco','measures','teoria','biblio','infolegal'] };
   const OPENERS = {};        // key → función que abre esa página
   let _cur = null;           // página actual {el, key, group, close}
   let _savedSub = null;      // subtítulo del logo previo a abrir una página
@@ -29,6 +29,19 @@
     const el=document.getElementById('logoSub');
     if(el && _savedSub!==null) el.textContent=_savedSub;
     _savedSub=null;
+  }
+
+  function creditFooterHtml(){
+    return `<footer class="site-foot app-page-foot">
+      <div class="sf-row">
+        <span class="sf-logo">Plan Nutricional</span>
+        <span class="sf-sep">·</span>
+        <span class="sf-credit">Creado por <strong>Juan María Gámez Ortiz</strong></span>
+        <span class="sf-sep">·</span>
+        <span class="sf-credit">Desarrollado con la ayuda de
+          <a class="sf-link" href="https://claude.ai" target="_blank" rel="noopener noreferrer">Claude</a></span>
+      </div>
+    </footer>`;
   }
 
   function injectCSS(){
@@ -49,6 +62,7 @@
       border-bottom:1px solid rgba(var(--ink-rgb,44,31,14),.1)}
     .app-page-swipe-hint{display:none;text-align:center;font-size:.72rem;color:var(--ink-50,#6b5d49);
       padding:6px 0 0;font-family:'DM Mono',monospace;letter-spacing:.04em}
+    .app-page-foot{max-width:760px;margin-top:34px;padding-bottom:8px}
     @media(max-width:760px){ .app-page-inner{max-width:none;border-top-width:3px} .app-page-swipe-hint{display:block} }
     /* Evita el scroll de fondo (doble barra de scroll) mientras hay una página abierta. */
     body.app-page-open{overflow:hidden !important}
@@ -91,6 +105,7 @@
     clearHeaderAction();
     restoreSubtitle();
     syncHdrH();
+    if(typeof renderTrainBar==='function') renderTrainBar();
     if(!silent){ try{ history.back(); }catch(e){} }
   }
 
@@ -110,9 +125,11 @@
       ${opts.titleHidden?'':`<h1 class="app-page-title">${opts.icon?opts.icon+' ':''}${opts.title||''}</h1>`}
       <div class="app-page-body"></div>
       ${opts.group?'<div class="app-page-swipe-hint">‹ desliza para cambiar de página ›</div>':''}
+      ${creditFooterHtml()}
     </div></div>`;
     document.body.appendChild(back);
     document.body.classList.add('app-page-open');
+    if(typeof renderTrainBar==='function') renderTrainBar();
     // Color de cabecera propio de las páginas de info (ciruela), distinto de las secciones.
     if(opts.group==='info' || opts.bodyClass) document.body.classList.add(opts.bodyClass || 'page-info');
     setSubtitle(opts.subtitle!=null ? opts.subtitle : (opts.group==='info' ? 'Guía y referencias' : null));
@@ -160,7 +177,10 @@
     const b = document.createElement('button');
     b.className = 'app-hdr-action'; b.type='button'; b.innerHTML = label;
     b.addEventListener('click', onClick);
-    if(help) top.insertBefore(b, help); else top.appendChild(b);
+    const helpWrap = help && help.closest ? help.closest('.sec-menu-wrap') : null;
+    if(helpWrap && helpWrap.parentNode===top) top.insertBefore(b, helpWrap);
+    else if(help && help.parentNode===top) top.insertBefore(b, help);
+    else top.appendChild(b);
   }
   function clearHeaderAction(){ const b=document.querySelector('.app-hdr-action'); if(b) b.remove(); }
 
@@ -196,6 +216,7 @@
     function hasOverlay(){ return !!document.querySelector('.app-page, .masst.show, #sportAsst.show, .mv.show, .modal-bg.show, .drawer.show, .pn-tut-back, .ob-back'); }
   })();
 
+  window.appCreditFooterHtml = creditFooterHtml;
   window.AppPage = { open, close, register, GROUPS, setHeaderAction, clearHeaderAction,
     setSubtitle, restoreSubtitle,
     get current(){ return _cur; },

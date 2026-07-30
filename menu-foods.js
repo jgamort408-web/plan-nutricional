@@ -559,18 +559,50 @@ window.recomputeAllComp = recomputeAllComp;
    Para no tener que pesar/medir todo: equivalencias aproximadas.
 ══════════════════════════════════════════════════════════ */
 const MEASURE_REFS = [
-  ['🥄 Cucharada sopera',  '≈ 15 ml · aceite 14 g · azúcar 12 g · harina 9 g · miel 20 g'],
-  ['🥄 Cucharadita (café)', '≈ 5 ml · sal 5 g · azúcar 4 g · aceite 4,5 g · levadura 3 g'],
-  ['🥛 Vaso de agua',       '≈ 200 ml (vaso de agua) · 100 ml el vaso pequeño'],
-  ['☕ Taza',               '≈ 240 ml · taza de café con leche ≈ 200 ml'],
-  ['🤏 Puñado',             '≈ 25-30 g (frutos secos) · 20 g de hojas verdes'],
-  ['✊ Puño cerrado',       '≈ 1 ración de hidratos cocidos (arroz/pasta) ≈ 150 g'],
-  ['🖐️ Palma de la mano',  '≈ 1 ración de proteína (carne/pescado) ≈ 100-120 g'],
-  ['👍 Pulgar',             '≈ 1 ración de grasa (aceite/mantequilla) ≈ 10-15 g'],
-  ['🧀 Loncha de queso',    '≈ 20 g · 🥓 loncha de jamón ≈ 15 g'],
-  ['🍞 Rebanada de pan molde','≈ 25-30 g · pan de barra (rodaja) ≈ 30 g'],
-  ['🥚 Huevo',              'pequeño ≈ 45 g · mediano (M) ≈ 55 g · grande (L) ≈ 65 g'],
-  ['🍫 Onza de chocolate',  '≈ 5-7 g']
+  ['🥄 Cucharada sopera rasa', '≈ 15 ml · aceite 13-14 g · azúcar 10-12 g · harina 8-10 g'],
+  ['🥄 Cucharadita rasa',      '≈ 5 ml · aceite 4-5 g · azúcar o sal 4-5 g · especias 2-3 g'],
+  ['🥛 Vaso doméstico',        '≈ 200-250 ml; compruébalo una vez llenándolo con una jarra medidora'],
+  ['☕ Taza',                  'café 60-100 ml · café con leche 180-220 ml · taza grande 240-300 ml'],
+  ['🥣 Cuenco o bol',          'pequeño 250-300 ml · mediano 350-450 ml; cambia mucho según la forma'],
+  ['🥄 Cazo de servir',        '≈ 100-150 ml · útil para sopas, guisos y legumbres'],
+  ['🤏 Puñado cerrado',        'frutos secos ≈ 20-30 g; la mano de cada persona sirve como escala propia'],
+  ['👐 Dos manos juntas',      'verduras o ensalada ≈ una ración abundante'],
+  ['✊ Puño',                  'arroz, pasta, patata o legumbre cocidos ≈ 120-180 g'],
+  ['🖐️ Palma sin dedos',      'carne, pescado, tofu o tempeh ≈ 90-140 g según grosor'],
+  ['👍 Pulgar',                'queso curado, crema de frutos secos o grasa untable ≈ 10-20 g'],
+  ['🧀 Loncha',                'queso ≈ 15-25 g · fiambre ≈ 10-20 g; revisa el envase'],
+  ['🍞 Rebanada',              'pan de molde ≈ 25-40 g · rodaja de barra ≈ 30-50 g'],
+  ['🥚 Huevo con cáscara',     'S <53 g · M 53-63 g · L 63-73 g; la parte comestible pesa menos'],
+  ['🍎 Pieza de fruta',        'pequeña 80-120 g · mediana 130-180 g · grande 200 g o más'],
+  ['🥫 Lata o conserva',       'usa el peso escurrido de la etiqueta, no el peso neto total'],
+  ['🍫 Onza',                  'no es universal: suele variar entre 5 y 12 g según la tableta'],
+  ['🧴 Chorro de aceite',      'muy variable; para aprender, mídelo algunas veces con cuchara']
+];
+const MEASURE_EVERYDAY = [
+  {title:'👀 Guía visual para montar un plato', items:[
+    ['Verduras y hortalizas','½ plato o dos manos juntas; combina crudas y cocinadas cuando puedas.'],
+    ['Proteína','¼ de plato o una palma; legumbre, huevo, pescado, carne, tofu o alternativas.'],
+    ['Hidrato rico en almidón','¼ de plato o un puño cocido; ajusta a hambre, actividad y resto del día.'],
+    ['Grasa culinaria','Una cantidad pequeña y consciente; el aceite “a ojo” es lo que más varía.']
+  ]},
+  {title:'🍚 Cantidades cocinadas fáciles de reconocer', items:[
+    ['Arroz o pasta','½ taza ≈ 80-100 g · 1 taza ≈ 160-200 g, según producto y cocción.'],
+    ['Legumbre','½ taza ≈ 80-110 g · 1 taza o cazo generoso ≈ 160-220 g.'],
+    ['Patata o boniato','Una pieza mediana o un puño ≈ 150-220 g.'],
+    ['Verdura cocinada','Un cuenco o dos cazos ≈ 180-300 g; en crudo ocupa mucho más volumen.']
+  ]},
+  {title:'🛒 Del envase al plato', items:[
+    ['Yogur','Un envase habitual aporta 120-150 g; comprueba la etiqueta.'],
+    ['Leche o bebida vegetal','Un vaso habitual ≈ 200-250 ml.'],
+    ['Conservas','Divide el peso escurrido entre las porciones realmente servidas.'],
+    ['Paquetes y bandejas','Peso total ÷ unidades o porciones usadas: suele ser más fiable que adivinar.']
+  ]},
+  {title:'🧭 Cómo usar estas medidas sin obsesionarse', items:[
+    ['Primera semana','Mide solo tus utensilios habituales una vez y guarda la referencia mental.'],
+    ['Crudo frente a cocinado','No compares gramos crudos con cocinados: el agua cambia peso y volumen.'],
+    ['Consistencia','Para seguir cambios importa más medir de forma parecida que acertar al gramo.'],
+    ['Cuándo sí pesar','Recetas nuevas, aceites, alimentos muy densos o cuando una pauta profesional lo pida.']
+  ]}
 ];
 function _fmNorm(s){ return (s||'').toString().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,''); }
 function injectMeasuresCSS(){
@@ -609,6 +641,8 @@ function injectMeasuresCSS(){
   .fm-n{font-family:'Lora',serif;font-size:.88rem;color:var(--ink,#3a2c1a);min-width:0}
   .fm-m{font-family:'DM Mono',monospace;font-size:.72rem;color:var(--ink-50,#6b5d49);text-align:right;white-space:nowrap;flex-shrink:0}
   .fm-m b{color:var(--olive,#5a6b2c)} .fm-m small{display:block;font-size:.6rem;color:var(--ink-30,#9b8d76)}
+  .fm-m.fm-wrap{white-space:normal;max-width:64%;line-height:1.45}
+  .fm-guide-note{font-family:'Lora',serif;font-size:.84rem;color:var(--ink-50,#6b5d49);margin:0 0 14px;line-height:1.5;padding:10px 12px;border-radius:10px;background:rgba(90,107,44,.08)}
   .fm-empty{font-family:'DM Mono',monospace;font-size:.78rem;color:var(--ink-30,#9b8d76);padding:14px 0;text-align:center}
   @media(max-width:560px){ .fm-items{grid-template-columns:1fr} .fm-ref b{min-width:118px} }
   @media print{
@@ -635,30 +669,37 @@ function openFoodMeasures(){
       <h4 class="fm-sec-h">${SEC[s].ico||''} ${esc(SEC[s].lbl||s)}</h4>
       <div class="fm-items">${items.map(id=>{
         const f=F[id], u=f.unit, kc=Math.round((f.kcal||0)*u.g/100);
-        return `<div class="fm-item" data-name="${esc(_fmNorm(f.name))}">
+        return `<div class="fm-item fm-searchable" data-name="${esc(_fmNorm(`${f.name} ${u.lbl} ${SEC[s].lbl||''}`))}">
           <span class="fm-n">${esc(f.name)}</span>
           <span class="fm-m">1 ${esc(u.lbl)} ≈ <b>${u.g} g</b><small>${kc} kcal</small></span>
         </div>`;
       }).join('')}</div>
     </div>`;
   }).join('');
-  const refsHtml = MEASURE_REFS.map(([k,v])=>`<div class="fm-ref"><b>${esc(k)}</b><span>${esc(v)}</span></div>`).join('');
+  const refsHtml = MEASURE_REFS.map(([k,v])=>`<div class="fm-ref fm-searchable" data-name="${esc(_fmNorm(k+' '+v))}"><b>${esc(k)}</b><span>${esc(v)}</span></div>`).join('');
+  const everydayHtml = MEASURE_EVERYDAY.map(group=>`<div class="fm-sec fm-guide-sec">
+    <h4 class="fm-sec-h">${esc(group.title)}</h4>
+    <div class="fm-items">${group.items.map(([k,v])=>`<div class="fm-item fm-searchable" data-name="${esc(_fmNorm(k+' '+v))}">
+      <span class="fm-n">${esc(k)}</span><span class="fm-m fm-wrap">${esc(v)}</span></div>`).join('')}</div>
+  </div>`).join('');
   if(typeof AppPage==='undefined') return;
   AppPage.open({
     key:'measures', group:'info', title:'📏 Medidas de alimentos',
     render(body){
       body.innerHTML=`
-        <div class="fm-intro">Equivalencias aproximadas para no tener que pesar a diario. Usa el buscador o descárgalo como PDF.</div>
+        <div class="fm-intro">Referencias visuales y domésticas para estimar cantidades razonables en el día a día. Son rangos aproximados: el tamaño del alimento, el utensilio y la cocción cambian el resultado.</div>
         <div class="fm-toolbar"><input class="fm-search" type="search" placeholder="🔎 Buscar alimento…" aria-label="Buscar alimento"><button class="fm-print" type="button">🖨️ PDF</button></div>
+        <p class="fm-guide-note">Consejo: calibra una vez tu vaso, taza, bol, cucharón y puñado. Después podrás repetir una referencia suficientemente consistente sin pesar cada comida.</p>
         <div class="fm-refs">${refsHtml}</div>
+        ${everydayHtml}
         ${listHtml || '<div class="fm-empty">No hay medidas registradas.</div>'}
         <div class="fm-empty fm-noresult" style="display:none">Sin alimentos que coincidan con la búsqueda.</div>`;
       const search = body.querySelector('.fm-search');
       search.addEventListener('input', ()=>{
         const q = _fmNorm(search.value.trim()); let any=false;
-        body.querySelectorAll('.fm-item').forEach(it=>{ const ok=!q||it.dataset.name.includes(q); it.style.display=ok?'':'none'; if(ok)any=true; });
-        body.querySelectorAll('.fm-sec').forEach(sec=>{ const vis=[...sec.querySelectorAll('.fm-item')].some(it=>it.style.display!=='none'); sec.style.display=vis?'':'none'; });
-        const refsBox=body.querySelector('.fm-refs'); if(refsBox) refsBox.style.display=q?'none':'';
+        body.querySelectorAll('.fm-searchable').forEach(it=>{ const ok=!q||(it.dataset.name||'').includes(q); it.style.display=ok?'':'none'; if(ok)any=true; });
+        body.querySelectorAll('.fm-sec').forEach(sec=>{ const vis=[...sec.querySelectorAll('.fm-searchable')].some(it=>it.style.display!=='none'); sec.style.display=vis?'':'none'; });
+        const refsBox=body.querySelector('.fm-refs'); if(refsBox){ const vis=[...refsBox.querySelectorAll('.fm-searchable')].some(it=>it.style.display!=='none'); refsBox.style.display=vis?'':'none'; }
         const nr=body.querySelector('.fm-noresult'); if(nr) nr.style.display=(q&&!any)?'':'none';
       });
       const pr=body.querySelector('.fm-print'); if(pr) pr.addEventListener('click', ()=> printFoodMeasures());
@@ -675,6 +716,9 @@ function buildMeasuresPrintHtml(){
   withUnit.forEach(id=>{ const s = SEC[F[id].sec] ? F[id].sec : 'desp'; (bySec[s]=bySec[s]||[]).push(id); });
   const secOrder = Object.keys(SEC).sort((a,b)=>(SEC[a].order||9)-(SEC[b].order||9));
   const refsRows = MEASURE_REFS.map(([k,v])=>`<tr><td class="k">${esc(k)}</td><td>${esc(v)}</td></tr>`).join('');
+  const everydayRows = MEASURE_EVERYDAY.map(group=>`<h2>${esc(group.title)}</h2><table class="refs"><tbody>${
+    group.items.map(([k,v])=>`<tr><td class="k">${esc(k)}</td><td>${esc(v)}</td></tr>`).join('')
+  }</tbody></table>`).join('');
   const secHtml = secOrder.filter(s=>bySec[s]).map(s=>{
     const items = bySec[s].sort((a,b)=> F[a].name.localeCompare(F[b].name,'es'));
     return `<h2>${SEC[s].ico||''} ${esc(SEC[s].lbl||s)}</h2>
@@ -698,9 +742,11 @@ function buildMeasuresPrintHtml(){
     @page{margin:14mm}
   </style></head><body>
     <h1>📏 Medidas de alimentos</h1>
-    <p class="intro">Equivalencias aproximadas para no tener que pesar a diario.</p>
+    <p class="intro">Referencias visuales y domésticas para estimar cantidades en el día a día. Son rangos aproximados: utensilio, tamaño y cocción modifican el resultado.</p>
     <h2>Referencias generales</h2>
     <table class="refs"><tbody>${refsRows}</tbody></table>
+    ${everydayRows}
+    <h2>Catálogo de equivalencias de la app</h2>
     ${secHtml}
     <footer>Plan Nutricional · Generado el ${new Date().toLocaleDateString('es')}</footer>
   </body></html>`;
@@ -728,27 +774,57 @@ window.openFoodMeasures = openFoodMeasures;
    Mismo formato que Medidas: overlay + buscador + PDF.
 ══════════════════════════════════════════════════════════ */
 const RECO_OBJETIVOS = [
-  ['Pérdida de grasa',  'Proteína 1,8–2,5 g/kg · Grasa 0,7–1 g/kg (≥20% kcal) · Hidratos el resto · Déficit GET×0,8'],
-  ['Mantenimiento',     'Proteína 1,4–2 g/kg · Grasa 0,8–1,2 g/kg · Hidratos el resto · kcal ≈ GET'],
-  ['Recomposición',     'Proteína 1,8–2,4 g/kg · Grasa 0,8–1 g/kg · Hidratos el resto (más cerca del entreno) · GET o déficit leve'],
-  ['Ganancia muscular', 'Proteína 1,6–2,2 g/kg · Grasa 0,8–1,2 g/kg · Hidratos el resto · Superávit GET×1,05–1,10']
+  ['Pérdida de grasa',  'Déficit moderado y revisable · proteína suficiente, especialmente si entrenas fuerza · conserva grasas, fibra y variedad.'],
+  ['Mantenimiento',     'Energía cercana al gasto real · patrón flexible que sostenga salud, rendimiento, vida social y preferencias.'],
+  ['Recomposición',     'Fuerza progresiva + proteína suficiente + energía de mantenimiento o déficit leve; valora medidas y rendimiento, no solo peso.'],
+  ['Ganancia muscular', 'Superávit pequeño, entrenamiento progresivo y tiempo · proteína orientativa 1,6–2,2 g/kg en adultos que entrenan.']
 ];
 const RECO_CALC = [
-  ['1 · Peso de cálculo', 'Peso real; o peso corregido si hay sobrepeso/obesidad. Peso ideal = 22 × altura²; peso corregido = ideal + 0,25 × (real − ideal).'],
-  ['2 · GMB', 'Gasto metabólico basal ≈ peso de cálculo × 22.'],
-  ['3 · Factor de actividad', 'Sedentario 1,3–1,6 · Ligero 1,5–1,8 · Activo 1,5–2,0 · Muy activo 1,9–2,2 (cuenta también el NEAT, no solo el gimnasio).'],
-  ['4 · GET', 'Gasto total = GMB × factor de actividad (kcal de mantenimiento).'],
-  ['5 · Objetivo', 'Pérdida: GET×0,75–0,9 (normal 0,8) · Mantenimiento: GET · Ganancia: GET×1,05–1,10.'],
-  ['6 · Macros', 'Fija proteína (g/kg), luego grasa (≥20% kcal o ~0,8–1 g/kg) y los hidratos al resto.'],
-  ['7 · Comida real', 'Proteína en cada comida; verdura y fruta a diario; legumbres, tubérculos e integrales; AOVE y frutos secos.'],
-  ['8 · Revisar', 'Ajusta cada 2–4 semanas según peso medio, perímetros, fuerza, hambre, sueño y adherencia.']
+  ['1 · Punto de partida', 'Las ecuaciones estiman, no miden. La app usa un cálculo rápido de gasto basal y actividad que puede desviarse bastante en una persona concreta.'],
+  ['2 · Actividad completa', 'Cuenta trabajo, desplazamientos, tareas, pasos y deporte. El gimnasio no resume todo tu movimiento diario.'],
+  ['3 · Objetivo prudente', 'Empieza cerca del mantenimiento o con cambios pequeños. Déficits y superávits grandes suelen empeorar hambre, recuperación o adherencia.'],
+  ['4 · Proteína', 'Asegura fuentes repartidas durante el día. Quien entrena fuerza puede usar rangos deportivos; no son necesarios para toda la población.'],
+  ['5 · Grasas e hidratos', 'Mantén grasas de calidad y ajusta hidratos a actividad, tolerancia y preferencias, priorizando fuentes ricas en fibra.'],
+  ['6 · Revisión', 'Observa 2–4 semanas: tendencia de peso, perímetros, fuerza, energía, hambre, sueño, digestión y facilidad para mantenerlo.'],
+  ['7 · Ajuste pequeño', 'Si la tendencia no encaja, cambia una variable cada vez: porciones, picoteo, bebidas, pasos o frecuencia de comidas.'],
+  ['8 · Individualizar', 'En enfermedad, embarazo, lactancia, TCA, medicación o necesidades especiales, la pauta debe revisarla un profesional.']
 ];
 const RECO_CLAVES = [
-  'La adherencia es el mejor predictor de éxito: la dieta debe poder mantenerse.',
-  'No hay obligación de hacer 5 comidas: 3 o 5 funcionan si las kcal y macros encajan.',
-  'Prioriza comida real y carbohidratos complejos; ajusta los hidratos a tu actividad.',
-  'No bajes la grasa por debajo del 20% de las kcal (~0,8–1 g/kg).',
-  'La báscula no lo es todo: usa media semanal, medidas, fotos, fuerza y energía.'
+  'Lo “ideal” es una estructura adaptable: no un menú perfecto que obligue a comer igual cada día.',
+  'No existe obligación de hacer cinco comidas. Elige un ritmo que evite llegar sin control y encaje con tus horarios.',
+  'Prioriza alimentos poco procesados, pero deja espacio consciente para placer, cultura, celebración y comodidad.',
+  'La báscula no lo es todo: digestión, energía, sueño, fuerza, hambre, analíticas y bienestar también cuentan.',
+  'Una comida distinta no estropea la semana. Vuelve a la siguiente decisión útil sin compensaciones extremas.'
+];
+const RECO_DAILY = [
+  ['1 · Elige anclas','Decide 2-3 desayunos, comidas y cenas fáciles que puedas repetir sin pensar demasiado.'],
+  ['2 · Planifica lo justo','Revisa agenda, personas y entrenamientos; planifica primero los días complicados, no una semana imaginaria perfecta.'],
+  ['3 · Compra por bloques','Verduras y fruta · proteínas · hidratos ricos en fibra · grasas y sabor · soluciones rápidas de despensa o congelador.'],
+  ['4 · Cocina componentes','Deja preparada una verdura, una proteína y una base de arroz, patata, pasta o legumbre para combinarlas de varias formas.'],
+  ['5 · Ten un plan B','Huevos, legumbre cocida, verduras congeladas, conserva, yogur, fruta, pan integral y frutos secos resuelven comidas reales.'],
+  ['6 · Sirve y observa','Empieza con una ración razonable, come sin prisa y repite si sigues teniendo hambre; no necesitas acertar de antemano.'],
+  ['7 · Ajusta el entorno','Deja visible y accesible lo que quieres usar más y reserva decisiones difíciles para cuando tengas energía.'],
+  ['8 · Revisa sin castigo','Pregunta qué facilitó o dificultó la semana y cambia una sola cosa útil para la siguiente.']
+];
+const RECO_SCENARIOS = [
+  ['Día con poco tiempo','Usa un plato de montaje: ensalada o verdura congelada + conserva/huevo/legumbre + pan, patata o arroz listo + AOVE.'],
+  ['Tupper','Prioriza preparaciones que aguanten: guiso de legumbre, cereal con verdura y proteína, crema + bocadillo completo o sobras planificadas.'],
+  ['Comer fuera','Busca verdura y una fuente de proteína, elige la guarnición que te apetezca, come hasta saciedad cómoda y evita “compensar” después.'],
+  ['Antes de entrenar','Si han pasado horas, toma algo familiar y digerible con hidratos y, si encaja, algo de proteína; no estrenes comidas pesadas.'],
+  ['Después de entrenar','Vuelve a una comida normal con líquido, proteína e hidratos. El total del día importa más que una ventana de minutos.'],
+  ['Presupuesto ajustado','Legumbres, huevos, conservas, pollo, avena, arroz, patata, fruta de temporada y congelados suelen dar buena relación coste-nutrición.'],
+  ['Varias personas','Comparte la misma base y adapta cantidad, guarnición y extras; no hace falta cocinar un menú completamente distinto para cada perfil.'],
+  ['Semana irregular','Mantén mínimos: alguna verdura o fruta, proteína suficiente, agua y una comida preparada. Retoma estructura cuando sea posible.']
+];
+const RECO_THEORY_LINKS = [
+  ['que-es-comer-bien','Qué significa comer bien'],
+  ['plato-ideal','El plato ideal'],
+  ['patrones-saludables','Patrones mediterráneo y DASH'],
+  ['comida-real-vs-ultraprocesados','Comida real y ultraprocesados'],
+  ['cuando-comer','Cómo repartir el día'],
+  ['diseno-del-entorno','Diseñar el entorno'],
+  ['adherencia-habitos-ejercicio','Adherencia antes que perfección'],
+  ['formulas-de-estimacion-y-fiabilidad','Límites de las fórmulas']
 ];
 function injectRecoCSS(){
   if(document.getElementById('recoCss')) return;
@@ -769,6 +845,11 @@ function injectRecoCSS(){
   .reco-bar .rb-fill{height:100%;background:var(--olive,#5a6b2c);border-radius:8px}
   .reco-bar .rb-p{font-family:'DM Mono',monospace;font-size:.72rem;color:var(--terra,#b5603a);width:38px;text-align:right;flex-shrink:0;font-weight:600}
   .reco-prose ul{margin:2px 0 0;padding-left:18px} .reco-prose li{font-family:'Lora',serif;font-size:.86rem;color:var(--ink,#3a2c1a);line-height:1.5;margin-bottom:5px}`;
+  st.textContent+=`
+  .reco-links{display:flex;flex-wrap:wrap;gap:7px}
+  .reco-link{border:1.5px solid rgba(var(--ink-rgb,44,31,14),.14);background:var(--white);color:var(--ink);border-radius:20px;padding:8px 12px;cursor:pointer;font-size:.78rem}
+  .reco-link:hover{border-color:var(--accent,#b5603a);color:var(--accent,#b5603a)}
+  .reco-bib{border-style:dashed}`;
   document.head.appendChild(st);
 }
 function _recoData(){
@@ -788,15 +869,21 @@ function openNutriReco(){
   const barsHtml = meals.map(([lbl,p])=>`<div class="reco-bar"><span class="rb-l">${esc(lbl)}</span><span class="rb-track"><span class="rb-fill" style="width:${Math.round(p*100)}%"></span></span><span class="rb-p">${Math.round(p*100)}%</span></div>`).join('');
   const calcHtml = RECO_CALC.map(([k,v])=>`<div class="fm-item" data-name="${esc(_fmNorm(k+' '+v))}"><span class="fm-n">${esc(k)}</span><span class="fm-m" style="white-space:normal;max-width:64%">${esc(v)}</span></div>`).join('');
   const clavesHtml = RECO_CLAVES.map(c=>`<li>${esc(c)}</li>`).join('');
+  const dailyHtml = RECO_DAILY.map(([k,v])=>`<div class="fm-item" data-name="${esc(_fmNorm(k+' '+v))}"><span class="fm-n">${esc(k)}</span><span class="fm-m fm-wrap">${esc(v)}</span></div>`).join('');
+  const scenariosHtml = RECO_SCENARIOS.map(([k,v])=>`<div class="fm-item" data-name="${esc(_fmNorm(k+' '+v))}"><span class="fm-n">${esc(k)}</span><span class="fm-m fm-wrap">${esc(v)}</span></div>`).join('');
+  const theoryHtml = RECO_THEORY_LINKS.map(([id,lbl])=>`<button class="reco-link" type="button" data-theory="${id}">📖 ${esc(lbl)}</button>`).join('');
 
   if(typeof AppPage==='undefined') return;
   AppPage.open({
     key:'reco', group:'info', title:'🥗 Recomendaciones y menú ideal',
     render(body){
       body.innerHTML=`
-        <div class="fm-intro">Cómo construir un menú equilibrado y calcular tus calorías y macros. Usa el buscador o descárgalo como PDF.</div>
+        <div class="fm-intro">Una guía para convertir la teoría de la app en comidas posibles: estructura flexible, compra, cocina, imprevistos, vida social y ajustes según tu día.</div>
         <div class="fm-toolbar"><input class="fm-search" type="search" placeholder="🔎 Buscar (legumbre, proteína, déficit…)" aria-label="Buscar recomendación"><button class="fm-print" type="button">🖨️ PDF</button></div>
         <div class="reco-prose">
+          <div class="fm-sec"><h4 class="fm-sec-h">🧭 Qué significa “menú ideal”</h4>
+            <p class="reco-note">No es un menú único ni perfecto. Es una estructura suficientemente nutritiva, agradable, asequible y flexible para repetirse la mayoría de semanas. Las cantidades y horarios se adaptan a cada persona.</p>
+          </div>
           <div class="fm-sec"><h4 class="fm-sec-h">🍽️ El plato ideal</h4>
             <div class="reco-plate">
               <div class="rp-seg rp-verd">½ Verduras y hortalizas<small>crudas + cocidas</small></div>
@@ -805,14 +892,21 @@ function openNutriReco(){
                 <div class="rp-seg rp-carb">¼ Hidratos de calidad<small>integral, patata, legumbre</small></div>
               </div>
             </div>
-            <p class="reco-note">+ una porción de grasa saludable (AOVE, aguacate, frutos secos) y agua como bebida. Fruta entera de postre.</p>
+            <p class="reco-note">Añade una porción razonable de grasa saludable y usa agua como bebida habitual. La fruta puede ir de postre o en otro momento. En guisos, bocadillos o platos mezclados conserva la idea, aunque no se vean cuatro zonas.</p>
           </div>
-          <div class="fm-sec"><h4 class="fm-sec-h">📊 Reparto de calorías del día</h4><div class="reco-bars">${barsHtml}</div></div>
+          <div class="fm-sec"><h4 class="fm-sec-h">📊 Un reparto posible del día</h4><div class="reco-bars">${barsHtml}</div>
+            <p class="reco-note">Es solo el reparto configurado en la app. Puedes mover, juntar o eliminar tomas según horarios, hambre, medicación, cultura y entrenamiento.</p>
+          </div>
         </div>
+        <div class="fm-sec"><h4 class="fm-sec-h">🧺 Del calendario a la compra y la cocina</h4><div class="fm-items">${dailyHtml}</div></div>
+        <div class="fm-sec"><h4 class="fm-sec-h">🏙️ Soluciones para situaciones reales</h4><div class="fm-items">${scenariosHtml}</div></div>
         <div class="fm-sec"><h4 class="fm-sec-h">🗓️ Cuánto comer a la semana</h4><div class="fm-items">${guideItems}</div></div>
-        <div class="fm-sec"><h4 class="fm-sec-h">🎯 Macros según objetivo</h4><div class="fm-items">${objItems}</div></div>
-        <div class="fm-sec"><h4 class="fm-sec-h">🧮 Cómo se calculan tus calorías y macros</h4><div class="fm-items">${calcHtml}</div></div>
+        <div class="fm-sec"><h4 class="fm-sec-h">🎯 Ajustes según objetivo</h4><div class="fm-items">${objItems}</div></div>
+        <div class="fm-sec"><h4 class="fm-sec-h">🧮 Cómo interpretar calorías y macros</h4><div class="fm-items">${calcHtml}</div></div>
         <div class="reco-prose"><div class="fm-sec"><h4 class="fm-sec-h">🔑 Claves</h4><ul>${clavesHtml}</ul></div></div>
+        <div class="reco-prose"><div class="fm-sec"><h4 class="fm-sec-h">📚 Profundiza en la teoría y las fuentes</h4>
+          <div class="reco-links">${theoryHtml}<button class="reco-link reco-bib" type="button" data-biblio="aesan-recom">📚 Recomendaciones AESAN</button></div>
+        </div></div>
         <div class="fm-empty fm-noresult" style="display:none">Sin recomendaciones que coincidan con la búsqueda.</div>`;
       const search = body.querySelector('.fm-search');
       search.addEventListener('input', ()=>{
@@ -823,6 +917,12 @@ function openNutriReco(){
         const nr=body.querySelector('.fm-noresult'); if(nr) nr.style.display=(q&&!any)?'':'none';
       });
       const pr=body.querySelector('.fm-print'); if(pr) pr.addEventListener('click', ()=> printNutriReco());
+      body.addEventListener('click',e=>{
+        const theory=e.target.closest('[data-theory]');
+        if(theory && typeof openTeoriaArticle==='function'){ openTeoriaArticle(theory.dataset.theory); return; }
+        const bib=e.target.closest('[data-biblio]');
+        if(bib && typeof openBibliografia==='function') openBibliografia(bib.dataset.biblio);
+      });
     }
   });
 }
@@ -832,6 +932,8 @@ function printNutriReco(){
   const guideRows = guide.map(g=>`<tr><td class="n">${esc(g.lbl)}</td><td>${esc(g.rule||'')}</td></tr>`).join('');
   const objRows = RECO_OBJETIVOS.map(([k,v])=>`<tr><td class="n">${esc(k)}</td><td>${esc(v)}</td></tr>`).join('');
   const calcRows = RECO_CALC.map(([k,v])=>`<tr><td class="n">${esc(k)}</td><td>${esc(v)}</td></tr>`).join('');
+  const dailyRows = RECO_DAILY.map(([k,v])=>`<tr><td class="n">${esc(k)}</td><td>${esc(v)}</td></tr>`).join('');
+  const scenarioRows = RECO_SCENARIOS.map(([k,v])=>`<tr><td class="n">${esc(k)}</td><td>${esc(v)}</td></tr>`).join('');
   const barRows = meals.map(([l,p])=>`<tr><td class="n">${esc(l)}</td><td>${Math.round(p*100)}%</td></tr>`).join('');
   const claves = RECO_CLAVES.map(c=>`<li>${esc(c)}</li>`).join('');
   const html = `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Recomendaciones nutricionales</title>
@@ -842,12 +944,15 @@ function printNutriReco(){
   ul{margin:2px 0 0;padding-left:18px}li{margin-bottom:4px}
   footer{margin-top:20px;padding-top:10px;border-top:1px solid #ddd;color:#999;font-size:10px;text-align:center}@page{margin:14mm}</style></head><body>
     <h1>🥗 Recomendaciones y construcción del menú</h1>
-    <p class="intro">Cómo montar un menú equilibrado y calcular tus calorías y macros.</p>
+    <p class="intro">Cómo convertir una estructura saludable en comidas posibles, flexibles y adaptadas a la vida diaria.</p>
+    <h2>Qué significa “menú ideal”</h2><p>No es un menú único ni perfecto: debe ser nutritivo, agradable, asequible, flexible y suficientemente fácil de repetir.</p>
     <h2>El plato ideal</h2><table><tr><td class="n">½ del plato</td><td>Verduras y hortalizas (crudas + cocidas)</td></tr><tr><td class="n">¼ del plato</td><td>Proteína magra: pescado, huevo, carne magra, legumbre, tofu</td></tr><tr><td class="n">¼ del plato</td><td>Hidratos de calidad: integral, patata, legumbre</td></tr><tr><td class="n">Extra</td><td>Grasa saludable (AOVE, aguacate, frutos secos) · agua · fruta de postre</td></tr></table>
-    <h2>Reparto de calorías del día</h2><table>${barRows}</table>
+    <h2>Del calendario a la compra y la cocina</h2><table>${dailyRows}</table>
+    <h2>Situaciones reales</h2><table>${scenarioRows}</table>
+    <h2>Un reparto posible del día</h2><table>${barRows}</table>
     <h2>Cuánto comer a la semana</h2><table>${guideRows}</table>
-    <h2>Macros según objetivo</h2><table>${objRows}</table>
-    <h2>Cómo se calculan tus calorías y macros</h2><table>${calcRows}</table>
+    <h2>Ajustes según objetivo</h2><table>${objRows}</table>
+    <h2>Cómo interpretar calorías y macros</h2><table>${calcRows}</table>
     <h2>Claves</h2><ul>${claves}</ul>
     <footer>Plan Nutricional · Generado el ${new Date().toLocaleDateString('es')}</footer>
   </body></html>`;
