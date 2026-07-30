@@ -1280,6 +1280,7 @@ function openModal(id){
         <button id="ctaFav" class="m-fav-btn ${isDishFav(id)?'on':''}" data-id="${id}">
           ${isDishFav(id) ? '★ En favoritos' : '☆ Favorito'}
         </button>
+        <button id="ctaShare" class="m-share-btn" data-id="${id}">↗ Compartir receta</button>
         <button id="ctaAdd" class="${inCart?'added':''}" data-id="${id}">
           ${inCart ? '✓ Añadido a mi día · Quitar' : '＋ Añadir a mi día'}
         </button>
@@ -1312,6 +1313,9 @@ function openModal(id){
     b.textContent = on ? '★ En favoritos' : '☆ Favorito';
     b.classList.toggle('on', on);
     renderMain(); renderCatNav();
+  });
+  document.getElementById('ctaShare').addEventListener('click', e=>{
+    if(typeof shareAppItem==='function') shareAppItem('recipe', e.currentTarget.dataset.id);
   });
 
   // user-recipe actions (only present if dish id starts with U)

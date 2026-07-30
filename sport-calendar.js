@@ -146,13 +146,26 @@ function openSpDayPicker(key){
                        : `<div class="picker-cur-empty">Día de descanso — sin sesión asignada</div>`}
       </div>
       <div class="picker-addhd">Catálogo de sesiones</div>
+      <label class="si-search picker-search"><span>⌕</span><input id="spDaySessQ" type="search" autocomplete="off" placeholder="Buscar por sesión, objetivo, nivel o ejercicio…"><small id="spDaySessCount">${ids.length}</small></label>
       <div class="picker-list">
-        ${ids.map(id=>{const s=SESSIONS[id];const t=EX_TYPES[s.type]||{ico:'•',lbl:s.type};const tt=sessionTotals(s,'A');return `<div class="picker-it" data-pick="${id}"><div class="pi-ico">${t.ico}</div><div class="pi-body"><div class="pi-n">${spEsc(s.name)}</div><div class="pi-m"><span>${t.lbl}${s.level?' · '+spEsc(s.level):''}</span><span>·</span><span>${tt.min} min · ${(s.items||[]).length} ej.</span></div></div><span class="pi-plus">＋</span></div>`;}).join('')}
+        ${ids.map(id=>{const s=SESSIONS[id];const t=EX_TYPES[s.type]||{ico:'•',lbl:s.type};const tt=sessionTotals(s,'A');const terms=[id,s.name,s.focus,s.level].concat((s.items||[]).map(it=>EXERCISES[it.e]?.name||it.e)).join(' ');return `<div class="picker-it" data-pick="${id}" data-search="${spEsc(terms)}"><div class="pi-ico">${t.ico}</div><div class="pi-body"><div class="pi-n">${spEsc(s.name)}</div><div class="pi-m"><span>${t.lbl}${s.level?' · '+spEsc(s.level):''}</span><span>·</span><span>${tt.min} min · ${(s.items||[]).length} ej.</span></div></div><span class="pi-plus">＋</span></div>`;}).join('')}
+        <div class="picker-cur-empty hidden" id="spDaySessEmpty">No hay sesiones que coincidan.</div>
       </div>
     </div>
     <div class="form-actions"><button class="btn-sec" id="spPkRest">🛌 Descanso (vaciar)</button><button class="btn-prim" id="spPkDone">Listo</button></div>`;
   openForm(html);
   const reopen = ()=>{ persistSportPlan(); renderSportCalendar(); openSpDayPicker(key); };
+  const sessQ=document.getElementById('spDaySessQ');
+  if(sessQ) sessQ.addEventListener('input',()=>{
+    const q=(sessQ.value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+    let shown=0;
+    formBody().querySelectorAll('.picker-it').forEach(it=>{
+      const hay=(it.dataset.search||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+      const ok=!q || hay.includes(q); it.classList.toggle('hidden',!ok); if(ok) shown++;
+    });
+    document.getElementById('spDaySessCount').textContent=shown;
+    document.getElementById('spDaySessEmpty').classList.toggle('hidden',shown!==0);
+  });
   // añadir sesión (who por defecto AB)
   formBody().querySelectorAll('.picker-it').forEach(it=> it.addEventListener('click', ()=>{
     if(!SportPlan.days[key]) SportPlan.days[key]=[];
@@ -703,6 +716,7 @@ function buildSportPrintHtml(){
   b('spCalClear', spCalClear);
   b('spCalPdf', spCalExportPdf);
   b('spCalJson', spCalExportJson);
+  b('spCalShare', ()=>{ if(typeof shareAppItem==='function') shareAppItem('training'); });
   b('spCalRename', spCalRename);
   // Dropdown "Más acciones" (mismo patrón que Plan Semanal)
   const moreBtn = document.getElementById('spCalMoreBtn');

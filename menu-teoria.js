@@ -388,8 +388,25 @@
      lead:'La imagen actual es menos dogmática que hace unos años. Para hipertrofia importan mucho el volumen semanal y el esfuerzo efectivo; para fuerza máxima, las cargas altas y la práctica específica del gesto siguen teniendo ventaja. La frecuencia, por sí sola, importa menos de lo que suele pensarse cuando el volumen total está igualado.',
      cuerpo:`<p><strong>Volumen</strong></p><p>La evidencia reciente apunta a una relación dosis-respuesta entre volumen semanal y ganancias de hipertrofia y fuerza, pero no infinita: al subir mucho el número de series aparecen rendimientos decrecientes. Para divulgación conviene evitar mensajes como cuantas más series mejor siempre. Mejor decir: más volumen suele ayudar hasta cierto punto, si se recupera bien. </p><p><strong>Intensidad o carga</strong></p><p>Para hipertrofia, una gama relativamente amplia de cargas puede funcionar si la serie se acerca lo suficiente al esfuerzo alto. Para fuerza máxima, las cargas altas siguen aventajando a las ligeras. Traducción práctica: no hace falta entrenar pesado siempre para ganar músculo, pero sí conviene mover carga relativamente alta de forma regular si la meta principal es fuerza. </p><p><strong>Frecuencia</strong></p><p>Cuando el volumen total está igualado, la frecuencia semanal importa poco para hipertrofia. Para fuerza, una frecuencia mayor puede ayudar, pero sobre todo porque facilita repartir más volumen o practicar más veces el gesto. Esto desmonta el falso debate de entrenar un músculo una vez frente a muchas veces como si la frecuencia fuera una variable mágica independiente del resto. </p><p><strong>Proximidad al fallo</strong></p><p>No parece necesario llegar al fallo muscular en todas las series. La evidencia sugiere que entrenar cerca del fallo basta en muchos contextos y que la hipertrofia podría beneficiarse de terminar las series más cerca del fallo, mientras la fuerza cambia menos a lo largo de un rango amplio de repeticiones en reserva. El coste es la fatiga: cuanto más al límite, más recuperación exigirá el programa. </p><p><strong>Descanso entre series</strong></p><p>Los descansos de más de 60 segundos muestran una pequeña ventaja para hipertrofia. En ejercicios multiarticulares pesados, 2 a 3 minutos suele ser una recomendación razonable porque ayuda a sostener rendimiento y volumen. En accesorios o trabajos más ligeros, descansos algo más cortos pueden ser aceptables. </p><ul><li><strong>Fuerza:</strong> priorizar cargas altas, buena técnica, descansos generosos y frecuencia suficiente para practicar. </li><li><strong>Hipertrofia:</strong> priorizar volumen semanal suficiente, esfuerzo alto y una carga que permita acercarse al fallo con técnica estable. </li></ul>`,
      nota:'Certeza: moderada para volumen, carga y frecuencia; moderada-baja para la dosis exacta óptima de RIR y para el techo de volumen, porque parte de la evidencia viene de metarregresiones y comparaciones indirectas.',
-     verAlso:['dosis-minima-eficaz','guia-para-principiantes','sexo-y-entrenamiento'],
+     verAlso:['organizar-volumen-y-splits','dosis-minima-eficaz','guia-para-principiantes','sexo-y-entrenamiento'],
      refs:['grgic-2018-frequency-strength-meta','schoenfeld-2019-frequency-hypertrophy-meta','lopez-2021-load-effects-network-meta','grgic-2022-failure-vs-nonfailure','robinson-2024-proximity-to-failure','singer-2024-rest-intervals-hypertrophy']},
+    {id:'organizar-volumen-y-splits', tema:'ejercicio', nivel:'avanzado',
+     titulo:'Cómo repartir el volumen: full-body, torso/pierna y PPL',
+     lead:'Una división no es buena por su nombre, sino porque permite repartir un volumen recuperable, entrenar con calidad y sostener el plan. La frecuencia ayuda a organizar; con el volumen igualado no parece ser un estímulo hipertrófico independiente.',
+     cuerpo:`<p><strong>Qué aporta el material revisado.</strong> La carpeta «Nuevas cosas que revisar» propone tres estructuras útiles: cuerpo completo en 3 días, torso/pierna en 4 y empuje/tirón/pierna en 6. Las tres pueden funcionar. La elección depende de experiencia, días disponibles, duración tolerable de cada sesión, material y recuperación.</p>
+       <p><strong>Volumen semanal.</strong> Como punto de partida para hipertrofia, alrededor de <strong>10 series exigentes por grupo muscular y semana</strong> puede ser una referencia útil. En personas entrenadas, algunos trabajos estudian rangos moderados de 12–20 series y volúmenes mayores, pero no existe un número universal que garantice el mejor resultado. El posicionamiento ACSM de 2026 encuentra ventaja para volúmenes más altos, a la vez que insiste en una prescripción progresiva y flexible.</p>
+       <p><strong>MEV, MAV y MRV.</strong> Los conceptos de volumen mínimo efectivo, adaptativo máximo y máximo recuperable son <strong>heurísticas de programación</strong>, no umbrales clínicos exactos validados para cada músculo. Sirven para formular una pregunta práctica: «¿Con cuánto progreso y de cuánto me recupero?». No justifican subir series automáticamente cada semana.</p>
+       <ul>
+         <li><strong>Full-body (2–3 días):</strong> reduce la dosis por músculo dentro de cada sesión y facilita practicar los patrones. Es una base eficiente para principiantes y semanas con poco tiempo.</li>
+         <li><strong>Torso/pierna (4 días):</strong> reparte cada gran región en dos exposiciones semanales y deja sesiones de duración razonable. Es un compromiso sólido para nivel intermedio.</li>
+         <li><strong>PPL (3–6 días):</strong> agrupa sinergistas y permite más especialización, pero la versión de 6 días exige mucha adherencia y recuperación.</li>
+       </ul>
+       <p><strong>Cómo progresar sin perseguir fatiga.</strong> Mantén los ejercicios principales varias semanas. Primero intenta sumar alguna repetición con la misma carga y técnica; cuando completas el objetivo con margen, sube el peso y vuelve a la parte baja del rango. Añade series solo si el rendimiento se estanca, la recuperación es buena y el grupo muscular necesita más estímulo. Si empeoran varias sesiones seguidas, el sueño o las molestias, mantén o reduce carga/series.</p>
+       <p><strong>Solapamiento.</strong> Una serie de press cuenta principalmente para pecho, pero también fatiga tríceps y deltoides anterior; un remo o jalón implica bíceps. La app contabiliza una serie para el músculo principal y media para secundarios como aproximación práctica. Por eso conviene evitar aislar un sinergista con mucha fatiga justo antes del básico que lo necesita.</p>
+       <p><strong>Aplicación en la app.</strong> En Sesiones encontrarás cuatro propuestas «Hipertrofia · Torso/Pierna» basadas en el material revisado. Son plantillas editables: usa las sugerencias de peso y repeticiones, registra el RPE y ajusta el volumen según tu evolución.</p>`,
+     nota:'La cifra de series es una referencia poblacional, no una prescripción médica. Dolor persistente, lesión, enfermedad o una caída mantenida del rendimiento requieren individualización profesional.',
+     verAlso:['variables-clave-fuerza-e-hipertrofia','guia-para-principiantes','prevencion-lesiones-progresion','sueno-descanso-recuperacion'],
+     refs:['currier-2026-acsm-resistance-position','baz-valle-2022-volume-hypertrophy','bernardez-vazquez-2022-hypertrophy-umbrella','schoenfeld-2019-frequency-hypertrophy-meta','grgic-2018-frequency-strength-meta','robinson-2024-proximity-to-failure']},
     {id:'recomposicion-corporal', tema:'metabolismo', nivel:'medio',
      titulo:'Recomposición corporal: perder grasa y ganar o mantener músculo',
      lead:'La recomposición corporal es posible, pero no siempre fácil ni lineal. Suele verse más en principiantes, personas con mayor grasa corporal, personas que retoman el entrenamiento tras parón, y en contextos donde el entrenamiento de fuerza se mantiene mientras la dieta no castiga en exceso la masa muscular.',
@@ -766,6 +783,7 @@
     .teo-article{max-width:680px;margin:0 auto}
     .teo-crumbs{font-size:.74rem;color:var(--ink-50);margin-bottom:10px}
     .teo-crumbs a{color:var(--accent,#B5603A);cursor:pointer}
+    .teo-share{float:right;border:1px solid rgba(var(--ink-rgb,44,31,14),.14);border-radius:18px;background:var(--white);color:var(--accent,#B5603A);padding:5px 10px;cursor:pointer;font-size:.72rem}
     .teo-a-t{font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--ink);line-height:1.2;margin:0 0 8px}
     .teo-a-lead{font-size:1rem;color:var(--ink-70,rgba(var(--ink-rgb,44,31,14),.8));font-style:italic;line-height:1.5;margin-bottom:14px}
     .teo-a-img{width:100%;border-radius:14px;border:1px solid rgba(var(--ink-rgb,44,31,14),.1);background:var(--white);margin:0 0 16px;display:block}
@@ -869,7 +887,7 @@
         ${next?`<button class="teo-pg next" data-art="${next.id}"><span class="teo-pg-dir">Siguiente →</span><span class="teo-pg-t">${esc(next.titulo)}</span></button>`:'<span style="flex:1"></span>'}
       </div>` : '';
     return `<div class="teo-article">
-      <div class="teo-crumbs"><a data-home>Teoría</a> › ${TEMAS[a.tema]?esc(TEMAS[a.tema].lbl):''}</div>
+      <div class="teo-crumbs"><a data-home>Teoría</a> › ${TEMAS[a.tema]?esc(TEMAS[a.tema].lbl):''}<button class="teo-share" data-share-art="${a.id}">↗ Compartir</button></div>
       <h2 class="teo-a-t">${esc(a.titulo)}</h2>
       <div class="teo-a-lead">${esc(a.lead)}</div>
       ${img}
@@ -909,6 +927,14 @@
         body.addEventListener('click', e=>{
           const g=e.target.closest('[data-goto]'); if(g){ const el=document.getElementById(g.dataset.goto); if(el){ try{ el.scrollIntoView({behavior:'smooth',block:'start'}); }catch(_){ el.scrollIntoView(); } } return; }
           const a=e.target.closest('[data-art]'); if(a){ goArticle(a.dataset.art); return; }
+          const share=e.target.closest('[data-share-art]'); if(share){
+            const item=art(share.dataset.shareArt);
+            if(item && typeof shareAppInfo==='function'){
+              const tmp=document.createElement('div'); tmp.innerHTML=item.cuerpo||'';
+              shareAppInfo(item.titulo,(item.lead||'')+'\n\n'+(tmp.textContent||'').trim());
+            }
+            return;
+          }
           const home=e.target.closest('[data-home]'); if(home){ goIndex(); return; }
           const ref=e.target.closest('[data-ref]'); if(ref){ if(typeof openBibliografia==='function') openBibliografia(ref.dataset.ref); return; }
         });
@@ -917,5 +943,9 @@
   }
 
   window.openTeoria = open;
+  window.openTeoriaArticle = function(id){
+    open();
+    setTimeout(()=>{ if(art(id)) goArticle(id); }, 0);
+  };
   if(typeof AppPage!=='undefined') AppPage.register('teoria', open);
 })();

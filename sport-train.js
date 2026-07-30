@@ -14,6 +14,7 @@
 var TrainState = null;
 var _trTick = null;      // intervalo del cronómetro de sesión
 var _trRestTick = null;  // intervalo del cronómetro de descanso
+var _trNavDir = '';      // animación breve al cambiar ejercicio
 
 /* ── Persistencia ─────────────────────────────────────────── */
 function trSaveState(){ if(TrainState) lsSet(LS_SP_TRAIN, TrainState); }
@@ -40,12 +41,15 @@ function trBuildState(sessId, who){
     const isTime = (it.dur != null) || e.mode === 'time';
     const goal   = isTime ? null : (it.reps != null ? it.reps : (e.reps || 10));
     const dur0   = isTime ? (it.dur != null ? it.dur : (e.dur || 30)) : 0;
-    let pre;
+    let pre, suggested;
     if(isTime){
       const lt = (typeof logLastTimeFor === 'function') ? logLastTimeFor(it.e, who) : null;
-      pre = {kg:0, reps:0, hint: lt ? `Última vez: ${logFmtDur(lt.dur)}${lt.dist?' · '+logFmtDist(lt.dist):''}` : ''};
+      pre = {kg:0, reps:0, hint: lt ? `Sugerencia basada en ${lt.date}: ${logFmtDur(lt.dur)}${lt.dist?' · '+logFmtDist(lt.dist):''}` : 'Primera vez · usa la duración prevista'};
+      suggested = Array.from({length:nSets}, ()=>({kg:0,reps:0,dur:lt&&lt.dur?lt.dur:dur0,dist:lt&&lt.dist?lt.dist:0,why:lt?'Repite el último bloque y edítalo según sensaciones':'Duración prevista por la sesión'}));
     } else {
-      pre = logPrefill(it.e, who, goal);
+      const sg = (typeof logSuggestSets==='function') ? logSuggestSets(it.e, who, goal, nSets) : null;
+      pre = sg ? {kg:sg.sets[0].kg,reps:sg.sets[0].reps,hint:sg.summary} : logPrefill(it.e, who, goal);
+      suggested = sg ? sg.sets : Array.from({length:nSets},()=>({kg:pre.kg,reps:pre.reps,why:pre.hint}));
     }
     return {
       e: it.e,
@@ -55,7 +59,12 @@ function trBuildState(sessId, who){
       dist: (typeof logExHasDist === 'function') && logExHasDist(it.e),   // ¿pide distancia?
       rest: it.rest != null ? it.rest : (e.rest || 60),
       hint: pre.hint,
-      sets: Array.from({length:nSets}, ()=> ({kg:pre.kg, reps:isTime?0:pre.reps, rpe:0, done:false, dur:dur0, dist:0}))
+      sets: Array.from({length:nSets}, (_,idx)=> {
+        const sg = suggested[idx] || suggested[suggested.length-1] || {};
+        return {kg:+sg.kg||0, reps:isTime?0:(+sg.reps||pre.reps), rpe:0, done:false,
+                dur:isTime?(+sg.dur||dur0):0, dist:isTime?(+sg.dist||0):0,
+                suggestion:sg.why||pre.hint||''};
+      })
     };
   }).filter(Boolean);
   if(!ex.length) return null;
@@ -228,7 +237,8 @@ function trAddSet(){
     reps: x.mode==='time' ? 0 : last.reps,
     rpe: 0, done: false,
     dur: x.mode==='time' ? (last.dur || x.goalDur || 0) : 0,
-    dist: x.mode==='time' ? (+last.dist || 0) : 0
+    dist: x.mode==='time' ? (+last.dist || 0) : 0,
+    suggestion:'Serie extra · ajusta según las sensaciones de hoy'
   });
   trSaveState(); renderTrain();
 }
@@ -271,9 +281,12 @@ function trAskRpe(x){
 }
 
 /* Navegación entre ejercicios */
-function trGoEx(i){
+function trGoEx(i, dir){
   if(!TrainState) return;
+  const prev = TrainState.cur;
   TrainState.cur = Math.max(0, Math.min(TrainState.ex.length-1, i));
+  if(TrainState.cur===prev) return;
+  _trNavDir = dir || (TrainState.cur>prev?'next':'prev');
   trSkipRest(); trSaveState(); renderTrain();
 }
 async function trSkipEx(){
@@ -281,6 +294,22 @@ async function trSkipEx(){
   if(!await pnConfirm(`¿Saltar «${(EXERCISES[x.e]||{}).name}»?\n\nLas series sin hacer no se registrarán.`, {okText:'Saltar'})) return;
   x.skipped = true;
   if(TrainState.cur < TrainState.ex.length-1) trGoEx(TrainState.cur+1); else trSaveState(), renderTrain();
+}
+/* Elimina por completo un ejercicio añadido o previsto. A diferencia de
+   «Saltar», tampoco se conservarán sus series ya marcadas en el registro. */
+async function trRemoveExercise(){
+  if(!TrainState) return;
+  if(TrainState.ex.length<=1){ pnToast('La sesión debe conservar al menos un ejercicio', 'warn'); return; }
+  const x=trCurEx(), name=(EXERCISES[x.e]||{}).name||'este ejercicio';
+  const done=(x.sets||[]).filter(s=>s.done).length;
+  const msg=`¿Eliminar «${name}» de este entrenamiento?${done?`\n\nTambién se descartarán sus ${done} series registradas.`:''}`;
+  if(!await pnConfirm(msg,{danger:true,okText:'Eliminar ejercicio'})) return;
+  const idx=TrainState.cur;
+  TrainState.ex.splice(idx,1);
+  TrainState.cur=Math.min(idx,TrainState.ex.length-1);
+  _trNavDir='next';
+  trSkipRest(); trSaveState(); renderTrain();
+  pnToast(`${name} eliminado del entrenamiento`, 'ok');
 }
 /* ── Selector de ejercicios ───────────────────────────────────
    Compartido por «Cambiar ejercicio» y «Añadir ejercicio extra».
@@ -410,7 +439,8 @@ function trSwapEx(){
     refId: x.e,
     exclude: [x.e],
     onPick: id=>{
-      const pre = logPrefill(id, TrainState.who, x.goalReps);
+      const sug = (typeof logSuggestSets==='function') ? logSuggestSets(id, TrainState.who, x.goalReps, x.sets.length) : null;
+      const pre = sug ? {kg:sug.sets[0].kg,reps:sug.sets[0].reps,hint:sug.summary} : logPrefill(id, TrainState.who, x.goalReps);
       x.e = id; x.hint = pre.hint;
       const nx = EXERCISES[id] || {};
       x.mode = (nx.mode === 'time') ? 'time' : 'reps';
@@ -418,7 +448,12 @@ function trSwapEx(){
       x.goalReps = x.mode === 'reps' ? (nx.reps||10) : null;
       x.dist = (typeof logExHasDist === 'function') && logExHasDist(id);
       x.rest = nx.rest != null ? nx.rest : x.rest;
-      x.sets.forEach(s=>{ if(!s.done){ s.kg = pre.kg; if(x.mode==='reps'){ s.reps = pre.reps; } else { s.dur = x.goalDur; s.dist = 0; } } });
+      x.sets.forEach((s,idx)=>{ if(!s.done){
+        const ss=sug && (sug.sets[idx]||sug.sets[sug.sets.length-1]);
+        s.kg = ss?ss.kg:pre.kg;
+        s.suggestion = ss?ss.why:pre.hint;
+        if(x.mode==='reps'){ s.reps = ss?ss.reps:pre.reps; } else { s.dur = x.goalDur; s.dist = 0; }
+      } });
       trSaveState(); renderTrain();
       pnToast(`Cambiado a ${nx.name}`, 'ok');
     }
@@ -438,14 +473,19 @@ function trAddExtraEx(){
       const e = EXERCISES[id]; if(!e) return;
       const isTime = e.mode === 'time';
       const goal = isTime ? null : (e.reps||10);
-      const pre  = isTime ? {kg:0, reps:0, hint:''} : logPrefill(id, TrainState.who, goal);
+      const nSets=e.sets||3;
+      const sug = !isTime && typeof logSuggestSets==='function' ? logSuggestSets(id, TrainState.who, goal, nSets) : null;
+      const pre  = isTime ? {kg:0, reps:0, hint:'Duración prevista por el ejercicio'} : (sug?{kg:sug.sets[0].kg,reps:sug.sets[0].reps,hint:sug.summary}:logPrefill(id, TrainState.who, goal));
       TrainState.ex.push({
         e:id, extra:true,
         mode: isTime ? 'time' : 'reps',
         goalReps: goal, goalDur: isTime ? (e.dur||30) : null,
         dist: (typeof logExHasDist === 'function') && logExHasDist(id),
         rest: e.rest || 60, hint: pre.hint,
-        sets: Array.from({length: e.sets||3}, ()=> ({kg:pre.kg, reps:isTime?0:pre.reps, rpe:0, done:false, dur:isTime?(e.dur||30):0, dist:0}))
+        sets: Array.from({length:nSets}, (_,idx)=>{ const ss=sug&&(sug.sets[idx]||sug.sets[sug.sets.length-1]); return {
+          kg:ss?ss.kg:pre.kg, reps:isTime?0:(ss?ss.reps:pre.reps), rpe:0, done:false,
+          dur:isTime?(e.dur||30):0, dist:0, suggestion:ss?ss.why:pre.hint
+        }; })
       });
       TrainState.cur = TrainState.ex.length - 1;      // salta directo a él
       trSkipRest(); trSaveState(); renderTrain();
@@ -629,7 +669,14 @@ function renderTrain(){
     el = document.createElement('div');
     el.id = 'trainOverlay';
     el.className = 'train-ov';
+    el.setAttribute('data-noswipe','1');
     document.body.appendChild(el);
+    // Gesto horizontal claro: izquierda avanza, derecha vuelve. Inputs,
+    // botones y paneles interactivos conservan sus propios gestos.
+    if(typeof pnSwipe==='function') pnSwipe(el,
+      ()=>{ if(TrainState && TrainState.cur<TrainState.ex.length-1) trGoEx(TrainState.cur+1,'next'); },
+      ()=>{ if(TrainState && TrainState.cur>0) trGoEx(TrainState.cur-1,'prev'); },
+      {min:55,maxT:700,guard:t=>!!(t.closest&&t.closest('input,button,select,textarea,details,.tr-rest,.tr-sets'))});
   }
   document.body.classList.add('train-mode');
   renderTrainBar();          // retira la barra «Entrenar hoy» mientras entrenas
@@ -657,11 +704,12 @@ function renderTrain(){
   <div class="tr-body">
     <div class="tr-ex">
       ${typeof exIllusBox==='function' ? `<div class="tr-ex-illus">${exIllusBox(x.e,{cls:'train'})}</div>` : ''}
-      <span class="tr-ex-n">Ejercicio ${st.cur+1} de ${st.ex.length}${x.extra?' · añadido':''}</span>
+      <span class="tr-ex-n">Ejercicio ${st.cur+1} de ${st.ex.length}${x.extra?' · añadido':''}<i class="tr-swipe-hint">‹ desliza ›</i></span>
       <h2>${spEsc(ex.name)}</h2>
       <div class="tr-ex-meta">
         <span>${spEsc(ex.equip||'')}</span>
         ${best ? `<span class="tr-best">🏆 ${best.kg} kg × ${best.reps}</span>` : ''}
+        ${st.ex.length>1?`<button class="tr-ex-remove" id="trRemoveEx" type="button">🗑 Quitar ejercicio</button>`:''}
       </div>
       ${x.hint ? `<div class="tr-hint">💡 ${spEsc(x.hint)}</div>` : ''}
       ${ex.cues ? `<details class="tr-cues"><summary>Técnica</summary><p>${spEsc(ex.cues)}</p></details>` : ''}
@@ -671,6 +719,7 @@ function renderTrain(){
       <div class="tr-set ${k.done?'done':''} ${n===i&&!doneAll?'cur':''}">
         <span class="tr-set-n">${n+1}</span>
         <span class="tr-set-v mono">${x.mode==='time' ? (logFmtDur(k.dur) + (+k.dist>0?' · '+logFmtDist(k.dist):'')) : `${k.kg?k.kg+' kg':'—'} × ${k.reps||'—'}`}</span>
+        ${k.suggestion&&!k.done?`<span class="tr-set-sug" title="${spEsc(k.suggestion)}">sugerida</span>`:''}
         ${k.rpe?`<span class="tr-set-rpe">RPE ${k.rpe}</span>`:''}
         <span class="tr-set-ok">${k.done?'✓':''}</span>
       </div>`).join('')}
@@ -688,6 +737,7 @@ function renderTrain(){
         </div>
       </div>` : `
       ${x.mode === 'time' ? trTimeInput(x, s) : trRepsInput(x, s)}
+      ${s.suggestion?`<div class="tr-current-sug"><b>Propuesta editable · serie ${i+1}</b><span>${spEsc(s.suggestion)}</span></div>`:''}
       <button class="tr-go" id="trDone">✓ ${x.mode==='time' ? (x.sets.length>1?('Bloque '+(i+1)+' hecho'):'Registrar') : ('Serie '+(i+1)+' hecha')}</button>
       <div class="tr-set-edit">
         <button class="tr-set-edit-b" id="trAddSet">+ Serie</button>
@@ -711,6 +761,7 @@ function renderTrain(){
   on('trPause', trTogglePause);
   on('trSwap', trSwapEx);
   on('trSkip', trSkipEx);
+  on('trRemoveEx', trRemoveExercise);
   on('trQuit', trAbandon);
   on('trFin',  trFinish);
   on('trFin2', trFinish);
@@ -720,7 +771,7 @@ function renderTrain(){
   on('trAddSet',trAddSet);
   on('trRmSet',trRemoveSet);
   on('trAddEx',trAddExtraEx);
-  on('trNext', ()=> trGoEx(st.cur+1));
+  on('trNext', ()=> trGoEx(st.cur+1,'next'));
   el.querySelectorAll('[data-go]').forEach(b=> b.addEventListener('click', ()=> trGoEx(+b.dataset.go)));
   el.querySelectorAll('[data-kg]').forEach(b=> b.addEventListener('click', ()=> trBumpKg(+b.dataset.kg)));
   el.querySelectorAll('[data-rp]').forEach(b=> b.addEventListener('click', ()=> trBumpReps(+b.dataset.rp)));
@@ -746,6 +797,13 @@ function renderTrain(){
   });
   if(distI) distI.addEventListener('input', ()=>{ s.dist = Math.max(0, Math.round((+distI.value||0)*1000)); trSaveState(); });
   on('trDone', trDoneSet);
+
+  const navBody=el.querySelector('.tr-body');
+  if(navBody && _trNavDir){
+    navBody.classList.add(_trNavDir==='next'?'tr-nav-in-next':'tr-nav-in-prev');
+    requestAnimationFrame(()=>requestAnimationFrame(()=>navBody.classList.remove('tr-nav-in-next','tr-nav-in-prev')));
+    _trNavDir='';
+  }
 
   trStartTick();
   trRenderRest();
@@ -1010,6 +1068,7 @@ window.trStartEntry = trStartEntry;
 window.trOpenPicker = trOpenPicker;
 window.trAddExtraEx = trAddExtraEx;
 window.trRemoveSet = trRemoveSet;
+window.trRemoveExercise = trRemoveExercise;
 window.trChooseWorkout = trChooseWorkout;
 window.trStartAdHoc = trStartAdHoc;
 window.trFmtClock = trFmtClock;
