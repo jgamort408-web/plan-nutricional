@@ -213,19 +213,46 @@ function trCurEx(){ return TrainState ? TrainState.ex[TrainState.cur] : null; }
 /* Índice de la primera serie sin cerrar del ejercicio actual */
 function trNextSetIdx(x){ const i = (x.sets||[]).findIndex(s=> !s.done); return i < 0 ? (x.sets.length-1) : i; }
 
+/* Valor de una serie tal y como se muestra en la lista (mismo formato que la
+   plantilla de renderTrain, extraído para reutilizarlo al refrescar en sitio) */
+function trSetVHtml(x, k){
+  return x.mode === 'time'
+    ? (logFmtDur(k.dur) + (+k.dist>0 ? ' · ' + logFmtDist(k.dist) : ''))
+    : `${k.kg?k.kg+' kg':'—'} × ${k.reps||'—'}`;
+}
+/* Refresca EN SITIO los valores tras pulsar ± (sin re-render completo: así no
+   salta el scroll ni parpadea la imagen del ejercicio). Actualiza el input
+   activo, sus subtítulos con formato y las filas de series afectadas. */
+function trSyncActiveSet(){
+  const el = document.getElementById('trainOverlay'); if(!el) return;
+  const x = trCurEx(); if(!x) return;
+  const i = trNextSetIdx(x), s = x.sets[i]; if(!s) return;
+  const set = (node, v)=>{ if(node && document.activeElement !== node) node.value = v; };
+  set(el.querySelector('#trKg'),   s.kg||'');
+  set(el.querySelector('#trReps'), s.reps||'');
+  const durI = el.querySelector('#trDur');
+  if(durI) set(durI, (trDurUnit(x)==='min' ? (Math.round((+s.dur||0)/60*10)/10) : (+s.dur||0)) || '');
+  const distI = el.querySelector('#trDist');
+  if(distI) set(distI, s.dist ? (Math.round(+s.dist/10)/100) : '');
+  const durSub = el.querySelector('#trDurSub'); if(durSub) durSub.textContent = logFmtDur(+s.dur||0);
+  const distSub = el.querySelector('#trDistSub'); if(distSub) distSub.textContent = +s.dist>0 ? logFmtDist(s.dist) : '—';
+  const rows = el.querySelectorAll('.tr-sets .tr-set');
+  x.sets.forEach((k,n)=>{ const v = rows[n] && rows[n].querySelector('.tr-set-v'); if(v) v.innerHTML = trSetVHtml(x, k); });
+}
+
 function trBumpKg(delta){
   const x = trCurEx(); if(!x) return;
   const i = trNextSetIdx(x);
   x.sets[i].kg = Math.max(0, spRoundLoad((+x.sets[i].kg||0) + delta));
   // arrastra el cambio a las series siguientes aún sin hacer
   for(let j = i+1; j < x.sets.length; j++) if(!x.sets[j].done) x.sets[j].kg = x.sets[i].kg;
-  trSaveState(); renderTrain();
+  trSaveState(); trSyncActiveSet();
 }
 function trBumpReps(delta){
   const x = trCurEx(); if(!x) return;
   const i = trNextSetIdx(x);
   x.sets[i].reps = Math.max(0, (+x.sets[i].reps||0) + delta);
-  trSaveState(); renderTrain();
+  trSaveState(); trSyncActiveSet();
 }
 /* ── Medidas por tiempo (duración) y distancia ────────────────
    Para lo que va por tiempo (senderismo, carrera, plancha…) el ± toca la
@@ -239,13 +266,13 @@ function trBumpDur(delta){
   const i = trNextSetIdx(x);
   x.sets[i].dur = Math.max(0, (+x.sets[i].dur||0) + delta);
   for(let j=i+1;j<x.sets.length;j++) if(!x.sets[j].done) x.sets[j].dur = x.sets[i].dur;
-  trSaveState(); renderTrain();
+  trSaveState(); trSyncActiveSet();
 }
 function trBumpDist(delta){
   const x = trCurEx(); if(!x) return;
   const i = trNextSetIdx(x);
   x.sets[i].dist = Math.max(0, Math.round((+x.sets[i].dist||0) + delta));
-  trSaveState(); renderTrain();
+  trSaveState(); trSyncActiveSet();
 }
 /* Cierra la serie en curso y arranca el descanso */
 function trDoneSet(){
@@ -677,7 +704,7 @@ function trTimeInput(x, s){
         <input class="mono" type="number" inputmode="decimal" id="trDur" value="${durVal||''}" placeholder="0">
         <button data-dur="${step}">+</button>
       </div>
-      <span class="tr-in-sub mono">${logFmtDur(+s.dur||0)}</span>
+      <span class="tr-in-sub mono" id="trDurSub">${logFmtDur(+s.dur||0)}</span>
     </div>`;
   const dist = x.dist ? `
     <div class="tr-in-grp">
@@ -687,7 +714,7 @@ function trTimeInput(x, s){
         <input class="mono" type="number" inputmode="decimal" step="0.1" id="trDist" value="${s.dist?(Math.round(+s.dist/10)/100):''}" placeholder="0">
         <button data-dist="${trDistStep()}">+</button>
       </div>
-      <span class="tr-in-sub mono">${+s.dist>0?logFmtDist(s.dist):'—'}</span>
+      <span class="tr-in-sub mono" id="trDistSub">${+s.dist>0?logFmtDist(s.dist):'—'}</span>
     </div>` : '';
   return `<div class="tr-input tr-input-time">${dur}${dist}</div>`;
 }
@@ -763,7 +790,7 @@ function renderTrain(){
     <div class="tr-sets">${x.sets.map((k,n)=>`
       <div class="tr-set ${k.done?'done':''} ${n===i&&!doneAll?'cur':''}">
         <span class="tr-set-n">${n+1}</span>
-        <span class="tr-set-v mono">${x.mode==='time' ? (logFmtDur(k.dur) + (+k.dist>0?' · '+logFmtDist(k.dist):'')) : `${k.kg?k.kg+' kg':'—'} × ${k.reps||'—'}`}</span>
+        <span class="tr-set-v mono">${trSetVHtml(x,k)}</span>
         ${k.suggestion&&!k.done?`<span class="tr-set-sug" title="${spEsc(k.suggestion)}">sugerida</span>`:''}
         ${k.rpe?`<span class="tr-set-rpe">RPE ${k.rpe}</span>`:''}
         <span class="tr-set-ok">${k.done?'✓':''}</span>

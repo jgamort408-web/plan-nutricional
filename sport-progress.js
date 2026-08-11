@@ -126,9 +126,25 @@ function pgEntryCard(e){
         </div>`;
       }).join('')}
       ${e.notes ? `<p class="pg-e-notes">📝 ${spEsc(e.notes)}</p>` : ''}
+      ${(typeof trPeople==='function' && trPeople().length>1) ? `<div class="pg-e-who">
+        <span class="pg-e-who-lbl">Quién entrenó</span>${whoSeg(e.who||'A','data-ewho')}
+      </div>` : ''}
       <div class="pg-e-acts"><button class="btn-sec sm" data-del="${e.id}">🗑️ Borrar</button></div>
     </div>` : ''}
   </article>`;
+}
+
+/* Reasigna a posteriori quién hizo un entrenamiento (para registros previos a
+   poder elegir persona). Recalcula peso corporal y kcal con el perfil nuevo. */
+function pgSetEntryWho(eid, who){
+  const e = logGet(eid); if(!e || e.who === who) return;
+  e.who = who;
+  if(typeof personWeight === 'function') e.bodyweight = personWeight(who);
+  if(typeof logEntryKcal === 'function') e.kcal = logEntryKcal(e, e.bodyweight);
+  logSave(e);
+  const nm = (typeof trPersonName==='function') ? trPersonName(who) : (typeof WHO_LBL!=='undefined'?WHO_LBL[who]:who);
+  pnToast(`Entrenamiento asignado a ${nm}`, 'ok');
+  renderProgress();
 }
 
 /* ── Render principal ─────────────────────────────────────── */
@@ -225,6 +241,10 @@ function renderProgress(){
   host.querySelectorAll('[data-del]').forEach(b=> b.addEventListener('click', async ()=>{
     if(!await pnConfirm('¿Borrar este entrenamiento del historial?', {danger:true, okText:'Borrar'})) return;
     logDelete(b.dataset.del); pnToast('Entrenamiento borrado', 'ok'); renderProgress();
+  }));
+  host.querySelectorAll('[data-ewho] .who-b').forEach(b=> b.addEventListener('click', ()=>{
+    const card = b.closest('.pg-entry');
+    if(card && card.dataset.eid) pgSetEntryWho(card.dataset.eid, b.dataset.who);
   }));
   const sel = document.getElementById('pgExSel');
   if(sel) sel.addEventListener('change', ()=>{ _pgExSel = sel.value; renderProgress(); });
