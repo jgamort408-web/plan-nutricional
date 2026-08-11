@@ -30,3 +30,8 @@ capture-shots.js
 cdp-shots.js
 .commitmsg.tmp
 *.output
+
+# Carpetas de trabajo (material de revisión, no es la app)
+Nuevas cosas que revisar/
+Nueva carpeta/
+serve.cjs

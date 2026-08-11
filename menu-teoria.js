@@ -46,6 +46,19 @@
        <p>Añade una porción de <strong>grasa saludable</strong> (AOVE, aguacate, frutos secos) y fruta de postre. Es una guía flexible, no una regla rígida.</p>`,
      verAlso:['que-es-comer-bien','proteina-cuanta','grasas-buenas'], refs:['harvard-plate','aesan-recom']},
 
+    {id:'pequenos-cambios', tema:'practica', nivel:'basico',
+     titulo:'Pequeños cambios para comer mejor',
+     lead:'No hace falta una dieta perfecta: mejora con cambios pequeños y sostenibles en tres direcciones — MÁS, CAMBIAR A y MENOS.',
+     cuerpo:`<p>La guía <em>Pequeños cambios para comer mejor</em> (Agencia de Salud Pública de Cataluña) resume la alimentación saludable de forma práctica: en vez de prohibiciones, propone <strong>cambios pequeños y mantenibles</strong> agrupados en tres ideas.</p>
+       <p><strong style="color:var(--sport,#5e8a3e)">MÁS</strong> — come más de lo que suele faltar:</p>
+       <ul><li><strong>Hortalizas</strong>: al menos 2 al día (comida y cena), crudas y cocidas.</li><li><strong>Fruta fresca</strong>: al menos 3 al día; entera mejor que en zumo.</li><li><strong>Legumbres</strong>: 3-4 veces por semana, como plato principal.</li><li><strong>Frutos secos</strong> crudos o tostados sin sal: 3-7 puñados a la semana.</li><li><strong>Vida activa y social</strong>: muévete más y come acompañado, en la mesa y sin pantallas.</li></ul>
+       <p><strong style="color:var(--gold,#c68a2e)">CAMBIAR A</strong> — sustituye por una opción mejor:</p>
+       <ul><li><strong>Agua</strong> como bebida principal, en lugar de refrescos, zumos o alcohol.</li><li><strong>Cereales integrales</strong> (pan, arroz, pasta) en vez de refinados.</li><li><strong>Aceite de oliva virgen</strong> para aliñar y cocinar.</li><li>Alimentos <strong>de temporada y de proximidad</strong>.</li></ul>
+       <p><strong style="color:var(--danger,#c0492e)">MENOS</strong> — reduce lo que sobra:</p>
+       <ul><li><strong>Sal</strong>: menos de 5 g al día; usa especias y hierbas, y vigila la sal oculta de los procesados.</li><li><strong>Azúcares</strong> y bebidas azucaradas, bollería y postres.</li><li><strong>Carne roja y procesada</strong>: la roja con moderación (3-4 raciones de carne/semana en total, mejor blanca y magra) y la procesada (embutidos) lo mínimo.</li><li><strong>Alimentos ultraprocesados</strong>: cocina más en casa y lee las etiquetas.</li></ul>
+       <p>La clave es el <strong>patrón global</strong>: elige uno o dos cambios y hazlos habituales antes de sumar el siguiente.</p>`,
+     verAlso:['que-es-comer-bien','plato-ideal','hidratos-calidad'], refs:['aspcat-cambios','who-diet']},
+
     {id:'macros-intro', tema:'macros', nivel:'basico',
      titulo:'Macronutrientes: las tres grandes piezas',
      lead:'Proteína, grasa e hidratos aportan energía y funciones distintas. Ninguno es el enemigo.',

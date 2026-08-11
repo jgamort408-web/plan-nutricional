@@ -33,6 +33,13 @@
 
   // Referencias base (ampliables). Las citas usan formato abreviado.
   const BIBLIO = [
+    {id:'aspcat-cambios', tipo:'guia', temas:['nutricion','practica'], year:2024,
+     autores:'Agencia de Salud Pública de Cataluña (ASPCAT)',
+     titulo:'Pequeños cambios para comer mejor',
+     fuente:'Generalitat de Catalunya · Departament de Salut',
+     url:'https://salutpublica.gencat.cat/ca/ambits/promocio_salut/alimentacio_saludable/Petits-canvis/',
+     cita:'Agencia de Salud Pública de Cataluña. Pequeños cambios para comer mejor. Barcelona: ASPCAT; 2ª ed. digital, 2024.',
+     resumen:'Guía de alimentación saludable basada en la dieta mediterránea que propone mejorar la alimentación mediante pequeños cambios sostenibles agrupados en tres ideas: comer MÁS de lo que suele faltar (fruta, hortalizas, legumbres, frutos secos, vida activa y social), CAMBIAR A mejores opciones (agua como bebida principal, cereales integrales, aceite de oliva virgen, alimentos de temporada y proximidad) y comer MENOS de lo que sobra (sal, azúcares, carne roja y procesada, alimentos ultraprocesados). Incluye una guía de frecuencia de consumo por grupos de alimentos.'},
     {id:'who-diet', tipo:'guia', temas:['nutricion'], year:2020,
      autores:'Organización Mundial de la Salud (OMS)',
      titulo:'Alimentación sana — Datos y cifras',

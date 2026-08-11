@@ -30,6 +30,43 @@ function trClearState(){ TrainState = null; lsSet(LS_SP_TRAIN, null); }
 /* ¿hay un entreno a medias? (lo usa el calendario para ofrecer «Reanudar») */
 function trHasPending(){ return !!trLoadState(); }
 
+/* ── Quién entrena (persona) ──────────────────────────────────
+   Cada usuario entrena en su propio dispositivo y registra bajo su
+   persona. Se recuerda la última elegida (sport:who:v1) y se puede
+   cambiar en cualquier momento; al cambiar, las series sin hacer se
+   re-prellenan con la carga sugerida de esa persona. */
+var LS_SP_WHO = 'sport:who:v1';
+function trPeople(){ return (typeof PEOPLE!=='undefined' && PEOPLE.length) ? PEOPLE.slice() : ['A','B']; }
+function trPersonName(w){ return (typeof TARGETS!=='undefined' && TARGETS[w] && TARGETS[w].name) || ('Persona '+w); }
+function trPersonSym(w){ return (typeof TARGETS!=='undefined' && TARGETS[w] && TARGETS[w].sym) || '🧑'; }
+function trWho(){ const w=lsGet(LS_SP_WHO,null), ppl=trPeople(); return (w && ppl.includes(w)) ? w : ppl[0]; }
+function trSetWho(w){ lsSet(LS_SP_WHO, w); }
+/* Aplica una persona al entreno en curso: registra bajo ella y re-prellena
+   las series sin hacer con SU carga sugerida (historial propio). */
+function trApplyWho(w){
+  if(!TrainState || w===TrainState.who) return;
+  TrainState.who = w; trSetWho(w);
+  TrainState.ex.forEach(x=>{
+    if(x.mode==='time') return;
+    const pre = (typeof logPrefill==='function') ? logPrefill(x.e, w, x.goalReps) : null;
+    if(pre){ x.hint = pre.hint; x.sets.forEach(s=>{ if(!s.done){ s.kg = pre.kg; s.reps = pre.reps; } }); }
+  });
+  trSaveState(); renderTrain();
+  if(typeof pnToast==='function') pnToast('Ahora entrena '+trPersonName(w), 'ok');
+}
+/* Selector de persona (solo si hay más de una) */
+function trSwitchWho(){
+  if(!TrainState) return;
+  const ppl = trPeople();
+  if(ppl.length < 2){ if(typeof pnToast==='function') pnToast('Solo hay una persona. Añade otra en Ajustes › Personas.', 'warn'); return; }
+  const rows = ppl.map(w=>`<button class="tr-who-opt ${w===TrainState.who?'on':''}" data-w="${w}"><span class="tr-who-sym">${trPersonSym(w)}</span><b>${spEsc(trPersonName(w))}</b>${w===TrainState.who?'<i>✓</i>':''}</button>`).join('');
+  openForm(`<div class="form-hd"><h2>¿Quién entrena?</h2><span class="form-sub">Se registrará bajo esta persona y usará su historial de cargas</span></div>
+    <div class="form-body"><div class="tr-who-list">${rows}</div></div>
+    <div class="form-actions"><button class="btn-sec" id="trWhoCancel">Cancelar</button></div>`);
+  formBody().querySelectorAll('[data-w]').forEach(b=> b.addEventListener('click', ()=>{ const w=b.dataset.w; closeForm(); trApplyWho(w); }));
+  const c=document.getElementById('trWhoCancel'); if(c) c.addEventListener('click', closeForm);
+}
+
 /* ── Arranque ─────────────────────────────────────────────── */
 /* Crea el estado inicial a partir de una sesión del catálogo */
 function trBuildState(sessId, who){
@@ -668,6 +705,11 @@ function renderTrain(){
   const best = logBestFor(x.e, st.who);
 
   let el = document.getElementById('trainOverlay');
+  // Al pulsar +peso/+rep/registrar se re-renderiza el MISMO ejercicio: guardamos
+  // el scroll para restaurarlo y que la vista no salte arriba. Al CAMBIAR de
+  // ejercicio (_trNavDir) sí empieza arriba.
+  const prevScroll = el ? ((el.querySelector('.tr-body')||{}).scrollTop || 0) : 0;
+  const isNav = !!_trNavDir;
   if(!el){
     el = document.createElement('div');
     el.id = 'trainOverlay';
@@ -689,7 +731,7 @@ function renderTrain(){
     <button class="tr-x" id="trMin" title="Minimizar">▾</button>
     <div class="tr-hd-mid">
       <b class="tr-sess">${spEsc(st.sessName||'Entrenamiento')}</b>
-      <span class="tr-prog">${doneSets}/${totalSets} series</span>
+      <span class="tr-prog">${doneSets}/${totalSets} series${trPeople().length>1?` · <button class="tr-who" id="trWhoBtn" type="button" title="Cambiar quién entrena">${trPersonSym(st.who)} ${spEsc(trPersonName(st.who))} ▾</button>`:''}</span>
     </div>
     <button class="tr-clock ${st.pauseAt?'paused':''}" id="trPause" title="Pausar/reanudar">
       <span class="mono" id="trClock">${trFmtClock(trElapsedSec())}</span>
@@ -761,6 +803,7 @@ function renderTrain(){
   /* wiring */
   const on = (id, fn)=>{ const b = document.getElementById(id); if(b) b.addEventListener('click', fn); };
   on('trMin', trMinimize);
+  on('trWhoBtn', trSwitchWho);
   on('trPause', trTogglePause);
   on('trSwap', trSwapEx);
   on('trSkip', trSkipEx);
@@ -808,6 +851,12 @@ function renderTrain(){
     _trNavDir='';
   }
 
+  // restaura el scroll salvo al cambiar de ejercicio, y centra el paso activo
+  const bodyEl = el.querySelector('.tr-body');
+  if(bodyEl && !isNav) bodyEl.scrollTop = prevScroll;
+  const stepsEl = el.querySelector('.tr-steps'), activeStep = el.querySelector('.tr-step.on');
+  if(stepsEl && activeStep) stepsEl.scrollLeft = activeStep.offsetLeft - stepsEl.clientWidth/2 + activeStep.clientWidth/2;
+
   trStartTick();
   trRenderRest();
   if(trRestLeft() > 0) trRestTick();
@@ -847,13 +896,16 @@ function trStartToday(){
 }
 /* Arranca una entrada del plan aplicando la fase del mesociclo */
 function trStartEntry(ent){
+  // por defecto entrena la persona de ESTE dispositivo (trWho), no la del plan:
+  // cada usuario registra bajo la suya y puede cambiarla en el overlay.
+  const who = (ent.who==='A'||ent.who==='B') && trPeople().includes(ent.who) ? ent.who : trWho();
   const live = (typeof spSessionFor === 'function') ? spSessionFor(ent) : SESSIONS[ent.s];
   if(live && ent.phase){
     const tmpId = '_live_' + ent.s + '_' + (ent.week||1);
     SESSIONS[tmpId] = live;
-    startTraining(tmpId, ent.who === 'B' ? 'B' : 'A');
+    startTraining(tmpId, who);
   } else {
-    startTraining(ent.s, ent.who === 'B' ? 'B' : 'A');
+    startTraining(ent.s, who);
   }
 }
 
@@ -957,7 +1009,7 @@ function trStartAdHoc(sess, who){
   if(!sess){ pnToast('No se pudo generar la sesión', 'err'); return; }
   const id = '_adhoc_' + Date.now().toString(36);
   SESSIONS[id] = sess;
-  startTraining(id, who || 'A');
+  startTraining(id, who || trWho());
 }
 
 function trChooseWorkout(){
@@ -1001,7 +1053,7 @@ function trChooseWorkout(){
     }).join('') || `<div class="trc-empty">Ninguna sesión coincide. Prueba a generar una a medida abajo.</div>`;
 
     host.querySelectorAll('[data-start]').forEach(b=> b.addEventListener('click', ()=>{
-      closeForm(); startTraining(b.dataset.start, 'A');
+      closeForm(); startTraining(b.dataset.start, trWho());
     }));
 
     // botón de generar según los músculos elegidos
@@ -1075,7 +1127,7 @@ function trChooseWorkout(){
     const prof=spProfile();
     const sess=buildSessionByCriteria(ms, _trChoose.dur, 'media', 'all', {profile:prof});
     if(!sess){ pnToast('No hay ejercicios para esos músculos con tu material', 'warn'); return; }
-    closeForm(); trStartAdHoc(sess, 'A');
+    closeForm(); trStartAdHoc(sess, trWho());
   });
   document.getElementById('trChooseCancel').addEventListener('click', closeForm);
   render();
@@ -1094,4 +1146,7 @@ window.trRemoveSet = trRemoveSet;
 window.trRemoveExercise = trRemoveExercise;
 window.trChooseWorkout = trChooseWorkout;
 window.trStartAdHoc = trStartAdHoc;
+window.trWho = trWho;
+window.trSetWho = trSetWho;
+window.trSwitchWho = trSwitchWho;
 window.trFmtClock = trFmtClock;
