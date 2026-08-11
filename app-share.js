@@ -297,6 +297,7 @@ function _ashShowPayload(p, opts){
       <b>📱 ¿Tienes la app instalada en tu iPhone?</b>
       <p>La app de tu pantalla de inicio guarda los datos <b>aparte de Safari</b>, así que «Cargar» aquí no llegaría a ella. Para pasar este ${kindWord} a tu app:</p>
       <ol><li>Pulsa <b>📋 Copiar código</b>.</li><li>Abre <b>Plan Nutricional</b> desde tu pantalla de inicio.</li><li>Pulsa <b>📥 Importar</b> (junto a «Compartir») y pega el código.</li></ol>
+      <button class="ash-tut-link" id="ashIosTut" type="button">📖 Ver tutorial paso a paso</button>
     </div>`:'';
   const installNote = (!iosCopy)?`<div class="ash-install-note" id="ashInstallStatus">${_ashIsStandalone()?'Abierto en la aplicación.':'Puedes usarlo ahora en la web o instalar la aplicación en este dispositivo.'}</div>`:'';
   const install=(!iosCopy && !_ashIsStandalone() && p.kind!=='info')?`<button class="btn-sec" id="ashInstall" type="button">⬇ Instalar app</button>`:'';
@@ -312,6 +313,7 @@ function _ashShowPayload(p, opts){
     await _ashCopy(opts.url||location.href);
     _ashToast('Código copiado. Ábrelo en tu app y pégalo en 📥 Importar.');
   });
+  const it=document.getElementById('ashIosTut'); if(it)it.addEventListener('click',()=>{ if(typeof window.pnTutorial==='function') window.pnTutorial('iosShare'); });
   const loadBtn=document.getElementById('ashLoad'); if(loadBtn) loadBtn.addEventListener('click',()=>{
     try{const msg=_ashImportPayload(p);if(source==='hash')_ashClearHash();_ashToast(msg);}
     catch(err){_ashToast('No se pudo cargar: '+err.message,'err');}
