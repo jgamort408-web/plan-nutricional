@@ -262,29 +262,91 @@ async function _ashInstall(){
     status.textContent='Abre el menú del navegador y elige “Instalar aplicación” o “Añadir a pantalla de inicio”.';
   }
 }
+/* ¿iPhone/iPad? En iOS, la app añadida a la pantalla de inicio corre en un
+   WebKit APARTE de Safari y NO comparte su almacenamiento. Por eso un enlace
+   compartido, que siempre abre en Safari, no puede "cargar" el contenido en la
+   app instalada: hay que pasarlo a mano con el código. */
+function _ashIsIOS(){
+  const ua=navigator.userAgent||'';
+  return /iP(hone|od|ad)/.test(ua) || (navigator.platform==='MacIntel' && (navigator.maxTouchPoints||0)>1);
+}
+/* Extrae el token de un enlace pegado (…#share=TOKEN) o acepta el token pelado */
+function _ashTokenFrom(str){
+  if(!str) return '';
+  str=String(str).trim();
+  let m=str.match(/[#?&]share=([^#?&\s]+)/); if(m) return m[1].trim();
+  m=str.match(/share=([^#?&\s]+)/);           if(m) return m[1].trim();
+  if(/^[gp]\.[A-Za-z0-9\-_]+$/.test(str)) return str;   // token pelado (g.… / p.…)
+  return str;
+}
+function _ashClearHash(){ try{ history.replaceState(null,'',location.href.split('#')[0]); }catch(_){}}
+
+/* Muestra la vista previa + acciones de un contenido compartido.
+   source 'hash' = llegó por enlace (abierto en el navegador);
+   source 'paste' = lo pegó la persona dentro de la app (Importar). */
+function _ashShowPayload(p, opts){
+  opts=opts||{}; const source=opts.source||'hash';
+  const meta=_ashKindMeta(p.kind);
+  const info=p.kind==='info'?`<div class="ash-info">${_ashEsc(p.data.text).replace(/\n/g,'<br>')}</div>`:'';
+  const preview=p.kind==='info'?'':_ashPreviewHtml(p);
+  // En iOS y en el navegador (no en la app instalada), «Cargar» guardaría en
+  // Safari, no en la app de la pantalla de inicio → ofrecemos copiar el código.
+  const iosCopy = source==='hash' && p.kind!=='info' && _ashIsIOS() && !_ashIsStandalone();
+  const kindWord = p.kind==='menu'?'menú':(p.kind==='training'?'entrenamiento':(meta[1]||'contenido').toLowerCase());
+  const iosNote = iosCopy?`<div class="ash-ios">
+      <b>📱 ¿Tienes la app instalada en tu iPhone?</b>
+      <p>La app de tu pantalla de inicio guarda los datos <b>aparte de Safari</b>, así que «Cargar» aquí no llegaría a ella. Para pasar este ${kindWord} a tu app:</p>
+      <ol><li>Pulsa <b>📋 Copiar código</b>.</li><li>Abre <b>Plan Nutricional</b> desde tu pantalla de inicio.</li><li>Pulsa <b>📥 Importar</b> (junto a «Compartir») y pega el código.</li></ol>
+    </div>`:'';
+  const installNote = (!iosCopy)?`<div class="ash-install-note" id="ashInstallStatus">${_ashIsStandalone()?'Abierto en la aplicación.':'Puedes usarlo ahora en la web o instalar la aplicación en este dispositivo.'}</div>`:'';
+  const install=(!iosCopy && !_ashIsStandalone() && p.kind!=='info')?`<button class="btn-sec" id="ashInstall" type="button">⬇ Instalar app</button>`:'';
+  const copyBtn=iosCopy?`<button class="btn-prim" id="ashCopyCode" type="button">📋 Copiar código</button>`:'';
+  const load=p.kind==='info'?'':`<button class="${iosCopy?'btn-sec':'btn-prim'}" id="ashLoad" type="button">${iosCopy?'Cargar aquí':meta[2]}</button>`;
+  const note=p.kind==='info'?'Información compartida.':'Inspecciona el contenido antes de añadirlo a lo tuyo. No sustituirá tus recetas, ejercicios o sesiones con el mismo nombre.';
+  openForm(`<div class="form-hd ash-head"><div class="ash-icon">${meta[0]}</div><div><h2>${_ashEsc(p.title)}</h2><span class="form-sub">${meta[1]} compartido mediante un enlace</span></div></div>
+    <div class="form-body"><div class="ash-note">${note}</div>${info}${preview}${iosNote}${installNote}</div>
+    <div class="form-actions"><button class="btn-sec" id="ashClose" type="button">${p.kind==='info'?'Cerrar':'Cancelar'}</button>${install}${load}${copyBtn}</div>`);
+  document.getElementById('ashClose').addEventListener('click',()=>{closeForm();if(source==='hash')_ashClearHash();});
+  const ib=document.getElementById('ashInstall'); if(ib)ib.addEventListener('click',_ashInstall);
+  const cc=document.getElementById('ashCopyCode'); if(cc)cc.addEventListener('click',async()=>{
+    await _ashCopy(opts.url||location.href);
+    _ashToast('Código copiado. Ábrelo en tu app y pégalo en 📥 Importar.');
+  });
+  const loadBtn=document.getElementById('ashLoad'); if(loadBtn) loadBtn.addEventListener('click',()=>{
+    try{const msg=_ashImportPayload(p);if(source==='hash')_ashClearHash();_ashToast(msg);}
+    catch(err){_ashToast('No se pudo cargar: '+err.message,'err');}
+  });
+}
 async function _ashOpenIncoming(){
   const m=location.hash.match(/^#share=(.+)$/); if(!m)return;
   let p;
   try{p=await _ashDecode(m[1]);}catch(err){_ashToast(err.message,'err');return;}
-  const meta=_ashKindMeta(p.kind);
-  const info=p.kind==='info'?`<div class="ash-info">${_ashEsc(p.data.text).replace(/\n/g,'<br>')}</div>`:'';
-  const preview=p.kind==='info'?'':_ashPreviewHtml(p);
-  const install=!_ashIsStandalone()?`<button class="btn-sec" id="ashInstall" type="button">⬇ Instalar app</button>`:'';
-  const load=p.kind==='info'?'':`<button class="btn-prim" id="ashLoad" type="button">${meta[2]}</button>`;
-  openForm(`<div class="form-hd ash-head"><div class="ash-icon">${meta[0]}</div><div><h2>${_ashEsc(p.title)}</h2><span class="form-sub">${meta[1]} compartido mediante un enlace</span></div></div>
-    <div class="form-body"><div class="ash-note">${p.kind==='info'?'Información compartida.':'Inspecciona el contenido antes de añadirlo a lo tuyo. No sustituirá tus recetas, ejercicios o sesiones con el mismo nombre.'}</div>${info}${preview}<div class="ash-install-note" id="ashInstallStatus">${_ashIsStandalone()?'Abierto en la aplicación.':'Puedes usarlo ahora en la web o instalar la aplicación en este dispositivo.'}</div></div>
-    <div class="form-actions">${install}<button class="btn-sec" id="ashClose" type="button">${p.kind==='info'?'Cerrar':'Cancelar'}</button>${load}</div>`);
-  document.getElementById('ashClose').addEventListener('click',()=>{closeForm();history.replaceState(null,'',location.href.split('#')[0]);});
-  const ib=document.getElementById('ashInstall'); if(ib)ib.addEventListener('click',_ashInstall);
-  const loadBtn=document.getElementById('ashLoad'); if(loadBtn) loadBtn.addEventListener('click',()=>{
-    try{const msg=_ashImportPayload(p);history.replaceState(null,'',location.href.split('#')[0]);_ashToast(msg);}
-    catch(err){_ashToast('No se pudo cargar: '+err.message,'err');}
+  _ashShowPayload(p,{source:'hash',url:location.href});
+}
+/* Importar pegando el enlace/código (imprescindible en iPhone: pasa a la app
+   instalada un menú o entrenamiento recibido en Safari). */
+function pnImportShare(){
+  openForm(`<div class="form-hd"><h2>📥 Importar contenido</h2><span class="form-sub">Pega el enlace o el código que te han compartido</span></div>
+    <div class="form-body">
+      <textarea class="finp ash-imp-ta" id="ashImpIn" rows="4" placeholder="Pega aquí el enlace (https://…#share=…) o el código" autocomplete="off" autocapitalize="off" spellcheck="false"></textarea>
+      <div class="ash-note">Úsalo para pasar a esta app un menú o entrenamiento que hayas recibido en Safari (iPhone) u otro navegador.</div>
+    </div>
+    <div class="form-actions"><button class="btn-sec" id="ashImpCancel" type="button">Cancelar</button><button class="btn-prim" id="ashImpOk" type="button">Continuar</button></div>`);
+  document.getElementById('ashImpCancel').addEventListener('click',closeForm);
+  document.getElementById('ashImpOk').addEventListener('click',async()=>{
+    const raw=(document.getElementById('ashImpIn').value||'').trim();
+    if(!raw){_ashToast('Pega primero el enlace o el código.','err');return;}
+    let p; try{p=await _ashDecode(_ashTokenFrom(raw));}
+    catch(err){_ashToast(err.message||'No se pudo leer el código.','err');return;}
+    _ashShowPayload(p,{source:'paste'});
   });
 }
 
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();_ashInstallEvent=e;});
 function _ashBoot(){
   const b=document.getElementById('calShare'); if(b)b.addEventListener('click',()=>shareAppItem('menu',CalState.id));
+  const ci=document.getElementById('calImport'); if(ci)ci.addEventListener('click',pnImportShare);
+  const si=document.getElementById('spCalImport'); if(si)si.addEventListener('click',pnImportShare);
   _ashOpenIncoming();
 }
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',_ashBoot,{once:true});
@@ -292,3 +354,4 @@ else _ashBoot();
 window.addEventListener('hashchange',_ashOpenIncoming);
 window.shareAppItem=shareAppItem;
 window.shareAppInfo=shareAppInfo;
+window.pnImportShare=pnImportShare;
