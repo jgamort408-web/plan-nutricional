@@ -205,6 +205,53 @@ function _ashKindMeta(kind){
     info:['ℹ️','Información','Cerrar']
   }[kind]||['↗','Contenido','Cargar'];
 }
+/* ── Vista previa del contenido compartido ────────────────────
+   Antes de cargar nada, la persona ve QUÉ contiene el enlace (sesiones,
+   ejercicios, días del menú…) para decidir si lo incorpora a lo suyo. */
+function _ashExData(p,id){ return (p.deps&&p.deps.exercises&&p.deps.exercises[id]) || (typeof EXERCISES!=='undefined'&&EXERCISES[id]) || null; }
+function _ashExName(p,id){ const e=_ashExData(p,id); return (e&&e.name)||id; }
+function _ashSessData(p,id){ return (p.deps&&p.deps.sessions&&p.deps.sessions[id]) || (typeof SESSIONS!=='undefined'&&SESSIONS[id]) || null; }
+function _ashRecName(p,id){ return (p.deps&&p.deps.recipes&&p.deps.recipes[id]&&p.deps.recipes[id].nom) || (typeof DISHES!=='undefined'&&DISHES[id]&&DISHES[id].nom) || id; }
+function _ashScheme(p,it){
+  const ex=_ashExData(p,it.e)||{}; const sets=it.sets||ex.sets||3;
+  if((it.dur!=null)||ex.mode==='time'){ const d=it.dur!=null?it.dur:(ex.dur||30); return sets+'×'+d+'s'; }
+  const reps=it.reps!=null?it.reps:(ex.reps||10); return sets+'×'+reps;
+}
+function _ashSessRow(p,s,extra){
+  if(!s) return '';
+  const items=s.items||[];
+  const exs=items.map(it=>`<li>${_ashEsc(_ashExName(p,it.e))}<span>${_ashEsc(_ashScheme(p,it))}</span></li>`).join('');
+  return `<details class="ash-pv-s"><summary>${_ashEsc(s.name||'Sesión')} <small>${items.length} ej${extra?' · '+_ashEsc(extra):''}</small></summary><ul class="ash-pv-ex">${exs}</ul></details>`;
+}
+function _ashPreviewHtml(p){
+  try{
+    if(p.kind==='session') return `<div class="ash-pv">${_ashSessRow(p,p.data.item)}</div>`;
+    if(p.kind==='exercise'){ const ex=p.data.item||{}; const mus=(ex.muscles||[]).join(', ');
+      return `<div class="ash-pv"><div class="ash-pv-line"><b>${_ashEsc(ex.name||'')}</b><span>${_ashEsc(ex.equip||'')}</span></div>${mus?`<div class="ash-pv-mus">${_ashEsc(mus)}</div>`:''}</div>`; }
+    if(p.kind==='training'){
+      const days=p.data.days||{}, keys=Object.keys(days);
+      const seen={}, rows=[]; let nSess=0;
+      keys.forEach(dk=>(days[dk]||[]).forEach(e=>{ nSess++; if(!seen[e.s]){ seen[e.s]=1; rows.push(_ashSessRow(p,_ashSessData(p,e.s),e.who)); } }));
+      return `<div class="ash-pv"><div class="ash-pv-line"><b>${_ashEsc(p.data.name||'Entrenamiento')}</b><span>${nSess} sesiones · ${keys.length} días</span></div>${rows.join('')||'<div class="ash-pv-mus">Sin sesiones.</div>'}</div>`;
+    }
+    if(p.kind==='menu'){
+      const cal=p.data.calendar||{}, keys=Object.keys(cal);
+      const rows=keys.slice(0,14).map(dk=>{
+        const day=cal[dk]||{};
+        const meals=Object.keys(day).map(slot=>{
+          const arr=Array.isArray(day[slot])?day[slot]:[day[slot]];
+          const names=arr.filter(Boolean).map(id=>_ashRecName(p,id)).join(', ');
+          return names?`<li><b>${_ashEsc(slot)}:</b> ${_ashEsc(names)}</li>`:'';
+        }).join('');
+        return meals?`<details class="ash-pv-s"><summary>${_ashEsc(dk)}</summary><ul class="ash-pv-ex">${meals}</ul></details>`:'';
+      }).join('');
+      return `<div class="ash-pv"><div class="ash-pv-line"><b>${_ashEsc(p.data.name||'Menú')}</b><span>${keys.length} días</span></div>${rows||'<div class="ash-pv-mus">Menú vacío.</div>'}</div>`;
+    }
+    if(p.kind==='recipe'){ const d=p.data.item||{};
+      return `<div class="ash-pv"><div class="ash-pv-line"><b>${_ashEsc(d.nom||'')}</b><span>${(d.ing||[]).length} ingredientes</span></div></div>`; }
+  }catch(e){}
+  return '';
+}
 function _ashIsStandalone(){ return matchMedia('(display-mode: standalone)').matches || navigator.standalone===true; }
 async function _ashInstall(){
   const status=document.getElementById('ashInstallStatus');
@@ -221,10 +268,11 @@ async function _ashOpenIncoming(){
   try{p=await _ashDecode(m[1]);}catch(err){_ashToast(err.message,'err');return;}
   const meta=_ashKindMeta(p.kind);
   const info=p.kind==='info'?`<div class="ash-info">${_ashEsc(p.data.text).replace(/\n/g,'<br>')}</div>`:'';
+  const preview=p.kind==='info'?'':_ashPreviewHtml(p);
   const install=!_ashIsStandalone()?`<button class="btn-sec" id="ashInstall" type="button">⬇ Instalar app</button>`:'';
   const load=p.kind==='info'?'':`<button class="btn-prim" id="ashLoad" type="button">${meta[2]}</button>`;
   openForm(`<div class="form-hd ash-head"><div class="ash-icon">${meta[0]}</div><div><h2>${_ashEsc(p.title)}</h2><span class="form-sub">${meta[1]} compartido mediante un enlace</span></div></div>
-    <div class="form-body"><div class="ash-note">Revisa el contenido antes de cargarlo. No sustituirá tus recetas, ejercicios o sesiones que tengan el mismo nombre.</div>${info}<div class="ash-install-note" id="ashInstallStatus">${_ashIsStandalone()?'Abierto en la aplicación.':'Puedes usarlo ahora en la web o instalar la aplicación en este dispositivo.'}</div></div>
+    <div class="form-body"><div class="ash-note">${p.kind==='info'?'Información compartida.':'Inspecciona el contenido antes de añadirlo a lo tuyo. No sustituirá tus recetas, ejercicios o sesiones con el mismo nombre.'}</div>${info}${preview}<div class="ash-install-note" id="ashInstallStatus">${_ashIsStandalone()?'Abierto en la aplicación.':'Puedes usarlo ahora en la web o instalar la aplicación en este dispositivo.'}</div></div>
     <div class="form-actions">${install}<button class="btn-sec" id="ashClose" type="button">${p.kind==='info'?'Cerrar':'Cancelar'}</button>${load}</div>`);
   document.getElementById('ashClose').addEventListener('click',()=>{closeForm();history.replaceState(null,'',location.href.split('#')[0]);});
   const ib=document.getElementById('ashInstall'); if(ib)ib.addEventListener('click',_ashInstall);

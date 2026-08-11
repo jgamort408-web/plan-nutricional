@@ -46,6 +46,162 @@
        <p>Añade una porción de <strong>grasa saludable</strong> (AOVE, aguacate, frutos secos) y fruta de postre. Es una guía flexible, no una regla rígida.</p>`,
      verAlso:['que-es-comer-bien','proteina-cuanta','grasas-buenas'], refs:['harvard-plate','aesan-recom']},
 
+    {id:'pequenos-cambios', tema:'practica', nivel:'basico',
+     titulo:'Pequeños cambios para comer mejor',
+     lead:'No hace falta una dieta perfecta: mejora con cambios pequeños y sostenibles en tres direcciones — MÁS, CAMBIAR A y MENOS.',
+     cuerpo:`<p>La guía <em>Pequeños cambios para comer mejor</em> (Agencia de Salud Pública de Cataluña) resume la alimentación saludable de forma práctica: en vez de prohibiciones, propone <strong>cambios pequeños y mantenibles</strong> agrupados en tres ideas.</p>
+       <p><strong style="color:var(--sport,#5e8a3e)">MÁS</strong> — come más de lo que suele faltar:</p>
+       <ul><li><strong>Hortalizas</strong>: al menos 2 al día (comida y cena), crudas y cocidas.</li><li><strong>Fruta fresca</strong>: al menos 3 al día; entera mejor que en zumo.</li><li><strong>Legumbres</strong>: 3-4 veces por semana, como plato principal.</li><li><strong>Frutos secos</strong> crudos o tostados sin sal: 3-7 puñados a la semana.</li><li><strong>Vida activa y social</strong>: muévete más y come acompañado, en la mesa y sin pantallas.</li></ul>
+       <p><strong style="color:var(--gold,#c68a2e)">CAMBIAR A</strong> — sustituye por una opción mejor:</p>
+       <ul><li><strong>Agua</strong> como bebida principal, en lugar de refrescos, zumos o alcohol.</li><li><strong>Cereales integrales</strong> (pan, arroz, pasta) en vez de refinados.</li><li><strong>Aceite de oliva virgen</strong> para aliñar y cocinar.</li><li>Alimentos <strong>de temporada y de proximidad</strong>.</li></ul>
+       <p><strong style="color:var(--danger,#c0492e)">MENOS</strong> — reduce lo que sobra:</p>
+       <ul><li><strong>Sal</strong>: menos de 5 g al día; usa especias y hierbas, y vigila la sal oculta de los procesados.</li><li><strong>Azúcares</strong> y bebidas azucaradas, bollería y postres.</li><li><strong>Carne roja y procesada</strong>: la roja con moderación (3-4 raciones de carne/semana en total, mejor blanca y magra) y la procesada (embutidos) lo mínimo.</li><li><strong>Alimentos ultraprocesados</strong>: cocina más en casa y lee las etiquetas.</li></ul>
+       <p>La clave es el <strong>patrón global</strong>: elige uno o dos cambios y hazlos habituales antes de sumar el siguiente. Cada bloque tiene su propia ficha con el porqué, las cantidades y trucos concretos.</p>`,
+     verAlso:['frecuencias-consumo','mas-frutas-hortalizas','menos-azucares','plato-ideal'], refs:['aspcat-cambios','who-diet']},
+
+    {id:'frecuencias-consumo', tema:'practica', nivel:'basico',
+     titulo:'Cada cuánto y cuánto: frecuencias y raciones',
+     lead:'Un cuadro orientativo de frecuencia por grupos de alimentos y a qué equivale una ración, para armar la semana sin contar calorías.',
+     cuerpo:`<p>Las guías alimentarias resumen la alimentación saludable en un <strong>cuadro de frecuencias</strong> que ayuda a planificar la semana. No son reglas rígidas: las cantidades se ajustan a la edad, la actividad y la sensación de hambre.</p>
+       <p><strong>Frecuencia orientativa de consumo</strong></p>
+       <ul>
+         <li><strong>Hortalizas</strong>: 2 al día como mínimo (comida y cena).</li>
+         <li><strong>Fruta fresca</strong>: 3 al día como mínimo.</li>
+         <li><strong>Farináceos integrales</strong> (pan, pasta, arroz, patata): en cada comida, según el gasto de energía.</li>
+         <li><strong>Frutos secos</strong> crudos o tostados: 3-7 puñados a la semana (un puñado al día es buena opción).</li>
+         <li><strong>Leche, yogur y queso</strong>: 1-3 veces al día (natural, sin azúcar añadido).</li>
+         <li><strong>Legumbres</strong>: 3-4 veces por semana.</li>
+         <li><strong>Pescado y marisco</strong>: 3-4 veces por semana.</li>
+         <li><strong>Huevos</strong>: 3-4 veces por semana.</li>
+         <li><strong>Carne</strong>: 3-4 veces por semana (roja como máximo 1-2; procesada, ocasional).</li>
+         <li><strong>Agua</strong>: según la sed. <strong>Aceite de oliva virgen</strong>: para aliñar y cocinar.</li>
+       </ul>
+       <p>Carne, pescado, huevos y legumbres se alternan como <em>plato proteico</em>: no más de 2 veces al día y ocupando aproximadamente <strong>un cuarto del plato</strong>.</p>
+       <p><strong>¿A qué equivale una ración?</strong></p>
+       <ul>
+         <li><strong>1 ración de fruta</strong>: 1 pieza mediana (naranja, manzana, pera, melocotón, plátano); 1 bol de cerezas, fresas o uvas; 1-2 cortes de melón, sandía o piña; 2-3 albaricoques, ciruelas o mandarinas.</li>
+         <li><strong>1 ración de hortalizas</strong>: 1 plato de verdura cocida o de ensalada variada; 1-2 tomates, zanahorias o pepinos; 1 pimiento, calabacín o berenjena.</li>
+         <li><strong>1 ración de proteico</strong>: ~100 g de carne o pescado (adultos), 1-2 huevos, o un plato de legumbres cocidas.</li>
+         <li><strong>1 ración de aceite</strong>: 1 cucharada sopera (~10 ml).</li>
+       </ul>
+       <p>Es preferible <strong>repetir antes que llenar el plato</strong> y que no sobre comida: ajustar la cantidad a la sensación de hambre evita el desperdicio.</p>`,
+     verAlso:['plato-ideal','pequenos-cambios','mas-frutas-hortalizas'], refs:['aspcat-cambios','aesan-recom','harvard-plate']},
+
+    {id:'mas-frutas-hortalizas', tema:'practica', nivel:'basico',
+     titulo:'Más frutas y hortalizas: 5 al día',
+     lead:'Al menos 5 raciones diarias (3 de fruta y 2 de hortalizas). Enteras, de temporada y en cualquier momento.',
+     cuerpo:`<p><strong>¿Por qué?</strong> Son ricas en vitaminas, minerales, agua y fibra, con muy pocas calorías. Consumirlas a diario reduce el riesgo de enfermedad cardiovascular, estreñimiento, obesidad y algunos tipos de cáncer.</p>
+       <p><strong>¿Cuántas?</strong> Un mínimo de <strong>5 raciones al día</strong>: 3 de fruta y 2 de hortalizas. En la evidencia el beneficio sigue creciendo hasta ~800 g/día, pero la mayor parte se logra ya con esas 5 raciones.</p>
+       <p><strong>¿Cómo?</strong></p>
+       <ul>
+         <li><strong>Entera o a trozos, mejor que en zumo</strong> (aunque sea natural): el zumo pierde fibra y sacia menos.</li>
+         <li>Incluye hortalizas en <strong>comida y cena</strong>, y también en bocadillos o desayunos.</li>
+         <li>Alterna preparaciones crudas (ensalada, gazpacho) con cocidas (vapor, horno, cremas).</li>
+         <li>La fruta es el mejor postre y un buen tentempié a cualquier hora.</li>
+       </ul>
+       <p><strong>Trucos:</strong> ten un bol de fruta a la vista, guarda fruta ya cortada en la nevera, añade fruta a las ensaladas y planifica la compra para que no falte en cada comida.</p>`,
+     verAlso:['plato-ideal','frecuencias-consumo','mas-legumbres'], refs:['aspcat-cambios','aune-2017-frutas-verduras','who-diet']},
+
+    {id:'mas-legumbres', tema:'practica', nivel:'basico',
+     titulo:'Más legumbres: 3-4 veces por semana',
+     lead:'Ricas en fibra y proteína, saciantes y sin lo que sobra. El mejor sustituto de la carne.',
+     cuerpo:`<p><strong>¿Por qué?</strong> Aportan fibra, proteínas, hidratos, vitaminas y minerales, y no aportan lo que conviene limitar (sal, grasa saturada, azúcares). Su consumo habitual baja el colesterol y los triglicéridos y se asocia con menor mortalidad cardiovascular y por cáncer.</p>
+       <p><strong>¿Cuántas?</strong> <strong>3-4 veces por semana</strong>, como mínimo, como plato principal.</p>
+       <p><strong>¿Cómo?</strong></p>
+       <ul>
+         <li>Como <strong>plato único o segundo</strong>: son una buena alternativa a carne, pescado y huevos.</li>
+         <li>En recetas de invierno (potajes, guisos) y de verano (ensaladas, humus, patés vegetales).</li>
+         <li>Añade verduras; si pones carne, en porciones pequeñas.</li>
+         <li>La proteína de garbanzos o soja es tan completa como la animal; lentejas y alubias se complementan con arroz, pan o pasta <em>a lo largo del día</em> (no hace falta en la misma comida).</li>
+       </ul>
+       <p><strong>Trucos:</strong> cocina 1 kg y congela en raciones; deja en remojo 6-12 h para que cuezan mejor y generen menos gases; las sobras van bien en ensaladas, sopas o trituradas como paté.</p>`,
+     verAlso:['frecuencias-consumo','menos-carne-roja-procesada','plato-ideal'], refs:['aspcat-cambios','papandreou-2018-legumbres']},
+
+    {id:'mas-frutos-secos', tema:'practica', nivel:'basico',
+     titulo:'Más frutos secos: un puñado al día',
+     lead:'Perlas de salud: saciantes, con grasas buenas y, pese a ser calóricos, no engordan.',
+     cuerpo:`<p><strong>¿Por qué?</strong> Nueces, avellanas, almendras, pistachos, anacardos… son ricos en fibra, grasas saludables, proteínas, vitaminas y minerales. Un consumo elevado se asocia con menor mortalidad y menos enfermedad cardiovascular, algunos cánceres, enfermedades respiratorias y diabetes. Son muy saciantes y, aunque calóricos, su consumo <strong>no se asocia con aumento de peso</strong>.</p>
+       <p><strong>¿Cuántos?</strong> <strong>Un puñado al día</strong> (unos 3-7 puñados a la semana) es una muy buena opción.</p>
+       <p><strong>¿Cómo?</strong> <strong>Crudos o ligeramente tostados, sin sal ni azúcar</strong>; evita los fritos. Van bien en el desayuno (con yogur y fruta), en ensaladas, en la merienda o en cremas y salsas (romesco, pesto).</p>
+       <p><strong>Sabías que…</strong> la fruta desecada (pasas, orejones, ciruelas pasas) <em>no</em> es un fruto seco, sino fruta deshidratada. El cacahuete, aunque es una legumbre, se incluye por su composición parecida. El estudio PREDIMED confirmó su papel protector cardiovascular.</p>`,
+     verAlso:['mas-legumbres','grasas-buenas','frecuencias-consumo'], refs:['aspcat-cambios','aune-2016-frutos-secos','estruch-2018-predimed']},
+
+    {id:'vida-activa-social', tema:'mente', nivel:'basico',
+     titulo:'Vida activa y social',
+     lead:'Moverse cada día y comer acompañado forman parte de comer bien: cuerpo y vínculos van juntos.',
+     cuerpo:`<p>La guía incluye, junto a los alimentos, dos hábitos con gran impacto en la salud: <strong>una vida activa</strong> y <strong>una vida social</strong>.</p>
+       <p><strong>Muévete cada día.</strong> La OMS recomienda al menos <strong>30 minutos de actividad moderada 5 días por semana</strong> (150 min/semana), o 75 de actividad intensa, más <strong>ejercicios de fuerza 2 días por semana</strong>. Estar sentado más de dos horas seguidas aumenta el riesgo incluso en personas activas: haz <strong>pausas activas de 2 minutos cada hora</strong> y recuerda que cada bloque de 10 minutos cuenta.</p>
+       <p><strong>Come acompañado.</strong> Compartir al menos una comida al día, en la mesa y <strong>sin pantallas</strong>, es una oportunidad para relacionarse y cuidar el bienestar emocional. En familia, comer juntos protege el desarrollo de los niños y ayuda a establecer rutinas saludables: los pequeños aprenden del modelo de los adultos.</p>
+       <p>Elige una actividad que disfrutes y, si puede ser, en compañía y al aire libre: es más fácil mantenerla en el tiempo.</p>`,
+     verAlso:['ejercicio-fuerza','mente-relacion','que-es-comer-bien'], refs:['aspcat-cambios','who-pa','firth-mental']},
+
+    {id:'cambiar-agua', tema:'practica', nivel:'basico',
+     titulo:'El agua, tu bebida principal',
+     lead:'La mejor bebida en cualquier etapa de la vida: sin calorías, económica y sostenible.',
+     cuerpo:`<p><strong>¿Por qué?</strong> El agua es la mejor forma de hidratarse y no aporta calorías, así que no influye en el peso. Otras bebidas no ofrecen ninguna ventaja frente a ella, y algunas (con azúcar o alcohol) son perjudiciales.</p>
+       <p><strong>¿Cuánta?</strong> En adultos sanos, la que pida la <strong>sed</strong> (parte del agua llega también con los alimentos). Conviene prestar más atención y ofrecerla a menudo en <strong>niños, personas mayores, con calor o al hacer ejercicio</strong>.</p>
+       <p><strong>¿Cómo?</strong> El <strong>agua del grifo</strong> pasa controles que garantizan que es apta; es más barata y sostenible que la embotellada. Si el sabor no te gusta, enfríala o añádele rodajas de limón, pepino o hierbas (menta) — <strong>sin azúcar</strong>.</p>
+       <p><strong>Trucos:</strong> ten agua accesible y fresca en casa, lleva una cantimplora y, en las comidas, una jarra en la mesa. Evita comprar refrescos y zumos de forma habitual.</p>`,
+     verAlso:['menos-azucares','frecuencias-consumo','que-es-comer-bien'], refs:['aspcat-cambios','who-diet']},
+
+    {id:'cambiar-integrales', tema:'practica', nivel:'medio',
+     titulo:'Cambia a cereales integrales',
+     lead:'Grano entero en vez de refinado: más fibra y micronutrientes, y menos riesgo a largo plazo.',
+     cuerpo:`<p><strong>¿Por qué?</strong> Los cereales integrales conservan el grano entero, con la fibra, las vitaminas del grupo B y los micronutrientes de las capas externas. Tomarlos en lugar de refinados se asocia con <strong>menor mortalidad</strong> y menos cáncer colorrectal y enfermedad cardiovascular. Al contrario que en muchas "dietas milagro", <strong>no están desaconsejados para adelgazar</strong>.</p>
+       <p><strong>¿Cuándo?</strong> Pueden estar en cada comida (pan, arroz, pasta, cuscús), ajustando la cantidad a las necesidades de energía y al hambre.</p>
+       <p><strong>Ojo con el etiquetado.</strong> La ley aún no exige un mínimo de harina integral para llamar "integral" a un producto. Busca en los ingredientes <strong>"elaborado 100% con harina integral"</strong>. Además, "fuente de fibra" (3 g/100 g) o "alto contenido en fibra" (6 g/100 g) <em>no</em> significan integral: puede ser salvado añadido, y esos beneficios no equivalen a los del grano entero.</p>
+       <p><strong>Trucos:</strong> compra solo la versión integral de cada derivado; deja el arroz integral en remojo para acortar la cocción; los sabores más intensos se disfrutan con algo de costumbre.</p>`,
+     verAlso:['hidratos-calidad','plato-ideal','frecuencias-consumo'], refs:['aspcat-cambios','reynolds-2019-carb-quality','reynolds-2020-fibra-diabetes']},
+
+    {id:'cambiar-aceite-oliva', tema:'practica', nivel:'medio',
+     titulo:'Aceite de oliva virgen',
+     lead:'La grasa de elección para aliñar y cocinar: aguanta mejor el calor y protege el corazón.',
+     cuerpo:`<p><strong>¿Por qué?</strong> Aunque aporta las mismas calorías que otros aceites (unas 800 kcal/100 ml), el tipo de grasa que contiene —ácido oleico monoinsaturado— más sus polifenoles y vitamina E (antioxidantes) hacen que su consumo se asocie con <strong>menos enfermedad cardiovascular, síndrome metabólico, diabetes tipo 2 y algunos cánceres</strong>. El estudio PREDIMED lo confirmó.</p>
+       <p><strong>¿Cuánto?</strong> Como referencia orientativa, unas <strong>4-6 cucharadas soperas (10 ml) al día</strong>, tanto para aliñar como para cocinar. En adultos sanos no se relaciona con ganar peso.</p>
+       <p><strong>¿Cómo?</strong> Sustituye otros aceites (girasol, maíz) y grasas (mantequilla, margarina, nata) por aceite de oliva virgen. Sus grasas monoinsaturadas <strong>resisten mejor las altas temperaturas</strong> que las poliinsaturadas del girasol, así que también es preferible para cocinar. El <strong>virgen extra</strong> es el de mayor calidad, seguido del virgen; el llamado "aceite de oliva" (refinado + virgen) conserva menos antioxidantes.</p>
+       <p><strong>Conservación:</strong> guárdalo protegido de la luz y el calor y sin contacto con el aire para que no se enrancie.</p>`,
+     verAlso:['grasas-buenas','grasas-calidad-fuentes','plato-ideal'], refs:['aspcat-cambios','estruch-2018-predimed','mozaffarian-fat']},
+
+    {id:'temporada-proximidad', tema:'fundamentos', nivel:'basico',
+     titulo:'De temporada y de proximidad',
+     lead:'Comer según el calendario y cerca de casa: más sabor y frescura, menos huella ambiental.',
+     cuerpo:`<p>El sistema alimentario (producción, transporte, residuos, desperdicio) tiene un gran impacto sobre el planeta. Elegir alimentos <strong>de temporada y de proximidad</strong> —sobre todo hortalizas, fruta y pescado— es un gesto sencillo con doble beneficio.</p>
+       <ul>
+         <li><strong>Mejor producto</strong>: recogido en su punto, conserva mejor aroma, sabor, vitaminas y minerales.</li>
+         <li><strong>Menos huella</strong>: se reduce la contaminación del transporte de largas distancias.</li>
+         <li><strong>Territorio</strong>: apoya la economía local y el desarrollo rural.</li>
+       </ul>
+       <p>Se consideran <strong>de proximidad</strong> los alimentos con, como mucho, un intermediario entre productor y consumidor (a veces se define como un máximo de ~100 km). Los <strong>de temporada</strong> son los disponibles de forma natural en cada época.</p>
+       <p><strong>Matiz importante:</strong> lo local solo es más sostenible si además es de temporada. Producir o almacenar un alimento fuera de su temporada en la zona puede gastar más energía que traer de lejos algo que sí está en temporada. Lo ecológico, si es de temporada y proximidad, suma un valor añadido.</p>`,
+     verAlso:['que-es-comer-bien','mas-frutas-hortalizas'], refs:['aspcat-cambios','aesan-recom']},
+
+    {id:'menos-sal', tema:'practica', nivel:'basico',
+     titulo:'Menos sal',
+     lead:'Menos de 5 g al día (una cucharadita), yodada, y ojo con la sal escondida en los procesados.',
+     cuerpo:`<p><strong>¿Por qué?</strong> Ni el sodio ni el cloro de la sal son imprescindibles (están en muchos alimentos). El exceso se relaciona con <strong>hipertensión, infartos, ictus, cáncer de estómago y mayor mortalidad</strong>.</p>
+       <p><strong>¿Cuánta?</strong> No superar los <strong>5 g de sal al día</strong> (2 g de sodio), lo que cabe en una cucharilla de postre — contando la que añades y la que ya traen los alimentos. En nuestro entorno se consume casi el doble. Que la sal que uses sea <strong>yodada</strong>.</p>
+       <p><strong>La sal escondida.</strong> Cerca de <strong>tres cuartas partes</strong> de la sal que tomamos no la añadimos nosotros: viene de <strong>procesados y ultraprocesados</strong> (embutidos, jamón, quesos, pan, salsas, precocinados, snacks). Lee las etiquetas: un alimento tiene "mucha sal" con ≥1,25 g/100 g y "poca" con ≤0,25 g/100 g.</p>
+       <p><strong>Trucos:</strong> sustituye la sal por <strong>especias y hierbas aromáticas</strong>, ajo, limón o vinagre; elige versiones sin sal de frutos secos y pan; usa cocciones que realcen el sabor (vapor, papillote). Reducir poco a poco reeduca el paladar.</p>`,
+     verAlso:['comida-real-vs-ultraprocesados','frecuencias-consumo','menos-azucares'], refs:['aspcat-cambios','who-sodio-2012','who-diet']},
+
+    {id:'menos-azucares', tema:'energia', nivel:'basico',
+     titulo:'Menos azúcares',
+     lead:'Cuantos menos azúcares libres, mejor: por debajo del 10% de las calorías (idealmente del 5%).',
+     cuerpo:`<p><strong>¿Por qué?</strong> Los <strong>azúcares libres</strong> (los añadidos, más los de miel, siropes y zumos) suben las calorías, empeoran la calidad de la dieta y aumentan el riesgo de exceso de peso, caries y problemas crónicos.</p>
+       <p><strong>¿Cuánto?</strong> Cuantos menos, mejor. La OMS aconseja que los azúcares libres no superen el <strong>10% de la energía diaria</strong>, y que bajar del <strong>5%</strong> aporta beneficios extra. En una dieta de 2.000 kcal eso son <strong>50 g (10%)</strong> y <strong>25 g (5%)</strong>. No hace falta azúcar añadido: la glucosa que el cuerpo necesita ya viene de farináceos, fruta, hortalizas, legumbres y lácteos.</p>
+       <p><strong>Dato:</strong> alrededor de un tercio de las calorías diarias y el <strong>80% de los azúcares añadidos</strong> proceden de ultraprocesados (bebidas azucaradas, bollería, galletas, cereales de desayuno, postres lácteos).</p>
+       <p><strong>Trucos:</strong> prioriza <strong>fruta entera</strong> frente al zumo; endulza con fruta madura o desecada, canela o vainilla; reduce el azúcar que añades a yogures y cafés; la mejor bebida es el agua. Miel, azúcar moreno, fructosa o edulcorantes <strong>no</strong> son mejores opciones.</p>`,
+     verAlso:['cambiar-agua','comida-real-vs-ultraprocesados','calorias-calidad'], refs:['aspcat-cambios','who-azucares-2015','who-diet']},
+
+    {id:'menos-carne-roja-procesada', tema:'practica', nivel:'medio',
+     titulo:'Menos carne roja y procesada',
+     lead:'Carne 3-4 veces por semana; la roja como máximo 1-2 y la procesada, solo de vez en cuando.',
+     cuerpo:`<p><strong>¿Por qué?</strong> La carne aporta proteínas, minerales y vitaminas, pero la OMS/IARC clasifica la <strong>carne procesada como carcinógena (Grupo 1)</strong> y la <strong>roja como probablemente carcinógena (Grupo 2A)</strong>, sobre todo para el cáncer colorrectal. El exceso, especialmente de procesada, se asocia además con enfermedad cardiovascular, hipertensión, exceso de peso y diabetes.</p>
+       <p><strong>¿Cuánta?</strong> Dentro de una alimentación basada en vegetales, se puede tomar <strong>carne 3-4 veces por semana</strong>, de las cuales la <strong>roja como máximo 1-2</strong>. La <strong>procesada</strong> (embutidos, salchichas, beicon, jamón), lo mínimo y ocasional. La ración en adultos ronda los <strong>100 g</strong>.</p>
+       <p><strong>¿Cómo?</strong> Alterna con otras fuentes proteicas: <strong>legumbres, huevos, pescado y carne blanca</strong>. Prioriza carne fresca frente a procesada y <strong>evita cocciones a muy alta temperatura</strong> (brasa, fritura, ahumado) y las partes achicharradas.</p>
+       <p><strong>Nota:</strong> los lácteos (leche, yogur natural, queso) también aportan proteína y calcio, 1-3 veces al día y sin azúcar añadido. El plato proteico ocupa aproximadamente <strong>un cuarto del plato</strong>.</p>`,
+     verAlso:['mas-legumbres','plato-ideal','frecuencias-consumo'], refs:['aspcat-cambios','iarc-carne-2015','who-diet']},
+
     {id:'macros-intro', tema:'macros', nivel:'basico',
      titulo:'Macronutrientes: las tres grandes piezas',
      lead:'Proteína, grasa e hidratos aportan energía y funciones distintas. Ninguno es el enemigo.',

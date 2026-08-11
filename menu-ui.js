@@ -318,11 +318,12 @@
       {ico:'⭐', t:'Las favoritas mandan', x:'Marca recetas con la ★ y podrás generar menús solo con ellas, o darles prioridad, desde ⋯ Más acciones del Plan Semanal.'},
       {ico:'✎', t:'Renombra tus planes', x:'El lápiz ✎ junto al título del Plan Semanal o de Entrenamientos edita su nombre antes de guardarlo.'}
     ]},
-    news: { sec:'Julio 2026', hd:'Novedades', steps:[
-      {ico:'🎛️', t:'Generador de menús con opciones', x:'El diálogo ✨ Generar menú ahora permite acotar a cocinas concretas, priorizar tus favoritos, usar solo recetas rápidas entre semana y activar el modo tupper.'},
-      {ico:'🍳', t:'Más recetas caseras', x:'El pack de cocina casera suma desayunos de tostadas variadas y una docena de meriendas nuevas.'},
-      {ico:'🗓️', t:'Vista mensual', x:'Asigna un menú guardado a cada semana del mes, desde ⋯ Más acciones del Plan Semanal.'},
-      {ico:'❔', t:'Nuevo centro de ayuda', x:'El botón ❔ ahora reúne los tutoriales de todas las secciones, los trucos y estas novedades.'}
+    news: { sec:'Agosto 2026', hd:'Novedades', steps:[
+      {ico:'🏋️', t:'Entreno más cómodo', x:'Al pulsar +/− de peso o repeticiones la vista ya no salta arriba. Además, el ejercicio activo se resalta y se centra en la barra de pasos para saber si ir a izquierda o derecha.'},
+      {ico:'🧑‍🤝‍🧑', t:'¿Quién entrena?', x:'Puedes cambiar la persona que entrena desde la cabecera del entreno, y también reasignar a posteriori quién hizo un entrenamiento del historial (recalcula peso corporal y kcal).'},
+      {ico:'🔎', t:'Comparte e inspecciona', x:'Antes de añadir un entrenamiento o un menú compartido, ves una vista previa de su contenido para revisarlo. Y sí: ahora también puedes compartir menús.'},
+      {ico:'📚', t:'Guía de nutrición ampliada', x:'La guía "Pequeños cambios para comer mejor" (ASPCAT) se despliega en 12 fichas por grupo de alimentos, con sus fuentes en Bibliografía.'},
+      {ico:'🍎', t:'Fruta: 3 al día', x:'Las recomendaciones se ajustan a la guía: al menos 3 piezas de fruta al día, mejor entera que en zumo.'}
     ]},
     mente: { sec:'Mente', steps:[
       {ico:'🧠', t:'Mente en Forma', x:'Esta sección cuida tu bienestar mientras haces la dieta: estado de ánimo, hábitos y herramientas psicológicas. Funciona dentro de la misma app, con su barra de pestañas abajo.'},
@@ -588,7 +589,7 @@
   if(typeof AppPage!=='undefined'){ AppPage.register('infolegal', pnInfoLegal); }
 
   /* ── Novedades por versión: clave manual, se sube al añadir funciones ── */
-  const NEWS_KEY = '2026-07';
+  const NEWS_KEY = '2026-08';
   function newsSeen(){ try{ return localStorage.getItem('mnut:news-seen')===NEWS_KEY; }catch(e){ return true; } }
   function markNewsSeen(){ try{ localStorage.setItem('mnut:news-seen', NEWS_KEY); }catch(e){} }
   function updateHelpDot(){

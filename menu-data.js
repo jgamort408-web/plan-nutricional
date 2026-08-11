@@ -384,7 +384,7 @@ const WEEKLY_GUIDE = [
   {k:'pa_total',  foodKey:'pa',  lbl:'Pescado azul · semana',   target:2, max:4, scope:'all', rule:'Pescado > carne en la semana'},
   {k:'pb_total',  foodKey:'pb',  lbl:'Pescado blanco · semana', target:2, max:4, scope:'all', rule:'Pescado > carne en la semana'},
   {k:'v_total',   foodKey:'v',   lbl:'Verdura · raciones día',  target:14, max:21, scope:'all', rule:'2 raciones/día (½ plato mín): cruda + cocida'},
-  {k:'fr_total',  foodKey:'fr',  lbl:'Fruta · raciones día',    target:14, max:21, scope:'all', rule:'Al menos 2 piezas/día, mejor entera'},
+  {k:'fr_total',  foodKey:'fr',  lbl:'Fruta · raciones día',    target:21, max:28, scope:'all', rule:'3 piezas/día mín. (guía ASPCAT), entera mejor que en zumo'},
   // Comida real prioritaria (teoría): proteína de calidad y grasas saludables a diario
   {k:'hv_total',  foodKey:'hv',  lbl:'Huevo · semana',          target:4,  max:8,  scope:'all', rule:'Hasta ~1 al día: proteína completa y saciante'},
   {k:'fs_total',  foodKey:'fs',  lbl:'Frutos secos · semana',   target:4,  max:7,  scope:'all', rule:'Un puñado (≈25 g) la mayoría de días, sin freír ni salar'},
