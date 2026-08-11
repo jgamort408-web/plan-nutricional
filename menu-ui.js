@@ -333,6 +333,12 @@
       {ico:'📊', t:'Tendencia', x:'Revisa tu evolución con calma: gráficos, calendario de días pasados y mensajes amables sobre cómo te sientes.'},
       {ico:'💚', t:'Apoyo', x:'Tu caja de herramientas: respiración guiada 4-7-8, técnicas para la ansiedad sin recurrir a la comida y recursos para los días flojos.'},
       {ico:'🔒', t:'Privado y local', x:'Todos tus datos de Mente se guardan solo en tu dispositivo. Nada sale de aquí.'}
+    ]},
+    iosShare: { hd:'Ayuda', sec:'Importar en iPhone', steps:[
+      {ico:'📱', t:'Cada app va por su cuenta', x:'En iPhone, la app que añades a la pantalla de inicio guarda tus datos aparte de Safari. Por eso un enlace compartido, que abre en Safari, no puede cargarse solo en tu app.'},
+      {ico:'📋', t:'1 · Copia el código', x:'Al abrir el enlace verás la vista previa. Pulsa «📋 Copiar código»: queda guardado en tu portapapeles.'},
+      {ico:'🏠', t:'2 · Abre tu app', x:'Sal de Safari y abre Plan Nutricional desde su icono en la pantalla de inicio.'},
+      {ico:'📥', t:'3 · Pega en Importar', x:'Pulsa «📥 Importar» (está junto a «Compartir», en Menú o en Entrenamiento), pega el código y confirma. El menú o el entrenamiento quedará en tu app.'}
     ]}
   };
 
