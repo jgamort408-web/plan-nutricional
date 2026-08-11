@@ -322,6 +322,7 @@
       {ico:'🏋️', t:'Entreno más cómodo', x:'Al pulsar +/− de peso o repeticiones la vista ya no salta arriba. Además, el ejercicio activo se resalta y se centra en la barra de pasos para saber si ir a izquierda o derecha.'},
       {ico:'🧑‍🤝‍🧑', t:'¿Quién entrena?', x:'Puedes cambiar la persona que entrena desde la cabecera del entreno, y también reasignar a posteriori quién hizo un entrenamiento del historial (recalcula peso corporal y kcal).'},
       {ico:'🔎', t:'Comparte e inspecciona', x:'Antes de añadir un entrenamiento o un menú compartido, ves una vista previa de su contenido para revisarlo. Y sí: ahora también puedes compartir menús.'},
+      {ico:'📥', t:'Importar en iPhone', x:'En iPhone la app instalada guarda sus datos aparte de Safari. Al abrir un enlace compartido puedes copiar su código y pegarlo en 📥 Importar (junto a Compartir) para pasar el menú o el entrenamiento a tu app.'},
       {ico:'📚', t:'Guía de nutrición ampliada', x:'La guía "Pequeños cambios para comer mejor" (ASPCAT) se despliega en 12 fichas por grupo de alimentos, con sus fuentes en Bibliografía.'},
       {ico:'🍎', t:'Fruta: 3 al día', x:'Las recomendaciones se ajustan a la guía: al menos 3 piezas de fruta al día, mejor entera que en zumo.'}
     ]},
