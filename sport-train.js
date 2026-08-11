@@ -878,15 +878,18 @@ function renderTrain(){
     _trNavDir='';
   }
 
+  // La barra de descanso (amarilla) se pinta ANTES de restaurar el scroll:
+  // ocupa alto y encoge .tr-body, así que si se restaurase el scroll antes de
+  // añadirla, al aparecer recortaría el alto útil y la vista saltaría arriba.
+  trStartTick();
+  trRenderRest();
+  if(trRestLeft() > 0) trRestTick();
+
   // restaura el scroll salvo al cambiar de ejercicio, y centra el paso activo
   const bodyEl = el.querySelector('.tr-body');
   if(bodyEl && !isNav) bodyEl.scrollTop = prevScroll;
   const stepsEl = el.querySelector('.tr-steps'), activeStep = el.querySelector('.tr-step.on');
   if(stepsEl && activeStep) stepsEl.scrollLeft = activeStep.offsetLeft - stepsEl.clientWidth/2 + activeStep.clientWidth/2;
-
-  trStartTick();
-  trRenderRest();
-  if(trRestLeft() > 0) trRestTick();
 }
 
 /* ── Acceso rápido: barra «Entrenar hoy» ──────────────────────
