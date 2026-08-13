@@ -202,6 +202,54 @@
        <p><strong>Nota:</strong> los lácteos (leche, yogur natural, queso) también aportan proteína y calcio, 1-3 veces al día y sin azúcar añadido. El plato proteico ocupa aproximadamente <strong>un cuarto del plato</strong>.</p>`,
      verAlso:['mas-legumbres','plato-ideal','frecuencias-consumo'], refs:['aspcat-cambios','iarc-carne-2015','who-diet']},
 
+    {id:'metas-realistas-peso', tema:'energia', nivel:'basico',
+     titulo:'Metas realistas: un 5-10% ya cambia tu salud',
+     lead:'No hace falta adelgazar mucho ni rápido: perder un 5-10% del peso, y sobre todo cintura, ya mejora la salud.',
+     cuerpo:`<p>Las guías clínicas de manejo del peso coinciden en algo liberador: <strong>lograr el máximo adelgazamiento en el menor tiempo NO es la clave del éxito</strong>. Una pérdida <strong>modesta, del 5-10% del peso inicial</strong>, ya aporta beneficios importantes: baja la tensión, mejora el azúcar y los lípidos y reduce el riesgo cardiometabólico.</p>
+       <p><strong>La cintura importa más que la báscula.</strong> Reducir el <strong>perímetro de cintura</strong> puede ser incluso más valioso que el peso en sí, porque refleja la <strong>grasa visceral</strong> (la que rodea los órganos), la más ligada al riesgo cardiovascular y metabólico.</p>
+       <p><strong>Pon el foco en la conducta, no en el número.</strong> Es más eficaz proponerse <strong>cambios positivos</strong> —comer más fruta y verdura, moverse más, cocinar en casa— que la presión de "tengo que adelgazar". Elige <strong>metas modestas y progresivas</strong>, paso a paso: son las que se sostienen.</p>
+       <p>Y recuerda que el peso no lo es todo: la energía, el sueño, la fuerza, la digestión, el ánimo y la analítica también cuentan.</p>`,
+     verAlso:['peso-composicion','evitar-efecto-rebote','en-forma-vs-delgado','plato-ideal'], refs:['durrer-2019-obesidad-ap','who-diet']},
+
+    {id:'evitar-efecto-rebote', tema:'energia', nivel:'medio',
+     titulo:'Evitar el efecto rebote (yo-yo)',
+     lead:'Mantener lo logrado es parte del plan, no el final: la clave es no recuperar el peso perdido.',
+     cuerpo:`<p>Perder peso es solo la mitad del camino. <strong>Prevenir la recuperación</strong> (el efecto rebote o yo-yo) es la <strong>piedra angular</strong> del manejo del peso a largo plazo, sea cual sea el método usado para adelgazar.</p>
+       <p><strong>Vigila la tendencia sin obsesionarte.</strong> Pesarte <strong>cada 1-2 semanas</strong> (a la misma hora y condiciones) basta para ver la dirección. Si recuperas <strong>3-4 kg</strong> con rapidez, no esperes demasiado: revisa hábitos y retoma pronto, cuando el ajuste es pequeño y fácil.</p>
+       <p><strong>Moverse protege lo conseguido.</strong> La actividad física regular es de lo que mejor previene la recuperación del peso y el ciclado de peso.</p>
+       <p><strong>Autocontrol a largo plazo.</strong> El mantenimiento mejora cuando mantienes un estilo de vida saludable, aprendes a <strong>gestionar el hambre</strong>, revisas tus metas de vez en cuando y te <strong>autopesas con regularidad</strong>. Una comida distinta no rompe nada: vuelve a la siguiente decisión útil sin compensaciones extremas.</p>`,
+     verAlso:['metas-realistas-peso','en-forma-vs-delgado','peso-composicion','adherencia-habitos-ejercicio'], refs:['durrer-2019-obesidad-ap','anderson-2001-mantenimiento']},
+
+    {id:'peso-no-es-fuerza-voluntad', tema:'mente', nivel:'basico',
+     titulo:'El peso no es (solo) fuerza de voluntad',
+     lead:'La obesidad es multifactorial. Culpabilizarse o culpabilizar no ayuda; entenderla y respetarse, sí.',
+     cuerpo:`<p>Un mensaje que las guías médicas subrayan: la obesidad es una condición <strong>multifactorial</strong> —influyen la genética, la epigenética, el ambiente, algunos medicamentos y acontecimientos vitales (un embarazo, un cambio de trabajo, un duelo)— y <strong>no está por completo bajo control voluntario</strong>. Reducirla a "falta de fuerza de voluntad" es inexacto e injusto.</p>
+       <p><strong>El estigma hace daño y es contraproducente.</strong> Los juicios sobre el peso —vengan de otros o de uno mismo— se asocian con más trastornos de la conducta alimentaria, menos actividad física, más ansiedad y depresión… lo que empeora justo lo que se pretendía mejorar.</p>
+       <p><strong>Cuidar la relación contigo cuenta.</strong> La autoestima, la imagen corporal y el bienestar no son un extra: son parte del cambio. Trátate con el mismo respeto y paciencia con que tratarías a alguien a quien quieres.</p>`,
+     verAlso:['mente-relacion','comer-con-atencion','metas-realistas-peso'], refs:['durrer-2019-obesidad-ap','firth-mental']},
+
+    {id:'comer-con-atencion', tema:'mente', nivel:'basico',
+     titulo:'Comer con atención: hambre y saciedad',
+     lead:'Recuperar las señales de hambre y saciedad, y comer sin pantallas y sin prisa, ayuda a regular la cantidad.',
+     cuerpo:`<p>Muchas veces comemos porque "toca", por impulso o por emoción, más que por hambre real. El primer paso, según las guías, es <strong>recuperar las sensaciones de hambre y saciedad</strong> que regulan de forma natural cuánto comemos.</p>
+       <ul>
+         <li><strong>Come sentado y sin pantallas</strong> (ni tele, ni móvil): comer distraído desconecta de la saciedad.</li>
+         <li><strong>Sin prisa.</strong> La sensación de saciedad aparece unos <strong>20 minutos</strong> tras empezar. Come despacio, saborea, y <strong>suelta los cubiertos entre bocado y bocado</strong>.</li>
+         <li><strong>Empieza con hambre, para al saciarte.</strong> No hace falta terminar el plato si ya estás lleno; sirve una ración razonable y repite solo si sigues con hambre.</li>
+         <li><strong>Plato más pequeño</strong>, una sola ración, y evita tanto picar sin hambre como saltarte comidas por sistema.</li>
+       </ul>
+       <p><strong>Detecta el hambre emocional.</strong> Comer con aburrimiento, estrés o tristeza es muy común. Llevar un pequeño <strong>diario</strong> de qué y cuándo comes ayuda a ver los desencadenantes y a buscar otras formas de calmar la emoción que no sean comer.</p>`,
+     verAlso:['peso-no-es-fuerza-voluntad','mente-relacion','plato-ideal','cuando-comer'], refs:['durrer-2019-obesidad-ap']},
+
+    {id:'en-forma-vs-delgado', tema:'ejercicio', nivel:'medio',
+     titulo:'Estar en forma pesa más que estar delgado',
+     lead:'Moverse protege la salud aunque la báscula no baje: caminar y sentarse menos es de lo más rentable.',
+     cuerpo:`<p>Un mensaje potente de la evidencia: las personas con obesidad que alcanzan una <strong>buena forma cardiorrespiratoria</strong> tienen <strong>menor mortalidad que personas de peso normal pero sedentarias</strong>. Es decir, moverse protege <em>aunque el peso no cambie mucho</em>. Además, la actividad física <strong>moviliza la grasa visceral</strong> y reduce la recuperación del peso.</p>
+       <p><strong>La receta general:</strong> al menos <strong>150 min/semana de actividad aeróbica moderada</strong> —equivale a caminar a 5-6 km/h— más <strong>2-3 sesiones de fuerza</strong> por semana con 8-10 ejercicios de grandes grupos musculares. Se puede repartir en bloques de <strong>10 minutos como mínimo</strong>.</p>
+       <p><strong>Caminar es la mejor opción</strong> para casi todo el mundo: no necesita equipo, es gratis y ajustas tú la intensidad. Una buena pauta: <strong>30 min/día (o 2×15, o 3×10), 5 días por semana</strong>, subiendo poco a poco. Curiosamente, sesiones demasiado largas pueden bajar la adherencia y favorecer "compensar" moviéndote menos el resto del día.</p>
+       <p><strong>Y siéntate menos.</strong> Actividad e inactividad van juntas: sube escaleras, baja una parada antes, pasea, y evita estar sentado más de 30-60 minutos seguidos. Recuperar el placer de moverte es el objetivo.</p>`,
+     verAlso:['ejercicio-fuerza','vida-activa-social','evitar-efecto-rebote'], refs:['durrer-2019-obesidad-ap','who-pa']},
+
     {id:'macros-intro', tema:'macros', nivel:'basico',
      titulo:'Macronutrientes: las tres grandes piezas',
      lead:'Proteína, grasa e hidratos aportan energía y funciones distintas. Ninguno es el enemigo.',
