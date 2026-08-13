@@ -794,6 +794,9 @@ const RECO_CLAVES = [
   'No existe obligación de hacer cinco comidas. Elige un ritmo que evite llegar sin control y encaje con tus horarios.',
   'Prioriza alimentos poco procesados, pero deja espacio consciente para placer, cultura, celebración y comodidad.',
   'La báscula no lo es todo: digestión, energía, sueño, fuerza, hambre, analíticas y bienestar también cuentan.',
+  'Un cambio pequeño y sostenible (5-10% del peso, y sobre todo de cintura) mejora la salud más que adelgazar mucho y rápido.',
+  'Come sentado, sin pantallas y sin prisa: la señal de saciedad tarda unos 20 minutos en llegar.',
+  'Mantener lo logrado es parte del plan: la actividad física regular y el autopesaje periódico previenen el efecto rebote.',
   'Una comida distinta no estropea la semana. Vuelve a la siguiente decisión útil sin compensaciones extremas.'
 ];
 const RECO_DAILY = [
@@ -822,6 +825,9 @@ const RECO_THEORY_LINKS = [
   ['patrones-saludables','Patrones mediterráneo y DASH'],
   ['comida-real-vs-ultraprocesados','Comida real y ultraprocesados'],
   ['cuando-comer','Cómo repartir el día'],
+  ['metas-realistas-peso','Metas realistas de peso'],
+  ['comer-con-atencion','Comer con atención'],
+  ['evitar-efecto-rebote','Evitar el efecto rebote'],
   ['diseno-del-entorno','Diseñar el entorno'],
   ['adherencia-habitos-ejercicio','Adherencia antes que perfección'],
   ['formulas-de-estimacion-y-fiabilidad','Límites de las fórmulas']

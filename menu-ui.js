@@ -602,7 +602,6 @@
   function updateHelpDot(){
     const unseen = !newsSeen();
     const d = document.getElementById('helpDot'); if(d) d.hidden = !unseen;
-    const m = document.querySelector('#helpMenu [data-news] .mi-dot'); if(m) m.hidden = !unseen;
   }
 
   /* Botón ❔ del header → centro de ayuda: tutoriales de todas las
@@ -610,31 +609,16 @@
      Además, la PRIMERA vez que se entra a una sección, su tutorial se abre solo. */
   function wireHelpMenu(){
     const btn = document.getElementById('helpBtn');
-    const menu = document.getElementById('helpMenu');
     if(!btn) return;
-    if(!menu){ btn.addEventListener('click', ()=> pnTutorial(currentSection())); return; }
-    const close = ()=>{ menu.hidden = true; btn.setAttribute('aria-expanded','false'); };
-    btn.addEventListener('click', e=>{
-      e.stopPropagation();
-      if(!menu.hidden){ close(); return; }
-      const cur = currentSection();
-      menu.querySelectorAll('[data-tut]').forEach(m=> m.classList.toggle('on', m.dataset.tut===cur));
-      menu.hidden = false; btn.setAttribute('aria-expanded','true');
-    });
-    menu.addEventListener('click', e=>{
-      const it = e.target.closest('.sec-mi'); if(!it) return;
-      close();
-      if(it.dataset.tut){ pnTutorial(it.dataset.tut); return; }
-      if(it.hasAttribute('data-news')){ markNewsSeen(); updateHelpDot(); pnTutorial('news'); return; }
-      const pg = it.dataset.page;
-      if(pg==='reco' && typeof window.openNutriReco==='function') return void window.openNutriReco();
-      if(pg==='measures' && typeof window.openFoodMeasures==='function') return void window.openFoodMeasures();
-      if(pg==='teoria' && typeof window.openTeoria==='function') return void window.openTeoria();
-      if(pg==='biblio' && typeof window.openBibliografia==='function') return void window.openBibliografia();
-    });
-    document.addEventListener('click', e=>{ if(!menu.hidden && !menu.contains(e.target) && e.target!==btn) close(); });
     // Primer uso de la app: las novedades pasadas no son noticia
     if(!newsSeen() && window.pnOnboarding && !window.pnOnboarding.seen()) markNewsSeen();
+    // El ❔ ya NO abre un menú de secciones (eso duplicaba el menú ☰ para
+    // moverse por la app). Ahora lanza directamente el tutorial de la ZONA en
+    // la que estás. Si hay novedades sin ver, las muestra primero (una vez).
+    btn.addEventListener('click', ()=>{
+      if(!newsSeen()){ markNewsSeen(); updateHelpDot(); pnTutorial('news'); return; }
+      pnTutorial(currentSection());
+    });
     updateHelpDot();
   }
 

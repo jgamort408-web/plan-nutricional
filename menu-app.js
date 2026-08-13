@@ -1570,6 +1570,7 @@ function wireSecMenu(){
     if(m.dataset.page === 'descargo'){ if(typeof window.pnDescargo === 'function') window.pnDescargo(); return; }
     if(m.dataset.page === 'biblio'){ if(typeof window.openBibliografia === 'function') window.openBibliografia(); return; }
     if(m.dataset.page === 'teoria'){ if(typeof window.openTeoria === 'function') window.openTeoria(); return; }
+    if(m.dataset.page === 'trucos'){ if(typeof window.pnTutorial === 'function') window.pnTutorial('trucos'); return; }
     if(m.dataset.page === 'save'){ if(window.PNSession && window.PNSession.manualSave) window.PNSession.manualSave(); return; }
     if(m.dataset.page === 'settings'){ if(typeof window.openUsuarios === 'function') window.openUsuarios(); return; }
     if(m.dataset.page === 'config'){ if(typeof window.openConfig === 'function') window.openConfig(); return; }
