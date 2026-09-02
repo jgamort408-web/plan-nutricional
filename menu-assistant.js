@@ -197,6 +197,10 @@
           <h2 class="masst-title">${meta.ico} ${esc(meta.title)} <small>paso ${_i+1} de ${_steps.length}</small></h2>
           <p class="masst-hint">${esc(meta.hint)}</p>
           <div class="masst-guide-wrap">${guidanceHtml(gd)}</div>
+          <div class="masst-tools" style="display:flex;gap:8px;margin:2px 0 8px;flex-wrap:wrap">
+            <button class="masst-btn ghost" data-tool="restr" style="padding:5px 10px;font-size:.8rem">⚙ Restricciones</button>
+            <button class="masst-btn ghost" data-tool="macros" style="padding:5px 10px;font-size:.8rem">🎯 Macros</button>
+          </div>
           <div class="masst-filters">${pills}</div>
           <div class="masst-grid">${cards}</div>
         </div>
@@ -219,6 +223,19 @@
     if(close1){ close(); return; }
     const pill = e.target.closest('[data-ft]');
     if(pill){ _filter[cat()] = pill.dataset.ft; render(); return; }
+    const tool = e.target.closest('[data-tool]');
+    if(tool){
+      // Editores de restricciones/macros: se muestran por encima del asistente
+      const bg = document.getElementById('promptBg'); const prev = bg ? bg.style.zIndex : '';
+      if(bg) bg.style.zIndex = '400';
+      const done = ()=>{ if(bg) bg.style.zIndex = prev; };
+      if(tool.dataset.tool==='restr' && typeof openStructureEditor==='function'){
+        openStructureEditor((typeof mcActiveId==='function'?mcActiveId():null), done);
+      } else if(tool.dataset.tool==='macros' && typeof openMacroTargets==='function'){
+        openMacroTargets(done);
+      } else { done(); }
+      return;
+    }
     const card = e.target.closest('[data-pick]');
     if(card){
       // Actualización in-situ: togglear solo esta tarjeta y el contador, SIN re-render

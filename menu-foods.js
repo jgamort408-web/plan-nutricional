@@ -359,6 +359,77 @@ function scaleComp(comp, targetKcal){
   return {rows, tot, factor};
 }
 
+/* ── Solver de MACROS por receta ───────────────────────────────
+   A diferencia de scaleComp (un único factor para clavar las kcal), este
+   ajusta CADA ingrediente escalable por separado, dentro de límites, para
+   acercar el total a un objetivo de {kcal, p, f, c} a la vez. Los ingredientes
+   fijos (verdura, aliño, aromáticos 'cs') no se tocan. Usa descenso por
+   coordenadas con solución cerrada por ingrediente (el objetivo es cuadrático):
+   así la receta se modifica lo mínimo imprescindible.
+     target : {kcal?, p?, f?, c?}  (gramos para p/f/c; los ausentes se ignoran)
+     opts   : {lo, hi, reg, weights, maxIter}
+   Devuelve {rows:[{it,grams,units,factor}], tot, tweaked, maxDev, ok}. */
+function solveComp(comp, target, opts){
+  opts = opts || {};
+  const lo  = opts.lo  != null ? opts.lo  : 0.55;   // hasta -45% por ingrediente
+  const hi  = opts.hi  != null ? opts.hi  : 1.6;    // hasta +60%
+  const reg = opts.reg != null ? opts.reg : 0.04;   // prefiere cambios pequeños
+  const W   = Object.assign({k:1.0, p:2.0, f:1.2, c:1.4}, opts.weights || {});
+  const maxIter = opts.maxIter || 240;
+  const MK = ['k','p','f','c'];
+  // Objetivo por macro (con clave 'k' para kcal). Solo cuentan los presentes.
+  const T = { k:+target.kcal||0, p:+target.p||0, f:+target.f||0, c:+target.c||0 };
+  const active = MK.filter(m => T[m] > 0);
+  // Ingredientes escalables (con su vector de macros base a factor 1) y fijos.
+  const items = comp.map(it=>{
+    const g0 = itemGrams(it);
+    const base = gramMacros(it.f, g0);          // {k,p,f,c} a gramos base
+    return { it, g0, base, scal: itemScalable(it) && g0 > 0 };
+  });
+  // Suma fija (ingredientes que no se tocan)
+  const fixed = {k:0,p:0,f:0,c:0};
+  items.forEach(x=>{ if(!x.scal) MK.forEach(m=> fixed[m]+= x.base[m]); });
+  // Factores por ingrediente escalable (arranque en 1)
+  const scal = items.filter(x=>x.scal);
+  scal.forEach(x=> x.factor = 1);
+  const denomScale = m => Math.max(T[m], 1) * Math.max(T[m], 1);   // error relativo
+  // Suma total de una macro dada los factores actuales
+  const totMacro = m => { let s = fixed[m]; scal.forEach(x=> s += x.factor * x.base[m]); return s; };
+  for(let iter=0; iter<maxIter; iter++){
+    let moved = 0;
+    for(const x of scal){
+      // total sin este ingrediente, por macro
+      let num = reg, den = reg;   // regularización hacia factor 1
+      for(const m of active){
+        const others = totMacro(m) - x.factor * x.base[m];
+        const b = x.base[m];
+        if(b === 0) continue;
+        const w = W[m] / denomScale(m);
+        num += w * b * (T[m] - others);
+        den += w * b * b;
+      }
+      let f = den > 0 ? num / den : x.factor;
+      if(f < lo) f = lo; if(f > hi) f = hi;
+      if(Math.abs(f - x.factor) > 1e-4) moved++;
+      x.factor = f;
+    }
+    if(!moved) break;
+  }
+  // Construye filas y totales finales
+  const rows = []; const tot = {k:0,p:0,f:0,c:0}; let maxDev = 0;
+  items.forEach(x=>{
+    const g = x.it.cs ? 0 : (x.scal ? x.g0 * x.factor : x.g0);
+    const m = gramMacros(x.it.f, g);
+    MK.forEach(k=> tot[k]+= m[k]);
+    const f = foodOf(x.it);
+    rows.push({ it:x.it, grams: Math.round(g), factor: x.scal ? x.factor : 1,
+                units: (x.it.u != null && f && f.unit) ? g/f.unit.g : null });
+  });
+  active.forEach(m=>{ const dev = Math.abs(tot[m]-T[m])/Math.max(T[m],1); if(dev>maxDev) maxDev=dev; });
+  const tweaked = scal.some(x=> Math.abs(x.factor-1) > 0.02);
+  return { rows, tot, tweaked, maxDev, ok: maxDev <= (opts.okDev != null ? opts.okDev : 0.08) };
+}
+
 /* Objetivo de kcal de una persona para una franja */
 function mealTargetKcal(personaKey, cat){
   // Ración = ración BASE (persona de menor kcal) × modificador de la persona.
@@ -369,6 +440,52 @@ function mealTargetKcal(personaKey, cat){
   const mod = (typeof personModifier==='function') ? personModifier(personaKey) : 1;
   return baseK * mod * (MEAL_PCT[cat] || 0.25);
 }
+
+/* ── Objetivos de MACROS por persona (auto + manual) ───────────
+   Base automática = TARGETS[p] (kcal y P/F/C en gramos, que ya salen del
+   perfil/GET). Si hay override manual guardado, manda: puede fijar kcal y los
+   % de proteína/grasa/hidratos, de los que se derivan los gramos. */
+var LS_MACRO_TGT = 'mnut:macro-targets';
+function _macroTgtStore(){ try{ return JSON.parse(localStorage.getItem(LS_MACRO_TGT) || '{}') || {}; }catch(_){ return {}; } }
+function personMacroTarget(p){
+  const t = (typeof TARGETS!=='undefined' && TARGETS[p]) || {};
+  let kcal=+t.kcal||0, pg=+t.p||0, fg=+t.f||0, cg=+t.c||0;
+  const ov = _macroTgtStore()[p];
+  if(ov && ov.mode==='manual'){
+    if(+ov.kcal>0) kcal=+ov.kcal;
+    if(ov.pPct!=null || ov.fPct!=null || ov.cPct!=null){
+      const pp=+ov.pPct||0, ff=+ov.fPct||0; let cc=(ov.cPct==null||isNaN(+ov.cPct))?Math.max(0,100-pp-ff):+ov.cPct;
+      pg=kcal*pp/100/4; fg=kcal*ff/100/9; cg=kcal*cc/100/4;
+    }
+  }
+  return {kcal:Math.round(kcal), p:Math.round(pg), f:Math.round(fg), c:Math.round(cg),
+          mode:(ov&&ov.mode)||'auto'};
+}
+function setPersonMacroTarget(p, ov){
+  const all=_macroTgtStore(); if(ov) all[p]=ov; else delete all[p];
+  try{ localStorage.setItem(LS_MACRO_TGT, JSON.stringify(all)); }catch(_){}
+}
+/* % actuales de P/F/C de un objetivo (para mostrar y precargar el editor) */
+function macroPct(t){
+  const k=Math.max(+t.kcal||0,1);
+  return { p:Math.round((t.p*4)/k*100), f:Math.round((t.f*9)/k*100), c:Math.round((t.c*4)/k*100) };
+}
+/* Objetivo de macros de una persona para una franja (reparto por MEAL_PCT) */
+function mealMacroTarget(p, cat){
+  const d=personMacroTarget(p), q=MEAL_PCT[cat]||0.25;
+  return {kcal:d.kcal*q, p:d.p*q, f:d.f*q, c:d.c*q};
+}
+/* Composición de una receta reajustada hacia las macros de la persona en su
+   franja. Devuelve null si la receta no tiene composición estructurada. */
+function dishSolvedForPerson(id, p, cat){
+  const d=(typeof DISHES!=='undefined')&&DISHES[id]; if(!d||!d.comp||typeof solveComp!=='function') return null;
+  return solveComp(d.comp, mealMacroTarget(p, cat||d.cat));
+}
+/* Interruptor (opt-in) para que las recetas servidas se reajusten a las macros
+   de cada persona (solveComp) en vez de solo a las kcal (scaleComp). */
+var LS_MC_RESHAPE='mnut:reshape-recipes';
+function mcReshapeOn(){ try{ return localStorage.getItem(LS_MC_RESHAPE)==='1'; }catch(_){ return false; } }
+function setMcReshape(on){ try{ localStorage.setItem(LS_MC_RESHAPE, on?'1':'0'); }catch(_){} }
 
 /* Escala una composición por un FACTOR directo (no por objetivo de kcal).
    Los ingredientes fijos (verduras, aliños, fx/cs) no se tocan; los
@@ -433,8 +550,13 @@ function dishScaledMeal(d, personaKey, slot, sumStd){
   if(d.comp && d.comp.length){
     const own = recipeStdKcal(d) || 1;
     const std = sumStd || own;
-    const targetK = personMealKcal(personaKey, slot) * (own / std);
-    return scaleComp(d.comp, targetK);
+    const share = own / std;
+    // Opt-in: reajustar TODAS las macros a la vez (no solo kcal)
+    if(mcReshapeOn() && typeof mealMacroTarget==='function'){
+      const mt = mealMacroTarget(personaKey, slot);
+      if(mt && mt.kcal) return solveComp(d.comp, {kcal:mt.kcal*share, p:mt.p*share, f:mt.f*share, c:mt.c*share});
+    }
+    return scaleComp(d.comp, personMealKcal(personaKey, slot) * share);
   }
   // Sin composición (p. ej. "libre"): usa los kcal/macros precalculados de la persona.
   const idx = Math.max(0, PEOPLE.indexOf(personaKey));
@@ -549,6 +671,14 @@ window.FOODS = FOODS;
 window.FOOD_SECTIONS = FOOD_SECTIONS;
 window.MEAL_PCT = MEAL_PCT;
 window.scaleComp = scaleComp;
+window.solveComp = solveComp;
+window.personMacroTarget = personMacroTarget;
+window.setPersonMacroTarget = setPersonMacroTarget;
+window.mealMacroTarget = mealMacroTarget;
+window.dishSolvedForPerson = dishSolvedForPerson;
+window.macroPct = macroPct;
+window.mcReshapeOn = mcReshapeOn;
+window.setMcReshape = setMcReshape;
 window.scaleByFactor = scaleByFactor;
 window.dishScaled = dishScaled;
 window.recomputeDish = recomputeDish;

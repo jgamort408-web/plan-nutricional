@@ -1047,7 +1047,7 @@ function scoreCandidate(dishId, ctx){
     const std = (typeof recipeStdKcal === 'function' ? recipeStdKcal(d) : 0) || 1;
     const perPerson = [];
     PEOPLE.forEach((p)=>{
-      const tgt = TARGETS[p];
+      const tgt = (typeof personMacroTarget==='function') ? personMacroTarget(p) : TARGETS[p];
       if(!tgt || !tgt.kcal) return;
       let penP = 0;
       const cur = (ctx.dayTotals[ctx.day] && ctx.dayTotals[ctx.day][p]) || {k:0,p:0,f:0,c:0};
@@ -1249,6 +1249,207 @@ function autofillPreload(ctx, skipDay, skipSlot){
 /* Modo tupper: estas cenas reutilizan la comida del día anterior. */
 const BATCH_LEFTOVER = { mar:'lun', jue:'mie', sab:'vie' };
 
+/* Rellena las franjas del calendario con el contexto dado. Extraído de
+   autofillCalendar para que el bucle "regenerar hasta cumplir" lo repita. */
+function mcRunPasses(ctx, opts, respectExisting){
+  opts = opts || {};
+  const orderedDays = WEEK_DAYS.map(d => d.k);
+  // — COMIDAS — (más restrictivo por plantilla)
+  orderedDays.forEach(day=>{
+    if(CalState.data[day].com.length && respectExisting) return;
+    const hints = (ctx.hints[day] && ctx.hints[day].com) || [];
+    if(hints.includes('lb')){
+      const libreId = 'LIBRE_com';
+      if(autofillEligible(libreId, 'com', day, ctx) && (!ctx.strictFav)){
+        CalState.data[day].com = [libreId];
+        autofillRegister(ctx, day, 'com', libreId);
+        return;
+      }
+    }
+    const id = pickBest('com', day, ctx, []);
+    if(!id) return;
+    CalState.data[day].com = [id];
+    autofillRegister(ctx, day, 'com', id);
+  });
+  // — CENAS — (modo tupper: mar/jue/sáb cenan la comida del día anterior)
+  ctx.batchUsed = [];
+  orderedDays.forEach(day=>{
+    if(CalState.data[day].cen.length && respectExisting) return;
+    if(opts.batch && BATCH_LEFTOVER[day]){
+      const src = (CalState.data[BATCH_LEFTOVER[day]].com || []).filter(id=>{
+        const d = DISHES[id];
+        return d && !d.libre && !d.loose && !(typeof dishViolations==='function' && dishViolations(id,'AB').length);
+      });
+      if(src.length){
+        CalState.data[day].cen = [src[0]];
+        autofillRegister(ctx, day, 'cen', src[0]);
+        ctx.batchUsed.push(day);
+        return;
+      }
+    }
+    const todaysComFoods = (CalState.data[day].com||[]).flatMap(id => DISHES[id]?.food || []);
+    const id = pickBest('cen', day, ctx, todaysComFoods);
+    if(!id) return;
+    CalState.data[day].cen = [id];
+    autofillRegister(ctx, day, 'cen', id);
+  });
+  // — DESAYUNOS —
+  orderedDays.forEach(day=>{
+    if(CalState.data[day].des.length && respectExisting) return;
+    const id = pickBest('des', day, ctx, []);
+    if(!id) return;
+    CalState.data[day].des = [id];
+    autofillRegister(ctx, day, 'des', id);
+  });
+  // — MERIENDAS —
+  orderedDays.forEach(day=>{
+    if(CalState.data[day].mer.length && respectExisting) return;
+    const id = pickBest('mer', day, ctx, []);
+    if(!id) return;
+    CalState.data[day].mer = [id];
+    autofillRegister(ctx, day, 'mer', id);
+  });
+}
+
+/* ══════════════════════════════════════════════════════════
+   ESTRUCTURAS DE RESTRICCIONES · Guía semanal + macros
+   Una "estructura" = conjunto de restricciones (cuánto de cada grupo y qué
+   macros/kcal) con su TOLERANCIA (rígido · ±N · ±%). Predefinidas + guardables.
+   El generador puede regenerar hasta cumplirlas (mcGenerateUntil).
+══════════════════════════════════════════════════════════ */
+var LS_MC_STRUCTS='mnut:menu-structs:v1', LS_MC_ACTIVE='mnut:menu-struct-active';
+var MC_MACRO_LBL={kcal:'Calorías (kcal)', p:'Proteína (g)', f:'Grasa (g)', c:'Hidratos (g)'};
+
+function mcStore(){ try{ return JSON.parse(localStorage.getItem(LS_MC_STRUCTS)||'{}')||{}; }catch(_){ return {}; } }
+function mcSaveStore(o){ try{ localStorage.setItem(LS_MC_STRUCTS, JSON.stringify(o)); }catch(_){} }
+function mcTolLabel(tol){
+  if(!tol || tol.type==='rigid') return 'rígido';
+  if(tol.type==='pm')  return '±'+tol.value;
+  if(tol.type==='pct') return '±'+tol.value+'%';
+  return '';
+}
+/* Restricciones de grupo de alimentos derivadas de la Guía semanal */
+function mcGuideConstraints(){
+  const out=[];
+  (typeof WEEKLY_GUIDE!=='undefined'?WEEKLY_GUIDE:[]).forEach(g=>{
+    const fk=g.foodKey||g.k;
+    if(fk==='lb') return;                          // "día libre" no es un grupo
+    out.push({ id:'food:'+g.k, kind:'food', foodKey:fk, scope:(g.scope==='com'?'com':'all'),
+      lbl:g.lbl, target:+g.target||0, max:(g.max!=null?+g.max:null),
+      tol:{type:'pm', value:1}, enabled:true });
+  });
+  return out;
+}
+function mcMacroConstraints(tol){
+  return ['kcal','p','f','c'].map(k=>({ id:'macro:'+k, kind:'macro', key:k,
+    lbl:MC_MACRO_LBL[k], tol:tol||{type:'pct', value:10}, enabled:true }));
+}
+function mcDefaultStructures(){
+  return {
+    completa:{ id:'completa', name:'Guía completa (comida + macros)', builtin:true,
+      constraints:[...mcGuideConstraints(), ...mcMacroConstraints()] },
+    guia:{ id:'guia', name:'Solo guía semanal', builtin:true, constraints:mcGuideConstraints() },
+    macros:{ id:'macros', name:'Solo macros y kcal', builtin:true, constraints:mcMacroConstraints() }
+  };
+}
+function mcAllStructures(){ return Object.assign(mcDefaultStructures(), mcStore()); }
+function mcActiveId(){ try{ return localStorage.getItem(LS_MC_ACTIVE) || 'completa'; }catch(_){ return 'completa'; } }
+function mcSetActive(id){ try{ localStorage.setItem(LS_MC_ACTIVE, id); }catch(_){} }
+function mcGetStructure(id){ const all=mcAllStructures(); return all[id||mcActiveId()] || all.completa; }
+/* Guarda una estructura del usuario (no builtin). Devuelve su id. */
+function mcSaveStructure(struct){
+  const store=mcStore();
+  const id=struct.id && !mcDefaultStructures()[struct.id] ? struct.id : ('u'+Date.now().toString(36));
+  store[id]=Object.assign({}, struct, {id, builtin:false});
+  mcSaveStore(store); return id;
+}
+function mcDeleteStructure(id){ const s=mcStore(); delete s[id]; mcSaveStore(s); if(mcActiveId()===id) mcSetActive('completa'); }
+
+/* ── Evaluación de una estructura sobre la semana actual ── */
+function mcBand(c){
+  const t=+c.target||0, m=(c.max!=null?+c.max:t), tol=c.tol||{type:'rigid'};
+  if(tol.type==='pct'){ const d=t*(+tol.value||0)/100, d2=m*(+tol.value||0)/100; return [t-d, m+d2]; }
+  const k=(tol.type==='pm')?(+tol.value||0):0; return [t-k, m+k];
+}
+function mcOk(c,v){ const b=mcBand(c); return v>=b[0]-1e-6 && v<=b[1]+1e-6; }
+function mcDeficit(c,v){ const b=mcBand(c), hi=Math.max(Math.abs(b[1])||1,1); if(v<b[0]) return (b[0]-v)/hi; if(v>b[1]) return (v-b[1])/hi; return 0; }
+function mcWeekFoodCounts(){
+  const com={}, all={};
+  WEEK_DAYS.forEach(d=>{ const day=CalState.data[d.k]||{};
+    Object.entries(day).forEach(([slot,arr])=>{ (arr||[]).forEach(id=>{ const dd=DISHES[id]; if(!dd) return;
+      (dd.food||[]).forEach(f=>{ all[f]=(all[f]||0)+1; if(slot==='com') com[f]=(com[f]||0)+1; }); }); });
+  });
+  return {com, all};
+}
+function mcWeekMacroAvg(){
+  const ppl=(typeof PEOPLE!=='undefined'&&PEOPLE.length)?PEOPLE:['A','B'];
+  const sum={}; ppl.forEach(p=>sum[p]={kcal:0,p:0,f:0,c:0});
+  const days=WEEK_DAYS.length || 7;
+  WEEK_DAYS.forEach(d=>{ const day=CalState.data[d.k]||{};
+    Object.entries(day).forEach(([slot,arr])=>{ (arr||[]).forEach(id=>{ const dd=DISHES[id]; if(!dd) return;
+      const std=(typeof recipeStdKcal==='function')?recipeStdKcal(dd):0;
+      ppl.forEach(p=>{ const mm=(typeof dishScaledMeal==='function')?dishScaledMeal(dd,p,slot,std).tot:{k:0,p:0,f:0,c:0};
+        sum[p].kcal+=mm.k; sum[p].p+=mm.p; sum[p].f+=mm.f; sum[p].c+=mm.c; }); }); });
+  });
+  const avg={}; ppl.forEach(p=>{ avg[p]={kcal:sum[p].kcal/days, p:sum[p].p/days, f:sum[p].f/days, c:sum[p].c/days}; });
+  return avg;
+}
+function mcEvalStructure(struct){
+  struct=struct||mcGetStructure();
+  const counts=mcWeekFoodCounts(), macros=mcWeekMacroAvg();
+  const ppl=(typeof PEOPLE!=='undefined'&&PEOPLE.length)?PEOPLE:['A','B'];
+  const results=[]; let violation=0;
+  (struct.constraints||[]).forEach(c=>{
+    if(c.enabled===false) return;
+    if(c.kind==='food'){
+      const v=(c.scope==='com'?counts.com:counts.all)[c.foodKey]||0;
+      const ok=mcOk(c,v), def=mcDeficit(c,v); violation+=def;
+      results.push({label:c.lbl, value:v, target:c.target, max:c.max, ok, deficit:def, kind:'food', tol:c.tol, scope:c.scope});
+    } else if(c.kind==='macro'){
+      let worst=0, allok=true; const persons=[];
+      ppl.forEach(p=>{ const tgt=(typeof personMacroTarget==='function')?personMacroTarget(p):((typeof TARGETS!=='undefined'&&TARGETS[p])||{});
+        const target=Math.round(+tgt[c.key]||0), val=Math.round((macros[p]||{})[c.key]||0);
+        const cc={target, max:null, tol:c.tol}, ok=mcOk(cc,val), def=mcDeficit(cc,val);
+        if(!ok) allok=false; if(def>worst) worst=def; persons.push({p, val, target, ok}); });
+      violation+=worst;
+      results.push({label:c.lbl, ok:allok, deficit:worst, kind:'macro', persons, tol:c.tol, key:c.key});
+    }
+  });
+  return {results, violation, allOk: results.every(r=>r.ok)};
+}
+/* Empuja el scoring del generador hacia las restricciones de comida activas */
+function mcApplyStructToCtx(struct, ctx){
+  if(!struct) return;
+  (struct.constraints||[]).forEach(c=>{
+    if(c.enabled===false || c.kind!=='food') return;
+    if(c.scope==='com') ctx.quota[c.foodKey]=Math.max(ctx.quota[c.foodKey]||0, +c.target||0);
+    else ctx.quotaAll[c.foodKey]=Math.max(ctx.quotaAll[c.foodKey]||0, +c.target||0);
+  });
+  ctx.struct=struct;
+}
+/* Bucle "regenerar hasta cumplir": genera la semana entera varias veces,
+   evalúa contra la estructura activa y se queda con la MEJOR. Devuelve el
+   mejor intento {ev, data, attempt} para informar de lo cumplido/pendiente. */
+function mcGenerateUntil(opts){
+  opts=opts||{};
+  const struct=mcGetStructure(opts.structId);
+  const N=Math.max(1, opts.maxAttempts||14);
+  let best=null;
+  for(let i=0;i<N;i++){
+    CalState.data=emptyCal();
+    const ctx=buildAutofillCtx(opts);
+    mcApplyStructToCtx(struct, ctx);
+    mcRunPasses(ctx, opts, false);
+    const ev=mcEvalStructure(struct);
+    if(!best || ev.violation < best.ev.violation){ best={ev, data:JSON.parse(JSON.stringify(CalState.data)), attempt:i+1}; }
+    if(ev.allOk) break;
+  }
+  if(best) CalState.data=best.data;
+  CalState.modified=true; if(typeof persistCal==='function') persistCal();
+  if(typeof renderCalendar==='function') renderCalendar();
+  return best;
+}
+
 function autofillCalendar(opts){
   opts = opts || {};
   const respectExisting = opts.respectExisting !== false; // por defecto sí
@@ -1274,70 +1475,7 @@ function autofillCalendar(opts){
     CalState.data = emptyCal();
   }
 
-  // Orden de relleno: COMIDAS primero (más restrictivo por plantilla),
-  // luego CENAS (dependen de la comida del mismo día), luego DESAYUNOS y MERIENDAS.
-  const orderedDays = WEEK_DAYS.map(d => d.k);
-
-  // — COMIDAS —
-  orderedDays.forEach(day=>{
-    if(CalState.data[day].com.length && respectExisting) return;
-    // Día LIBRE de la plantilla (sábado en la del PDF): se coloca directo,
-    // sin puntuar por macros — el sentido del día libre es no contarlos.
-    const hints = (ctx.hints[day] && ctx.hints[day].com) || [];
-    if(hints.includes('lb')){
-      const libreId = 'LIBRE_com';
-      if(autofillEligible(libreId, 'com', day, ctx) && (!ctx.strictFav)){
-        CalState.data[day].com = [libreId];
-        autofillRegister(ctx, day, 'com', libreId);
-        return;
-      }
-    }
-    const id = pickBest('com', day, ctx, []);
-    if(!id) return;
-    CalState.data[day].com = [id];
-    autofillRegister(ctx, day, 'com', id);
-  });
-
-  // — CENAS — (modo tupper: mar/jue/sáb cenan la comida del día anterior)
-  ctx.batchUsed = [];
-  orderedDays.forEach(day=>{
-    if(CalState.data[day].cen.length && respectExisting) return;
-    if(opts.batch && BATCH_LEFTOVER[day]){
-      const src = (CalState.data[BATCH_LEFTOVER[day]].com || []).filter(id=>{
-        const d = DISHES[id];
-        return d && !d.libre && !d.loose && !(typeof dishViolations==='function' && dishViolations(id,'AB').length);
-      });
-      if(src.length){
-        CalState.data[day].cen = [src[0]];
-        autofillRegister(ctx, day, 'cen', src[0]);
-        ctx.batchUsed.push(day);
-        return;
-      }
-    }
-    const todaysComFoods = (CalState.data[day].com||[]).flatMap(id => DISHES[id]?.food || []);
-    const id = pickBest('cen', day, ctx, todaysComFoods);
-    if(!id) return;
-    CalState.data[day].cen = [id];
-    autofillRegister(ctx, day, 'cen', id);
-  });
-
-  // — DESAYUNOS — (rotar para variedad)
-  orderedDays.forEach(day=>{
-    if(CalState.data[day].des.length && respectExisting) return;
-    const id = pickBest('des', day, ctx, []);
-    if(!id) return;
-    CalState.data[day].des = [id];
-    autofillRegister(ctx, day, 'des', id);
-  });
-
-  // — MERIENDAS —
-  orderedDays.forEach(day=>{
-    if(CalState.data[day].mer.length && respectExisting) return;
-    const id = pickBest('mer', day, ctx, []);
-    if(!id) return;
-    CalState.data[day].mer = [id];
-    autofillRegister(ctx, day, 'mer', id);
-  });
+  mcRunPasses(ctx, opts, respectExisting);
 
   CalState.modified = true;
   persistCal();
@@ -1465,7 +1603,9 @@ function openAutofillOptions(mode){
     quick: !!prefs.quick,
     batch: !!prefs.batch,
     favBoost: !!prefs.favBoost,
-    cuisines: Array.isArray(prefs.cuisines) ? prefs.cuisines.slice() : null   // null = todas
+    cuisines: Array.isArray(prefs.cuisines) ? prefs.cuisines.slice() : null,   // null = todas
+    until: !!prefs.until,
+    structId: (typeof mcActiveId==='function') ? mcActiveId() : 'completa'
   };
   const choices = autofillCuisineChoices();
   // limpia selecciones guardadas que ya no existan (pack quitado, etc.)
@@ -1508,6 +1648,21 @@ function openAutofillOptions(mode){
           ${st.mode!=='fav' ? `<label style="display:flex;gap:8px;align-items:center;font-size:.88rem;margin:6px 0;cursor:pointer">
             <input type="checkbox" id="afFavBoost" ${st.favBoost?'checked':''}> ⭐ Dar prioridad a mis favoritos</label>` : ''}
         </div>
+        <div class="fgrp"><label class="flbl">Objetivos y restricciones</label>
+          <select class="fsel" id="afStruct">
+            ${Object.values(mcAllStructures()).map(s=>`<option value="${escAttr(s.id)}" ${st.structId===s.id?'selected':''}>${escAttr(s.name)}</option>`).join('')}
+          </select>
+          <div style="display:flex;gap:6px;margin-top:6px">
+            <button type="button" class="btn-sec" id="afEditStruct" style="flex:1">⚙ Restricciones…</button>
+            <button type="button" class="btn-sec" id="afMacroTgt" style="flex:1">🎯 Macros…</button>
+          </div>
+          <label style="display:flex;gap:8px;align-items:center;font-size:.88rem;margin:8px 0 0;cursor:pointer">
+            <input type="checkbox" id="afUntil" ${st.until?'checked':''}> 🎯 Regenerar hasta cumplir las restricciones</label>
+          <div style="font-size:.78rem;color:var(--ink-50);margin-top:4px;line-height:1.45">Genera la semana varias veces (desde cero) y se queda con la que mejor las cumpla, avisando de lo que quede pendiente.</div>
+          <label style="display:flex;gap:8px;align-items:center;font-size:.88rem;margin:8px 0 0;cursor:pointer">
+            <input type="checkbox" id="afReshape" ${(typeof mcReshapeOn==='function'&&mcReshapeOn())?'checked':''}> 🍽 Ajustar las recetas a mis macros <small style="opacity:.6">(experimental)</small></label>
+          <div style="font-size:.78rem;color:var(--ink-50);margin-top:4px;line-height:1.45">Reajusta los gramos internos de cada receta hacia las macros de cada persona, no solo las kcal. Afecta a cómo se muestran todas las recetas.</div>
+        </div>
       </div>
       <div class="form-actions">
         <button class="btn-sec" id="afCancel">Cancelar</button>
@@ -1522,6 +1677,9 @@ function openAutofillOptions(mode){
     if(st.mode !== 'fav') st.favBoost = g('afFavBoost');
     const sel = document.getElementById('afTemplate');
     if(sel) st.template = sel.value;
+    st.until = g('afUntil');
+    const rs = document.getElementById('afReshape'); if(rs && typeof setMcReshape==='function') setMcReshape(rs.checked);
+    const ss = document.getElementById('afStruct'); if(ss) st.structId = ss.value;
   };
 
   function wire(){
@@ -1537,6 +1695,12 @@ function openAutofillOptions(mode){
     if(x) x.onclick = _closePrompt;
     const go = document.getElementById('afGo');
     if(go) go.addEventListener('click', onGenerate);
+    const ss = document.getElementById('afStruct');
+    if(ss) ss.addEventListener('change', ()=>{ st.structId = ss.value; if(typeof mcSetActive==='function') mcSetActive(ss.value); });
+    const es = document.getElementById('afEditStruct');
+    if(es) es.addEventListener('click', ()=>{ readChecks(); openStructureEditor(st.structId, (id)=>{ if(id) st.structId = id; render(); }); });
+    const mt = document.getElementById('afMacroTgt');
+    if(mt) mt.addEventListener('click', ()=>{ readChecks(); openMacroTargets(()=> render()); });
   }
 
   function onGenerate(){
@@ -1549,7 +1713,7 @@ function openAutofillOptions(mode){
       if(!onIds.length){ pnAlert('Marca al menos una cocina para generar el menú.'); return; }
       if(onIds.length < choices.length) cuisines = onIds;   // todas marcadas = sin acotar
     }
-    saveAutoPrefs({template:st.template, quick:st.quick, batch:st.batch, favBoost:st.favBoost, cuisines});
+    saveAutoPrefs({template:st.template, quick:st.quick, batch:st.batch, favBoost:st.favBoost, cuisines, until:st.until});
 
     const opts = {
       respectExisting: st.mode === 'fill',
@@ -1563,12 +1727,166 @@ function openAutofillOptions(mode){
     } else if(st.favBoost){
       opts.favorites = true;
     }
+    // 🎯 Regenerar hasta cumplir: bucle que evalúa contra la estructura activa
+    if(st.until && typeof mcGenerateUntil==='function'){
+      if(typeof mcSetActive==='function') mcSetActive(st.structId);
+      _closePrompt();
+      const best = mcGenerateUntil(Object.assign({}, opts, {respectExisting:false, structId:st.structId, maxAttempts:16}));
+      mcShowReport(best);
+      return;
+    }
     _closePrompt();
     safeAutofill(opts);
   }
 
   render();
   _showPrompt();
+}
+
+/* ── Informe del bucle "regenerar hasta cumplir" ── */
+function mcShowReport(best){
+  const body=document.getElementById('promptBody');
+  if(!body){ if(typeof pnToast==='function') pnToast('Menú generado.'); return; }
+  const ev=best?best.ev:null, results=(ev&&ev.results)||[];
+  const met=results.filter(r=>r.ok).length, tot=results.length;
+  const row=r=>{
+    const val = r.kind==='food'
+      ? `${r.value}${r.max!=null?'/'+r.max:''} <small style="opacity:.6">(obj ${r.target}${r.scope==='com'?' comidas':'/sem'})</small>`
+      : (r.persons||[]).map(p=>`${p.p} ${p.val}/${p.target}`).join(' · ');
+    return `<li style="display:flex;gap:8px;align-items:baseline;line-height:1.6;padding:2px 0">
+      <span>${r.ok?'✅':'⚠️'}</span><b style="min-width:140px">${escAttr(r.label)}</b>
+      <span style="font-size:.85rem">${val} <span style="opacity:.5">· ${escAttr(mcTolLabel(r.tol))}</span></span></li>`;
+  };
+  body.innerHTML=`
+    <div class="form-hd"><h2>🎯 Menú generado</h2>
+      <span class="form-sub">${met}/${tot} restricciones cumplidas${best?' · '+best.attempt+' intento'+(best.attempt>1?'s':''):''}${ev&&ev.allOk?' · ¡todas! 🎉':''}</span></div>
+    <div class="form-body">
+      <ul style="list-style:none;margin:0;padding:0">${results.map(row).join('')||'<li style="opacity:.6">Sin restricciones activas.</li>'}</ul>
+      ${ev&&!ev.allOk?`<div style="font-size:.83rem;color:var(--ink-50);margin-top:10px;line-height:1.5">Algunas no se cumplieron del todo con las recetas disponibles. Puedes aflojar su tolerancia, quitarlas, activar más cocinas/recetas o ajustar los objetivos de macros por persona.</div>`:''}
+    </div>
+    <div class="form-actions"><button class="btn-prim" id="mcRepOk" style="width:100%">Entendido</button></div>`;
+  _showPrompt();
+  const ok=document.getElementById('mcRepOk'); if(ok) ok.addEventListener('click', _closePrompt);
+  const x=document.getElementById('promptClose'); if(x) x.onclick=_closePrompt;
+}
+
+/* ── Editor de estructuras de restricciones ── */
+function _mcTolOpts(kind){
+  return kind==='macro'
+    ? [['rigid','rígido'],['pct:5','±5%'],['pct:10','±10%'],['pct:15','±15%'],['pct:20','±20%']]
+    : [['rigid','rígido'],['pm:1','±1'],['pm:2','±2'],['pm:3','±3']];
+}
+function _mcTolVal(tol){ if(!tol||tol.type==='rigid') return 'rigid'; return tol.type+':'+tol.value; }
+function _mcParseTol(v){ if(v==='rigid') return {type:'rigid'}; const parts=String(v).split(':'); return {type:parts[0], value:+parts[1]}; }
+function openStructureEditor(structId, onDone){
+  const body=document.getElementById('promptBody'); if(!body){ if(onDone) onDone(null); return; }
+  const src=mcGetStructure(structId);
+  const ws={ id: src.builtin?null:src.id, name: src.builtin?(src.name+' (mía)'):src.name,
+             constraints: JSON.parse(JSON.stringify(src.constraints||[])) };
+  const readRows=()=>{
+    const nm=document.getElementById('mcName'); if(nm) ws.name=nm.value.trim()||ws.name;
+    ws.constraints.forEach((c,i)=>{
+      const en=body.querySelector('[data-en="'+i+'"]'); if(en) c.enabled=en.checked;
+      const tol=body.querySelector('[data-tol="'+i+'"]'); if(tol) c.tol=_mcParseTol(tol.value);
+      const tgt=body.querySelector('[data-tgt="'+i+'"]'); if(tgt) c.target=+tgt.value||0;
+    });
+  };
+  const render=()=>{
+    const present=new Set(ws.constraints.map(c=>c.id));
+    const pool=[...mcGuideConstraints(), ...mcMacroConstraints()].filter(c=>!present.has(c.id));
+    body.innerHTML=`
+      <div class="form-hd"><h2>⚙ Restricciones del menú</h2>
+        <span class="form-sub">Añade o quita objetivos y ajusta la tolerancia de cada uno</span></div>
+      <div class="form-body">
+        <div class="fgrp"><label class="flbl">Nombre de la estructura</label>
+          <input class="finp" id="mcName" value="${escAttr(ws.name)}" placeholder="Mi estructura"></div>
+        <div class="mc-rows">${ws.constraints.map((c,i)=>`
+          <div style="display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid rgba(var(--ink-rgb),.07)">
+            <input type="checkbox" ${c.enabled!==false?'checked':''} data-en="${i}" title="Activar/desactivar">
+            <span style="flex:1;font-size:.87rem">${escAttr(c.lbl)}${c.kind==='food'?` <small style="opacity:.5">${c.scope==='com'?'comidas':'/sem'}</small>`:''}</span>
+            ${c.kind==='food'?`<input class="finp" type="number" min="0" style="width:50px;padding:4px" value="${c.target}" data-tgt="${i}" title="Objetivo">`:''}
+            <select class="fsel" data-tol="${i}" style="width:auto;padding:4px 6px">
+              ${_mcTolOpts(c.kind).map(([v,l])=>`<option value="${v}" ${_mcTolVal(c.tol)===v?'selected':''}>${l}</option>`).join('')}
+            </select>
+            <button class="cal-btn" data-rm="${i}" title="Quitar" style="padding:2px 9px">✕</button>
+          </div>`).join('') || '<div style="opacity:.6;font-size:.85rem;padding:8px 0">Sin restricciones: añade alguna abajo.</div>'}
+        </div>
+        ${pool.length?`<div class="fgrp" style="margin-top:10px"><label class="flbl">Añadir restricción</label>
+          <div style="display:flex;gap:6px"><select class="fsel" id="mcAddSel">
+            ${pool.map(c=>`<option value="${escAttr(c.id)}">${escAttr(c.lbl)}</option>`).join('')}
+          </select><button class="btn-sec" id="mcAdd" style="white-space:nowrap">➕ Añadir</button></div></div>`:''}
+      </div>
+      <div class="form-actions">
+        <button class="btn-sec" id="mcCancel">Cancelar</button>
+        <button class="btn-prim" id="mcSave">Guardar y usar</button>
+      </div>`;
+    wire();
+  };
+  function wire(){
+    body.querySelectorAll('[data-rm]').forEach(b=>b.addEventListener('click',()=>{ readRows(); ws.constraints.splice(+b.dataset.rm,1); render(); }));
+    const add=document.getElementById('mcAdd');
+    if(add) add.addEventListener('click',()=>{ readRows(); const id=document.getElementById('mcAddSel').value;
+      const c=[...mcGuideConstraints(),...mcMacroConstraints()].find(x=>x.id===id);
+      if(c) ws.constraints.push(JSON.parse(JSON.stringify(c))); render(); });
+    const cancel=document.getElementById('mcCancel'); if(cancel) cancel.addEventListener('click',()=>{ if(onDone) onDone(null); });
+    const save=document.getElementById('mcSave'); if(save) save.addEventListener('click',()=>{ readRows();
+      if(!ws.constraints.length){ pnAlert('Añade al menos una restricción.'); return; }
+      const id=mcSaveStructure(ws); mcSetActive(id);
+      if(typeof pnToast==='function') pnToast('Restricciones guardadas'); if(onDone) onDone(id); });
+    const x=document.getElementById('promptClose'); if(x) x.onclick=()=>{ if(onDone) onDone(null); };
+  }
+  render(); _showPrompt();
+}
+
+/* ── Editor de OBJETIVOS de macros por persona (auto/manual) ── */
+function openMacroTargets(onDone){
+  const body=document.getElementById('promptBody'); if(!body){ if(onDone) onDone(); return; }
+  const ppl=(typeof PEOPLE!=='undefined'&&PEOPLE.length)?PEOPLE:['A','B'];
+  const ws={};
+  ppl.forEach(p=>{ const t=(typeof personMacroTarget==='function')?personMacroTarget(p):{kcal:0,p:0,f:0,c:0,mode:'auto'};
+    const pct=(typeof macroPct==='function')?macroPct(t):{p:0,f:0,c:0};
+    ws[p]={mode:t.mode||'auto', kcal:t.kcal||0, pPct:pct.p, fPct:pct.f, cPct:pct.c}; });
+  const readP=(p)=>{ const el=body.querySelector('[data-p="'+p+'"]'); if(!el) return;
+    ['kcal','pPct','fPct','cPct'].forEach(f=>{ const i=el.querySelector('[data-f="'+f+'"]'); if(i) ws[p][f]=+i.value||0; }); };
+  const updateSum=(p)=>{ const el=body.querySelector('[data-p="'+p+'"]'); if(!el) return; const w=ws[p];
+    const sum=(+w.pPct||0)+(+w.fPct||0)+(+w.cPct||0);
+    const g={p:w.kcal*w.pPct/100/4, f:w.kcal*w.fPct/100/9, c:w.kcal*w.cPct/100/4};
+    const s=el.querySelector('.mt-sum'); if(s) s.innerHTML='≈ '+Math.round(g.p)+' g P · '+Math.round(g.f)+' g G · '+Math.round(g.c)+' g H · suma '+sum+'%'+(sum!==100?' ⚠':''); };
+  const render=()=>{
+    body.innerHTML=`
+      <div class="form-hd"><h2>🎯 Objetivos de macros</h2><span class="form-sub">Automático desde el perfil de cada persona, o manual por %</span></div>
+      <div class="form-body">${ppl.map(p=>{ const w=ws[p]; const nm=((typeof TARGETS!=='undefined'&&TARGETS[p]&&TARGETS[p].name))||('Persona '+p);
+        return `<div class="fgrp" data-p="${escAttr(p)}" style="border:1px solid rgba(var(--ink-rgb),.1);border-radius:10px;padding:10px;margin-bottom:10px">
+          <label class="flbl" style="display:flex;justify-content:space-between;align-items:center">${escAttr(nm)}
+            <span class="fchips"><button type="button" class="fchip ${w.mode==='auto'?'on':''}" data-mode="auto">Auto</button><button type="button" class="fchip ${w.mode==='manual'?'on':''}" data-mode="manual">Manual</button></span></label>
+          <div class="mt-manual" style="${w.mode==='manual'?'':'display:none'};margin-top:8px">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:.85rem">
+              <label>kcal <input class="finp" type="number" min="0" style="width:78px;padding:4px" data-f="kcal" value="${w.kcal}"></label>
+              <label>P% <input class="finp" type="number" min="0" max="100" style="width:54px;padding:4px" data-f="pPct" value="${w.pPct}"></label>
+              <label>G% <input class="finp" type="number" min="0" max="100" style="width:54px;padding:4px" data-f="fPct" value="${w.fPct}"></label>
+              <label>H% <input class="finp" type="number" min="0" max="100" style="width:54px;padding:4px" data-f="cPct" value="${w.cPct}"></label>
+            </div>
+            <div class="mt-sum" style="font-size:.8rem;color:var(--ink-50);margin-top:6px"></div>
+          </div>
+          <div class="mt-auto" style="${w.mode==='auto'?'':'display:none'};font-size:.82rem;color:var(--ink-50);margin-top:6px">Usa el objetivo calculado del perfil (${w.kcal||'—'} kcal).</div>
+        </div>`; }).join('')}</div>
+      <div class="form-actions"><button class="btn-sec" id="mtCancel">Cancelar</button><button class="btn-prim" id="mtSave">Guardar</button></div>`;
+    wire(); ppl.forEach(updateSum);
+  };
+  function wire(){
+    ppl.forEach(p=>{ const el=body.querySelector('[data-p="'+p+'"]'); if(!el) return;
+      el.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>{ readP(p); ws[p].mode=b.dataset.mode; render(); }));
+      el.querySelectorAll('[data-f]').forEach(i=>i.addEventListener('input',()=>{ readP(p); updateSum(p); }));
+    });
+    const cancel=document.getElementById('mtCancel'); if(cancel) cancel.addEventListener('click',()=>{ if(onDone) onDone(); });
+    const save=document.getElementById('mtSave'); if(save) save.addEventListener('click',()=>{ ppl.forEach(readP);
+      ppl.forEach(p=>{ const w=ws[p]; if(typeof setPersonMacroTarget!=='function') return;
+        if(w.mode==='manual') setPersonMacroTarget(p,{mode:'manual',kcal:+w.kcal||0,pPct:+w.pPct||0,fPct:+w.fPct||0,cPct:+w.cPct||0});
+        else setPersonMacroTarget(p,null); });
+      if(typeof pnToast==='function') pnToast('Objetivos de macros guardados'); if(onDone) onDone(); });
+    const x=document.getElementById('promptClose'); if(x) x.onclick=()=>{ if(onDone) onDone(); };
+  }
+  render(); _showPrompt();
 }
 
 /* Sugerencia automática para UNA franja (botón 🎲 del picker):
@@ -1643,3 +1961,16 @@ window.renderCalendar = renderCalendar;
 window.emptyCal = emptyCal;
 window.persistCal = persistCal;
 window.normalizeCalData = normalizeCalData;
+// Estructuras de restricciones + bucle "regenerar hasta cumplir"
+window.mcGenerateUntil   = mcGenerateUntil;
+window.mcEvalStructure   = mcEvalStructure;
+window.mcGetStructure    = mcGetStructure;
+window.mcAllStructures   = mcAllStructures;
+window.mcActiveId        = mcActiveId;
+window.mcSetActive       = mcSetActive;
+window.mcSaveStructure   = mcSaveStructure;
+window.mcDeleteStructure = mcDeleteStructure;
+window.mcDefaultStructures = mcDefaultStructures;
+window.mcTolLabel        = mcTolLabel;
+window.mcGuideConstraints  = mcGuideConstraints;
+window.mcMacroConstraints  = mcMacroConstraints;
