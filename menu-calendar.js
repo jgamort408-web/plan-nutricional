@@ -1603,7 +1603,9 @@ function openAutofillOptions(mode){
     quick: !!prefs.quick,
     batch: !!prefs.batch,
     favBoost: !!prefs.favBoost,
-    cuisines: Array.isArray(prefs.cuisines) ? prefs.cuisines.slice() : null   // null = todas
+    cuisines: Array.isArray(prefs.cuisines) ? prefs.cuisines.slice() : null,   // null = todas
+    until: !!prefs.until,
+    structId: (typeof mcActiveId==='function') ? mcActiveId() : 'completa'
   };
   const choices = autofillCuisineChoices();
   // limpia selecciones guardadas que ya no existan (pack quitado, etc.)
@@ -1646,6 +1648,15 @@ function openAutofillOptions(mode){
           ${st.mode!=='fav' ? `<label style="display:flex;gap:8px;align-items:center;font-size:.88rem;margin:6px 0;cursor:pointer">
             <input type="checkbox" id="afFavBoost" ${st.favBoost?'checked':''}> ⭐ Dar prioridad a mis favoritos</label>` : ''}
         </div>
+        <div class="fgrp"><label class="flbl">Objetivos y restricciones</label>
+          <select class="fsel" id="afStruct">
+            ${Object.values(mcAllStructures()).map(s=>`<option value="${escAttr(s.id)}" ${st.structId===s.id?'selected':''}>${escAttr(s.name)}</option>`).join('')}
+          </select>
+          <button type="button" class="btn-sec" id="afEditStruct" style="width:100%;margin-top:6px">⚙ Ajustar restricciones y tolerancias…</button>
+          <label style="display:flex;gap:8px;align-items:center;font-size:.88rem;margin:8px 0 0;cursor:pointer">
+            <input type="checkbox" id="afUntil" ${st.until?'checked':''}> 🎯 Regenerar hasta cumplir las restricciones</label>
+          <div style="font-size:.78rem;color:var(--ink-50);margin-top:4px;line-height:1.45">Genera la semana varias veces (desde cero) y se queda con la que mejor las cumpla, avisando de lo que quede pendiente.</div>
+        </div>
       </div>
       <div class="form-actions">
         <button class="btn-sec" id="afCancel">Cancelar</button>
@@ -1660,6 +1671,8 @@ function openAutofillOptions(mode){
     if(st.mode !== 'fav') st.favBoost = g('afFavBoost');
     const sel = document.getElementById('afTemplate');
     if(sel) st.template = sel.value;
+    st.until = g('afUntil');
+    const ss = document.getElementById('afStruct'); if(ss) st.structId = ss.value;
   };
 
   function wire(){
@@ -1675,6 +1688,10 @@ function openAutofillOptions(mode){
     if(x) x.onclick = _closePrompt;
     const go = document.getElementById('afGo');
     if(go) go.addEventListener('click', onGenerate);
+    const ss = document.getElementById('afStruct');
+    if(ss) ss.addEventListener('change', ()=>{ st.structId = ss.value; if(typeof mcSetActive==='function') mcSetActive(ss.value); });
+    const es = document.getElementById('afEditStruct');
+    if(es) es.addEventListener('click', ()=>{ readChecks(); openStructureEditor(st.structId, (id)=>{ if(id) st.structId = id; render(); }); });
   }
 
   function onGenerate(){
@@ -1687,7 +1704,7 @@ function openAutofillOptions(mode){
       if(!onIds.length){ pnAlert('Marca al menos una cocina para generar el menú.'); return; }
       if(onIds.length < choices.length) cuisines = onIds;   // todas marcadas = sin acotar
     }
-    saveAutoPrefs({template:st.template, quick:st.quick, batch:st.batch, favBoost:st.favBoost, cuisines});
+    saveAutoPrefs({template:st.template, quick:st.quick, batch:st.batch, favBoost:st.favBoost, cuisines, until:st.until});
 
     const opts = {
       respectExisting: st.mode === 'fill',
@@ -1701,12 +1718,115 @@ function openAutofillOptions(mode){
     } else if(st.favBoost){
       opts.favorites = true;
     }
+    // 🎯 Regenerar hasta cumplir: bucle que evalúa contra la estructura activa
+    if(st.until && typeof mcGenerateUntil==='function'){
+      if(typeof mcSetActive==='function') mcSetActive(st.structId);
+      _closePrompt();
+      const best = mcGenerateUntil(Object.assign({}, opts, {respectExisting:false, structId:st.structId, maxAttempts:16}));
+      mcShowReport(best);
+      return;
+    }
     _closePrompt();
     safeAutofill(opts);
   }
 
   render();
   _showPrompt();
+}
+
+/* ── Informe del bucle "regenerar hasta cumplir" ── */
+function mcShowReport(best){
+  const body=document.getElementById('promptBody');
+  if(!body){ if(typeof pnToast==='function') pnToast('Menú generado.'); return; }
+  const ev=best?best.ev:null, results=(ev&&ev.results)||[];
+  const met=results.filter(r=>r.ok).length, tot=results.length;
+  const row=r=>{
+    const val = r.kind==='food'
+      ? `${r.value}${r.max!=null?'/'+r.max:''} <small style="opacity:.6">(obj ${r.target}${r.scope==='com'?' comidas':'/sem'})</small>`
+      : (r.persons||[]).map(p=>`${p.p} ${p.val}/${p.target}`).join(' · ');
+    return `<li style="display:flex;gap:8px;align-items:baseline;line-height:1.6;padding:2px 0">
+      <span>${r.ok?'✅':'⚠️'}</span><b style="min-width:140px">${escAttr(r.label)}</b>
+      <span style="font-size:.85rem">${val} <span style="opacity:.5">· ${escAttr(mcTolLabel(r.tol))}</span></span></li>`;
+  };
+  body.innerHTML=`
+    <div class="form-hd"><h2>🎯 Menú generado</h2>
+      <span class="form-sub">${met}/${tot} restricciones cumplidas${best?' · '+best.attempt+' intento'+(best.attempt>1?'s':''):''}${ev&&ev.allOk?' · ¡todas! 🎉':''}</span></div>
+    <div class="form-body">
+      <ul style="list-style:none;margin:0;padding:0">${results.map(row).join('')||'<li style="opacity:.6">Sin restricciones activas.</li>'}</ul>
+      ${ev&&!ev.allOk?`<div style="font-size:.83rem;color:var(--ink-50);margin-top:10px;line-height:1.5">Algunas no se cumplieron del todo con las recetas disponibles. Puedes aflojar su tolerancia, quitarlas, activar más cocinas/recetas o ajustar los objetivos de macros por persona.</div>`:''}
+    </div>
+    <div class="form-actions"><button class="btn-prim" id="mcRepOk" style="width:100%">Entendido</button></div>`;
+  _showPrompt();
+  const ok=document.getElementById('mcRepOk'); if(ok) ok.addEventListener('click', _closePrompt);
+  const x=document.getElementById('promptClose'); if(x) x.onclick=_closePrompt;
+}
+
+/* ── Editor de estructuras de restricciones ── */
+function _mcTolOpts(kind){
+  return kind==='macro'
+    ? [['rigid','rígido'],['pct:5','±5%'],['pct:10','±10%'],['pct:15','±15%'],['pct:20','±20%']]
+    : [['rigid','rígido'],['pm:1','±1'],['pm:2','±2'],['pm:3','±3']];
+}
+function _mcTolVal(tol){ if(!tol||tol.type==='rigid') return 'rigid'; return tol.type+':'+tol.value; }
+function _mcParseTol(v){ if(v==='rigid') return {type:'rigid'}; const parts=String(v).split(':'); return {type:parts[0], value:+parts[1]}; }
+function openStructureEditor(structId, onDone){
+  const body=document.getElementById('promptBody'); if(!body){ if(onDone) onDone(null); return; }
+  const src=mcGetStructure(structId);
+  const ws={ id: src.builtin?null:src.id, name: src.builtin?(src.name+' (mía)'):src.name,
+             constraints: JSON.parse(JSON.stringify(src.constraints||[])) };
+  const readRows=()=>{
+    const nm=document.getElementById('mcName'); if(nm) ws.name=nm.value.trim()||ws.name;
+    ws.constraints.forEach((c,i)=>{
+      const en=body.querySelector('[data-en="'+i+'"]'); if(en) c.enabled=en.checked;
+      const tol=body.querySelector('[data-tol="'+i+'"]'); if(tol) c.tol=_mcParseTol(tol.value);
+      const tgt=body.querySelector('[data-tgt="'+i+'"]'); if(tgt) c.target=+tgt.value||0;
+    });
+  };
+  const render=()=>{
+    const present=new Set(ws.constraints.map(c=>c.id));
+    const pool=[...mcGuideConstraints(), ...mcMacroConstraints()].filter(c=>!present.has(c.id));
+    body.innerHTML=`
+      <div class="form-hd"><h2>⚙ Restricciones del menú</h2>
+        <span class="form-sub">Añade o quita objetivos y ajusta la tolerancia de cada uno</span></div>
+      <div class="form-body">
+        <div class="fgrp"><label class="flbl">Nombre de la estructura</label>
+          <input class="finp" id="mcName" value="${escAttr(ws.name)}" placeholder="Mi estructura"></div>
+        <div class="mc-rows">${ws.constraints.map((c,i)=>`
+          <div style="display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid rgba(var(--ink-rgb),.07)">
+            <input type="checkbox" ${c.enabled!==false?'checked':''} data-en="${i}" title="Activar/desactivar">
+            <span style="flex:1;font-size:.87rem">${escAttr(c.lbl)}${c.kind==='food'?` <small style="opacity:.5">${c.scope==='com'?'comidas':'/sem'}</small>`:''}</span>
+            ${c.kind==='food'?`<input class="finp" type="number" min="0" style="width:50px;padding:4px" value="${c.target}" data-tgt="${i}" title="Objetivo">`:''}
+            <select class="fsel" data-tol="${i}" style="width:auto;padding:4px 6px">
+              ${_mcTolOpts(c.kind).map(([v,l])=>`<option value="${v}" ${_mcTolVal(c.tol)===v?'selected':''}>${l}</option>`).join('')}
+            </select>
+            <button class="cal-btn" data-rm="${i}" title="Quitar" style="padding:2px 9px">✕</button>
+          </div>`).join('') || '<div style="opacity:.6;font-size:.85rem;padding:8px 0">Sin restricciones: añade alguna abajo.</div>'}
+        </div>
+        ${pool.length?`<div class="fgrp" style="margin-top:10px"><label class="flbl">Añadir restricción</label>
+          <div style="display:flex;gap:6px"><select class="fsel" id="mcAddSel">
+            ${pool.map(c=>`<option value="${escAttr(c.id)}">${escAttr(c.lbl)}</option>`).join('')}
+          </select><button class="btn-sec" id="mcAdd" style="white-space:nowrap">➕ Añadir</button></div></div>`:''}
+      </div>
+      <div class="form-actions">
+        <button class="btn-sec" id="mcCancel">Cancelar</button>
+        <button class="btn-prim" id="mcSave">Guardar y usar</button>
+      </div>`;
+    wire();
+  };
+  function wire(){
+    body.querySelectorAll('[data-rm]').forEach(b=>b.addEventListener('click',()=>{ readRows(); ws.constraints.splice(+b.dataset.rm,1); render(); }));
+    const add=document.getElementById('mcAdd');
+    if(add) add.addEventListener('click',()=>{ readRows(); const id=document.getElementById('mcAddSel').value;
+      const c=[...mcGuideConstraints(),...mcMacroConstraints()].find(x=>x.id===id);
+      if(c) ws.constraints.push(JSON.parse(JSON.stringify(c))); render(); });
+    const cancel=document.getElementById('mcCancel'); if(cancel) cancel.addEventListener('click',()=>{ if(onDone) onDone(null); });
+    const save=document.getElementById('mcSave'); if(save) save.addEventListener('click',()=>{ readRows();
+      if(!ws.constraints.length){ pnAlert('Añade al menos una restricción.'); return; }
+      const id=mcSaveStructure(ws); mcSetActive(id);
+      if(typeof pnToast==='function') pnToast('Restricciones guardadas'); if(onDone) onDone(id); });
+    const x=document.getElementById('promptClose'); if(x) x.onclick=()=>{ if(onDone) onDone(null); };
+  }
+  render(); _showPrompt();
 }
 
 /* Sugerencia automática para UNA franja (botón 🎲 del picker):
