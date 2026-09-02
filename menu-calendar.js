@@ -1334,15 +1334,23 @@ function mcGuideConstraints(){
   (typeof WEEKLY_GUIDE!=='undefined'?WEEKLY_GUIDE:[]).forEach(g=>{
     const fk=g.foodKey||g.k;
     if(fk==='lb') return;                          // "día libre" no es un grupo
-    out.push({ id:'food:'+g.k, kind:'food', foodKey:fk, scope:(g.scope==='com'?'com':'all'),
-      lbl:g.lbl, target:+g.target||0, max:(g.max!=null?+g.max:null),
-      tol:{type:'pm', value:1}, enabled:true });
+    const scope=(g.scope==='com'?'com':'all');
+    let target=+g.target||0;
+    // El conteo cuenta recetas con la etiqueta del grupo (aprox.): la fruta como
+    // mucho aparece ~16 veces/semana aunque la recomendación sea 21 (3/día),
+    // porque cada receta suma 1 aunque lleve 2 piezas. Ajustamos el objetivo de
+    // la RESTRICCIÓN a lo alcanzable para no fallar siempre.
+    if(fk==='fr') target=Math.min(target, 16);
+    out.push({ id:'food:'+g.k, kind:'food', foodKey:fk, scope,
+      lbl:g.lbl, target, max:(g.max!=null?+g.max:null),
+      // por comida ±1; totales semanales ±2 (el conteo por grupo es aproximado)
+      tol:{type:'pm', value: scope==='com'?1:2}, enabled:true });
   });
   return out;
 }
 function mcMacroConstraints(tol){
   return ['kcal','p','f','c'].map(k=>({ id:'macro:'+k, kind:'macro', key:k,
-    lbl:MC_MACRO_LBL[k], tol:tol||{type:'pct', value:10}, enabled:true }));
+    lbl:MC_MACRO_LBL[k], tol:tol||{type:'pct', value:15}, enabled:true }));
 }
 function mcDefaultStructures(){
   return {
@@ -1727,12 +1735,23 @@ function openAutofillOptions(mode){
     } else if(st.favBoost){
       opts.favorites = true;
     }
-    // 🎯 Regenerar hasta cumplir: bucle que evalúa contra la estructura activa
+    // 🎯 Regenerar hasta cumplir: bucle que evalúa contra la estructura activa.
+    // No cerramos el modal: al terminar, su contenido se sustituye por el
+    // informe (evita cualquier parpadeo de ocultar/mostrar).
     if(st.until && typeof mcGenerateUntil==='function'){
       if(typeof mcSetActive==='function') mcSetActive(st.structId);
-      _closePrompt();
-      const best = mcGenerateUntil(Object.assign({}, opts, {respectExisting:false, structId:st.structId, maxAttempts:16}));
-      mcShowReport(best);
+      try{
+        const best = mcGenerateUntil(Object.assign({}, opts, {respectExisting:false, structId:st.structId, maxAttempts:24}));
+        if(best && best.ev){
+          const met=best.ev.results.filter(r=>r.ok).length, tot=best.ev.results.length;
+          if(typeof pnToast==='function') pnToast(`Menú generado · ${met}/${tot} restricciones · ${best.attempt} intento${best.attempt>1?'s':''}`, best.ev.allOk?'ok':'warn');
+        }
+        mcShowReport(best);
+      }catch(err){
+        console.error('mcGenerateUntil', err);
+        _closePrompt();
+        if(typeof pnAlert==='function') pnAlert('No se pudo generar con restricciones.\n'+(err&&err.message||err));
+      }
       return;
     }
     _closePrompt();
@@ -1744,7 +1763,8 @@ function openAutofillOptions(mode){
 }
 
 /* ── Informe del bucle "regenerar hasta cumplir" ── */
-function mcShowReport(best){
+function mcShowReport(best, o){
+  o=o||{};
   const body=document.getElementById('promptBody');
   if(!body){ if(typeof pnToast==='function') pnToast('Menú generado.'); return; }
   const ev=best?best.ev:null, results=(ev&&ev.results)||[];
@@ -1761,8 +1781,9 @@ function mcShowReport(best){
     <div class="form-hd"><h2>🎯 Menú generado</h2>
       <span class="form-sub">${met}/${tot} restricciones cumplidas${best?' · '+best.attempt+' intento'+(best.attempt>1?'s':''):''}${ev&&ev.allOk?' · ¡todas! 🎉':''}</span></div>
     <div class="form-body">
+      ${o.reshapedAuto?`<div style="font-size:.82rem;color:var(--ink-50);margin:0 0 8px;line-height:1.5;border-left:3px solid var(--gold);background:var(--cream);padding:8px 10px;border-radius:0 8px 8px 0">🍽 Se activó <b>“Ajustar las recetas a mis macros”</b> para poder cumplir los objetivos de proteína/grasa/hidratos (las macros no se pueden clavar solo eligiendo recetas).</div>`:''}
       <ul style="list-style:none;margin:0;padding:0">${results.map(row).join('')||'<li style="opacity:.6">Sin restricciones activas.</li>'}</ul>
-      ${ev&&!ev.allOk?`<div style="font-size:.83rem;color:var(--ink-50);margin-top:10px;line-height:1.5">Algunas no se cumplieron del todo con las recetas disponibles. Puedes aflojar su tolerancia, quitarlas, activar más cocinas/recetas o ajustar los objetivos de macros por persona.</div>`:''}
+      ${ev&&!ev.allOk?`<div style="font-size:.83rem;color:var(--ink-50);margin-top:10px;line-height:1.5">Las marcadas ⚠️ no se cumplieron del todo tras ${best?best.attempt:''} intentos con las recetas disponibles. Puedes aflojar su tolerancia o quitarlas en <b>⚙ Restricciones</b>, activar más cocinas/recetas, o ajustar los objetivos en <b>🎯 Macros</b>. Para <b>clavar las macros</b> al detalle, activa <b>🍽 Ajustar las recetas a mis macros</b>.</div>`:''}
     </div>
     <div class="form-actions"><button class="btn-prim" id="mcRepOk" style="width:100%">Entendido</button></div>`;
   _showPrompt();
