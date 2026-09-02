@@ -1737,24 +1737,22 @@ document.addEventListener('keydown', e=>{
    inicializado, y renderCalendar reventaba leyendo CalState.data cuando la
    vista guardada era el calendario. Con <script> sueltos el guard fallaba y
    no ocurría nada; esperando a DOMContentLoaded es correcto en ambos casos. */
-if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ()=>renderAll(), {once:true});
-else renderAll();
-// el estado activo del selector de personas ya lo fija renderPersonToggle()
-
-// Auto-sincronización con el día actual del calendario:
-//  · Si cambió la fecha desde el último uso → reemplaza con el calendario de hoy (limpia comidas viejas)
+// Primer render + sincronización de arranque. AMBOS se difieren a que TODO el
+// bundle esté ejecutado: la sincronización también llama a renderAll(), y si la
+// vista guardada es el calendario, renderCalendar lee estado de menu-calendar.js
+// (MEAL_ROWS, CalState…) que aún está en la zona muerta (TDZ) durante la carga.
+//  · Si cambió la fecha desde el último uso → reemplaza con el calendario de hoy
 //  · Si es el mismo día y Mi día está vacío → carga el calendario de hoy
-//  · Si es el mismo día y ya hay platos → añade SOLO lo pendiente del calendario (no duplica)
-(function syncMiDiaOnStartup(){
+//  · Si es el mismo día y ya hay platos → añade SOLO lo pendiente (no duplica)
+function _pnStartup(){
+  renderAll();
   const lastDate = lsGet('mnut:cartDate:v1', null);
   const today    = getTodayDate();
   if(lastDate && lastDate !== today){
-    // cambió el día — reemplaza con el menú de hoy
     if(syncWithToday('replace')){
       // si no había nada en el calendario, dejamos el cart como esté
     } else {
-      // calendario sin nada para hoy: limpia los restos de ayer
-      S.cart = []; persistCart();
+      S.cart = []; persistCart();   // calendario sin nada para hoy: limpia restos de ayer
     }
     lsSet('mnut:cartDate:v1', today);
     renderAll();
@@ -1762,7 +1760,10 @@ else renderAll();
     syncWithToday(S.cart.length ? 'merge' : 'replace');
     if(S.cart.length) renderAll();
   }
-})();
+}
+if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', _pnStartup, {once:true});
+else _pnStartup();
+// el estado activo del selector de personas ya lo fija renderPersonToggle()
 
 // Re-sincroniza cada vez que el drawer se abre (refleja cambios hechos en Calendario)
 // Nota: la sincronización ya ocurre dentro de openDrawer().
