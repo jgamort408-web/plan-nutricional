@@ -481,6 +481,11 @@ function dishSolvedForPerson(id, p, cat){
   const d=(typeof DISHES!=='undefined')&&DISHES[id]; if(!d||!d.comp||typeof solveComp!=='function') return null;
   return solveComp(d.comp, mealMacroTarget(p, cat||d.cat));
 }
+/* Interruptor (opt-in) para que las recetas servidas se reajusten a las macros
+   de cada persona (solveComp) en vez de solo a las kcal (scaleComp). */
+var LS_MC_RESHAPE='mnut:reshape-recipes';
+function mcReshapeOn(){ try{ return localStorage.getItem(LS_MC_RESHAPE)==='1'; }catch(_){ return false; } }
+function setMcReshape(on){ try{ localStorage.setItem(LS_MC_RESHAPE, on?'1':'0'); }catch(_){} }
 
 /* Escala una composición por un FACTOR directo (no por objetivo de kcal).
    Los ingredientes fijos (verduras, aliños, fx/cs) no se tocan; los
@@ -545,8 +550,13 @@ function dishScaledMeal(d, personaKey, slot, sumStd){
   if(d.comp && d.comp.length){
     const own = recipeStdKcal(d) || 1;
     const std = sumStd || own;
-    const targetK = personMealKcal(personaKey, slot) * (own / std);
-    return scaleComp(d.comp, targetK);
+    const share = own / std;
+    // Opt-in: reajustar TODAS las macros a la vez (no solo kcal)
+    if(mcReshapeOn() && typeof mealMacroTarget==='function'){
+      const mt = mealMacroTarget(personaKey, slot);
+      if(mt && mt.kcal) return solveComp(d.comp, {kcal:mt.kcal*share, p:mt.p*share, f:mt.f*share, c:mt.c*share});
+    }
+    return scaleComp(d.comp, personMealKcal(personaKey, slot) * share);
   }
   // Sin composición (p. ej. "libre"): usa los kcal/macros precalculados de la persona.
   const idx = Math.max(0, PEOPLE.indexOf(personaKey));
@@ -667,6 +677,8 @@ window.setPersonMacroTarget = setPersonMacroTarget;
 window.mealMacroTarget = mealMacroTarget;
 window.dishSolvedForPerson = dishSolvedForPerson;
 window.macroPct = macroPct;
+window.mcReshapeOn = mcReshapeOn;
+window.setMcReshape = setMcReshape;
 window.scaleByFactor = scaleByFactor;
 window.dishScaled = dishScaled;
 window.recomputeDish = recomputeDish;

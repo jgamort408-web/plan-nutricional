@@ -1652,10 +1652,16 @@ function openAutofillOptions(mode){
           <select class="fsel" id="afStruct">
             ${Object.values(mcAllStructures()).map(s=>`<option value="${escAttr(s.id)}" ${st.structId===s.id?'selected':''}>${escAttr(s.name)}</option>`).join('')}
           </select>
-          <button type="button" class="btn-sec" id="afEditStruct" style="width:100%;margin-top:6px">⚙ Ajustar restricciones y tolerancias…</button>
+          <div style="display:flex;gap:6px;margin-top:6px">
+            <button type="button" class="btn-sec" id="afEditStruct" style="flex:1">⚙ Restricciones…</button>
+            <button type="button" class="btn-sec" id="afMacroTgt" style="flex:1">🎯 Macros…</button>
+          </div>
           <label style="display:flex;gap:8px;align-items:center;font-size:.88rem;margin:8px 0 0;cursor:pointer">
             <input type="checkbox" id="afUntil" ${st.until?'checked':''}> 🎯 Regenerar hasta cumplir las restricciones</label>
           <div style="font-size:.78rem;color:var(--ink-50);margin-top:4px;line-height:1.45">Genera la semana varias veces (desde cero) y se queda con la que mejor las cumpla, avisando de lo que quede pendiente.</div>
+          <label style="display:flex;gap:8px;align-items:center;font-size:.88rem;margin:8px 0 0;cursor:pointer">
+            <input type="checkbox" id="afReshape" ${(typeof mcReshapeOn==='function'&&mcReshapeOn())?'checked':''}> 🍽 Ajustar las recetas a mis macros <small style="opacity:.6">(experimental)</small></label>
+          <div style="font-size:.78rem;color:var(--ink-50);margin-top:4px;line-height:1.45">Reajusta los gramos internos de cada receta hacia las macros de cada persona, no solo las kcal. Afecta a cómo se muestran todas las recetas.</div>
         </div>
       </div>
       <div class="form-actions">
@@ -1672,6 +1678,7 @@ function openAutofillOptions(mode){
     const sel = document.getElementById('afTemplate');
     if(sel) st.template = sel.value;
     st.until = g('afUntil');
+    const rs = document.getElementById('afReshape'); if(rs && typeof setMcReshape==='function') setMcReshape(rs.checked);
     const ss = document.getElementById('afStruct'); if(ss) st.structId = ss.value;
   };
 
@@ -1692,6 +1699,8 @@ function openAutofillOptions(mode){
     if(ss) ss.addEventListener('change', ()=>{ st.structId = ss.value; if(typeof mcSetActive==='function') mcSetActive(ss.value); });
     const es = document.getElementById('afEditStruct');
     if(es) es.addEventListener('click', ()=>{ readChecks(); openStructureEditor(st.structId, (id)=>{ if(id) st.structId = id; render(); }); });
+    const mt = document.getElementById('afMacroTgt');
+    if(mt) mt.addEventListener('click', ()=>{ readChecks(); openMacroTargets(()=> render()); });
   }
 
   function onGenerate(){
@@ -1825,6 +1834,57 @@ function openStructureEditor(structId, onDone){
       const id=mcSaveStructure(ws); mcSetActive(id);
       if(typeof pnToast==='function') pnToast('Restricciones guardadas'); if(onDone) onDone(id); });
     const x=document.getElementById('promptClose'); if(x) x.onclick=()=>{ if(onDone) onDone(null); };
+  }
+  render(); _showPrompt();
+}
+
+/* ── Editor de OBJETIVOS de macros por persona (auto/manual) ── */
+function openMacroTargets(onDone){
+  const body=document.getElementById('promptBody'); if(!body){ if(onDone) onDone(); return; }
+  const ppl=(typeof PEOPLE!=='undefined'&&PEOPLE.length)?PEOPLE:['A','B'];
+  const ws={};
+  ppl.forEach(p=>{ const t=(typeof personMacroTarget==='function')?personMacroTarget(p):{kcal:0,p:0,f:0,c:0,mode:'auto'};
+    const pct=(typeof macroPct==='function')?macroPct(t):{p:0,f:0,c:0};
+    ws[p]={mode:t.mode||'auto', kcal:t.kcal||0, pPct:pct.p, fPct:pct.f, cPct:pct.c}; });
+  const readP=(p)=>{ const el=body.querySelector('[data-p="'+p+'"]'); if(!el) return;
+    ['kcal','pPct','fPct','cPct'].forEach(f=>{ const i=el.querySelector('[data-f="'+f+'"]'); if(i) ws[p][f]=+i.value||0; }); };
+  const updateSum=(p)=>{ const el=body.querySelector('[data-p="'+p+'"]'); if(!el) return; const w=ws[p];
+    const sum=(+w.pPct||0)+(+w.fPct||0)+(+w.cPct||0);
+    const g={p:w.kcal*w.pPct/100/4, f:w.kcal*w.fPct/100/9, c:w.kcal*w.cPct/100/4};
+    const s=el.querySelector('.mt-sum'); if(s) s.innerHTML='≈ '+Math.round(g.p)+' g P · '+Math.round(g.f)+' g G · '+Math.round(g.c)+' g H · suma '+sum+'%'+(sum!==100?' ⚠':''); };
+  const render=()=>{
+    body.innerHTML=`
+      <div class="form-hd"><h2>🎯 Objetivos de macros</h2><span class="form-sub">Automático desde el perfil de cada persona, o manual por %</span></div>
+      <div class="form-body">${ppl.map(p=>{ const w=ws[p]; const nm=((typeof TARGETS!=='undefined'&&TARGETS[p]&&TARGETS[p].name))||('Persona '+p);
+        return `<div class="fgrp" data-p="${escAttr(p)}" style="border:1px solid rgba(var(--ink-rgb),.1);border-radius:10px;padding:10px;margin-bottom:10px">
+          <label class="flbl" style="display:flex;justify-content:space-between;align-items:center">${escAttr(nm)}
+            <span class="fchips"><button type="button" class="fchip ${w.mode==='auto'?'on':''}" data-mode="auto">Auto</button><button type="button" class="fchip ${w.mode==='manual'?'on':''}" data-mode="manual">Manual</button></span></label>
+          <div class="mt-manual" style="${w.mode==='manual'?'':'display:none'};margin-top:8px">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:.85rem">
+              <label>kcal <input class="finp" type="number" min="0" style="width:78px;padding:4px" data-f="kcal" value="${w.kcal}"></label>
+              <label>P% <input class="finp" type="number" min="0" max="100" style="width:54px;padding:4px" data-f="pPct" value="${w.pPct}"></label>
+              <label>G% <input class="finp" type="number" min="0" max="100" style="width:54px;padding:4px" data-f="fPct" value="${w.fPct}"></label>
+              <label>H% <input class="finp" type="number" min="0" max="100" style="width:54px;padding:4px" data-f="cPct" value="${w.cPct}"></label>
+            </div>
+            <div class="mt-sum" style="font-size:.8rem;color:var(--ink-50);margin-top:6px"></div>
+          </div>
+          <div class="mt-auto" style="${w.mode==='auto'?'':'display:none'};font-size:.82rem;color:var(--ink-50);margin-top:6px">Usa el objetivo calculado del perfil (${w.kcal||'—'} kcal).</div>
+        </div>`; }).join('')}</div>
+      <div class="form-actions"><button class="btn-sec" id="mtCancel">Cancelar</button><button class="btn-prim" id="mtSave">Guardar</button></div>`;
+    wire(); ppl.forEach(updateSum);
+  };
+  function wire(){
+    ppl.forEach(p=>{ const el=body.querySelector('[data-p="'+p+'"]'); if(!el) return;
+      el.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>{ readP(p); ws[p].mode=b.dataset.mode; render(); }));
+      el.querySelectorAll('[data-f]').forEach(i=>i.addEventListener('input',()=>{ readP(p); updateSum(p); }));
+    });
+    const cancel=document.getElementById('mtCancel'); if(cancel) cancel.addEventListener('click',()=>{ if(onDone) onDone(); });
+    const save=document.getElementById('mtSave'); if(save) save.addEventListener('click',()=>{ ppl.forEach(readP);
+      ppl.forEach(p=>{ const w=ws[p]; if(typeof setPersonMacroTarget!=='function') return;
+        if(w.mode==='manual') setPersonMacroTarget(p,{mode:'manual',kcal:+w.kcal||0,pPct:+w.pPct||0,fPct:+w.fPct||0,cPct:+w.cPct||0});
+        else setPersonMacroTarget(p,null); });
+      if(typeof pnToast==='function') pnToast('Objetivos de macros guardados'); if(onDone) onDone(); });
+    const x=document.getElementById('promptClose'); if(x) x.onclick=()=>{ if(onDone) onDone(); };
   }
   render(); _showPrompt();
 }
